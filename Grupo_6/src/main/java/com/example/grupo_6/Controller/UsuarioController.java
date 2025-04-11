@@ -15,7 +15,6 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Mapeo actualizado a "/usuarios" (ya no hay conflicto)
     @GetMapping("/usuarios")
     public String index(Model model) {
         List<Usuario> listaUsuarios = usuarioRepository.findAll();
@@ -23,9 +22,9 @@ public class UsuarioController {
         return "usuario/lista"; // Este valor se usa para resolver la plantilla en: /templates/usuario/lista.html
     }
 
-    // Si deseas que la raíz ("/") redireccione a /usuarios, agrega otro método:
     @GetMapping("/")
     public String homeRedirect() {
         return "redirect:/usuarios";
     }
+
 }

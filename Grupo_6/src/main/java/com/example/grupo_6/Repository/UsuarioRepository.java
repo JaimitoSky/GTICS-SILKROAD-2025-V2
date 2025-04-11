@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
-    // Si quieres búsquedas personalizadas, agregas métodos
-    // Ej: List<Usuario> findByNombresContaining(String nombre);
+
 
 }
