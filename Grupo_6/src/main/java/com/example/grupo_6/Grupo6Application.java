@@ -2,6 +2,7 @@ package com.example.grupo_6;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 public class Grupo6Application {
@@ -9,3 +10,4 @@ public class Grupo6Application {
         SpringApplication.run(Grupo6Application.class, args);
     }
 }
+
