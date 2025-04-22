@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Inicio - Superadmin</title>
+
+	<!-- Estilos externos -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- Estilos internos -->
+	<style>
+		body {
+			font-family: 'Inter', sans-serif;
+			overflow-x: hidden;
+		}
+
+		/* Sidebar styles */
+		.sidebar {
+			width: 260px;
+			min-height: 100vh;
+			background-color: #a8323e;
+			color: white;
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: 1030;
+			display: flex;
+			flex-direction: column;
+			transition: transform 0.3s ease-in-out;
+			padding: 1.5rem 0;
+		}
+
+		.sidebar-header {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 0 1rem;
+			margin-bottom: 2rem;
+		}
+
+		.sidebar-header img {
+			width: 120px;
+			height: auto;
+			margin-bottom: 1.5rem;
+		}
+		/* Hover para el texto San Miguel (sólo PC/tablet) */
+		@media (min-width: 768px) {
+			.municipality-name {
+				transition: transform 0.3s ease;
+				display: inline-block;
+			}
+
+			.municipality-name:hover {
+				transform: scale(1.05);
+			}
+		}
+
+		@media (min-width: 768px) {
+			.sidebar-header .logo-link img {
+				transition: transform 0.3s ease;
+			}
+
+			.sidebar-header .logo-link:hover img {
+				transform: scale(1.1);
+			}
+		}
+
+		.sidebar-header .municipality-name {
+			font-family: 'Montserrat', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 700;
+			color: white;
+			text-align: center;
+			line-height: 1.3;
+			letter-spacing: 1px;
+			text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+			margin-top: 0.5rem;
+		}
+
+		.sidebar .nav {
+			width: 100%;
+			padding: 0 1rem;
+		}
+
+		.sidebar .nav-link {
+			color: white;
+			padding: 0.75rem 1.25rem;
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			text-decoration: none;
+			transition: all 0.2s ease-in-out;
+			border-left: 3px solid transparent;
+			border-radius: 4px;
+			margin-bottom: 0.5rem;
+		}
+
+		.sidebar .nav-link:hover,
+		.sidebar .nav-link:focus {
+			background-color: rgba(255, 255, 255, 0.15);
+			border-left: 3px solid rgba(255, 255, 255, 0.5);
+		}
+
+		.sidebar .nav-link i {
+			font-size: 1.1rem;
+			width: 24px;
+			text-align: center;
+		}
+
+		/* Main content area */
+		.main {
+			margin-left: 260px;
+			transition: margin-left 0.3s ease-in-out;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		/* Toggle button styles */
+		.sidebar-toggle {
+			cursor: pointer;
+			font-size: 1.5rem;
+			margin: 1rem;
+			color: #495057;
+			transition: all 0.2s;
+			position: absolute;
+			left: 10px;
+			top: 10px;
+			z-index: 1040;
+		}
+
+		.sidebar-toggle:hover {
+			color: #000;
+		}
+
+		/* Collapsed state */
+		body.sidebar-collapsed .sidebar {
+			transform: translateX(-260px);
+		}
+
+		body.sidebar-collapsed .main {
+			margin-left: 0;
+		}
+
+		/* Responsive adjustments */
+		@media (max-width: 991.98px) {
+			.sidebar {
+				transform: translateX(-260px);
+			}
+
+			body.sidebar-collapsed .sidebar {
+				transform: translateX(0);
+			}
+
+			.main {
+				margin-left: 0;
+			}
+
+			.sidebar-header img {
+				width: 100px;
+			}
+		}
+
+		@media (max-width: 767.98px) {
+			.sidebar-header {
+				padding: 0 0.75rem;
+			}
+
+			.sidebar .nav-link {
+				padding: 0.75rem 1rem;
+				font-size: 0.9rem;
+			}
+
+			.sidebar-header .municipality-name {
+				font-size: 1.2rem;
+			}
+
+			/* Ajustes para las tarjetas de deportes */
+			.sport-icon-container {
+				height: 100px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.sport-icon-container img {
+				max-height: 40px;
+				width: auto;
+			}
+
+			.card-img-top {
+				height: 150px;
+			}
+		}
+
+		/* Content styles */
+		.content {
+			flex: 1;
+		}
+
+		/* Card styles for sports complexes */
+		.card {
+			height: 100%;
+			transition: transform 0.2s;
+			border: none;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
+
+		.card:hover {
+			transform: translateY(-5px);
+		}
+
+		.card-img-top {
+			height: 200px;
+			object-fit: cover;
+		}
+
+		/* Navbar superior */
+		.top-navbar {
+			padding-left: 60px;
+		}
+
+		/* Estilo para los iconos deportivos */
+		.sport-icon-container {
+			padding: 1rem;
+			background-color: #f8f9fa;
+			border-radius: 0.5rem;
+			height: 120px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			transition: all 0.2s;
+		}
+
+		.sport-icon-container:hover {
+			background-color: #e9ecef;
+			transform: scale(1.05);
+		}
+
+		.sport-icon-container img {
+			height: 50px;
+			width: auto;
+			margin-bottom: 0.5rem;
+		}
+
+		.sport-icon-container p {
+			margin: 0;
+			font-weight: 500;
+		}
+	</style>
+</head>
+<body>
+<div class="wrapper">
+	<!-- Sidebar -->
+	<nav id="sidebar" class="sidebar">
+		<div class="sidebar-header text-center">
+			<a th:href="@{/superadmin}" class="logo-link d-block">
+				<img th:src="@{/img/logo_sanmiguel_superadmin.png}" alt="Logo Municipalidad">
+			</a>
+			<a th:href="@{/superadmin}" class="municipality-name d-block text-decoration-none">
+				San Miguel
+			</a>
+		</div>
+
+		<ul class="nav flex-column text-white">
+			<li class="nav-item"><a th:href="@{/superadmin/usuarios}" class="nav-link"><i class="bi bi-person-fill"></i>Usuarios</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-calendar-check"></i>Reservas</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-cash-coin"></i> Tarifas</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-graph-up-arrow"></i>Estadísticas</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-gear-fill"></i>Sistema</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-bar-chart-line-fill"></i>Registros</a></li>
+
+		</ul>
+	</nav>
+
+	<!-- Main -->
+	<div class="main">
+		<!-- Navbar superior -->
+		<nav class="navbar navbar-expand navbar-light bg-light shadow-sm top-navbar">
+			<!-- Botón de toggle -->
+			<a class="sidebar-toggle js-sidebar-toggle" href="#" aria-label="Toggle sidebar">
+				<i class="bi bi-list"></i>
+			</a>
+			<div class="navbar-collapse collapse">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<span class="nav-link">Superadmin</span>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+		<main class="content">
+			<div class="row">
+				<div class="col-12">
+					<div class="card flex-fill">
+						<div class="card-header d-flex align-items-center justify-content-between">
+							<h5 class="card-title mb-0">Gestión de Usuarios</h5>
+							<a th:href="@{/superadmin/usuarios/nuevo}" class="btn btn-sm btn-primary">
+								<i class="bi bi-person-plus-fill"></i> Nuevo Usuario
+							</a>
+						</div>
+						<div class="table-responsive">
+							<table class="table table-hover table-striped align-middle">
+								<thead class="table-light">
+								<tr>
+									<th>ID</th>
+									<th>Nombre</th>
+									<th class="d-none d-md-table-cell">Correo</th>
+									<th class="d-none d-md-table-cell">Rol</th>
+									<th class="d-none d-md-table-cell">Estado</th>
+									<th class="text-center">Acciones</th>
+								</tr>
+								</thead>
+								<tbody>
+								<tr th:each="usuario : ${usuarios}">
+									<td th:text="${usuario.idusuario}">1</td>
+									<td th:text="${usuario.nombres + ' ' + usuario.apellidos}">Juan Pérez</td>
+									<td class="d-none d-md-table-cell" th:text="${usuario.email}">juan@mail.com</td>
+									<td class="d-none d-md-table-cell" th:text="${mapaRoles[usuario.idrol]}">admin</td>
+									<td class="d-none d-md-table-cell">
+								<span class="badge text-uppercase px-3 py-2"
+									  th:classappend="${usuario.estado} == 'activo' ? 'bg-success' :
+								      (usuario.estado == 'inactivo' ? 'bg-danger' : 'bg-warning')"
+									  th:text="${usuario.estado}">Activo</span>
+									</td>
+									<td class="text-center">
+										<div class="btn-group btn-group-sm" role="group">
+											<form th:action="@{/cambiar-rol}" method="post">
+												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+												<select name="rol" class="form-select form-select-sm" onchange="this.form.submit()">
+													<option value="1" th:selected="${usuario.idrol == 1}">Superadmin</option>
+													<option value="2" th:selected="${usuario.idrol == 2}">Administrador</option>
+													<option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
+													<option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
+												</select>
+											</form>
+
+											<form th:if="${usuario.estado == 'inactivo'}"
+												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
+												<button type="submit" class="btn btn-outline-success" title="Activar Usuario">
+													<i class="bi bi-check-circle"></i>
+												</button>
+											</form>
+
+											<form th:if="${usuario.estado != 'inactivo'}"
+												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
+												<button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
+													<i class="bi bi-slash-circle"></i>
+												</button>
+											</form>
+
+											<form th:action="@{/eliminar}" method="post" class="d-inline">
+												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+												<button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
+														data-bs-toggle="modal" data-bs-target="#confirmModal" th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
+													<i class="bi bi-trash"></i>
+												</button>
+											</form>
+										</div>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Modal genérico fuera de bucles -->
+			<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="eliminarLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header bg-warning">
+							<h5 class="modal-title">¿Eliminar Usuario?</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+						</div>
+						<div class="modal-body">
+							¿Estás seguro de que deseas eliminar a <strong id="nombreUsuario">Usuario</strong>?
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+							<form id="formEliminar" method="post" th:action="@{/eliminar}">
+								<input type="hidden" name="idusuario" id="inputIdUsuario" />
+								<button type="submit" class="btn btn-danger">Eliminar</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				const modal = document.getElementById("confirmModal");
+				modal.addEventListener("show.bs.modal", function (event) {
+					const button = event.relatedTarget;
+					const idUsuario = button.getAttribute("data-id");
+					const nombre = button.getAttribute("data-nombre");
+					document.getElementById("inputIdUsuario").value = idUsuario;
+					document.getElementById("nombreUsuario").innerText = nombre;
+				});
+			});
+		</script>
+	w
+
+
+
+
+
+
+
+	</div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.querySelector(".js-sidebar-toggle");
+		toggle.addEventListener("click", function (e) {
+			e.preventDefault();
+			document.body.classList.toggle("sidebar-collapsed");
+		});
+	});
+</script>
+
+</div>
+</body>
+</html>

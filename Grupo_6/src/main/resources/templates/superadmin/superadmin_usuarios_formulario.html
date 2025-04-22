@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Inicio - Superadmin</title>
+
+	<!-- Estilos externos -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- Estilos internos -->
+	<style>
+		body {
+			font-family: 'Inter', sans-serif;
+			overflow-x: hidden;
+		}
+
+		/* Sidebar styles */
+		.sidebar {
+			width: 260px;
+			min-height: 100vh;
+			background-color: #a8323e;
+			color: white;
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: 1030;
+			display: flex;
+			flex-direction: column;
+			transition: transform 0.3s ease-in-out;
+			padding: 1.5rem 0;
+		}
+
+		.sidebar-header {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 0 1rem;
+			margin-bottom: 2rem;
+		}
+
+		.sidebar-header img {
+			width: 120px;
+			height: auto;
+			margin-bottom: 1.5rem;
+		}
+
+		.sidebar-header .municipality-name {
+			font-family: 'Montserrat', sans-serif;
+			font-size: 1.4rem;
+			font-weight: 700;
+			color: white;
+			text-align: center;
+			line-height: 1.3;
+			letter-spacing: 1px;
+			text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+			margin-top: 0.5rem;
+		}
+
+		.sidebar .nav {
+			width: 100%;
+			padding: 0 1rem;
+		}
+
+		.sidebar .nav-link {
+			color: white;
+			padding: 0.75rem 1.25rem;
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			text-decoration: none;
+			transition: all 0.2s ease-in-out;
+			border-left: 3px solid transparent;
+			border-radius: 4px;
+			margin-bottom: 0.5rem;
+		}
+
+		.sidebar .nav-link:hover,
+		.sidebar .nav-link:focus {
+			background-color: rgba(255, 255, 255, 0.15);
+			border-left: 3px solid rgba(255, 255, 255, 0.5);
+		}
+
+		.sidebar .nav-link i {
+			font-size: 1.1rem;
+			width: 24px;
+			text-align: center;
+		}
+
+		/* Main content area */
+		.main {
+			margin-left: 260px;
+			transition: margin-left 0.3s ease-in-out;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		/* Toggle button styles */
+		.sidebar-toggle {
+			cursor: pointer;
+			font-size: 1.5rem;
+			margin: 1rem;
+			color: #495057;
+			transition: all 0.2s;
+			position: absolute;
+			left: 10px;
+			top: 10px;
+			z-index: 1040;
+		}
+
+		.sidebar-toggle:hover {
+			color: #000;
+		}
+
+		/* Collapsed state */
+		body.sidebar-collapsed .sidebar {
+			transform: translateX(-260px);
+		}
+
+		body.sidebar-collapsed .main {
+			margin-left: 0;
+		}
+
+		/* Responsive adjustments */
+		@media (max-width: 991.98px) {
+			.sidebar {
+				transform: translateX(-260px);
+			}
+
+			body.sidebar-collapsed .sidebar {
+				transform: translateX(0);
+			}
+
+			.main {
+				margin-left: 0;
+			}
+
+			.sidebar-header img {
+				width: 100px;
+			}
+		}
+
+		@media (max-width: 767.98px) {
+			.sidebar-header {
+				padding: 0 0.75rem;
+			}
+
+			.sidebar .nav-link {
+				padding: 0.75rem 1rem;
+				font-size: 0.9rem;
+			}
+
+			.sidebar-header .municipality-name {
+				font-size: 1.2rem;
+			}
+
+			/* Ajustes para las tarjetas de deportes */
+			.sport-icon-container {
+				height: 100px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.sport-icon-container img {
+				max-height: 40px;
+				width: auto;
+			}
+
+			.card-img-top {
+				height: 150px;
+			}
+		}
+
+		/* Content styles */
+		.content {
+			flex: 1;
+		}
+
+		/* Card styles for sports complexes */
+		.card {
+			height: 100%;
+			transition: transform 0.2s;
+			border: none;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
+
+		.card:hover {
+			transform: translateY(-5px);
+		}
+
+		.card-img-top {
+			height: 200px;
+			object-fit: cover;
+		}
+
+		/* Navbar superior */
+		.top-navbar {
+			padding-left: 60px;
+		}
+
+		/* Estilo para los iconos deportivos */
+		.sport-icon-container {
+			padding: 1rem;
+			background-color: #f8f9fa;
+			border-radius: 0.5rem;
+			height: 120px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			transition: all 0.2s;
+		}
+
+		.sport-icon-container:hover {
+			background-color: #e9ecef;
+			transform: scale(1.05);
+		}
+
+		.sport-icon-container img {
+			height: 50px;
+			width: auto;
+			margin-bottom: 0.5rem;
+		}
+
+		.sport-icon-container p {
+			margin: 0;
+			font-weight: 500;
+		}
+	</style>
+</head>
+<body>
+<div class="wrapper">
+	<!-- Sidebar -->
+	<nav id="sidebar" class="sidebar">
+		<div class="sidebar-header">
+			<img th:src="@{/img/logo_sanmiguel_superadmin.png}" alt="Logo Municipalidad">
+			<div class="municipality-name">San Miguel</div>
+		</div>
+		<ul class="nav flex-column text-white">
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-person-fill"></i>Usuarios</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-gear-fill"></i>Sistema</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-bar-chart-line-fill"></i>Registros</a></li>
+			<li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-graph-up-arrow"></i>Estadísticas</a></li>
+		</ul>
+	</nav>
+
+	<!-- Main -->
+	<div class="main">
+		<!-- Navbar superior -->
+		<nav class="navbar navbar-expand navbar-light bg-light shadow-sm top-navbar">
+			<!-- Botón de toggle -->
+			<a class="sidebar-toggle js-sidebar-toggle" href="#" aria-label="Toggle sidebar">
+				<i class="bi bi-list"></i>
+			</a>
+			<div class="navbar-collapse collapse">
+				<ul class="navbar-nav ms-auto">
+					<li class="nav-item">
+						<span class="nav-link">Superadmin</span>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+		<main class="content">
+			<div class="container-fluid p-0">
+				<div class="mb-3">
+					<h1 class="h3 d-inline align-middle">Registrar Nuevo Usuario</h1>
+				</div>
+
+				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}">
+					<div class="row">
+						<div class="col-12 col-lg-6">
+							<div class="card mb-3">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Datos Personales</h5>
+								</div>
+								<div class="card-body">
+									<div class="mb-3">
+										<label class="form-label">DNI</label>
+										<input type="text" th:field="*{dni}" class="form-control" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Nombres</label>
+										<input type="text" th:field="*{nombres}" class="form-control" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Apellidos</label>
+										<input type="text" th:field="*{apellidos}" class="form-control" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Email</label>
+										<input type="text" th:field="*{email}" class="form-control" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-12 col-lg-6">
+							<div class="card mb-3">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Credenciales y Contacto</h5>
+								</div>
+								<div class="card-body">
+									<div class="mb-3">
+										<label class="form-label">Password Hash</label>
+										<input type="text" name="passwordHash" class="form-control" required>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Password Salt</label>
+										<input type="text" name="passwordSalt" class="form-control" required>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Teléfono</label>
+										<input type="text" name="telefono" class="form-control" required>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Dirección</label>
+										<textarea name="direccion" class="form-control" rows="2"></textarea>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Rol</label>
+										<select th:field="*{idrol}" class="form-select">
+											<option value="1">Superadmin</option>
+											<option value="2">Administrador</option>
+											<option value="3">Coordinador</option>
+											<option value="4">Vecino</option>
+										</select>
+									</div>
+									<div class="mb-3 form-check">
+										<input type="checkbox" name="notificar_recordatorio" class="form-check-input" id="recordatorio">
+										<label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
+									</div>
+									<div class="mb-3 form-check">
+										<input type="checkbox" name="notificar_disponibilidad" class="form-check-input" id="disponibilidad">
+										<label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
+									</div>
+									<button type="submit" class="btn btn-success">Registrar Usuario</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</main>
+
+
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				const modal = document.getElementById("confirmModal");
+				modal.addEventListener("show.bs.modal", function (event) {
+					const button = event.relatedTarget;
+					const idUsuario = button.getAttribute("data-id");
+					const nombre = button.getAttribute("data-nombre");
+					document.getElementById("inputIdUsuario").value = idUsuario;
+					document.getElementById("nombreUsuario").innerText = nombre;
+				});
+			});
+		</script>
+
+
+
+
+
+
+
+
+	</div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.querySelector(".js-sidebar-toggle");
+		toggle.addEventListener("click", function (e) {
+			e.preventDefault();
+			document.body.classList.toggle("sidebar-collapsed");
+		});
+	});
+</script>
+
+</div>
+</body>
+</html>
