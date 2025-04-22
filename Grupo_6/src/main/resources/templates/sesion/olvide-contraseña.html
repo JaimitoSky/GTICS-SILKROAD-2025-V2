@@ -38,7 +38,8 @@
     <h2>¿Olvidaste tu contraseña?</h2>
     <form action="verificar-codigo.html" method="get">
         <div class="form-floating mb-4">
-            <input type="email" class="form-control" id="correoRecuperacion" placeholder="Correo electrónico">
+            <input type="email" class="form-control" id="correoRecuperacion" name="correoRecuperacion"
+                   placeholder="Correo electrónico" required>
             <label for="correoRecuperacion">Correo electrónico</label>
         </div>
         <button type="submit" class="btn btn-primary w-100">Enviar código</button>

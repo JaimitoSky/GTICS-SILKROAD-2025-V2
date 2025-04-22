@@ -38,11 +38,13 @@
     <h2>Restablecer contraseña</h2>
     <form action="#" method="post">
         <div class="form-floating mb-4">
-            <input type="password" class="form-control" id="nuevaPass" placeholder="Nueva contraseña">
+            <input type="password" class="form-control" id="nuevaPass" name="nuevaPass"
+                   placeholder="Nueva contraseña" required>
             <label for="nuevaPass">Nueva contraseña</label>
         </div>
         <div class="form-floating mb-4">
-            <input type="password" class="form-control" id="repetirPass" placeholder="Repetir contraseña">
+            <input type="password" class="form-control" id="repetirPass" name="repetirPass"
+                   placeholder="Repetir contraseña" required>
             <label for="repetirPass">Repetir contraseña</label>
         </div>
         <button type="submit" class="btn btn-primary w-100">Guardar contraseña</button>
