@@ -68,8 +68,86 @@
                     </div>
                 </nav>
 
-                <!-- Contenido principal -->
+                <main class="content">
+                    <div class="container-fluid p-4">
+                        <h2 class="mb-4">RESERVAR</h2>
 
+                        <div class="row text-center mb-4">
+                            <div class="col">
+                                <a href="ListaGimnasio.html" style="text-decoration: none; color: inherit;">
+                                    <img src="../../static/img/icons/icon-gym.png" alt="Gimnasio" height="40">
+                                    <p>Gimnasio</p>
+                                </a>
+                            </div>
+                            <div class="col">
+                                <img src="../../static/img/icons/icon-losa.jpeg" alt="Cancha losa" height="40">
+                                <p>Cancha losa</p>
+                            </div>
+                            <div class="col">
+                                <img src="../../static/img/icons/icon-grass.jpeg" alt="Cancha grass" height="40">
+                                <p>Cancha grass</p>
+                            </div>
+                            <div class="col">
+                                <img src="../../static/img/icons/icon-pool.jpeg" alt="Piscina" height="40">
+                                <p>Piscina</p>
+                            </div>
+                            <div class="col">
+                                <img src="../../static/img/icons/icon-atletismo.jpeg" alt="Atletismo" height="40">
+                                <p>Atletismo</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <a href="home.html" class="text-decoration-none">
+                                <img src="/static/img/icons/retroceder.png" alt="Retroceder" style="height: 30px; width: 30px;">
+                            </a>
+                        </div>
+                        <div class="container mt-5">
+                            <div class="row">
+                                <!-- Card 1 -->
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <img src="/static/img/photos/Gimnasio1.jpg" class="card-img-top"
+                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
+                                             alt="Gimnasio 1">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Gimnasio Munipical</h5>
+                                            <p class="card-text">Jr. Agustín Gamarra N°120 </p>
+                                            <a href="#" class="btn btn-primary">Más detalles</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2 -->
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <img src="/static/img/photos/Gimnasio2.jpg" class="card-img-top"
+                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
+                                             alt="Gimnasio 2">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Gimnasio municipal</h5>
+                                            <p class="card-text">Calle Gamarra cdra 1 (alt. Cdra 14 Av. La Paz )</p>
+                                            <a href="#" class="btn btn-primary">Más detalles</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 3 -->
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <img src="/static/img/photos/Gimnasio3.jpg" class="card-img-top"
+                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
+                                             alt="Gimnasio 3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Smartfit Plaza San Miguel</h5>
+                                            <p class="card-text">Av. de la Marina 2000</p>
+                                            <a href="#" class="btn btn-primary">Más detalles</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
 
                 <!-- Footer -->
                 <footer class="footer mt-auto py-3">
@@ -109,11 +187,7 @@
                         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
                     });
 
-                    // Cargar estado inicial si existe
-                    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                        sidebar.classList.add('collapsed');
-                        mainContent.classList.add('sidebar-collapsed');
-                    }
+
                 }
 
                 // 3. Dropdown (aseguramos funcionamiento)
