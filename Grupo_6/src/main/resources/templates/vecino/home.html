@@ -75,8 +75,10 @@
 
                         <div class="row text-center mb-4">
                             <div class="col">
-                                <img src="../../static/img/icons/icon-gym.png" alt="Gimnasio" height="40">
-                                <p>Gimnasio</p>
+                                <a href="ListaGimnasio.html" style="text-decoration: none; color: inherit;">
+                                    <img src="../../static/img/icons/icon-gym.png" alt="Gimnasio" height="40">
+                                    <p>Gimnasio</p>
+                                </a>
                             </div>
                             <div class="col">
                                 <img src="../../static/img/icons/icon-losa.jpeg" alt="Cancha losa" height="40">
@@ -167,11 +169,7 @@
                         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
                     });
 
-                    // Cargar estado inicial si existe
-                    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                        sidebar.classList.add('collapsed');
-                        mainContent.classList.add('sidebar-collapsed');
-                    }
+
                 }
 
                 // 3. Dropdown (aseguramos funcionamiento)
