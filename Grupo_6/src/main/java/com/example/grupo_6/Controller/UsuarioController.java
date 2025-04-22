@@ -19,7 +19,7 @@ public class UsuarioController {
     public String index(Model model) {
         List<Usuario> listaUsuarios = usuarioRepository.findAll();
         model.addAttribute("listaUsuarios", listaUsuarios);
-        return "usuario/lista"; // Este valor se usa para resolver la plantilla en: /templates/usuario/lista.html
+        return "sesion/login"; // Este valor se usa para resolver la plantilla en: /templates/usuario/lista.html
     }
 
     @GetMapping("/")
