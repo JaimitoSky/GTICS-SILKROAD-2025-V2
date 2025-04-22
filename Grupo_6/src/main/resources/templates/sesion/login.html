@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Sistema de Reservas</title>
+    <title>Iniciar sesión - Sistema de Reservas</title>
     <link rel="stylesheet" href="../../static/css/app.css" />
-    <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
-            rel="stylesheet"
-    />
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         body {
             margin: 0;
@@ -63,24 +56,22 @@
     <img src="../../static/img/photos/fondo-municipalidad.jpg" alt="Logo Municipalidad San Miguel" />
     <h4>Sistema de Reservas Deportivas</h4>
 
-    <!-- Tabs -->
     <ul class="nav nav-pills nav-justified mb-3" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" data-bs-toggle="pill" href="#pills-login" role="tab">Login</a>
+            <a class="nav-link active" data-bs-toggle="pill" href="#pills-login" role="tab">Inicio</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="pill" href="#pills-register" role="tab">Register</a>
+            <a class="nav-link" data-bs-toggle="pill" href="#pills-register" role="tab">Registrarse</a>
         </li>
     </ul>
 
-    <!-- Tab content -->
     <div class="tab-content">
-        <!-- Login -->
+        <!-- Inicio de sesión -->
         <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
-            <form>
+            <form onsubmit="window.location.href='../vecino/home.html'; return false;">
                 <div class="form-floating mb-4">
-                    <input type="email" id="loginName" class="form-control" placeholder="Correo o usuario" required />
-                    <label for="loginName">Correo o usuario</label>
+                    <input type="email" id="loginName" class="form-control" placeholder="Correo Electrónico" required />
+                    <label for="loginName">Correo Electrónico</label>
                 </div>
 
                 <div class="form-floating mb-4">
@@ -100,15 +91,11 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block mb-4">Iniciar sesión</button>
-
-                <div class="text-center">
-                    <p>¿No tienes cuenta? <a href="#pills-register" data-bs-toggle="pill">Regístrate</a></p>
-                </div>
+                <button type="submit" class="btn btn-primary btn-block mb-4">Ingresar</button>
             </form>
         </div>
 
-        <!-- Register -->
+        <!-- Registro -->
         <div class="tab-pane fade" id="pills-register" role="tabpanel">
             <form id="registerForm" onsubmit="return validarCoordinador()">
                 <div class="row">
@@ -156,13 +143,11 @@
                     <label for="registerRepeatPassword">Repetir contraseña</label>
                 </div>
 
-                <!-- Checkbox coordinador -->
                 <div class="form-check mb-3 text-start">
                     <input class="form-check-input" type="checkbox" id="coordinatorCheck" onclick="toggleCodeField()" />
                     <label class="form-check-label" for="coordinatorCheck">¿Deseas registrarte como Coordinador?</label>
                 </div>
 
-                <!-- Código coordinador -->
                 <div class="form-floating mb-4" id="coordinatorCodeField" style="display: none;">
                     <input type="text" id="coordinatorCode" class="form-control" placeholder="Código coordinador" />
                     <label for="coordinatorCode">Código de acceso del Coordinador</label>
@@ -201,5 +186,4 @@
     }
 </script>
 </body>
-
 </html>
