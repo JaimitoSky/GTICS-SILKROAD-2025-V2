@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Listas de Gimnasio</title>
+        <title>Seleccion de fecha y hora</title>
 
         <!-- Estilos locales -->
         <link href="../../static/css/app.css" rel="stylesheet">
@@ -68,6 +68,7 @@
                     </div>
                 </nav>
 
+                <!-- Contenido principal -->
                 <main class="content">
                     <div class="container-fluid p-4">
                         <h2 class="mb-4">RESERVAR</h2>
@@ -96,56 +97,47 @@
                                 <p>Atletismo</p>
                             </div>
                         </div>
+
                         <div class="d-flex align-items-center mb-3">
-                            <a href="home.html" class="text-decoration-none">
+                            <a href="DescripcionComplejoDeportivo.html" class="text-decoration-none">
                                 <img src="/static/img/icons/retroceder.png" alt="Retroceder" style="height: 30px; width: 30px;">
                             </a>
                         </div>
-                        <div class="container mt-5">
-                            <div class="row">
-                                <!-- Card 1 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio1.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 1">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Gimnasio Munipical</h5>
-                                            <p class="card-text">Jr. Agustín Gamarra N°120 </p>
-                                            <a href="DescripcionComplejoDeportivo.html" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <!-- Card 2 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio2.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 2">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Gimnasio municipal</h5>
-                                            <p class="card-text">Calle Gamarra cdra 1 (alt. Cdra 14 Av. La Paz )</p>
-                                            <a href="#" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <!-- Card 3 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio3.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 3">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Smartfit Plaza San Miguel</h5>
-                                            <p class="card-text">Av. de la Marina 2000</p>
-                                            <a href="#" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
-                                </div>
+
+                        <div class="card p-4">
+                            <h4 class="mb-3">Reserva del Gimnasio</h4>
+
+                            <!-- Selección de fecha -->
+                            <div class="mb-3">
+                                <label for="fecha" class="form-label">Fecha:</label>
+                                <input type="date" id="fecha" class="form-control" min="<?= date('Y-m-d'); ?>">
                             </div>
+
+                            <!-- Selección de hora -->
+                            <div class="mb-3">
+                                <label for="hora" class="form-label">Hora de inicio:</label>
+                                <select id="hora" class="form-select">
+                                    <!-- Las opciones serán llenadas dinámicamente -->
+                                </select>
+                            </div>
+
+                            <!-- Duración -->
+                            <div class="mb-3">
+                                <label for="duracion" class="form-label">Duración:</label>
+                                <select id="duracion" class="form-select">
+                                    <option value="1">1 hora</option>
+                                    <option value="2">2 horas</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="reservar()">Reservar</button>
                         </div>
+
+
+
+
                     </div>
                 </main>
 
@@ -159,6 +151,7 @@
                         Municipalidad de San Miguel © 2025
                     </div>
                 </footer>
+
             </div>
         </div>
 
@@ -197,6 +190,74 @@
                         new bootstrap.Dropdown(dropdownElement);
                     }
                 }
+            });
+        </script>
+
+        <script>
+            const horasReservadas = {
+                // Simulación de reservas: fecha => [horas reservadas]
+                "2025-04-22": ["08:00", "09:00"],
+                "2025-04-23": ["10:00", "11:00", "12:00"]
+            };
+
+            function cargarHorasDisponibles() {
+                const horaSelect = document.getElementById("hora");
+                const fecha = document.getElementById("fecha").value;
+                const reservadas = horasReservadas[fecha] || [];
+                horaSelect.innerHTML = ""; // Limpiar opciones
+
+                for (let h = 6; h < 21; h++) { // Hasta 20 porque máximo 2h
+                    const horaStr = `${h.toString().padStart(2, '0')}:00`;
+                    const siguienteHora = `${(h + 1).toString().padStart(2, '0')}:00`;
+                    const dosHorasDespues = `${(h + 2).toString().padStart(2, '0')}:00`;
+
+                    // Verificar si el bloque de 1 o 2 horas está libre
+                    const bloque1Disponible = !reservadas.includes(horaStr);
+                    const bloque2Disponible = bloque1Disponible && !reservadas.includes(siguienteHora);
+
+                    if (bloque1Disponible) {
+                        const option = document.createElement("option");
+                        option.value = horaStr;
+                        option.text = `${horaStr}`;
+                        if (!bloque2Disponible) {
+                            option.text += " (solo 1h disponible)";
+                        }
+                        horaSelect.appendChild(option);
+                    }
+                }
+            }
+
+            document.getElementById("fecha").addEventListener("change", cargarHorasDisponibles);
+
+            function reservar() {
+                const fecha = document.getElementById("fecha").value;
+                const hora = document.getElementById("hora").value;
+                const duracion = parseInt(document.getElementById("duracion").value);
+                const reservadas = horasReservadas[fecha] || [];
+
+                const horasSeleccionadas = [];
+                for (let i = 0; i < duracion; i++) {
+                    const horaReserva = (parseInt(hora.split(":")[0]) + i).toString().padStart(2, '0') + ":00";
+                    if (reservadas.includes(horaReserva)) {
+                        alert(`La hora ${horaReserva} ya está reservada.`);
+                        return;
+                    }
+                    horasSeleccionadas.push(horaReserva);
+                }
+
+                // Redirección a página de confirmación (puedes cambiar el nombre del archivo si es diferente)
+                const params = new URLSearchParams({
+                    fecha: fecha,
+                    hora: hora,
+                    duracion: duracion
+                });
+                window.location.href = `FormularioReservas.html?${params.toString()}`;
+            }
+
+            // Inicialización
+            window.addEventListener('DOMContentLoaded', () => {
+                document.getElementById("fecha").valueAsDate = new Date();
+                cargarHorasDisponibles();
             });
         </script>
     </body>

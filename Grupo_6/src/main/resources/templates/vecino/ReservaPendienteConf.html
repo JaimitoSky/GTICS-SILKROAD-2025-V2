@@ -3,11 +3,84 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Listas de Gimnasio</title>
+        <title>Reserva por confirmar</title>
 
         <!-- Estilos locales -->
         <link href="../../static/css/app.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            .form-container {
+                display: flex;
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+            .form-section {
+                flex: 1;
+                background: #fff;
+                padding: 2rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .image-section {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: #fff;
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .image-section img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+                color: #333;
+            }
+            .form-control {
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background-color: #f9f9f9;
+                font-size: 1rem;
+            }
+            .form-control[readonly] {
+                background-color: #eee;
+                cursor: not-allowed;
+            }
+            .btn-submit {
+                background-color: #4e73df;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+                transition: background-color 0.3s;
+                margin-top: 1rem;
+            }
+            .btn-submit:hover {
+                background-color: #3a5bc7;
+            }
+            .qr-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                color: #333;
+                text-align: center;
+            }
+        </style>
     </head>
 
     <body>
@@ -68,6 +141,7 @@
                     </div>
                 </nav>
 
+                <!-- Contenido principal -->
                 <main class="content">
                     <div class="container-fluid p-4">
                         <h2 class="mb-4">RESERVAR</h2>
@@ -101,52 +175,47 @@
                                 <img src="/static/img/icons/retroceder.png" alt="Retroceder" style="height: 30px; width: 30px;">
                             </a>
                         </div>
-                        <div class="container mt-5">
-                            <div class="row">
-                                <!-- Card 1 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio1.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 1">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Gimnasio Munipical</h5>
-                                            <p class="card-text">Jr. Agustín Gamarra N°120 </p>
-                                            <a href="DescripcionComplejoDeportivo.html" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
+
+                        <div class="form-container">
+                            <!-- Sección de Imagen del Complejo -->
+
+                            <div class="image-section">
+                                <h3 class="mb-4">Gimnasio Municipal</h3>
+                                <img src="/static/img/photos/Gimnasio1.jpg" alt="Complejo Deportivo">
+                            </div>
+
+                            <!-- Sección de Datos -->
+                            <div class="form-section">
+                                <div class="form-group">
+                                    <label for="nombre">Nombre:</label>
+                                    <input type="text" id="nombre" class="form-control" value="Sebastián Abad" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dni">DNI:</label>
+                                    <input type="text" id="dni" class="form-control" value="12345678" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inicio">Hora de Inicio:</label>
+                                    <input type="text" id="inicio" class="form-control" value="6:00 pm" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fin">Horario Fin:</label>
+                                    <input type="text" id="fin" class="form-control" value="8:00 pm" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="direccion">Dirección:</label>
+                                    <input type="text" id="direccion" class="form-control" value="Jr. Agustín Gamarra N°120" readonly>
                                 </div>
 
-                                <!-- Card 2 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio2.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 2">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Gimnasio municipal</h5>
-                                            <p class="card-text">Calle Gamarra cdra 1 (alt. Cdra 14 Av. La Paz )</p>
-                                            <a href="#" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Card 3 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio3.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 3">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Smartfit Plaza San Miguel</h5>
-                                            <p class="card-text">Av. de la Marina 2000</p>
-                                            <a href="#" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
+                                <!-- Recuadro para adjuntar imagen -->
+                                <div class="form-group">
+                                    <label for="adjuntar">Adjuntar Imagen:</label>
+                                    <input type="file" id="adjuntar" class="form-control" accept=".jpeg, .jpg, .png">
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        </div>
+
                 </main>
 
                 <!-- Footer -->
@@ -159,6 +228,7 @@
                         Municipalidad de San Miguel © 2025
                     </div>
                 </footer>
+
             </div>
         </div>
 

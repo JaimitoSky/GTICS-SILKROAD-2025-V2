@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Listas de Gimnasio</title>
+        <title>Formulario Reserva</title>
 
         <!-- Estilos locales -->
         <link href="../../static/css/app.css" rel="stylesheet">
@@ -97,55 +97,67 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
-                            <a href="home.html" class="text-decoration-none">
+                            <a href="Seleccionfechayhora.html" class="text-decoration-none">
                                 <img src="/static/img/icons/retroceder.png" alt="Retroceder" style="height: 30px; width: 30px;">
                             </a>
                         </div>
-                        <div class="container mt-5">
-                            <div class="row">
-                                <!-- Card 1 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio1.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 1">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Gimnasio Munipical</h5>
-                                            <p class="card-text">Jr. Agustín Gamarra N°120 </p>
-                                            <a href="DescripcionComplejoDeportivo.html" class="btn btn-primary">Más detalles</a>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <!-- Card 2 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio2.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 2">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Gimnasio municipal</h5>
-                                            <p class="card-text">Calle Gamarra cdra 1 (alt. Cdra 14 Av. La Paz )</p>
-                                            <a href="#" class="btn btn-primary">Más detalles</a>
+                        <div class="container mt-4">
+                            <div class="card p-4 shadow rounded">
+                                <h4 class="mb-4">Datos de la Reserva</h4>
+                                <form action="reserva" method="POST">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="nombre" class="form-label">Nombre:</label>
+                                            <input type="text" id="nombre" name="nombre" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="apellido" class="form-label">Apellido:</label>
+                                            <input type="text" id="apellido" name="apellido" class="form-control" required>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Card 3 -->
-                                <div class="col-md-4 mb-4">
-                                    <div class="card h-100">
-                                        <img src="/static/img/photos/Gimnasio3.jpg" class="card-img-top"
-                                             style="height: 300px; width: 100%; object-fit: cover; object-position: center;"
-                                             alt="Gimnasio 3">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Smartfit Plaza San Miguel</h5>
-                                            <p class="card-text">Av. de la Marina 2000</p>
-                                            <a href="#" class="btn btn-primary">Más detalles</a>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="correo" class="form-label">Correo electrónico:</label>
+                                            <input type="email" id="correo" name="correo" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="telefono" class="form-label">Teléfono:</label>
+                                            <input type="tel" id="telefono" name="telefono" class="form-control" required>
                                         </div>
                                     </div>
-                                </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="dni" class="form-label">DNI:</label>
+                                            <input type="text" id="dni" name="dni" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="fecha" class="form-label">Fecha:</label>
+                                            <input type="date" id="fecha" name="fecha" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="horario" class="form-label">Horario:</label>
+                                            <select id="horario" name="horario" class="form-select" required>
+                                                <option value="">Seleccione un horario</option>
+                                                <option value="06:00-07:00">06:00 - 07:00</option>
+                                                <option value="07:00-08:00">07:00 - 08:00</option>
+                                                <option value="08:00-09:00">08:00 - 09:00</option>
+                                                <option value="17:00-18:00">17:00 - 18:00</option>
+                                                <option value="18:00-19:00">18:00 - 19:00</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <a href="FormularioPago.html" class="btn btn-primary">Continuar</a>
+                                    </div>
+                                </form>
                             </div>
                         </div>
+
+
                     </div>
                 </main>
 
@@ -199,5 +211,29 @@
                 }
             });
         </script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const params = new URLSearchParams(window.location.search);
+                const fecha = params.get("fecha");
+                const hora = params.get("hora");
+                const duracion = params.get("duracion");
+
+                // Mostrar los valores en el formulario si existen
+                if (fecha && hora && duracion) {
+                    // Asignar a inputs si existen
+                    const inputFecha = document.getElementById("input-fecha");
+                    const inputHora = document.getElementById("input-hora");
+                    const inputDuracion = document.getElementById("input-duracion");
+
+                    if (inputFecha) inputFecha.value = fecha;
+                    if (inputHora) inputHora.value = hora;
+                    if (inputDuracion) inputDuracion.value = duracion + " hora(s)";
+                }
+            });
+        </script>
+
+
+
     </body>
 </html>
