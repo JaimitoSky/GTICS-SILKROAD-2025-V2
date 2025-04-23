@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar sesión - Sistema de Reservas</title>
+    <link rel="stylesheet" href="../../static/css/app.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-image: url('../../static/img/photos/fondo-login.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container img {
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .login-container h4 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #0069d9;
+        }
+
+        .nav-pills .nav-link {
+            color: #0069d9;
+        }
+    </style>
+</head>
+
+<body>
+<div class="login-container">
+    <img src="../../static/img/photos/fondo-municipalidad.jpg" alt="Logo Municipalidad San Miguel" />
+    <h4>Sistema de Reservas Deportivas</h4>
+
+    <ul class="nav nav-pills nav-justified mb-3" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="pill" href="#pills-login" role="tab">Inicio</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="pill" href="#pills-register" role="tab">Registrarse</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Inicio de sesión -->
+        <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
+            <form onsubmit="window.location.href='../vecino/home.html'; return false;">
+                <div class="form-floating mb-4">
+                    <input type="email" id="loginName" class="form-control" placeholder="Correo Electrónico" required />
+                    <label for="loginName">Correo Electrónico</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Contraseña" required />
+                    <label for="loginPassword">Contraseña</label>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 d-flex justify-content-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="loginCheck" checked />
+                            <label class="form-check-label" for="loginCheck">Recordarme</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-center">
+                        <a href="olvide-contraseña.html">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-4">Ingresar</button>
+            </form>
+        </div>
+
+        <!-- Registro -->
+        <div class="tab-pane fade" id="pills-register" role="tabpanel">
+            <form id="registerForm" onsubmit="return validarCoordinador()">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" id="registerName" class="form-control" placeholder="Nombre" required />
+                            <label for="registerName">Nombre</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" id="registerLastName" class="form-control" placeholder="Apellido" required />
+                            <label for="registerLastName">Apellido</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" id="registerDNI" class="form-control" placeholder="DNI" pattern="\d{8}" maxlength="8" required />
+                            <label for="registerDNI">DNI (8 dígitos)</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-4">
+                            <input type="text" id="registerAddress" class="form-control" placeholder="Dirección" required />
+                            <label for="registerAddress">Dirección</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="email" id="registerEmail" class="form-control" placeholder="Correo electrónico" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required />
+                    <label for="registerEmail">Correo electrónico (solo Gmail)</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="password" id="registerPassword" class="form-control" placeholder="Contraseña" required />
+                    <label for="registerPassword">Contraseña</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="password" id="registerRepeatPassword" class="form-control" placeholder="Repetir contraseña" required />
+                    <label for="registerRepeatPassword">Repetir contraseña</label>
+                </div>
+
+                <div class="form-check mb-3 text-start">
+                    <input class="form-check-input" type="checkbox" id="coordinatorCheck" onclick="toggleCodeField()" />
+                    <label class="form-check-label" for="coordinatorCheck">¿Deseas registrarte como Coordinador?</label>
+                </div>
+
+                <div class="form-floating mb-4" id="coordinatorCodeField" style="display: none;">
+                    <input type="text" id="coordinatorCode" class="form-control" placeholder="Código coordinador" />
+                    <label for="coordinatorCode">Código de acceso del Coordinador</label>
+                </div>
+
+                <div class="form-check d-flex justify-content-center mb-4">
+                    <input class="form-check-input me-2" type="checkbox" id="registerCheck" required />
+                    <label class="form-check-label" for="registerCheck">Acepto los términos y condiciones</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-3">Registrarse</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleCodeField() {
+        const checkbox = document.getElementById('coordinatorCheck');
+        const codeField = document.getElementById('coordinatorCodeField');
+        codeField.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    function validarCoordinador() {
+        const isCoordinator = document.getElementById('coordinatorCheck').checked;
+        const code = document.getElementById('coordinatorCode').value.trim();
+
+        if (isCoordinator && code === '') {
+            alert('Por favor, ingrese el código de acceso para coordinador.');
+            return false;
+        }
+
+        return true;
+    }
+</script>
+</body>
+</html>
