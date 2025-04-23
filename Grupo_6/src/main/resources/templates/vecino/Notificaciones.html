@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Notificaciones</title>
+
+        <!-- Estilos locales -->
+        <link href="../../static/css/app.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                background: #f4f6f9;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 900px;
+                margin: 3rem auto;
+                background: white;
+                border-radius: 8px;
+                padding: 2rem;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+            h2 {
+                margin-bottom: 1.5rem;
+                color: #333;
+            }
+            .search-bar {
+                margin-bottom: 1.5rem;
+            }
+            .search-bar input {
+                width: 100%;
+                padding: 0.6rem 1rem;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                font-size: 1rem;
+            }
+            .notification {
+                background-color: #eef2ff;
+                border-left: 5px solid forestgreen;
+                padding: 1rem 1.5rem;
+                border-radius: 5px;
+                margin-bottom: 1.2rem;
+            }
+            .notification.reminder {
+                background-color: #fff8e1;
+                border-left-color: #f6c23e;
+            }
+            .notification h4 {
+                margin: 0 0 0.5rem 0;
+                color: #333;
+            }
+            .notification p {
+                margin: 0;
+                color: #555;
+            }
+            .pagination {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 2rem;
+            }
+            .pagination button {
+                padding: 0.5rem 1rem;
+                border: none;
+                background-color: #4e73df;
+                color: white;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .pagination button:disabled {
+                background-color: #ccc;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="wrapper">
+            <!-- Sidebar exclusivo para Vecino -->
+            <nav id="sidebar" class="sidebar js-sidebar">
+                <div class="sidebar-content js-simplebar">
+                    <a class="sidebar-brand" href="#">
+                        <span class="align-middle">Reservas San Miguel</span>
+                    </a>
+                    <ul class="sidebar-nav">
+                        <li class="sidebar-item active">
+                            <a class="sidebar-link" href="#">
+                                <i class="align-middle" data-feather="home"></i> <span class="align-middle">Inicio</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#">
+                                <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Mis Reservas</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#">
+                                <i class="align-middle" data-feather="user"></i> <span class="align-middle">Mi Perfil</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="main">
+                <!-- Navbar superior -->
+                <nav class="navbar navbar-expand navbar-light navbar-bg">
+                    <a class="sidebar-toggle js-sidebar-toggle">
+                        <i class="hamburger align-self-center"></i>
+                    </a>
+                    <div class="navbar-collapse collapse">
+                        <ul class="navbar-nav navbar-align ms-auto">
+                            <!-- Ícono de campana (sin dropdown) -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" title="Notificaciones">
+                                    <img src="/static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;">
+                                </a>
+                            </li>
+
+                            <!-- Dropdown de usuario existente -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i data-feather="user"></i>
+                                    <span class="text-dark">Vecino</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="#">Mi cuenta</a></li>
+                                    <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+
+                <div class="container">
+                    <div class="d-flex align-items-center mb-3">
+                        <a href="home.html" class="text-decoration-none">
+                            <img src="/static/img/icons/retroceder.png" alt="Retroceder" style="height: 30px; width: 30px;">
+                        </a>
+                    </div>
+                    <h2>Mis Notificaciones</h2>
+
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Buscar notificaciones...">
+                    </div>
+
+                    <div id="notificationsList">
+                        <div class="notification">
+                            <h4>✅ Reserva Confirmada</h4>
+                            <p>Tu reserva para el <strong>Gimnasio Municipal</strong> en <em>Jr. Agustín Gamarra N°120</em> ha sido confirmada para el horario de <strong>6:00 pm a 8:00 pm</strong>.</p>
+                        </div>
+
+                        <div class="notification reminder">
+                            <h4>⏰ Recordatorio de Reserva</h4>
+                            <p>No olvides que tienes una reserva hoy en el <strong>Gimnasio Municipal</strong> de <strong>6:00 pm a 8:00 pm</strong>. ¡Te esperamos!</p>
+                        </div>
+                    </div>
+
+                    <div class="pagination">
+                        <button id="prevBtn" disabled>&laquo; Anterior</button>
+                        <button id="nextBtn">Siguiente &raquo;</button>
+                    </div>
+                </div>
+
+
+                <!-- Footer -->
+                <footer class="footer mt-auto py-3">
+                    <div class="text-center mt-5 mb-5" >
+                        <img src="../../static/img/photos/logo-san-miguel.png" alt="Municipalidad de San Miguel" height="60" >
+                    </div>
+
+                    <div class="container text-center text-muted">
+                        Municipalidad de San Miguel © 2025
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <!-- Scripts en el orden correcto -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://unpkg.com/feather-icons"></script>
+        <script>
+            // Inicialización completa
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. Feather Icons
+                feather.replace();
+
+                // 2. Sidebar Toggle (versión mejorada)
+                const sidebarToggle = document.querySelector('.js-sidebar-toggle');
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.querySelector('.main');
+
+                if (sidebarToggle && sidebar && mainContent) {
+                    sidebarToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        sidebar.classList.toggle('collapsed');
+                        mainContent.classList.toggle('sidebar-collapsed');
+
+                        // Opcional: Para persistencia del estado
+                        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                    });
+
+
+                }
+
+                // 3. Dropdown (aseguramos funcionamiento)
+                if (typeof bootstrap !== 'undefined') {
+                    const dropdownElement = document.querySelector('.dropdown-toggle');
+                    if (dropdownElement) {
+                        new bootstrap.Dropdown(dropdownElement);
+                    }
+                }
+            });
+        </script>
+        <script>
+            // Búsqueda (dinámica en cliente, simulada)
+            const searchInput = document.getElementById('searchInput');
+            const notificationsList = document.getElementById('notificationsList');
+            const originalNotifications = notificationsList.innerHTML;
+
+            searchInput.addEventListener('input', () => {
+                const value = searchInput.value.toLowerCase();
+                const notifications = Array.from(notificationsList.children);
+                notifications.forEach(n => {
+                    const text = n.textContent.toLowerCase();
+                    n.style.display = text.includes(value) ? 'block' : 'none';
+                });
+            });
+
+            // Paginación (simulada con solo 2 notificaciones por ahora)
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            let currentPage = 1;
+            const totalPages = 1; // Puedes cambiar esto según la cantidad de páginas disponibles
+
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePagination();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updatePagination();
+                }
+            });
+
+            function updatePagination() {
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+                // Aquí podrías cargar contenido específico por página con fetch/ajax
+            }
+        </script>
+    </body>
+</html>
