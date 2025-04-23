@@ -39,6 +39,8 @@
             </nav>
 
             <div class="main">
+                <div id="sidebar-container"></div>
+
                 <!-- Navbar superior -->
                 <nav class="navbar navbar-expand navbar-light navbar-bg">
                     <a class="sidebar-toggle js-sidebar-toggle">
@@ -46,21 +48,17 @@
                     </a>
                     <div class="navbar-collapse collapse">
                         <ul class="navbar-nav navbar-align ms-auto">
-                            <!-- Ícono de campana (sin dropdown) -->
                             <li class="nav-item">
-                                <a class="nav-link" href="#" title="Notificaciones">
-                                    <img src="/static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;">
+                                <a class="nav-link" href="Notificaciones.html">
+                                    <img src="../../static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;">
                                 </a>
                             </li>
-
-                            <!-- Dropdown de usuario existente -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i data-feather="user"></i>
-                                    <span class="text-dark">Vecino</span>
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <i data-feather="user"></i> <span class="text-dark">Vecino</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li><a class="dropdown-item" href="#">Mi cuenta</a></li>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="perfil.html">Mi cuenta</a></li>
                                     <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
                                 </ul>
                             </li>

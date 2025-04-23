@@ -85,6 +85,7 @@
 
     <body>
         <div class="wrapper">
+
             <!-- Sidebar exclusivo para Vecino -->
             <nav id="sidebar" class="sidebar js-sidebar">
                 <div class="sidebar-content js-simplebar">
@@ -112,6 +113,7 @@
             </nav>
 
             <div class="main">
+                <div id="sidebar-container"></div>
                 <!-- Navbar superior -->
                 <nav class="navbar navbar-expand navbar-light navbar-bg">
                     <a class="sidebar-toggle js-sidebar-toggle">
@@ -212,9 +214,13 @@
                                     <label for="adjuntar">Adjuntar Imagen:</label>
                                     <input type="file" id="adjuntar" class="form-control" accept=".jpeg, .jpg, .png">
                                 </div>
+                                <div class="form-group">
+                                    <button type="button" id="btnEnviar" class="btn-submit">Enviar</button>
+                                </div>
                             </div>
                         </div>
                         </div>
+
 
                 </main>
 
@@ -231,6 +237,7 @@
 
             </div>
         </div>
+
 
         <!-- Scripts -->
         <!-- Scripts en el orden correcto -->
@@ -269,5 +276,49 @@
                 }
             });
         </script>
+        <script>
+            // Inicialización completa
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. Feather Icons
+                feather.replace();
+
+                // 2. Sidebar Toggle (versión mejorada)
+                const sidebarToggle = document.querySelector('.js-sidebar-toggle');
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.querySelector('.main');
+
+                if (sidebarToggle && sidebar && mainContent) {
+                    sidebarToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        sidebar.classList.toggle('collapsed');
+                        mainContent.classList.toggle('sidebar-collapsed');
+
+                        // Opcional: Para persistencia del estado
+                        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                    });
+                }
+
+                // 3. Dropdown (aseguramos funcionamiento)
+                if (typeof bootstrap !== 'undefined') {
+                    const dropdownElement = document.querySelector('.dropdown-toggle');
+                    if (dropdownElement) {
+                        new bootstrap.Dropdown(dropdownElement);
+                    }
+                }
+
+                // 4. Funcionalidad del botón "Enviar"
+                const btnEnviar = document.getElementById('btnEnviar');
+                if (btnEnviar) {
+                    btnEnviar.addEventListener('click', function() {
+                        // Mostrar mensaje de confirmación
+                        alert("¡La imagen fue enviada correctamente!");
+
+                        // Redirigir al usuario a 'mis-reservas.html' después de hacer clic en "Ok"
+                        window.location.href = 'mis-reservas.html';
+                    });
+                }
+            });
+        </script>
+
     </body>
 </html>
