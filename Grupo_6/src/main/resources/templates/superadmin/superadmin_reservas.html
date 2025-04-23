@@ -41,6 +41,7 @@
 
     <!-- Main -->
     <div class="main">
+        <!-- Navbar superior -->
         <!-- Navbar superior única -->
         <nav class="navbar navbar-expand navbar-light bg-light shadow-sm top-navbar">
             <!-- Botón de toggle -->
@@ -104,100 +105,81 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
+                <h1 class="h3 mb-4"><strong>Gestión de Reservas</strong> - Super Admin</h1>
 
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
-
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
-                            </div>
-                        </div>
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" placeholder="Fecha inicio">
                     </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" placeholder="Fecha fin">
                     </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
+                    <div class="col-md-3">
+                        <select class="form-control">
+                            <option selected>Todos los estados</option>
+                            <option>Confirmada</option>
+                            <option>Pendiente</option>
+                            <option>Cancelada</option>
+                        </select>
                     </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
+                    <div class="col-md-3 text-end">
+                        <button class="btn btn-danger">Filtrar</button>
                     </div>
                 </div>
 
-                <!-- Actividades y alertas -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                <!-- Tabla de reservas -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Reservas Registradas</h5>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="card-body">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Vecino</th>
+                                <th>Servicio</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>1021</td>
+                                <td>Juan Pérez</td>
+                                <td>Fútbol 7 - Sede Central</td>
+                                <td>2025-04-25</td>
+                                <td>17:00</td>
+                                <td><span class="badge bg-success">Confirmada</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">Ver</button>
+                                    <button class="btn btn-sm btn-warning">Editar</button>
+                                    <button class="btn btn-sm btn-danger">Cancelar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1022</td>
+                                <td>Ana Flores</td>
+                                <td>Gimnasio</td>
+                                <td>2025-04-26</td>
+                                <td>09:00</td>
+                                <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">Ver</button>
+                                    <button class="btn btn-sm btn-danger">Cancelar</button>
+                                </td>
+                            </tr>
+                            <!-- Más registros... -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </main>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

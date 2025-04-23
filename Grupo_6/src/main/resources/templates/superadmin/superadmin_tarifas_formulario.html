@@ -41,6 +41,7 @@
 
     <!-- Main -->
     <div class="main">
+        <!-- Navbar superior -->
         <!-- Navbar superior única -->
         <nav class="navbar navbar-expand navbar-light bg-light shadow-sm top-navbar">
             <!-- Botón de toggle -->
@@ -104,100 +105,113 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
+                <h1 class="h3 mb-3"><strong>Registrar Nueva Tarifa</strong></h1>
 
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
+                <div class="card">
+                    <div class="card-body">
+                        <form action="#" method="post">
+                            <div class="mb-3">
+                                <label for="servicio" class="form-label">Nombre del Servicio</label>
+                                <input type="text" class="form-control" id="servicio" name="servicio" placeholder="Ej. Cancha de fútbol 7" required>
+                            </div>
 
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo de Servicio</label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    <option value="">Seleccione un tipo</option>
+                                    <option value="Cancha">Cancha</option>
+                                    <option value="Piscina">Piscina</option>
+                                    <option value="Gimnasio">Gimnasio</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Actividades y alertas -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
+                            <div class="mb-3">
+                                <label for="precio" class="form-label">Precio por hora (S/)</label>
+                                <input type="number" class="form-control" id="precio" name="precio" step="0.1" min="0" required>
                             </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción (opcional)</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="2" placeholder="Opcional: descripción del servicio"></textarea>
                             </div>
-                            <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+
+                            <button type="submit" class="btn btn-success">Registrar Tarifa</button>
+                            <a href="/superadmin/tarifas" class="btn btn-secondary">Cancelar</a>
+                        </form>
                     </div>
                 </div>
             </div>
         </main>
+
+
+        <!-- Script para Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Línea: Reservas por día
+                new Chart(document.getElementById("chart-reservas-dia"), {
+                    type: "line",
+                    data: {
+                        labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+                        datasets: [{
+                            label: "Reservas",
+                            data: [12, 19, 3, 5, 9, 7, 11],
+                            borderColor: "#0d6efd",
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Barras: Servicios más usados
+                new Chart(document.getElementById("chart-servicios"), {
+                    type: "bar",
+                    data: {
+                        labels: ["Fútbol", "Piscina", "Gimnasio", "Básquet"],
+                        datasets: [{
+                            label: "Reservas",
+                            data: [80, 50, 40, 30],
+                            backgroundColor: "#198754"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Doughnut: Tipos de usuarios
+                new Chart(document.getElementById("chart-usuarios"), {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Vecinos", "Coordinadores", "Admins", "Superadmins"],
+                        datasets: [{
+                            data: [65, 15, 10, 10],
+                            backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#6f42c1"]
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // Pie: Estados de reserva
+                new Chart(document.getElementById("chart-estados"), {
+                    type: "pie",
+                    data: {
+                        labels: ["Confirmadas", "Pendientes", "Canceladas"],
+                        datasets: [{
+                            data: [60, 25, 15],
+                            backgroundColor: ["#198754", "#ffc107", "#dc3545"]
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            });
+        </script>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

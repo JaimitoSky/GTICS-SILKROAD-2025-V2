@@ -104,100 +104,48 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
+                <h1 class="h3 mb-3"><strong>Configuración del Sistema</strong></h1>
 
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
-
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividades y alertas -->
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
+                                <h5 class="card-title mb-0">Horarios de atención</h5>
                             </div>
                             <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
-                                    </li>
-                                </ul>
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="horaInicio" class="form-label">Hora de inicio</label>
+                                        <input type="time" class="form-control" id="horaInicio" value="08:00">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="horaFin" class="form-label">Hora de cierre</label>
+                                        <input type="time" class="form-control" id="horaFin" value="22:00">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                </form>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
+                                <h5 class="card-title mb-0">Modo mantenimiento</h5>
                             </div>
                             <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="modoMantenimiento">
+                                    <label class="form-check-label" for="modoMantenimiento">Activar mantenimiento</label>
                                 </div>
+                                <small class="text-muted">Al activarse, el sistema bloqueará las reservas temporalmente.</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

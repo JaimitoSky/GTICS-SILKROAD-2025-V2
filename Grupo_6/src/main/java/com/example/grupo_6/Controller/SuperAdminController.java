@@ -32,14 +32,39 @@ public class SuperAdminController {
     }
 
     // Vista de gestión de usuarios
+
+
     @GetMapping("/superadmin/usuarios")
-    public String listarUsuarios(Model model) {
-        List<Usuario> listaUsuarios = usuarioRepository.findAll();
+    public String listarUsuarios(@RequestParam(required = false) String filtro,
+                                 @RequestParam(required = false, defaultValue = "nombre") String campo,
+                                 Model model) {
+        List<Usuario> listaUsuarios;
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            String valor = filtro.trim().toLowerCase();
+            listaUsuarios = switch (campo) {
+                case "correo" -> usuarioRepository.buscarPorCorreo(valor);
+                case "estado" -> usuarioRepository.buscarPorEstado(valor);
+                case "rol" -> usuarioRepository.buscarPorRol(valor);
+                case "id" -> usuarioRepository.buscarPorId(valor);
+                default -> usuarioRepository.buscarPorNombre(valor);
+            };
+        } else {
+            listaUsuarios = usuarioRepository.findAll();
+        }
+
         model.addAttribute("usuarios", listaUsuarios);
         model.addAttribute("rol", "superadmin");
-        model.addAttribute("mapaRoles", mapaRoles); // solo para vista
+        model.addAttribute("mapaRoles", mapaRoles);
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("campo", campo);
+
         return "superadmin/superadmin_usuarios";
     }
+
+
+
+
 
 
     // Cambiar rol del usuario
@@ -104,5 +129,39 @@ public class SuperAdminController {
         usuarioRepository.save(usuario);
         return "redirect:/superadmin/usuarios";
     }
+    @GetMapping("/superadmin/reservas")
+    public String gestionarReservas() {
+        return "superadmin/superadmin_reservas";
+    }
+
+    @GetMapping("/superadmin/tarifas")
+    public String gestionarTarifas() {
+        return "superadmin/superadmin_tarifas";
+    }
+
+    @GetMapping("/superadmin/estadisticas")
+    public String verEstadisticas() {
+        return "superadmin/superadmin_estadisticas";
+    }
+
+    @GetMapping("/superadmin/sistema")
+    public String configuracionSistema() {
+        return "superadmin/superadmin_sistema";
+    }
+
+    @GetMapping("/superadmin/registros")
+    public String verRegistros() {
+        return "superadmin/superadmin_registros";
+    }
+    @GetMapping("/superadmin/pagos")
+    public String gestionarPagos() {
+        return "superadmin/superadmin_pagos";
+    }
+    @GetMapping("/superadmin/tarifas/nueva")
+    public String mostrarFormularioTarifa() {
+        return "superadmin/superadmin_tarifas_formulario";
+    }
+
+
 
 }

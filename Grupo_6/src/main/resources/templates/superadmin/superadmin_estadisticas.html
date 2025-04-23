@@ -41,6 +41,7 @@
 
     <!-- Main -->
     <div class="main">
+        <!-- Navbar superior -->
         <!-- Navbar superior única -->
         <nav class="navbar navbar-expand navbar-light bg-light shadow-sm top-navbar">
             <!-- Botón de toggle -->
@@ -105,99 +106,131 @@
         <main class="content">
             <div class="container-fluid p-0">
 
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
+                <h1 class="h3 mb-4"><strong>Estadísticas Generales</strong> - Super Admin</h1>
 
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividades y alertas -->
                 <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card">
+                    <!-- Reservas por día -->
+                    <div class="col-12 col-lg-6 mb-4">
+                        <div class="card flex-fill w-100">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
+                                <h5 class="card-title">Reservas por Día</h5>
+                                <h6 class="card-subtitle text-muted">Cantidad de reservas registradas en la última semana.</h6>
                             </div>
                             <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
-                                    </li>
-                                </ul>
+                                <canvas id="chart-reservas-dia" height="300"></canvas>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
+                    <!-- Servicios más reservados -->
+                    <div class="col-12 col-lg-6 mb-4">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
+                                <h5 class="card-title">Servicios Más Usados</h5>
+                                <h6 class="card-subtitle text-muted">Comparativa entre los servicios deportivos disponibles.</h6>
                             </div>
                             <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
-                                </div>
+                                <canvas id="chart-servicios" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distribución de usuarios -->
+                    <div class="col-12 col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Tipos de Usuario</h5>
+                                <h6 class="card-subtitle text-muted">Porcentaje de participación de vecinos, coordinadores, etc.</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chart-usuarios" height="252"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estado de reservas -->
+                    <div class="col-12 col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Estado de Reservas</h5>
+                                <h6 class="card-subtitle text-muted">Distribución de reservas confirmadas, pendientes o canceladas.</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chart-estados" height="252"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- Script para Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Línea: Reservas por día
+                new Chart(document.getElementById("chart-reservas-dia"), {
+                    type: "line",
+                    data: {
+                        labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+                        datasets: [{
+                            label: "Reservas",
+                            data: [12, 19, 3, 5, 9, 7, 11],
+                            borderColor: "#0d6efd",
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Barras: Servicios más usados
+                new Chart(document.getElementById("chart-servicios"), {
+                    type: "bar",
+                    data: {
+                        labels: ["Fútbol", "Piscina", "Gimnasio", "Básquet"],
+                        datasets: [{
+                            label: "Reservas",
+                            data: [80, 50, 40, 30],
+                            backgroundColor: "#198754"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Doughnut: Tipos de usuarios
+                new Chart(document.getElementById("chart-usuarios"), {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Vecinos", "Coordinadores", "Admins", "Superadmins"],
+                        datasets: [{
+                            data: [65, 15, 10, 10],
+                            backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#6f42c1"]
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // Pie: Estados de reserva
+                new Chart(document.getElementById("chart-estados"), {
+                    type: "pie",
+                    data: {
+                        labels: ["Confirmadas", "Pendientes", "Canceladas"],
+                        datasets: [{
+                            data: [60, 25, 15],
+                            backgroundColor: ["#198754", "#ffc107", "#dc3545"]
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            });
+        </script>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
