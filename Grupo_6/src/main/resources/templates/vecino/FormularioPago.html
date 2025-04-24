@@ -3,12 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Formulario Pago</title>
+        <title>Formulario Reserva</title>
 
         <!-- Estilos locales -->
         <link href="../../static/css/app.css" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             .form-container {
@@ -83,100 +81,79 @@
                 text-align: center;
             }
         </style>
-
     </head>
 
     <body>
         <div class="wrapper">
-            <!-- Sidebar exclusivo para Vecino -->
-            <nav id="sidebar" class="sidebar js-sidebar">
-                <div class="sidebar-content js-simplebar">
-                    <a class="sidebar-brand" href="#">
-                        <span class="align-middle">Reservas San Miguel</span>
-                    </a>
-                    <ul class="sidebar-nav">
-                        <li class="sidebar-item active">
-                            <a class="sidebar-link" href="#">
-                                <i class="align-middle" data-feather="home"></i> <span class="align-middle">Inicio</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
-                                <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Mis Reservas</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
-                                <i class="align-middle" data-feather="user"></i> <span class="align-middle">Mi Perfil</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <!-- Sidebar -->
+            <div id="sidebar-container"></div>
 
             <div class="main">
-                <!-- Navbar superior -->
+                <!-- Navbar -->
                 <nav class="navbar navbar-expand navbar-light navbar-bg">
                     <a class="sidebar-toggle js-sidebar-toggle">
                         <i class="hamburger align-self-center"></i>
                     </a>
                     <div class="navbar-collapse collapse">
                         <ul class="navbar-nav navbar-align ms-auto">
-                            <!-- Ícono de campana (sin dropdown) -->
                             <li class="nav-item">
-                                <a class="nav-link" href="#" title="Notificaciones">
-                                    <img src="/static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;">
+                                <a class="nav-link" href="Notificaciones.html">
+                                    <img src="../../static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;">
                                 </a>
                             </li>
-
-                            <!-- Dropdown de usuario existente -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i data-feather="user"></i>
-                                    <span class="text-dark">Vecino</span>
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                    <i data-feather="user"></i> <span class="text-dark">Vecino</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li><a class="dropdown-item" href="#">Mi cuenta</a></li>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="perfil.html">Mi cuenta</a></li>
                                     <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
                                 </ul>
                             </li>
                         </ul>
                     </div>
-
-
-
-
-
                 </nav>
 
+                <!-- Contenido principal -->
                 <main class="content">
                     <div class="container-fluid p-4">
-                        <h2 class="mb-4">RESERVAR</h2>
 
-                        <div class="row text-center mb-4">
+                        <!-- Opciones de Reservar -->
+                        <h2 class="mb-4">RESERVAR</h2>
+                        <div class="row text-center mb-5 reservar-opciones">
                             <div class="col">
-                                <a href="FormularioReservas.html" style="text-decoration: none; color: inherit;">
-                                    <img src="../../static/img/icons/icon-gym.png" alt="Gimnasio" height="40">
+                                <a href="ListaGimnasio.html">
+                                    <img src="../../static/img/icons/icon-gym.png" height="40">
                                     <p>Gimnasio</p>
                                 </a>
                             </div>
                             <div class="col">
-                                <img src="../../static/img/icons/icon-losa.jpeg" alt="Cancha losa" height="40">
-                                <p>Cancha losa</p>
+                                <a href="ListaGimnasio.html">
+                                    <img src="../../static/img/icons/icon-losa.jpeg" height="40">
+                                    <p>Cancha losa</p>
+                                </a>
                             </div>
                             <div class="col">
-                                <img src="../../static/img/icons/icon-grass.jpeg" alt="Cancha grass" height="40">
-                                <p>Cancha grass</p>
+                                <a href="ListaGimnasio.html">
+                                    <img src="../../static/img/icons/icon-grass.jpeg" height="40">
+                                    <p>Cancha grass</p>
+                                </a>
                             </div>
                             <div class="col">
-                                <img src="../../static/img/icons/icon-pool.jpeg" alt="Piscina" height="40">
-                                <p>Piscina</p>
+                                <a href="ListaGimnasio.html">
+                                    <img src="../../static/img/icons/icon-pool.jpeg" height="40">
+                                    <p>Piscina</p>
+                                </a>
                             </div>
                             <div class="col">
-                                <img src="../../static/img/icons/icon-atletismo.jpeg" alt="Atletismo" height="40">
-                                <p>Atletismo</p>
+                                <a href="ListaGimnasio.html">
+                                    <img src="../../static/img/icons/icon-atletismo.jpeg" height="40">
+                                    <p>Atletismo</p>
+                                </a>
                             </div>
                         </div>
+
+
                         <div class="d-flex align-items-center mb-3">
                             <a href="FormularioReservas.html" class="text-decoration-none">
                                 <img src="/static/img/icons/retroceder.png" alt="Retroceder" style="height: 30px; width: 30px;">
@@ -239,15 +216,16 @@
                         </div>
 
 
+
+
                     </div>
                 </main>
 
                 <!-- Footer -->
                 <footer class="footer mt-auto py-3">
-                    <div class="text-center mt-5 mb-5" >
-                        <img src="../../static/img/photos/logo-san-miguel.png" alt="Municipalidad de San Miguel" height="60" >
+                    <div class="text-center mt-5 mb-5">
+                        <img src="../../static/img/photos/logo-san-miguel.png" height="60">
                     </div>
-
                     <div class="container text-center text-muted">
                         Municipalidad de San Miguel © 2025
                     </div>
@@ -256,9 +234,31 @@
         </div>
 
         <!-- Scripts -->
-        <!-- Scripts en el orden correcto -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://unpkg.com/feather-icons"></script>
+        <script>
+            feather.replace();
+
+            fetch('../fragments/sidebar-vecino.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('sidebar-container').innerHTML = html;
+                    const sidebarToggle = document.querySelector('.js-sidebar-toggle');
+                    const sidebar = document.getElementById('sidebar');
+                    const mainContent = document.querySelector('.main');
+
+                    if (sidebarToggle && sidebar && mainContent) {
+                        sidebarToggle.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            sidebar.classList.toggle('collapsed');
+                            mainContent.classList.toggle('sidebar-collapsed');
+                            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                        });
+                    }
+
+                    feather.replace();
+                });
+        </script>
         <script>
             // Inicialización completa
             document.addEventListener('DOMContentLoaded', function() {
@@ -301,6 +301,5 @@
                 }
             });
         </script>
-
     </body>
 </html>
