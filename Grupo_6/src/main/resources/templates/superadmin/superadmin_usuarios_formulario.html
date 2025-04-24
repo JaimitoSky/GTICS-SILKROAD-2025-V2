@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Inicio - Superadmin</title>
+
+	<!-- Estilos externos -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- Estilos internos -->
+	<link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+
+</head>
+<body>
+<div class="wrapper">
+	<!-- Sidebar -->
+	<nav id="sidebar" class="sidebar">
+		<div class="sidebar-header text-center">
+			<a th:href="@{/superadmin}" class="logo-link d-block">
+				<img th:src="@{/img/logo_sanmiguel_superadmin.png}" alt="Logo Municipalidad">
+			</a>
+			<a th:href="@{/superadmin}" class="municipality-name d-block text-decoration-none">
+				San Miguel
+			</a>
+		</div>
+
+		<ul class="nav flex-column text-white">
+			<li class="nav-item"><a th:href="@{/superadmin/usuarios}" class="nav-link"><i class="bi bi-person-fill"></i>Usuarios</a></li>
+			<li class="nav-item"><a th:href="@{/superadmin/reservas}" class="nav-link"><i class="bi bi-calendar-check"></i>Reservas</a></li>
+			<li class="nav-item"><a th:href="@{/superadmin/tarifas}" class="nav-link"><i class="bi bi-cash-coin"></i>Tarifas</a></li>
+			<li class="nav-item"><a th:href="@{/superadmin/pagos}" class="nav-link"><i class="bi bi-credit-card"></i> Pagos</a></li>
+			<li class="nav-item"><a th:href="@{/superadmin/estadisticas}" class="nav-link"><i class="bi bi-graph-up-arrow"></i>Estadísticas</a></li>
+			<li class="nav-item"><a th:href="@{/superadmin/sistema}" class="nav-link"><i class="bi bi-gear-fill"></i>Sistema</a></li>
+			<li class="nav-item"><a th:href="@{/superadmin/registros}" class="nav-link"><i class="bi bi-bar-chart-line-fill"></i>Registros</a></li>
+		</ul>
+
+	</nav>
+
+	<!-- Main -->
+	<div class="main">
+		<!-- Navbar superior -->
+		<!-- Navbar superior única -->
+		<nav class="navbar navbar-expand navbar-light bg-light shadow-sm top-navbar">
+			<!-- Botón de toggle -->
+			<a class="sidebar-toggle js-sidebar-toggle" href="#" aria-label="Toggle sidebar">
+				<i class="bi bi-list fs-4 text-dark"></i>
+			</a>
+
+			<div class="navbar-collapse collapse justify-content-end">
+				<ul class="navbar-nav align-items-center">
+
+					<!-- Notificaciones -->
+					<li class="nav-item dropdown me-3">
+						<a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="bi bi-bell fs-5 text-dark"></i>
+							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            3
+          </span>
+						</a>
+						<div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
+							<h6 class="dropdown-header">Notificaciones recientes</h6>
+							<a class="dropdown-item d-flex align-items-start" href="#">
+								<i class="bi bi-exclamation-circle text-danger me-2"></i>
+								Reserva cancelada por el sistema
+							</a>
+							<a class="dropdown-item d-flex align-items-start" href="#">
+								<i class="bi bi-cloud-slash text-warning me-2"></i>
+								Error de conexión con API RENIEC
+							</a>
+							<a class="dropdown-item d-flex align-items-start" href="#">
+								<i class="bi bi-calendar-event text-primary me-2"></i>
+								Nueva reserva aprobada
+							</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item text-center small text-muted" href="#">Ver todas</a>
+						</div>
+					</li>
+
+					<!-- Usuario -->
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+							<i class="bi bi-person-circle me-2 fs-5 text-dark"></i>
+							<span class="d-none d-sm-inline text-dark fw-bold">Super Admin</span>
+						</a>
+						<div class="dropdown-menu dropdown-menu-end">
+							<a class="dropdown-item" href="/perfil-superadmin"><i class="bi bi-person me-1"></i> Mi Perfil</a>
+							<a class="dropdown-item" href="/superadmin/usuarios"><i class="bi bi-people me-1"></i> Gestión de Usuarios</a>
+							<a class="dropdown-item" href="/superadmin/reservas"><i class="bi bi-calendar me-1"></i> Gestión de Reservas</a>
+							<a class="dropdown-item" href="/configuracion-sistema"><i class="bi bi-gear me-1"></i> Configuración</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión</a>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+
+
+
+
+		<main class="content">
+			<div class="container-fluid p-0">
+				<div class="mb-3">
+					<h1 class="h3 d-inline align-middle">Registrar Nuevo Usuario</h1>
+				</div>
+
+				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}">
+					<div class="row">
+						<div class="col-12 col-lg-6">
+							<div class="card mb-3">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Datos Personales</h5>
+								</div>
+								<div class="card-body">
+									<div class="mb-3">
+										<label class="form-label">DNI</label>
+										<input type="text" th:field="*{dni}" class="form-control" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Nombres</label>
+										<input type="text" th:field="*{nombres}" class="form-control" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Apellidos</label>
+										<input type="text" th:field="*{apellidos}" class="form-control" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Email</label>
+										<input type="text" th:field="*{email}" class="form-control" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-12 col-lg-6">
+							<div class="card mb-3">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Credenciales y Contacto</h5>
+								</div>
+								<div class="card-body">
+									<div class="mb-3">
+										<label class="form-label">Password Hash</label>
+										<input type="text" name="passwordHash" class="form-control" required>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Password Salt</label>
+										<input type="text" name="passwordSalt" class="form-control" required>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Teléfono</label>
+										<input type="text" name="telefono" class="form-control" required>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Dirección</label>
+										<textarea name="direccion" class="form-control" rows="2"></textarea>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Rol</label>
+										<select th:field="*{idrol}" class="form-select">
+											<option value="1">Superadmin</option>
+											<option value="2">Administrador</option>
+											<option value="3">Coordinador</option>
+											<option value="4">Vecino</option>
+										</select>
+									</div>
+									<div class="mb-3 form-check">
+										<input type="checkbox" name="notificar_recordatorio" class="form-check-input" id="recordatorio">
+										<label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
+									</div>
+									<div class="mb-3 form-check">
+										<input type="checkbox" name="notificar_disponibilidad" class="form-check-input" id="disponibilidad">
+										<label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
+									</div>
+									<button type="submit" class="btn btn-success">Registrar Usuario</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</main>
+
+
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				const modal = document.getElementById("confirmModal");
+				modal.addEventListener("show.bs.modal", function (event) {
+					const button = event.relatedTarget;
+					const idUsuario = button.getAttribute("data-id");
+					const nombre = button.getAttribute("data-nombre");
+					document.getElementById("inputIdUsuario").value = idUsuario;
+					document.getElementById("nombreUsuario").innerText = nombre;
+				});
+			});
+		</script>
+
+
+
+
+
+
+
+		<footer class="footer mt-auto py-3 bg-light border-top">
+			<div class="container text-center text-muted">
+				Municipalidad de San Miguel © 2025
+			</div>
+		</footer>
+	</div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.querySelector(".js-sidebar-toggle");
+		toggle.addEventListener("click", function (e) {
+			e.preventDefault();
+			document.body.classList.toggle("sidebar-collapsed");
+		});
+	});
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+	feather.replace();
+</script>
+</div>
+</body>
+</html>
