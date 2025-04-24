@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,47 +11,42 @@
 
     <style>
 
-        .center-content {
-            text-align: center;
-            margin-top: 4rem;
-        }
-        .icon-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        .icon-box {
-            width: 140px;
-            height: 140px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .icon-box i {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-            color: white;
-            background-color: #a8323e;
-            padding: 1rem;
-            border-radius: 50%;
+        .notification-detail-box {
+            background-color: #f6f6f6;
+            border-left: 6px solid #fbb202;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
-        .icon-box i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #a8323e;
+        .notification-title {
+            font-weight: 700;
+            font-size: 1.25rem;
         }
-        .icon-box:hover {
-            transform: scale(1.05);
-            background-color: #f1f1f1;
+
+        .notification-description {
+            color: #555;
         }
+
+        .notification-footer {
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #777;
+            text-align: end;
+        }
+
+        .extra-text {
+            padding-top: 1rem;
+            color: #444;
+        }
+
+        .btn-aceptar {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+
     </style>
 </head>
 <body>
@@ -92,36 +88,35 @@
 
         <!-- Contenido principal -->
         <main class="content">
-            <div class="container center-content">
-                <h2 class="fw-bold">Bienvenida: Hola, Fernando Godoy</h2>
-                <p class="mt-2 fs-5">Local actual del día: <strong>Matute</strong></p>
+            <div class="container mt-5">
+                <h2 class="fw-bold mb-4" style="color: #000;">Centro de notificaciones</h2>
 
-                <div class="icon-grid">
-                    <a href="coordinador-tareas.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-tasks"></i>
-                            <span>Tareas Diarias</span>
+                <div class="notification-detail-box">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="notification-title">🛠️ Mantenimiento programado</div>
+                            <p class="notification-description mt-2">
+                                El jueves 04/04 se realizará mantenimiento eléctrico en el complejo La Paz de 14:00 a 17:00.
+                            </p>
                         </div>
-                    </a>
+                        <div class="notification-footer">
+                            <div>03/04/2025</div>
+                            <div>09:00</div>
+                        </div>
+                    </div>
 
-                    <a href="coordinador-observacion.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>Observaciones</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-historial.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-history"></i>
-                            <span>Historial</span>
-                        </div>
-                    </a>
+                    <div class="extra-text">
+                        Por favor, asegúrate de suspende cualquier actividad deportiva o de limpieza durante ese horario y comunicarlo a los vecions en caso sea necesario.
+                    </div>
                 </div>
 
+                <div class="btn-aceptar">
+                    <button class="btn btn-warning px-4" onclick="window.location.href='coordinador-notificaciones.html'">Aceptar</button>
+                </div>
             </div>
 
         </main>
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3">

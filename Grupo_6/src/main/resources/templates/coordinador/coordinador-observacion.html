@@ -41,7 +41,6 @@
             padding: 1rem;
             border-radius: 50%;
         }
-
         .icon-box i {
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -91,37 +90,29 @@
         </nav>
 
         <!-- Contenido principal -->
+        <!-- Sustituye tu sección de contenido principal con este fragmento dentro de <main class="content"> -->
         <main class="content">
-            <div class="container center-content">
-                <h2 class="fw-bold">Bienvenida: Hola, Fernando Godoy</h2>
-                <p class="mt-2 fs-5">Local actual del día: <strong>Matute</strong></p>
+            <div class="container text-center mt-5">
+                <h2 class="mb-4 fw-bold" style="color: black;">Registrar Observación</h2>
 
-                <div class="icon-grid">
-                    <a href="coordinador-tareas.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-tasks"></i>
-                            <span>Tareas Diarias</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-observacion.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>Observaciones</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-historial.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-history"></i>
-                            <span>Historial</span>
-                        </div>
-                    </a>
+                <!-- Textarea para observación -->
+                <div class="mb-4 mx-auto" style="max-width: 700px;">
+                    <textarea class="form-control" rows="5" placeholder="Describe la observación aquí..."></textarea>
                 </div>
 
-            </div>
+                <!-- Subida de imágenes/videos -->
+                <div class="mb-4 mx-auto" style="max-width: 700px;">
+                    <label class="form-label fw-semibold mb-2" for="evidencia">Subir imagen/video de evidencia</label>
+                    <input class="form-control" type="file" id="evidencia" multiple accept="image/*,video/*">
+                </div>
 
+                <!-- Botón guardar -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-success px-5 py-2 fw-semibold">Guardar</button>
+                </div>
+            </div>
         </main>
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3">

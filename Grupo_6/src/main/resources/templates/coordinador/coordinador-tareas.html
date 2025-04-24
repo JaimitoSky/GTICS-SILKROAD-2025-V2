@@ -41,7 +41,6 @@
             padding: 1rem;
             border-radius: 50%;
         }
-
         .icon-box i {
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -92,36 +91,32 @@
 
         <!-- Contenido principal -->
         <main class="content">
-            <div class="container center-content">
-                <h2 class="fw-bold">Bienvenida: Hola, Fernando Godoy</h2>
-                <p class="mt-2 fs-5">Local actual del día: <strong>Matute</strong></p>
+            <div class="container text-center mt-5">
+                <h2 class="mb-4 fw-bold" style="color: black;">Tareas Diarias</h2>
 
-                <div class="icon-grid">
-                    <a href="coordinador-tareas.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-tasks"></i>
-                            <span>Tareas Diarias</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-observacion.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>Observaciones</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-historial.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-history"></i>
-                            <span>Historial</span>
-                        </div>
-                    </a>
+                <div class="task-list mx-auto" style="max-width: 600px;">
+                    <div class="task-item d-flex align-items-center p-3 mb-3 border rounded shadow-sm bg-white">
+                        <input class="form-check-input me-3" type="checkbox" id="tarea1">
+                        <label class="form-check-label flex-grow-1 text-start" for="tarea1">Supervisar ingreso de personal</label>
+                    </div>
+                    <div class="task-item d-flex align-items-center p-3 mb-3 border rounded shadow-sm bg-white">
+                        <input class="form-check-input me-3" type="checkbox" id="tarea2">
+                        <label class="form-check-label flex-grow-1 text-start" for="tarea2">Verificar limpieza del local</label>
+                    </div>
+                    <div class="task-item d-flex align-items-center p-3 mb-3 border rounded shadow-sm bg-white">
+                        <input class="form-check-input me-3" type="checkbox" id="tarea3">
+                        <label class="form-check-label flex-grow-1 text-start" for="tarea3">Registrar asistencia</label>
+                    </div>
+                    <div class="task-item d-flex align-items-center p-3 mb-4 border rounded shadow-sm bg-white">
+                        <input class="form-check-input me-3" type="checkbox" id="tarea4">
+                        <label class="form-check-label flex-grow-1 text-start" for="tarea4">Enviar reporte diario</label>
+                    </div>
                 </div>
 
+                <button class="btn btn-warning px-5 py-2 fw-semibold">Finalizar Jornada</button>
             </div>
-
         </main>
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3">

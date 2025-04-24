@@ -6,51 +6,8 @@
     <title>Inicio - Vecino</title>
     <link href="../../static/css/app.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-sJQ0GvB5i9dFnUY2fxl9RmNqJjAxJ+2J0Fe58cSCmgmrncHnVArLMgqxHTFzWQaMGBaYZ6MZbTY4HE1Zb5GowA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-
-        .center-content {
-            text-align: center;
-            margin-top: 4rem;
-        }
-        .icon-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        .icon-box {
-            width: 140px;
-            height: 140px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .icon-box i {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-            color: white;
-            background-color: #a8323e;
-            padding: 1rem;
-            border-radius: 50%;
-        }
-
-        .icon-box i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #a8323e;
-        }
-        .icon-box:hover {
-            transform: scale(1.05);
-            background-color: #f1f1f1;
-        }
     </style>
 </head>
 <body>
@@ -92,33 +49,73 @@
 
         <!-- Contenido principal -->
         <main class="content">
-            <div class="container center-content">
-                <h2 class="fw-bold">Bienvenida: Hola, Fernando Godoy</h2>
-                <p class="mt-2 fs-5">Local actual del día: <strong>Matute</strong></p>
+            <div class="container mt-4 text-center">
+                <h2 class="mb-4">Historial</h2>
 
-                <div class="icon-grid">
-                    <a href="coordinador-tareas.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-tasks"></i>
-                            <span>Tareas Diarias</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-observacion.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>Observaciones</span>
-                        </div>
-                    </a>
-
-                    <a href="coordinador-historial.html" style="text-decoration: none; color: inherit;">
-                        <div class="icon-box">
-                            <i class="fas fa-history"></i>
-                            <span>Historial</span>
-                        </div>
-                    </a>
+                <div class="table-responsive d-flex justify-content-center">
+                    <table class="table table-striped align-middle text-center" style="max-width: 800px;">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center">Día</th>
+                            <th class="text-center">Local</th>
+                            <th class="text-center">Asistencia</th>
+                            <th class="text-center">Observaciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>30/10/25</td>
+                            <td>Matute</td>
+                            <td>Presente</td>
+                            <td>
+                                <a href="coordinador-observacion-local.html" class="text-decoration-none text-primary">
+                                    <i data-feather="eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>13/10/25</td>
+                            <td>Monumental</td>
+                            <td>Presente</td>
+                            <td>
+                                <a href="coordinador-observacion-local.html" class="text-decoration-none text-primary">
+                                    <i data-feather="eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>10/12/25</td>
+                            <td>Minas</td>
+                            <td>Ausente</td>
+                            <td>
+                                <a href="coordinador-observacion-local.html" class="text-decoration-none text-primary">
+                                    <i data-feather="eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>10/09/25</td>
+                            <td>La cárcel</td>
+                            <td>Presente</td>
+                            <td>
+                                <a href="coordinador-observacion-local.html" class="text-decoration-none text-primary">
+                                    <i data-feather="eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>01/09/25</td>
+                            <td>Piscina</td>
+                            <td>Presente</td>
+                            <td>
+                                <a href="coordinador-observacion-local.html" class="text-decoration-none text-primary">
+                                    <i data-feather="eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-
             </div>
 
         </main>
@@ -161,7 +158,6 @@
 
             feather.replace();
         });
-
 </script>
 </body>
 </html>
