@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Gestión de Servicios - Admin</title>
+        <link href="../../static/css/app.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+        <style>
+            .table-actions .btn { margin-right: 8px; width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+            .btn-icon svg { width: 18px; height: 18px; }
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0,0,0,0.5);
+                z-index: 2000;
+            }
+            .modal.show {
+                display: flex;
+            }
+            .modal-dialog {
+                max-width: 600px;
+                width: 90%;
+                margin: auto;
+            }
+            .modal-content {
+                background: #fff;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+            }
+            .hour-slot {
+                display: inline-block;
+                margin: 6px;
+                padding: 10px 14px;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                cursor: pointer;
+                text-align: center;
+            }
+            .hour-slot.disabled {
+                background-color: #e9ecef;
+                color: #6c757d;
+                cursor: not-allowed;
+            }
+            .hour-slot.active {
+                background-color: #0d6efd;
+                color: white;
+                border-color: #0d6efd;
+            }
+            .modal-body .d-flex.flex-wrap {
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div id="sidebar-container"></div>
+            <div class="main">
+                <nav class="navbar navbar-expand navbar-light navbar-bg">
+                    <a class="sidebar-toggle js-sidebar-toggle"><i class="hamburger align-self-center"></i></a>
+                    <div class="navbar-collapse collapse">
+                        <ul class="navbar-nav navbar-align ms-auto">
+                            <li class="nav-item"><a class="nav-link" href="#"><img src="../../static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;"></a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i data-feather="user"></i> <span class="text-dark">Administrador</span></a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="perfil.html">Mi cuenta</a></li>
+                                    <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <main class="content">
+                    <div class="container-fluid p-4">
+                        <div class="user-table-container">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Servicio</th><th class="text-center">Información</th><th class="text-center">Horarios</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Cancha de Fútbol</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-info btn-icon" title="Ver información" data-bs-toggle="modal" data-bs-target="#infoModal">
+                                                    <i data-feather="eye"></i>
+                                                </button>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-info btn-icon" title="Ver horarios" data-bs-toggle="modal" data-bs-target="#horariosModal">
+                                                    <i data-feather="eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Modal Info Servicio -->
+        <div class="modal fade" id="infoModal" tabindex="-1">
+            <div class="modal-dialog d-flex align-items-center justify-content-center">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Información del Servicio</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">Servicio:</label>
+                                <input type="text" class="form-control" value="Cancha de Fútbol">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Dirección:</label>
+                                <input type="text" class="form-control" placeholder="Ej: Av. Las Palmas 123">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Requisitos:</label>
+                                <textarea class="form-control" rows="2" placeholder="Carnet, pago anticipado, etc."></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Horarios -->
+        <div class="modal fade" id="horariosModal" tabindex="-1">
+            <div class="modal-dialog d-flex align-items-center justify-content-center">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Horarios Disponibles</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex flex-wrap justify-content-center">
+                            <div class="hour-slot">06:00</div>
+                            <div class="hour-slot">07:00</div>
+                            <div class="hour-slot">08:00</div>
+                            <div class="hour-slot disabled">09:00</div>
+                            <div class="hour-slot">10:00</div>
+                            <div class="hour-slot">11:00</div>
+                            <div class="hour-slot disabled">12:00</div>
+                            <div class="hour-slot">13:00</div>
+                            <div class="hour-slot">14:00</div>
+                            <div class="hour-slot">15:00</div>
+                            <div class="hour-slot">16:00</div>
+                            <div class="hour-slot">17:00</div>
+                            <div class="hour-slot">18:00</div>
+                            <div class="hour-slot">19:00</div>
+                            <div class="hour-slot">20:00</div>
+                            <div class="hour-slot">21:00</div>
+                            <div class="hour-slot">22:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://unpkg.com/feather-icons"></script>
+        <script>
+            feather.replace();
+            fetch('../fragments/sidebar-administrador.html').then(res => res.text()).then(html => {
+                document.getElementById('sidebar-container').innerHTML = html;
+                const toggle = document.querySelector('.js-sidebar-toggle'), sidebar = document.getElementById('sidebar'), main = document.querySelector('.main');
+                if(toggle && sidebar && main) toggle.addEventListener('click', e=>{ e.preventDefault(); sidebar.classList.toggle('collapsed'); main.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed')); });
+                feather.replace();
+            });
+        </script>
+    </body>
+</html>
