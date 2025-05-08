@@ -1,0 +1,35 @@
+package com.example.grupo_6.Entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "sede")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Sede {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer idsede;
+
+    @Column(nullable = false, length = 100)
+    private String nombre;
+
+    @Column(length = 255)
+    private String direccion;
+
+    @Column(length = 100)
+    private String distrito;
+
+    @Column(columnDefinition = "TEXT")
+    private String referencia;
+
+    private BigDecimal latitud;
+
+    private BigDecimal longitud;
+}

@@ -107,20 +107,27 @@
             <div class="container-fluid p-0">
                 <h1 class="h3 mb-4"><strong>Gestión de Reservas</strong> - Super Admin</h1>
 
+                <!-- Botón superior -->
+                <div class="mb-3 text-end">
+                    <a th:href="@{/superadmin/reservas/nueva}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-1"></i> Crear Reserva
+                    </a>
+                </div>
+
                 <!-- Filtros -->
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <input type="date" class="form-control" placeholder="Fecha inicio">
+                        <input type="date" class="form-control" name="fechaInicio" placeholder="Fecha inicio">
                     </div>
                     <div class="col-md-3">
-                        <input type="date" class="form-control" placeholder="Fecha fin">
+                        <input type="date" class="form-control" name="fechaFin" placeholder="Fecha fin">
                     </div>
                     <div class="col-md-3">
-                        <select class="form-control">
-                            <option selected>Todos los estados</option>
-                            <option>Confirmada</option>
-                            <option>Pendiente</option>
-                            <option>Cancelada</option>
+                        <select class="form-control" name="estado">
+                            <option value="" selected>Todos los estados</option>
+                            <option value="confirmada">Confirmada</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="cancelada">Cancelada</option>
                         </select>
                     </div>
                     <div class="col-md-3 text-end">
@@ -134,7 +141,7 @@
                         <h5 class="card-title mb-0">Reservas Registradas</h5>
                     </div>
                     <div class="card-body">
-                        <table class="table table-hover table-bordered">
+                        <table class="table table-hover table-bordered align-middle">
                             <thead class="table-light">
                             <tr>
                                 <th>#</th>
@@ -147,38 +154,49 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>1021</td>
-                                <td>Juan Pérez</td>
-                                <td>Fútbol 7 - Sede Central</td>
-                                <td>2025-04-25</td>
-                                <td>17:00</td>
-                                <td><span class="badge bg-success">Confirmada</span></td>
+                            <tr th:each="reserva : ${listaReservas}">
+                                <td th:text="${reserva.idreserva}">1021</td>
+                                <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Juan Pérez</td>
+                                <td th:text="${reserva.servicio.nombre}">Fútbol 7</td>
+                                <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}">2025-04-25</td>
+                                <td th:text="${#temporals.format(reserva.horaInicio, 'HH:mm')}">17:00</td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary">Ver</button>
-                                    <button class="btn btn-sm btn-warning">Editar</button>
-                                    <button class="btn btn-sm btn-danger">Cancelar</button>
+    <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' : (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' : 'badge bg-secondary')}"
+          th:text="${reserva.estado.nombre}">
+</span>
+
+
                                 </td>
-                            </tr>
-                            <tr>
-                                <td>1022</td>
-                                <td>Ana Flores</td>
-                                <td>Gimnasio</td>
-                                <td>2025-04-26</td>
-                                <td>09:00</td>
-                                <td><span class="badge bg-warning text-dark">Pendiente</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary">Ver</button>
-                                    <button class="btn btn-sm btn-danger">Cancelar</button>
+                                    <a th:href="@{/superadmin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">Ver</a>
+
+                                    <form th:action="@{/superadmin/reservas/aprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-success me-1" th:if="${reserva.estado.nombre.equals('pendiente')}">Aprobar Pago</button>
+                                    </form>
+
+                                    <form th:action="@{/superadmin/reservas/desaprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-warning me-1" th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar Pago</button>
+                                    </form>
+
+                                    <form th:action="@{/superadmin/reservas/cancelar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
+                                          onsubmit="return confirm('¿Cancelar esta reserva?');">
+                                        <button type="submit" class="btn btn-sm btn-danger me-1">Cancelar</button>
+                                    </form>
+
+                                    <form th:action="@{/superadmin/reservas/habilitar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
+                                          th:if="${reserva.estado.nombre.equals('cancelada')}">
+                                        <button type="submit" class="btn btn-sm btn-secondary">Habilitar</button>
+                                    </form>
                                 </td>
+
                             </tr>
-                            <!-- Más registros... -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </main>
+
 
 
         <script>

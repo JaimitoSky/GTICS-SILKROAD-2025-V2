@@ -102,134 +102,113 @@
 
 
 
+        <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
+                <h1 class="h3 mb-4"><strong>Detalle de Reserva</strong> - Super Admin</h1>
 
-                <h1 class="h3 mb-4"><strong>Estadísticas Generales</strong> - Super Admin</h1>
-
-                <div class="row">
-                    <!-- Reservas por día -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card flex-fill w-100">
-                            <div class="card-header">
-                                <h5 class="card-title">Reservas por Día</h5>
-                                <h6 class="card-subtitle text-muted">Cantidad de reservas registradas en la última semana.</h6>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ID Reserva:</label>
+                                <p class="form-control-plaintext" th:text="${reserva.idreserva}">1021</p>
                             </div>
-                            <div class="card-body">
-                                <canvas id="chart-reservas-dia" height="300"></canvas>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Estado:</label>
+                                <span th:if="${reserva.estado.nombre == 'confirmada'}" class="badge bg-success" th:text="${reserva.estado.nombre}"></span>
+                                <span th:if="${reserva.estado.nombre == 'pendiente'}" class="badge bg-warning text-dark" th:text="${reserva.estado.nombre}"></span>
+                                <span th:if="${reserva.estado.nombre != 'confirmada' and reserva.estado.nombre != 'pendiente'}" class="badge bg-secondary" th:text="${reserva.estado.nombre}"></span>
+
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Servicios más reservados -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Servicios Más Usados</h5>
-                                <h6 class="card-subtitle text-muted">Comparativa entre los servicios deportivos disponibles.</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Vecino:</label>
+                                <p class="form-control-plaintext" th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Nombre</p>
                             </div>
-                            <div class="card-body">
-                                <canvas id="chart-servicios" height="300"></canvas>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">DNI:</label>
+                                <p class="form-control-plaintext" th:text="${reserva.usuario.dni}">00000000</p>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Distribución de usuarios -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Tipos de Usuario</h5>
-                                <h6 class="card-subtitle text-muted">Porcentaje de participación de vecinos, coordinadores, etc.</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Servicio:</label>
+                                <p class="form-control-plaintext" th:text="${reserva.servicio.nombre}">Piscina</p>
                             </div>
-                            <div class="card-body">
-                                <canvas id="chart-usuarios" height="252"></canvas>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Descripción:</label>
+                                <p class="form-control-plaintext" th:text="${reserva.servicio.descripcion}">Desc.</p>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Estado de reservas -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Estado de Reservas</h5>
-                                <h6 class="card-subtitle text-muted">Distribución de reservas confirmadas, pendientes o canceladas.</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Fecha de Reserva:</label>
+                                <p class="form-control-plaintext" th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}">10/06/2025</p>
                             </div>
-                            <div class="card-body">
-                                <canvas id="chart-estados" height="252"></canvas>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Hora Inicio:</label>
+                                <p class="form-control-plaintext" th:text="${#temporals.format(reserva.horaInicio, 'HH:mm')}">10:00</p>
                             </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Hora Fin:</label>
+                                <p class="form-control-plaintext" th:text="${#temporals.format(reserva.horaFin, 'HH:mm')}">12:00</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3" th:if="${reserva.pago != null}">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Método de Pago:</label>
+                                <p class="form-control-plaintext" th:text="${reserva.pago.metodo}">Yape</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Monto Pagado:</label>
+                                <p class="form-control-plaintext" th:text="|S/ ${#numbers.formatDecimal(reserva.pago.monto, 2, 2)}|"
+                                >S/ 20.00</p>
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <a th:href="@{/superadmin/reservas}" class="btn btn-secondary">Volver</a>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Script para Chart.js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <!-- Cargar datos del backend con Thymeleaf -->
-        <script th:inline="javascript">
-            const reservasPorDia = [[${reservasPorDiaJson}]];
-            const serviciosPopulares = [[${serviciosPopularesJson}]];
-            const usuariosPorRol = [[${usuariosPorRolJson}]];
-            const estadoReservas = [[${estadoReservasJson}]];
-        </script>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                new Chart(document.getElementById("chart-reservas-dia"), {
-                    type: "line",
+                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
+                const ctx = document.getElementById('activity-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
                     data: {
-                        labels: reservasPorDia.map(e => e.dia),
+                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
                         datasets: [{
-                            label: "Reservas",
-                            data: reservasPorDia.map(e => e.cantidad),
-                            borderColor: "#0d6efd",
+                            label: 'Reservas',
+                            data: [12, 19, 3, 5, 2, 3, 7],
+                            borderColor: '#dc3545',
                             tension: 0.3
                         }]
                     },
-                    options: { responsive: true, plugins: { legend: { display: false } } }
-                });
-
-                new Chart(document.getElementById("chart-servicios"), {
-                    type: "bar",
-                    data: {
-                        labels: serviciosPopulares.map(e => e.nombre),
-                        datasets: [{
-                            label: "Reservas",
-                            data: serviciosPopulares.map(e => e.cantidad),
-                            backgroundColor: "#198754"
-                        }]
-                    },
-                    options: { responsive: true, plugins: { legend: { display: false } } }
-                });
-
-                new Chart(document.getElementById("chart-usuarios"), {
-                    type: "doughnut",
-                    data: {
-                        labels: usuariosPorRol.map(e => e.rol),
-                        datasets: [{
-                            data: usuariosPorRol.map(e => e.total),
-                            backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#6f42c1"]
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-
-                new Chart(document.getElementById("chart-estados"), {
-                    type: "pie",
-                    data: {
-                        labels: estadoReservas.map(e => e.estado),
-                        datasets: [{
-                            data: estadoReservas.map(e => e.cantidad),
-                            backgroundColor: ["#198754", "#ffc107", "#dc3545"]
-                        }]
-                    },
-                    options: { responsive: true }
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
                 });
             });
         </script>
-
-
 
 
         <!-- Footer -->

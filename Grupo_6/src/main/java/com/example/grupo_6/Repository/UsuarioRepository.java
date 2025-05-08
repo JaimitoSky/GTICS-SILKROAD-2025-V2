@@ -33,6 +33,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     @Query("SELECT u FROM Usuario u WHERE CAST(u.idrol AS string) LIKE %:valor%")
     List<Usuario> buscarPorRol(@Param("valor") String valor);
+    Usuario findByDni(String dni);
+
+    @Query("SELECT u.idrol, COUNT(u) FROM Usuario u GROUP BY u.idrol")
+    List<Object[]> countUsuariosPorRol();
+
+
 }
 
 

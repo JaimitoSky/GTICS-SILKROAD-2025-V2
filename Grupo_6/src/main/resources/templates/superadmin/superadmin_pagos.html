@@ -121,34 +121,44 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>1001</td>
-                                <td>Juan Pérez</td>
-                                <td>Cancha Fútbol</td>
-                                <td>Depósito</td>
-                                <td><span class="badge bg-warning text-dark">Pendiente</span></td>
-                                <td><a href="/files/comprobante_1001.jpg" target="_blank">Ver</a></td>
+                            <tr th:each="pago : ${listaPagos}">
+                                <td th:text="${pago.idpago}">1001</td>
+                                <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}">Juan Pérez</td>
+                                <td th:text="${pago.reserva != null ? pago.reserva.servicio.nombre : '—'}">—</td>
+                                <td th:text="${pago.metodo}">Depósito</td>
                                 <td>
-                                    <button class="btn btn-sm btn-success">Aprobar</button>
-                                    <button class="btn btn-sm btn-danger">Rechazar</button>
+                                <span th:text="${pago.estado.nombre}"
+                                      th:classappend="
+                                        ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
+                                        (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
+                                    Pendiente
+                                </span>
                                 </td>
+                                <td>
+                                    <a th:if="${pago.comprobante != null}" th:href="@{'/uploads/' + ${pago.comprobante}}" target="_blank">Ver</a>
+                                    <span th:if="${pago.comprobante == null}">—</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/superadmin/pagos/aprobar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                    </form>
+                                    <form th:action="@{/superadmin/pagos/rechazar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-danger">Rechazar</button>
+                                    </form>
+                                    <form th:action="@{/superadmin/pagos/pendiente/{id}(id=${pago.idpago})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-secondary">Volver a Pendiente</button>
+                                    </form>
+                                </td>
+
                             </tr>
-                            <tr>
-                                <td>1002</td>
-                                <td>Ana Torres</td>
-                                <td>Piscina</td>
-                                <td>Pago en línea</td>
-                                <td><span class="badge bg-success">Confirmado</span></td>
-                                <td>—</td>
-                                <td>✔</td>
-                            </tr>
-                            <!-- Más filas -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </main>
+
+
 
 
         <script>

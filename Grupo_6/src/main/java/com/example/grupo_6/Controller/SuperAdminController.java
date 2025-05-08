@@ -1,15 +1,22 @@
 package com.example.grupo_6.Controller;
 
-import com.example.grupo_6.Entity.Usuario;
-import com.example.grupo_6.Repository.UsuarioRepository;
+import com.example.grupo_6.Entity.*;
+import com.example.grupo_6.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class SuperAdminController {
@@ -22,6 +29,21 @@ public class SuperAdminController {
             3, "Coordinador",
             4, "Vecino"
     );
+    @Autowired
+    private TarifaRepository tarifaRepository;
+
+    @Autowired
+    private ServicioRepository servicioRepository;
+
+    @Autowired
+    private SedeServicioRepository sedeServicioRepository;
+    @Autowired
+    private EstadoRepository estadoRepository;
+    @Autowired
+    private ReservaRepository reservaRepository;
+    @Autowired
+    private PagoRepository pagoRepository;
+
 
 
     // Vista principal del superadmin
@@ -129,20 +151,199 @@ public class SuperAdminController {
         usuarioRepository.save(usuario);
         return "redirect:/superadmin/usuarios";
     }
+
     @GetMapping("/superadmin/reservas")
-    public String gestionarReservas() {
+    public String listarReservas(Model model) {
+        List<Reserva> reservas = reservaRepository.findAll();
+        model.addAttribute("listaReservas", reservas);
         return "superadmin/superadmin_reservas";
     }
 
+    @GetMapping("/superadmin/reservas/nueva")
+    public String nuevaReservaForm(Model model) {
+        model.addAttribute("reserva", new Reserva());
+        model.addAttribute("listaServicios", servicioRepository.findAll());
+        return "superadmin/superadmin_reservas_form";
+    }
+
+    @PostMapping("/superadmin/reservas/guardar")
+    public String guardarReserva(@RequestParam("dni") String dni,
+                                 @ModelAttribute Reserva reserva,
+                                 @RequestParam("idservicio") Integer idservicio,
+                                 RedirectAttributes redirectAttributes) {
+
+        Usuario usuario = usuarioRepository.findByDni(dni);
+        Servicio servicio = servicioRepository.findById(idservicio).orElse(null);
+        Estado estado = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+
+        if (usuario != null && servicio != null && estado != null) {
+            reserva.setUsuario(usuario);
+            reserva.setServicio(servicio);
+            reserva.setEstado(estado);
+            reserva.setFechaCreacion(LocalDateTime.now());
+            reservaRepository.save(reserva);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Reserva creada correctamente.");
+        } else {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al crear la reserva. Verifique los datos.");
+        }
+        return "redirect:/superadmin/reservas";
+    }
+
+    @GetMapping("/superadmin/reservas/ver/{id}")
+    public String verReserva(@PathVariable("id") Integer id, Model model) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        model.addAttribute("reserva", reserva);
+        return "superadmin/superadmin_reservas_detalle";
+    }
+
+    @PostMapping("/superadmin/reservas/aprobar-pago/{id}")
+    public String aprobarPago(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+
+        if (reserva != null && reserva.getPago() != null) {
+            Estado aprobadoReserva = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
+            Estado confirmadoPago = estadoRepository.findByNombreAndTipoAplicacion("confirmado", Estado.TipoAplicacion.pago);
+
+            if (aprobadoReserva != null && confirmadoPago != null) {
+                reserva.setEstado(aprobadoReserva);
+                reservaRepository.save(reserva);
+
+                Pago pago = reserva.getPago();
+                pago.setEstado(confirmadoPago);
+                pagoRepository.save(pago);
+            } else {
+                // Puedes agregar logs o redirección con error
+                System.err.println("Error: estado aprobado o confirmado no encontrado");
+            }
+        }
+
+        return "redirect:/superadmin/reservas";
+    }
+
+
+    @PostMapping("/superadmin/reservas/desaprobar-pago/{id}")
+    public String desaprobarPago(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva != null && reserva.getPago() != null) {
+            Estado pendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+            Estado pendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+
+            reserva.setEstado(pendienteReserva);
+            reservaRepository.save(reserva);
+
+            Pago pago = reserva.getPago();
+            pago.setEstado(pendientePago);
+            pagoRepository.save(pago);
+        }
+        return "redirect:/superadmin/reservas";
+    }
+
+    @PostMapping("/superadmin/reservas/cancelar/{id}")
+    public String cancelarReserva(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva != null) {
+            Estado cancelada = estadoRepository.findByNombreAndTipoAplicacion("cancelada", Estado.TipoAplicacion.reserva);
+            reserva.setEstado(cancelada);
+            reservaRepository.save(reserva);
+        }
+        return "redirect:/superadmin/reservas";
+    }
+
+
+    @PostMapping("/superadmin/reservas/habilitar/{id}")
+    public String habilitarReserva(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva != null) {
+            Estado pendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+            reserva.setEstado(pendienteReserva);
+            reservaRepository.save(reserva);
+
+            if (reserva.getPago() != null) {
+                Estado pendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+                reserva.getPago().setEstado(pendientePago);
+                pagoRepository.save(reserva.getPago());
+            }
+        }
+        return "redirect:/superadmin/reservas";
+    }
+
+
     @GetMapping("/superadmin/tarifas")
-    public String gestionarTarifas() {
+    public String listarTarifas(Model model) {
+        List<Tarifa> tarifas = tarifaRepository.findAll();
+        model.addAttribute("listaTarifas", tarifas);
         return "superadmin/superadmin_tarifas";
     }
 
+    @GetMapping("/superadmin/tarifas/nueva")
+    public String nuevaTarifa(Model model) {
+        model.addAttribute("tarifa", new Tarifa());
+        return "superadmin/superadmin_tarifas_formulario";
+    }
+
+    // Guardar nueva tarifa
+    @PostMapping("/superadmin/tarifas/guardar")
+    public String guardarTarifa(@ModelAttribute Tarifa tarifa) {
+        tarifa.setFechaActualizacion(LocalDate.now());
+        tarifaRepository.save(tarifa);
+        return "redirect:/superadmin/tarifas";
+    }
+
+    // Mostrar formulario para editar tarifa
+    @GetMapping("/superadmin/tarifas/editar/{id}")
+    public String editarTarifa(@PathVariable("id") Integer id, Model model) {
+        Tarifa tarifa = tarifaRepository.findById(id).orElse(null);
+        if (tarifa != null) {
+            model.addAttribute("tarifa", tarifa);
+            return "superadmin/superadmin_tarifas_update";
+        } else {
+            return "redirect:/superadmin/tarifas";
+        }
+    }
+
+    // Guardar cambios en tarifa existente
+    @PostMapping("/superadmin/tarifas/actualizar")
+    public String actualizarTarifa(@ModelAttribute Tarifa tarifa) {
+        tarifa.setFechaActualizacion(LocalDate.now());
+        tarifaRepository.save(tarifa);
+        return "redirect:/superadmin/tarifas";
+    }
+    @GetMapping("/superadmin/tarifas/eliminar/{id}")
+    public String eliminarTarifa(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        if (tarifaRepository.existsById(id)) {
+            tarifaRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Tarifa eliminada correctamente.");
+        } else {
+            redirectAttributes.addFlashAttribute("mensajeError", "La tarifa no existe.");
+        }
+        return "redirect:/superadmin/tarifas";
+    }
+    @Autowired
+    private RolRepository rolRepository;
+
+
+
     @GetMapping("/superadmin/estadisticas")
-    public String verEstadisticas() {
+    public String verEstadisticas(Model model) {
+        model.addAttribute("reservasPorDia", reservaRepository.countReservasPorDia());
+        model.addAttribute("serviciosPopulares", reservaRepository.countReservasPorServicio());
+        model.addAttribute("estadoReservas", reservaRepository.countReservasPorEstado());
+
+        // convertir idrol -> nombre
+        List<Object[]> usuariosPorRolRaw = usuarioRepository.countUsuariosPorRol();
+        Map<String, Long> usuariosPorRol = new LinkedHashMap<>();
+        for (Object[] row : usuariosPorRolRaw) {
+            Integer idrol = (Integer) row[0];
+            Long count = (Long) row[1];
+            String nombreRol = rolRepository.findById(idrol).map(Rol::getNombre).orElse("Desconocido");
+            usuariosPorRol.put(nombreRol, count);
+        }
+
+        model.addAttribute("usuariosPorRol", usuariosPorRol);
+
         return "superadmin/superadmin_estadisticas";
     }
+
 
     @GetMapping("/superadmin/sistema")
     public String configuracionSistema() {
@@ -154,13 +355,79 @@ public class SuperAdminController {
         return "superadmin/superadmin_registros";
     }
     @GetMapping("/superadmin/pagos")
-    public String gestionarPagos() {
+    public String listarPagos(Model model) {
+        List<Pago> listaPagos = pagoRepository.findAll();
+        model.addAttribute("listaPagos", listaPagos);
         return "superadmin/superadmin_pagos";
     }
-    @GetMapping("/superadmin/tarifas/nueva")
-    public String mostrarFormularioTarifa() {
-        return "superadmin/superadmin_tarifas_formulario";
+    @PostMapping("/superadmin/pagos/aprobar/{id}")
+    public String aprobarPagoDesdePagos(@PathVariable("id") Integer id) {
+        Pago pago = pagoRepository.findById(id).orElse(null);
+        if (pago == null) return "redirect:/superadmin/pagos";
+
+        Estado estadoConfirmado = estadoRepository.findByNombreAndTipoAplicacion("confirmado", Estado.TipoAplicacion.pago);
+        Estado estadoAprobadoReserva = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
+        if (estadoConfirmado == null || estadoAprobadoReserva == null) return "redirect:/superadmin/pagos";
+
+        pago.setEstado(estadoConfirmado);
+        pagoRepository.save(pago);
+
+        Reserva reserva = reservaRepository.findByPago(pago);
+        if (reserva != null) {
+            reserva.setEstado(estadoAprobadoReserva);
+            reservaRepository.save(reserva);
+        }
+
+        return "redirect:/superadmin/pagos";
     }
+
+    @PostMapping("/superadmin/pagos/rechazar/{id}")
+    public String rechazarPago(@PathVariable("id") Integer id) {
+        Pago pago = pagoRepository.findById(id).orElse(null);
+        if (pago == null) return "redirect:/superadmin/pagos";
+
+        Estado estadoRechazado = estadoRepository.findByNombreAndTipoAplicacion("rechazado", Estado.TipoAplicacion.pago);
+        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+        if (estadoRechazado == null || estadoPendienteReserva == null) return "redirect:/superadmin/pagos";
+
+        pago.setEstado(estadoRechazado);
+        pagoRepository.save(pago);
+
+        Reserva reserva = reservaRepository.findByPago(pago);
+        if (reserva != null) {
+            reserva.setEstado(estadoPendienteReserva);
+            reservaRepository.save(reserva);
+        }
+
+        return "redirect:/superadmin/pagos";
+    }
+
+    @PostMapping("/superadmin/pagos/pendiente/{id}")
+    public String volverPagoAPendiente(@PathVariable("id") Integer id) {
+        Pago pago = pagoRepository.findById(id).orElse(null);
+        if (pago == null) return "redirect:/superadmin/pagos";
+
+        Estado estadoPendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+        if (estadoPendientePago == null || estadoPendienteReserva == null) return "redirect:/superadmin/pagos";
+
+        pago.setEstado(estadoPendientePago);
+        pagoRepository.save(pago);
+
+        Reserva reserva = reservaRepository.findByPago(pago);
+        if (reserva != null) {
+            reserva.setEstado(estadoPendienteReserva);
+            reservaRepository.save(reserva);
+        }
+
+        return "redirect:/superadmin/pagos";
+    }
+
+
+
+
+
+
 
 
 

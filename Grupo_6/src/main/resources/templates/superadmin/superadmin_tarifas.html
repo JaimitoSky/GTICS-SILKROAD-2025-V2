@@ -57,7 +57,6 @@
                         <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-dark"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
           </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
@@ -105,7 +104,6 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
-
                 <h1 class="h3 mb-4"><strong>Gestión de Tarifas</strong> - Super Admin</h1>
 
                 <div class="mb-3 text-end">
@@ -123,58 +121,38 @@
                             <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>Servicio</th>
-                                <th>Tipo</th>
+                                <th>Descripción</th>
                                 <th>Precio por hora</th>
                                 <th>Última actualización</th>
                                 <th>Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Cancha de fútbol sintético</td>
-                                <td>Loza deportiva</td>
-                                <td>S/ 40.00</td>
-                                <td>15/04/2025</td>
+                            <tr th:each="tarifa, i : ${listaTarifas}">
+                                <td th:text="${i.index + 1}">1</td>
+                                <td th:text="${tarifa.descripcion}">Descripción</td>
+                                <td th:text="|S/ ${#numbers.formatDecimal(tarifa.monto, 2, 2)}|">S/ 0.00</td>
+                                <td th:text="${#temporals.format(tarifa.fechaActualizacion, 'dd/MM/yyyy')}">15/04/2025</td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-warning">
+                                    <a th:href="@{/superadmin/tarifas/editar/{id}(id=${tarifa.idtarifa})}" class="btn btn-sm btn-warning me-1">
                                         <i data-feather="edit"></i> Editar
+                                    </a>
+                                    <a th:href="@{/superadmin/tarifas/eliminar/{id}(id=${tarifa.idtarifa})}"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('¿Está seguro de eliminar esta tarifa?');">
+                                        <i data-feather="trash-2"></i> Eliminar
                                     </a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Piscina olímpica</td>
-                                <td>Piscina</td>
-                                <td>S/ 25.00</td>
-                                <td>02/04/2025</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-warning">
-                                        <i data-feather="edit"></i> Editar
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Gimnasio municipal</td>
-                                <td>Gimnasio</td>
-                                <td>S/ 15.00</td>
-                                <td>20/03/2025</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-warning">
-                                        <i data-feather="edit"></i> Editar
-                                    </a>
-                                </td>
-                            </tr>
-                            <!-- Puedes seguir agregando más filas aquí -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </main>
+
+
+
 
         <!-- Feather Icons -->
         <script>
