@@ -1,69 +1,59 @@
-<!-- Fragmento Sidebar -->
-<nav id="sidebar" class="sidebar js-sidebar">
-    <div class="sidebar-content js-simplebar">
-        <a class="sidebar-brand" href="home.html">
-            <span class="align-middle">Reservas San Miguel</span>
+<!-- fragments/sidebar-vecino.html -->
+<nav id="sidebar" class="sidebar" th:fragment="sidebar">
+    <!-- Encabezado con logo -->
+    <div class="sidebar-header text-center">
+        <a th:href="@{/vecino/home}" class="logo-link d-block">
+            <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad">
         </a>
-        <ul class="sidebar-nav">
-
-            <!-- Inicio -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="home.html">
-                    <i class="align-middle" data-feather="home"></i>
-                    <span class="align-middle">Inicio</span>
-                </a>
-            </li>
-
-            <!-- Mis Reservas -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="mis-reservas.html">
-                    <i class="align-middle" data-feather="calendar"></i>
-                    <span class="align-middle">Mis Reservas</span>
-                </a>
-            </li>
-
-            <!-- Notificaciones -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="notificaciones.html">
-                    <i class="align-middle" data-feather="bell"></i>
-                    <span class="align-middle">Notificaciones</span>
-                </a>
-            </li>
-
-            <!-- Reservar -->
-            <li class="sidebar-header">Reservar</li>
-
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="ListaGimnasio.html">
-                    <i class="align-middle" data-feather="activity"></i>
-                    <span class="align-middle">Gimnasio</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="ListaLosa.html">
-                    <i class="align-middle" data-feather="grid"></i>
-                    <span class="align-middle">Cancha Losa</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="ListaGrass.html">
-                    <i class="align-middle" data-feather="layers"></i>
-                    <span class="align-middle">Cancha Grass</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="ListaPiscina.html">
-                    <i class="align-middle" data-feather="droplet"></i>
-                    <span class="align-middle">Piscina</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="ListaAtletismo.html">
-                    <i class="align-middle" data-feather="wind"></i>
-                    <span class="align-middle">Atletismo</span>
-                </a>
-            </li>
-
-        </ul>
+        <span class="municipality-name d-block">Vecino</span>
     </div>
+
+    <!-- Menú de navegación -->
+    <ul class="nav flex-column text-white">
+        <li class="nav-item">
+            <a th:href="@{/vecino/home}" class="nav-link">
+                <i class="bi bi-house-door-fill me-2"></i>Inicio
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a th:href="@{/vecino/mis-reservas}" class="nav-link">
+                <i class="bi bi-calendar-check-fill me-2"></i>Mis Reservas
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a th:href="@{/vecino/notificaciones}" class="nav-link">
+                <i class="bi bi-bell-fill me-2"></i>Notificaciones
+            </a>
+        </li>
+
+        <li class="nav-item text-uppercase mt-3 mb-1 ps-3 small fw-bold text-white-50">Reservar</li>
+
+        <li class="nav-item">
+            <a th:href="@{/vecino/lista/Gimnasio}" class="nav-link">
+                <i class="bi bi-activity me-2"></i> Gimnasio
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/vecino/lista/CanchaLosa}" class="nav-link">
+                <i class="bi bi-grid-1x2-fill me-2"></i> Cancha Losa
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/vecino/lista/CanchaGrass}" class="nav-link">
+                <i class="bi bi-tree-fill me-2"></i> Cancha Grass
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/vecino/lista/Piscina}" class="nav-link">
+                <i class="bi bi-droplet-fill me-2"></i> Piscina
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/vecino/lista/Atletismo}" class="nav-link">
+                <i class="bi bi-wind me-2"></i> Atletismo
+            </a>
+        </li>
+    </ul>
 </nav>

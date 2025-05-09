@@ -1,5 +1,6 @@
 package com.example.grupo_6.Repository;
 
+import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,7 +39,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Query("SELECT u.idrol, COUNT(u) FROM Usuario u GROUP BY u.idrol")
     List<Object[]> countUsuariosPorRol();
 
-
+    @Query("SELECT u.nombres AS nombres, u.apellidos AS apellidos, u.email AS correo, u.direccion AS direccion, u.telefono AS telefono FROM Usuario u WHERE u.idusuario = ?1")
+    VecinoPerfilDTO obtenerPerfilVecinoPorId(int id);
 }
 
 

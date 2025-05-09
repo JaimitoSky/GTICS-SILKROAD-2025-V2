@@ -1,14 +1,14 @@
-
 body {
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
+    background-color: #f0f8ff;
 }
 
 /* Sidebar styles */
 .sidebar {
     width: 260px;
     min-height: 100vh;
-    background-color: #a8323e;
+    background-color: #3e7ecb; /* Azul medio */
     color: white;
     position: fixed;
     top: 0;
@@ -33,27 +33,6 @@ body {
     height: auto;
     margin-bottom: 1.5rem;
 }
-/* Hover para el texto San Miguel (sólo PC/tablet) */
-@media (min-width: 768px) {
-    .municipality-name {
-        transition: transform 0.3s ease;
-        display: inline-block;
-    }
-
-    .municipality-name:hover {
-        transform: scale(1.05);
-    }
-}
-
-@media (min-width: 768px) {
-    .sidebar-header .logo-link img {
-        transition: transform 0.3s ease;
-    }
-
-    .sidebar-header .logo-link:hover img {
-        transform: scale(1.1);
-    }
-}
 
 .sidebar-header .municipality-name {
     font-family: 'Montserrat', sans-serif;
@@ -65,6 +44,26 @@ body {
     letter-spacing: 1px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     margin-top: 0.5rem;
+}
+
+/* Logo hover */
+@media (min-width: 768px) {
+    .municipality-name {
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+
+    .municipality-name:hover {
+        transform: scale(1.05);
+    }
+
+    .sidebar-header .logo-link img {
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-header .logo-link:hover img {
+        transform: scale(1.1);
+    }
 }
 
 .sidebar .nav {
@@ -83,12 +82,13 @@ body {
     border-left: 3px solid transparent;
     border-radius: 4px;
     margin-bottom: 0.5rem;
+    background-color: transparent;
 }
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link:focus {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-left: 3px solid rgba(255, 255, 255, 0.5);
+    background-color: #204b8a; /* Azul oscuro */
+    border-left: 3px solid #61c3f0; /* Celeste claro */
 }
 
 .sidebar .nav-link i {
@@ -111,7 +111,7 @@ body {
     cursor: pointer;
     font-size: 1.5rem;
     margin: 1rem;
-    color: #495057;
+    color: #3e7ecb;
     transition: all 0.2s;
     position: absolute;
     left: 10px;
@@ -120,7 +120,7 @@ body {
 }
 
 .sidebar-toggle:hover {
-    color: #000;
+    color: #204b8a;
 }
 
 /* Collapsed state */
@@ -165,7 +165,6 @@ body.sidebar-collapsed .main {
         font-size: 1.2rem;
     }
 
-    /* Ajustes para las tarjetas de deportes */
     .sport-icon-container {
         height: 100px;
         display: flex;
@@ -208,13 +207,16 @@ body.sidebar-collapsed .main {
 
 /* Navbar superior */
 .top-navbar {
+    background-color: #61c3f0;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     padding-left: 60px;
 }
 
-/* Estilo para los iconos deportivos */
+/* Iconos deportivos */
 .sport-icon-container {
     padding: 1rem;
-    background-color: #f8f9fa;
+    background-color: #e6f3fc;
     border-radius: 0.5rem;
     height: 120px;
     display: flex;
@@ -225,7 +227,7 @@ body.sidebar-collapsed .main {
 }
 
 .sport-icon-container:hover {
-    background-color: #e9ecef;
+    background-color: #cde9fb;
     transform: scale(1.05);
 }
 
