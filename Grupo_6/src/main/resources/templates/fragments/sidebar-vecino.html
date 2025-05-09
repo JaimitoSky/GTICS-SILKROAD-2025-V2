@@ -2,7 +2,7 @@
 <nav id="sidebar" class="sidebar" th:fragment="sidebar">
     <!-- Encabezado con logo -->
     <div class="sidebar-header text-center">
-        <a th:href="@{/vecino/home}" class="logo-link d-block">
+        <a th:href="@{/vecino}" class="logo-link d-block">
             <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad">
         </a>
         <span class="municipality-name d-block">Vecino</span>
@@ -11,19 +11,19 @@
     <!-- Menú de navegación -->
     <ul class="nav flex-column text-white">
         <li class="nav-item">
-            <a th:href="@{/vecino/home}" class="nav-link">
+            <a th:href="@{/vecino}" class="nav-link">
                 <i class="bi bi-house-door-fill me-2"></i>Inicio
             </a>
         </li>
 
         <li class="nav-item">
-            <a th:href="@{/vecino/mis-reservas}" class="nav-link">
+            <a th:href="@{/vecino/vecino_mis-reservas}" class="nav-link">
                 <i class="bi bi-calendar-check-fill me-2"></i>Mis Reservas
             </a>
         </li>
 
         <li class="nav-item">
-            <a th:href="@{/vecino/notificaciones}" class="nav-link">
+            <a th:href="@{/vecino/vecino_notificaciones}" class="nav-link">
                 <i class="bi bi-bell-fill me-2"></i>Notificaciones
             </a>
         </li>
