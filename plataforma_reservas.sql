@@ -138,10 +138,10 @@ CREATE TABLE `media_servicio` (
   PRIMARY KEY (`idmedia`),
   FOREIGN KEY (`idservicio`) REFERENCES `servicio`(`idservicio`)
 );
+-- ------------------------------
+-- Tabla PAGO (ahora puede referenciar a reserva)
+-- ------------------------------
 
--- ------------------------------
--- Tabla: Pagos
--- ------------------------------
 CREATE TABLE `pago` (
   `idpago` INT NOT NULL AUTO_INCREMENT,
   `idusuario` INT NOT NULL,
@@ -155,25 +155,37 @@ CREATE TABLE `pago` (
   FOREIGN KEY (`idestado`) REFERENCES `estado`(`idestado`)
 );
 
--- ------------------------------
--- Tabla: Reservas
--- ------------------------------
-CREATE TABLE `reserva` (
-  `idreserva` INT NOT NULL AUTO_INCREMENT,
-  `idusuario` INT NOT NULL,
-  `idservicio` INT NOT NULL,
-  `fecha_reserva` DATE NOT NULL,
-  `hora_inicio` TIME NOT NULL,
-  `hora_fin` TIME NOT NULL,
-  `idestado` INT NOT NULL,
-  `idpago` INT,
-  `fecha_creacion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idreserva`),
-  FOREIGN KEY (`idusuario`) REFERENCES `usuario`(`idusuario`),
-  FOREIGN KEY (`idservicio`) REFERENCES `servicio`(`idservicio`),
-  FOREIGN KEY (`idestado`) REFERENCES `estado`(`idestado`),
-  FOREIGN KEY (`idpago`) REFERENCES `pago`(`idpago`)
+CREATE TABLE horario_disponible (
+  idhorario INT NOT NULL AUTO_INCREMENT,
+  idsede_servicio INT NOT NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL,
+  activo BOOLEAN DEFAULT TRUE,
+  PRIMARY KEY (idhorario),
+  FOREIGN KEY (idsede_servicio) REFERENCES sede_servicio(idsede_servicio)
 );
+
+-- ------------------------------
+CREATE TABLE reserva (
+  idreserva INT AUTO_INCREMENT PRIMARY KEY,
+  idusuario INT NOT NULL,
+  idsede_servicio INT NOT NULL,
+  fecha_reserva DATE NOT NULL,
+  idhorario INT NOT NULL,
+  idestado INT NOT NULL,
+  idpago INT,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  fecha_limite_pago DATETIME,
+  FOREIGN KEY (idusuario) REFERENCES usuario(idusuario),
+  FOREIGN KEY (idsede_servicio) REFERENCES sede_servicio(idsede_servicio),
+  FOREIGN KEY (idhorario) REFERENCES horario_disponible(idhorario),
+  FOREIGN KEY (idestado) REFERENCES estado(idestado),
+  FOREIGN KEY (idpago) REFERENCES pago(idpago)
+);
+
+
+-- ------------------------------
+
 
 -- ------------------------------
 -- Tabla: Reembolsos
@@ -319,19 +331,29 @@ CREATE TABLE `chatbot_log` (
   FOREIGN KEY (`idusuario`) REFERENCES `usuario`(`idusuario`)
 );
 
+
+
+
 -- ------------------------------
 -- Índices para optimización
 -- ------------------------------
 CREATE INDEX `idx_usuario_reserva` ON `reserva`(`idusuario`);
-CREATE INDEX `idx_servicio_reserva` ON `reserva`(`idservicio`);
+CREATE INDEX `idx_reserva_sede_servicio` ON `reserva`(`idsede_servicio`);
+
 CREATE INDEX `idx_estado_tipo` ON `estado`(`tipo_aplicacion`);
 CREATE INDEX `idx_usuario_email` ON `usuario`(`email`);
 CREATE INDEX `idx_usuario_dni` ON `usuario`(`dni`);
 CREATE INDEX `idx_sede_servicio` ON `sede_servicio`(`idsede`, `idservicio`);
+CREATE INDEX `idx_pago_idusuario` ON `pago`(`idusuario`);
+CREATE INDEX `idx_pago_estado` ON `pago`(`idestado`);
+
+CREATE INDEX `idx_reserva_fecha_limite` ON `reserva`(`fecha_limite_pago`);
 
 -- ------------------------------
 -- Insertar datos iniciales
 -- ------------------------------
+
+
 
 -- Roles
 INSERT INTO `rol` (`nombre`, `descripcion`, `nivel_acceso`) VALUES
@@ -356,7 +378,6 @@ INSERT INTO `estado` (`nombre`, `descripcion`, `tipo_aplicacion`) VALUES
 ('inactivo', 'Servicio fuera de operación de forma indefinida', 'servicio');
 
 -- Estados para INCIDENCIA
-
 INSERT INTO `estado` (`nombre`, `descripcion`, `tipo_aplicacion`) VALUES
 ('reportado', 'Incidencia registrada por un coordinador', 'incidencia'),
 ('en_progreso', 'Acción en curso para resolver la incidencia', 'incidencia'),
@@ -466,10 +487,26 @@ INSERT INTO `pago` (`idusuario`, `monto`, `metodo`, `comprobante`, `idestado`) V
 (4, 50.00, 'banco', NULL,
  (SELECT idestado FROM estado WHERE nombre = 'pendiente' AND tipo_aplicacion = 'pago'));
 
+INSERT INTO horario_disponible (idsede_servicio, hora_inicio, hora_fin)
+VALUES
+  (1, '08:00:00', '09:00:00'),
+  (1, '09:00:00', '10:00:00'),
+  (1, '10:00:00', '11:00:00'),
+  (2, '08:00:00', '09:00:00');
 
--- Reservas de ejemplo (estado: 'aprobada' = 2, 'pendiente' = 1)
-INSERT INTO `reserva` (`idusuario`, `idservicio`, `fecha_reserva`, `hora_inicio`, `hora_fin`, `idestado`, `idpago`) VALUES
-(3, 1, '2025-06-10', '10:00:00', '12:00:00', 2, 1),
-(4, 3, '2025-06-15', '16:00:00', '18:00:00', 1, NULL);
+-- Luego insert de reservas referenciando `idsede_servicio` y `idpago` ya existentes
+INSERT INTO reserva (idusuario, idsede_servicio, fecha_reserva, idhorario, idestado, idpago, fecha_limite_pago)
+VALUES
+(3, 1, '2025-06-10', 1,  -- 08:00-09:00
+ (SELECT idestado FROM estado WHERE nombre = 'aprobada' AND tipo_aplicacion = 'reserva'),
+ 1, DATE_ADD(NOW(), INTERVAL 4 HOUR)),
+
+(4, 2, '2025-06-15', 4,  -- 08:00-09:00 en otro servicio
+ (SELECT idestado FROM estado WHERE nombre = 'pendiente' AND tipo_aplicacion = 'reserva'),
+ 2, DATE_ADD(NOW(), INTERVAL 4 HOUR));
+-- Finalmente, si lo deseas, puedes hacer update del campo `idreserva` en `pago` para cerrar la relación inversa:
+UPDATE `reserva` SET idpago = 1 WHERE idreserva = 1;
+
+UPDATE `reserva` SET idpago = 2 WHERE idreserva = 2;
 
 
