@@ -28,8 +28,6 @@ public class Usuario {
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
-    @Column(name = "password_salt", length = 255)
-    private String passwordSalt;
 
     @Column(length = 20)
     private String telefono;

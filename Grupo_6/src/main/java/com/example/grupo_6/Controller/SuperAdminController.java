@@ -1,5 +1,6 @@
 package com.example.grupo_6.Controller;
 
+import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
@@ -43,6 +45,10 @@ public class SuperAdminController {
     private ReservaRepository reservaRepository;
     @Autowired
     private PagoRepository pagoRepository;
+    @Autowired
+    private SedeRepository sedeRepository;
+    @Autowired
+    private HorarioDisponibleRepository horarioDisponibleRepository;
 
 
 
@@ -156,38 +162,92 @@ public class SuperAdminController {
     public String listarReservas(Model model) {
         List<Reserva> reservas = reservaRepository.findAll();
         model.addAttribute("listaReservas", reservas);
+
+        model.addAttribute("reserva", new Reserva()); // para evitar errores con th:field si se reutiliza
         return "superadmin/superadmin_reservas";
     }
 
+
     @GetMapping("/superadmin/reservas/nueva")
-    public String nuevaReservaForm(Model model) {
+    public String nuevaReserva(Model model) {
         model.addAttribute("reserva", new Reserva());
-        model.addAttribute("listaServicios", servicioRepository.findAll());
-        return "superadmin/superadmin_reservas_form";
+
+        List<Sede> sedes = sedeRepository.findAll();
+        model.addAttribute("listaSedes", sedes);
+
+        List<HorarioDisponible> listaHorarios = horarioDisponibleRepository.findByActivoTrue();
+        model.addAttribute("listaHorarios", listaHorarios);
+
+        return "superadmin/superadmin_reservas_formulario";
     }
+
+
 
     @PostMapping("/superadmin/reservas/guardar")
     public String guardarReserva(@RequestParam("dni") String dni,
-                                 @ModelAttribute Reserva reserva,
-                                 @RequestParam("idservicio") Integer idservicio,
+                                 @ModelAttribute("reserva") Reserva reserva,
                                  RedirectAttributes redirectAttributes) {
 
         Usuario usuario = usuarioRepository.findByDni(dni);
-        Servicio servicio = servicioRepository.findById(idservicio).orElse(null);
-        Estado estado = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+        Estado estadoPendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+        Estado estadoAprobadaReserva = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
+        Estado estadoPagado = estadoRepository.findByNombreAndTipoAplicacion("pagado", Estado.TipoAplicacion.pago);
 
-        if (usuario != null && servicio != null && estado != null) {
+        SedeServicio sedeServicio = reserva.getSedeServicio(); // ← ya viene mapeado
+
+        if (usuario != null && sedeServicio != null && estadoPendienteReserva != null && estadoPendientePago != null) {
+
+            // Crear pago asociado
+            Pago pago = new Pago();
+            pago.setUsuario(usuario);
+            pago.setMetodo(Pago.Metodo.banco); // o online si lo implementas
+            pago.setMonto(BigDecimal.valueOf(sedeServicio.getTarifa().getMonto()));
+            pago.setEstado(estadoPendientePago);
+            pago.setFechaPago(null);
+            pagoRepository.save(pago);
+
+            // Configurar la reserva
             reserva.setUsuario(usuario);
-            reserva.setServicio(servicio);
-            reserva.setEstado(estado);
             reserva.setFechaCreacion(LocalDateTime.now());
+            reserva.setFechaLimitePago(reserva.getFechaCreacion().plusHours(4));
+            reserva.setPago(pago);
+
+            // Estado según pago
+            if (pago.getEstado().equals(estadoPagado)) {
+                reserva.setEstado(estadoAprobadaReserva);
+            } else {
+                reserva.setEstado(estadoPendienteReserva);
+            }
+
             reservaRepository.save(reserva);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Reserva creada correctamente.");
+            redirectAttributes.addFlashAttribute("mensajeExito", "Reserva y pago creados correctamente.");
         } else {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al crear la reserva. Verifique los datos.");
         }
+
         return "redirect:/superadmin/reservas";
     }
+
+
+
+    @GetMapping("/api/sede-servicios")
+    public List<SedeServicio> listarServiciosPorSedePorParam(@RequestParam("sedeId") Integer sedeId) {
+        return sedeServicioRepository.findBySedeIdsede(sedeId);
+    }
+
+
+    //@GetMapping("/api/servicios-por-sede/{idsede}")
+    //  @ResponseBody
+    // public List<ServicioPorSedeDTO> listarServiciosDTOporSede(@PathVariable Integer idsede) {
+    // return sedeServicioRepository.obtenerServiciosPorSede(idsede);
+    // }
+
+
+
+
+
+
 
     @GetMapping("/superadmin/reservas/ver/{id}")
     public String verReserva(@PathVariable("id") Integer id, Model model) {
@@ -197,7 +257,7 @@ public class SuperAdminController {
     }
 
     @PostMapping("/superadmin/reservas/aprobar-pago/{id}")
-    public String aprobarPago(@PathVariable("id") Integer id) {
+    public String aprobarPago(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         Reserva reserva = reservaRepository.findById(id).orElse(null);
 
         if (reserva != null && reserva.getPago() != null) {
@@ -210,11 +270,15 @@ public class SuperAdminController {
 
                 Pago pago = reserva.getPago();
                 pago.setEstado(confirmadoPago);
+                pago.setFechaPago(LocalDateTime.now());
                 pagoRepository.save(pago);
+
+                redirectAttributes.addFlashAttribute("mensajeExito", "Pago aprobado exitosamente.");
             } else {
-                // Puedes agregar logs o redirección con error
-                System.err.println("Error: estado aprobado o confirmado no encontrado");
+                redirectAttributes.addFlashAttribute("mensajeError", "Estados no encontrados.");
             }
+        } else {
+            redirectAttributes.addFlashAttribute("mensajeError", "Reserva sin pago asociado.");
         }
 
         return "redirect:/superadmin/reservas";

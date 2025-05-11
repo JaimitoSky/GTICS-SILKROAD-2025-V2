@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Sede {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idsede;
@@ -26,10 +27,10 @@ public class Sede {
     @Column(length = 100)
     private String distrito;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 255)
     private String referencia;
 
-    private BigDecimal latitud;
+    private Double latitud;
 
-    private BigDecimal longitud;
+    private Double longitud;
 }

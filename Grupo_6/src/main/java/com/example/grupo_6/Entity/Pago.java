@@ -20,6 +20,10 @@ public class Pago {
     @JoinColumn(name = "idusuario", nullable = false)
     private Usuario usuario;
 
+    @OneToOne
+    @JoinColumn(name = "idreserva", unique = true) // FK directa a reserva
+    private Reserva reserva;
+
     private BigDecimal monto;
 
     @Enumerated(EnumType.STRING)
@@ -39,7 +43,4 @@ public class Pago {
     public enum Metodo {
         online, banco
     }
-    @OneToOne(mappedBy = "pago", fetch = FetchType.LAZY)
-    private Reserva reserva;
-
 }

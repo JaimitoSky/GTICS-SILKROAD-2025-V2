@@ -57,7 +57,6 @@
                         <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-dark"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
           </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
@@ -105,91 +104,151 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-4"><strong>Detalle de Reserva</strong> - Super Admin</h1>
+                <h1 class="h3 mb-3"><strong>Registrar Nueva Reserva</strong></h1>
 
                 <div class="card">
                     <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">ID Reserva:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.idreserva}">1021</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Estado:</label>
-                                <span th:if="${reserva.estado.nombre == 'confirmada'}" class="badge bg-success" th:text="${reserva.estado.nombre}"></span>
-                                <span th:if="${reserva.estado.nombre == 'pendiente'}" class="badge bg-warning text-dark" th:text="${reserva.estado.nombre}"></span>
-                                <span th:if="${reserva.estado.nombre != 'confirmada' and reserva.estado.nombre != 'pendiente'}" class="badge bg-secondary" th:text="${reserva.estado.nombre}"></span>
-                            </div>
-                        </div>
+                        <form th:action="@{/superadmin/reservas/guardar}" th:object="${reserva}" method="post">
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Vecino:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Nombre</p>
+                            <!-- DNI -->
+                            <div class="mb-3">
+                                <label class="form-label">DNI del Vecino</label>
+                                <input type="text" class="form-control" name="dni" placeholder="Ej: 12345678" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">DNI:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.usuario.dni}">00000000</p>
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Servicio:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.sedeServicio.servicio.nombre}">Piscina</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Descripción:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.sedeServicio.servicio.descripcion}">Desc.</p>
-                            </div>
-                        </div>
+                            <!-- SEDE -->
+                            <div class="mb-3">
+                                <label class="form-label">Sede</label>
+                                <select id="sede-select" class="form-select" required>
+                                    <option value="">Seleccione una sede</option>
+                                    <option th:each="sede : ${listaSedes}" th:value="${sede.idsede}" th:text="${sede.nombre}"></option>
+                                </select>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Sede:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.sedeServicio.sede.nombre}">Loza A</p>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Ubicación:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.sedeServicio.sede.direccion}">Dirección</p>
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Fecha de Reserva:</label>
-                                <p class="form-control-plaintext" th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}">10/06/2025</p>
+                            <!-- SERVICIO (se cargará según sede) -->
+                            <div class="mb-3">
+                                <label class="form-label">Servicio</label>
+                                <select id="servicio-select" name="sedeServicio" class="form-select" required>
+                                    <option value="">Seleccione una sede primero</option>
+                                </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Hora Inicio:</label>
-                                <p class="form-control-plaintext" th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}">10:00</p>
+
+                            <!-- FECHA -->
+                            <div class="mb-3">
+                                <label class="form-label">Fecha de Reserva</label>
+                                <input type="date" class="form-control" id="fechaReserva" name="fechaReserva" th:field="*{fechaReserva}" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Hora Fin:</label>
-                                <p class="form-control-plaintext" th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">12:00</p>
+
+                            <!-- HORA DISPONIBLE -->
+                            <div class="mb-3">
+                                <label class="form-label">Horario Disponible</label>
+                                <select class="form-select" name="horarioDisponible.idhorario" id="horarioDisponible" required>
+                                    <option value="">Seleccione un horario</option>
+                                    <option th:each="horario : ${listaHorarios}"
+                                            th:value="${horario.idhorario}"
+                                            th:text="${#temporals.format(horario.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(horario.horaFin, 'HH:mm')}">
+                                    </option>
+                                </select>
                             </div>
-                        </div>
 
 
-                        <div class="row mb-3" th:if="${reserva.pago != null}">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Método de Pago:</label>
-                                <p class="form-control-plaintext" th:text="${reserva.pago.metodo}">Yape</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Monto Pagado:</label>
-                                <p class="form-control-plaintext"
-                                   th:text="|S/ ${#numbers.formatDecimal(reserva.pago.monto, 2, 2)}|">S/ 20.00</p>
-                            </div>
-                        </div>
-
-                        <div class="text-end">
-                            <a th:href="@{/superadmin/reservas}" class="btn btn-secondary">Volver</a>
-                        </div>
+                            <button type="submit" class="btn btn-success">Registrar Reserva</button>
+                            <a th:href="@{/superadmin/reservas}" class="btn btn-secondary">Cancelar</a>
+                        </form>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- Scripts -->
+        <script>
+            const servicioSelect = document.getElementById("servicio-select");
+            const sedeSelect = document.getElementById("sede-select");
+            const fechaInput = document.getElementById("fechaReserva");
+            const horarioSelect = document.getElementById("horarioDisponible");
+
+            // Cargar servicios según sede seleccionada
+            sedeSelect.addEventListener("change", function () {
+                const sedeId = this.value;
+                servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
+                horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>'; // limpia horarios
+
+                fetch(`/api/servicios-por-sede/${sedeId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+                        data.forEach(s => {
+                            let option = document.createElement("option");
+                            option.value = s.idSedeServicio;  // Nombre exacto desde JSON
+                            option.textContent = s.nombre;
+                            servicioSelect.appendChild(option);
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Error cargando servicios", err);
+                        servicioSelect.innerHTML = '<option>Error al cargar</option>';
+
+                    });
+            });
+
+            // Cargar horarios disponibles según servicio y fecha
+            function cargarHorariosDisponibles() {
+                const sedeServicioId = servicioSelect.value;
+                const fecha = fechaInput.value;
+
+                if (!sedeServicioId || sedeServicioId === "undefined") {
+                    console.warn("ID de sede-servicio inválido o no seleccionado.");
+                    horarioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+                    return;
+                }
+
+                if (!fecha) {
+                    console.warn("Fecha no seleccionada.");
+                    return;
+                }
+
+                fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}&fecha=${fecha}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        horarioSelect.innerHTML = '';
+
+                        if (data.length === 0) {
+                            const opt = document.createElement("option");
+                            opt.value = "";
+                            opt.textContent = "No hay horarios disponibles";
+                            horarioSelect.appendChild(opt);
+                        } else {
+                            const opt = document.createElement("option");
+                            opt.value = "";
+                            opt.textContent = "Seleccione un horario";
+                            opt.disabled = true;
+                            opt.selected = true;
+                            horarioSelect.appendChild(opt);
+
+                            data.forEach(horario => {
+                                const opt = document.createElement("option");
+                                opt.value = horario.idhorario;  // Enviar el ID real
+                                opt.textContent = `${horario.horaInicio} - ${horario.horaFin}`;
+                                horarioSelect.appendChild(opt);
+                            });
+
+                        }
+                    })
+                    .catch(error => {
+                        horarioSelect.innerHTML = '<option>Error al cargar horarios</option>';
+                        console.error("Error al cargar horarios:", error);
+                    });
+            }
+
+
+
+            fechaInput.addEventListener("change", cargarHorariosDisponibles);
+
+
+
+        </script>
+
 
 
 
@@ -238,6 +297,8 @@
             }
         });
     });
+
+
 </script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>

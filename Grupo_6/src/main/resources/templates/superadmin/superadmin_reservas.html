@@ -57,7 +57,6 @@
                         <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-dark"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
           </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
@@ -147,6 +146,7 @@
                                 <th>#</th>
                                 <th>Vecino</th>
                                 <th>Servicio</th>
+                                <th>Sede</th>
                                 <th>Fecha</th>
                                 <th>Hora</th>
                                 <th>Estado</th>
@@ -155,32 +155,35 @@
                             </thead>
                             <tbody>
                             <tr th:each="reserva : ${listaReservas}">
-                                <td th:text="${reserva.idreserva}">1021</td>
-                                <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Juan Pérez</td>
-                                <td th:text="${reserva.servicio.nombre}">Fútbol 7</td>
-                                <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}">2025-04-25</td>
-                                <td th:text="${#temporals.format(reserva.horaInicio, 'HH:mm')}">17:00</td>
+                                <td th:text="${reserva.idreserva}">1</td>
+                                <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Vecino</td>
+                                <td th:text="${reserva.sedeServicio.servicio.nombre}">Servicio</td>
+                                <td th:text="${reserva.sedeServicio.sede.nombre}">Sede</td>
+                                <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}">2025-06-01</td>
+                                <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">10:00</td>
                                 <td>
-    <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' : (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' : 'badge bg-secondary')}"
-          th:text="${reserva.estado.nombre}">
-</span>
-
-
+                                <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
+                                                (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
+                                                (reserva.estado.nombre == 'cancelada' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                                      th:text="${reserva.estado.nombre}">
+                                </span>
                                 </td>
                                 <td>
                                     <a th:href="@{/superadmin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">Ver</a>
 
                                     <form th:action="@{/superadmin/reservas/aprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-success me-1" th:if="${reserva.estado.nombre.equals('pendiente')}">Aprobar Pago</button>
+                                        <button type="submit" class="btn btn-sm btn-success me-1"
+                                                th:if="${reserva.estado.nombre.equals('pendiente')}">Aprobar Pago</button>
                                     </form>
 
                                     <form th:action="@{/superadmin/reservas/desaprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-warning me-1" th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar Pago</button>
+                                        <button type="submit" class="btn btn-sm btn-warning me-1"
+                                                th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar</button>
                                     </form>
 
                                     <form th:action="@{/superadmin/reservas/cancelar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
                                           onsubmit="return confirm('¿Cancelar esta reserva?');">
-                                        <button type="submit" class="btn btn-sm btn-danger me-1">Cancelar</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
                                     </form>
 
                                     <form th:action="@{/superadmin/reservas/habilitar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
@@ -188,7 +191,6 @@
                                         <button type="submit" class="btn btn-sm btn-secondary">Habilitar</button>
                                     </form>
                                 </td>
-
                             </tr>
                             </tbody>
                         </table>
@@ -199,32 +201,9 @@
 
 
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
+
+
+
 
 
         <!-- Footer -->
