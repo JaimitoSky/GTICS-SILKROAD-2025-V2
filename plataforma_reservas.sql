@@ -165,6 +165,17 @@ CREATE TABLE horario_disponible (
   FOREIGN KEY (idsede_servicio) REFERENCES sede_servicio(idsede_servicio)
 );
 
+CREATE TABLE horario_atencion (
+  idhorario_atencion INT AUTO_INCREMENT PRIMARY KEY,
+  idsede_servicio INT NOT NULL,
+  dia_semana ENUM('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo') NOT NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL,
+  activo BOOLEAN DEFAULT TRUE,
+  FOREIGN KEY (idsede_servicio) REFERENCES sede_servicio(idsede_servicio)
+);
+
+
 -- ------------------------------
 CREATE TABLE reserva (
   idreserva INT AUTO_INCREMENT PRIMARY KEY,
@@ -486,6 +497,17 @@ INSERT INTO `pago` (`idusuario`, `monto`, `metodo`, `comprobante`, `idestado`) V
  (SELECT idestado FROM estado WHERE nombre = 'confirmado' AND tipo_aplicacion = 'pago')),
 (4, 50.00, 'banco', NULL,
  (SELECT idestado FROM estado WHERE nombre = 'pendiente' AND tipo_aplicacion = 'pago'));
+
+INSERT INTO horario_atencion (idsede_servicio, dia_semana, hora_inicio, hora_fin)
+VALUES
+(1, 'Lunes', '08:00:00', '20:00:00'),
+(1, 'Martes', '08:00:00', '20:00:00'),
+(1, 'Miércoles', '08:00:00', '20:00:00'),
+(1, 'Jueves', '08:00:00', '20:00:00'),
+(1, 'Viernes', '08:00:00', '20:00:00'),
+(1, 'Sábado', '08:00:00', '15:00:00'),
+(1, 'Domingo', '00:00:00', '00:00:00'); -- para deshabilitar
+
 
 INSERT INTO horario_disponible (idsede_servicio, hora_inicio, hora_fin)
 VALUES
