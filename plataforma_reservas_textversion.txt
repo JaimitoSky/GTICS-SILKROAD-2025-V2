@@ -540,8 +540,4 @@ UPDATE `reserva` SET idpago = 1 WHERE idreserva = 1;
 
 UPDATE `reserva` SET idpago = 2 WHERE idreserva = 2;
 
-UPDATE usuario
-SET password_hash = '$2a$12$dph5tAef7Fp9jw14axukY.5YWxJ3khz8bCzGoXqHUlGUUDGxIR1em'
-WHERE email IS NOT NULL;
-
 
