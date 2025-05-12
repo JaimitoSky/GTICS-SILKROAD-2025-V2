@@ -57,7 +57,6 @@
                         <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-dark"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
           </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
@@ -105,127 +104,61 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
+                <h1 class="h3 mb-4"><strong>Gestión de Sedes</strong> - Super Admin</h1>
 
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
-
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
-                    </div>
+                <div class="mb-3 text-end">
+                    <a th:href="@{/superadmin/sedes/nueva}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nueva Sede
+                    </a>
                 </div>
 
-                <!-- Actividades y alertas -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-bordered align-middle table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>Distrito</th>
+                                <th>Servicios</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="sede : ${listaSedes}">
+                                <td th:text="${sede.idsede}">1</td>
+                                <td th:text="${sede.nombre}">Complejo Maranga</td>
+                                <td th:text="${sede.direccion}">Av. La Marina</td>
+                                <td th:text="${sede.distrito}">San Miguel</td>
+                                <td>
+                                    <ul class="mb-0">
+                                        <li th:each="serv : ${sede.sedeServicios}" th:text="${serv.servicio.nombre}"></li>
+                                    </ul>
+                                </td>
+                                <td>
+                            <span th:class="${sede.activo} ? 'badge bg-success' : 'badge bg-secondary'"
+                                  th:text="${sede.activo} ? 'Activa' : 'Inactiva'"></span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/superadmin/sedes/ver/{id}(id=${sede.idsede})}" class="btn btn-sm btn-primary">Ver</a>
+                                    <a th:href="@{/superadmin/sedes/editar/{id}(id=${sede.idsede})}" class="btn btn-sm btn-warning">Editar</a>
+                                    <a th:href="@{/superadmin/sedes/configurar/{id}(id=${sede.idsede})}" class="btn btn-sm btn-info">Configurar</a>
+                                    <form th:action="@{/superadmin/sedes/desactivar/{id}(id=${sede.idsede})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('¿Desactivar esta sede?');">Desactivar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </main>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
+
 
 
         <!-- Footer -->

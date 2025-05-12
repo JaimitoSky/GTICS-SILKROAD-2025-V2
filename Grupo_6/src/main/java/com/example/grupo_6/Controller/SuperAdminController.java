@@ -3,6 +3,7 @@ package com.example.grupo_6.Controller;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,13 +13,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import java.text.Normalizer;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalTime;
+import java.util.*;
 
 @Controller
 public class SuperAdminController {
@@ -49,6 +49,8 @@ public class SuperAdminController {
     private SedeRepository sedeRepository;
     @Autowired
     private HorarioDisponibleRepository horarioDisponibleRepository;
+    @Autowired
+    private HorarioAtencionRepository horarioAtencionRepository;
 
 
 
@@ -157,6 +159,214 @@ public class SuperAdminController {
         usuarioRepository.save(usuario);
         return "redirect:/superadmin/usuarios";
     }
+
+    @GetMapping("/superadmin/sedes")
+    public String listarSedes(Model model) {
+        List<Sede> sedes = sedeRepository.findAll();
+        model.addAttribute("listaSedes", sedes);
+        return "superadmin/superadmin_sedes";
+    }
+
+    @GetMapping("/superadmin/sedes/nueva")
+    public String nuevaSede(Model model) {
+        model.addAttribute("sede", new Sede());
+        return "superadmin/superadmin_sedes_formulario";
+    }
+    @GetMapping("/superadmin/sedes/ver/{id}")
+    public String verSede(@PathVariable("id") Integer id, Model model, RedirectAttributes attr) {
+        Optional<Sede> optionalSede = sedeRepository.findById(id);
+        if (optionalSede.isPresent()) {
+            model.addAttribute("sede", optionalSede.get());
+            return "superadmin/superadmin_sedes_detalle";
+        } else {
+            attr.addFlashAttribute("mensajeError", "Sede no encontrada.");
+            return "redirect:/superadmin/sedes";
+        }
+    }
+    public enum DiaSemana {
+        LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADO, DOMINGO
+    }
+    public String normalizarDia(String input) {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "") // elimina tildes
+                .toUpperCase(Locale.ROOT); // asegura mayúsculas en inglés
+    }
+
+
+
+    @GetMapping("/superadmin/sedes/configurar/{id}")
+    public String configurarSede(@PathVariable("id") Integer id, Model model, RedirectAttributes attr) {
+
+        Optional<Sede> optionalSede = sedeRepository.findById(id);
+        if (optionalSede.isEmpty()) {
+            attr.addFlashAttribute("mensajeError", "Sede no encontrada.");
+            return "redirect:/superadmin/sedes";
+        }
+
+        Sede sede = optionalSede.get();
+        model.addAttribute("sede", sede);
+        model.addAttribute("listaServicios", servicioRepository.findAll());
+        model.addAttribute("listaTarifas", tarifaRepository.findAll());
+        model.addAttribute("dias", List.of("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"));
+
+        // Cargar o generar los 7 días
+        List<HorarioAtencion> horarios = new ArrayList<>();
+        for (HorarioAtencion.DiaSemana dia : HorarioAtencion.DiaSemana.values()) {
+            Optional<HorarioAtencion> ha = horarioAtencionRepository.findBySedeAndDiaSemana(sede, dia);
+            horarios.add(ha.orElse(new HorarioAtencion(null, sede, dia, null, null, false)));
+        }
+        model.addAttribute("listaHorariosAtencion", horarios);
+
+        model.addAttribute("horariosDisponibles", horarioDisponibleRepository.findByHorarioAtencion_Sede_Idsede(id));
+
+        return "superadmin/superadmin_sedes_configurar";
+    }
+
+
+
+    @PostMapping("/superadmin/sedes/configurar/servicios")
+    public String asignarServicio(@RequestParam("idsede") Integer idsede,
+                                  @RequestParam("idservicio") Integer idservicio,
+                                  @RequestParam("idtarifa") Integer idtarifa,
+                                  RedirectAttributes attr) {
+
+        Optional<Sede> sedeOpt = sedeRepository.findById(idsede);
+        Optional<Servicio> servOpt = servicioRepository.findById(idservicio);
+        Optional<Tarifa> tarifaOpt = tarifaRepository.findById(idtarifa);
+
+        if (sedeOpt.isPresent() && servOpt.isPresent() && tarifaOpt.isPresent()) {
+            SedeServicio ss = new SedeServicio();
+            ss.setSede(sedeOpt.get());
+            ss.setServicio(servOpt.get());
+            ss.setTarifa(tarifaOpt.get());
+            sedeServicioRepository.save(ss);
+
+            attr.addFlashAttribute("mensajeExito", "Servicio asignado a la sede correctamente.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "Error al asignar servicio.");
+        }
+
+        return "redirect:/superadmin/sedes/configurar/" + idsede;
+    }
+
+
+    @PostMapping("/superadmin/sedes/configurar/atencion/guardar")
+    public String guardarHorariosAtencion(@RequestParam("idsede") Integer idsede,
+                                          HttpServletRequest request,
+                                          RedirectAttributes attr) {
+        Optional<Sede> sedeOpt = sedeRepository.findById(idsede);
+        if (sedeOpt.isEmpty()) {
+            attr.addFlashAttribute("mensajeError", "Sede no encontrada.");
+            return "redirect:/superadmin/sedes";
+        }
+
+        Sede sede = sedeOpt.get();
+
+        for (HorarioAtencion.DiaSemana dia : HorarioAtencion.DiaSemana.values()) {
+            String nombreDia = dia.name(); // Ej. "LUNES"
+
+            String inicioParam = request.getParameter("horaInicio_" + nombreDia);
+            String finParam = request.getParameter("horaFin_" + nombreDia);
+            boolean activo = request.getParameter("activo_" + nombreDia) != null;
+
+            LocalTime horaInicio = null;
+            LocalTime horaFin = null;
+
+            if (inicioParam != null && !inicioParam.isEmpty()) {
+                horaInicio = LocalTime.parse(inicioParam);
+            }
+            if (finParam != null && !finParam.isEmpty()) {
+                horaFin = LocalTime.parse(finParam);
+            }
+
+            // Buscar o crear el horario para ese día
+            HorarioAtencion horario = horarioAtencionRepository.findBySedeAndDiaSemana(sede, dia)
+                    .orElse(new HorarioAtencion(null, sede, dia, null, null, false));
+
+            horario.setHoraInicio(horaInicio);
+            horario.setHoraFin(horaFin);
+            horario.setActivo(activo);
+
+            horarioAtencionRepository.save(horario);
+        }
+
+        attr.addFlashAttribute("mensajeExito", "Horarios de atención actualizados.");
+        return "redirect:/superadmin/sedes/configurar/" + idsede;
+    }
+
+
+
+    @PostMapping("/superadmin/sedes/configurar/intervalos")
+    public String agregarHorarioDisponible(@RequestParam("idhorarioAtencion") Integer idHorarioAtencion,
+                                           @RequestParam("idservicio") Integer idservicio,
+                                           @RequestParam("horaInicio") String horaInicio,
+                                           @RequestParam("horaFin") String horaFin,
+                                           RedirectAttributes attr) {
+
+        Optional<HorarioAtencion> haOpt = horarioAtencionRepository.findById(idHorarioAtencion);
+        Optional<Servicio> servOpt = servicioRepository.findById(idservicio);
+
+        if (haOpt.isPresent() && servOpt.isPresent()) {
+            HorarioDisponible intervalo = new HorarioDisponible();
+            intervalo.setHorarioAtencion(haOpt.get());
+            intervalo.setServicio(servOpt.get());
+            intervalo.setHoraInicio(LocalTime.parse(horaInicio));
+            intervalo.setHoraFin(LocalTime.parse(horaFin));
+            intervalo.setActivo(true);
+
+            horarioDisponibleRepository.save(intervalo);
+            attr.addFlashAttribute("mensajeExito", "Intervalo agregado correctamente.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "No se encontró el horario o servicio asociado.");
+        }
+
+        return "redirect:/superadmin/sedes/configurar/" + haOpt.map(h -> h.getSede().getIdsede()).orElse(-1);
+    }
+
+
+
+
+
+
+    @GetMapping("/superadmin/sedes/editar/{id}")
+    public String mostrarFormularioEdicion(@PathVariable("id") Integer id, Model model, RedirectAttributes attr) {
+        Optional<Sede> optionalSede = sedeRepository.findById(id);
+        if (optionalSede.isPresent()) {
+            model.addAttribute("sede", optionalSede.get());
+            return "superadmin/superadmin_sedes_update"; // ¡nombre corregido!
+        } else {
+            attr.addFlashAttribute("mensajeError", "Sede no encontrada.");
+            return "redirect:/superadmin/sedes";
+        }
+    }
+
+    @PostMapping("/superadmin/sedes/actualizar")
+    public String actualizarSede(@ModelAttribute("sede") Sede sede, RedirectAttributes attr) {
+        sedeRepository.save(sede);
+        attr.addFlashAttribute("mensajeExito", "Sede actualizada correctamente.");
+        return "redirect:/superadmin/sedes";
+    }
+
+
+
+    @PostMapping("/superadmin/sedes/guardar")
+    public String guardarSede(@ModelAttribute Sede sede, RedirectAttributes attr) {
+        sede.setActivo(true);
+        sedeRepository.save(sede);
+        attr.addFlashAttribute("mensaje", "Sede registrada exitosamente.");
+        return "redirect:/superadmin/sedes";
+    }
+
+    @PostMapping("/superadmin/sedes/desactivar/{id}")
+    public String desactivarSede(@PathVariable("id") Integer id) {
+        Optional<Sede> optional = sedeRepository.findById(id);
+        optional.ifPresent(sede -> {
+            sede.setActivo(false);
+            sedeRepository.save(sede);
+        });
+        return "redirect:/superadmin/sedes";
+    }
+
 
     @GetMapping("/superadmin/reservas")
     public String listarReservas(Model model) {

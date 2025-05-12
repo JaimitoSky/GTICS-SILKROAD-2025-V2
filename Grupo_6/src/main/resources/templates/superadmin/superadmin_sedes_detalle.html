@@ -57,7 +57,6 @@
                         <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-dark"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
           </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
@@ -105,128 +104,77 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
+                <h1 class="h3 mb-4"><strong>Detalle de Sede</strong> - Super Admin</h1>
 
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Info básica -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ID Sede:</label>
+                                <p class="form-control-plaintext" th:text="${sede.idsede}">1</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Estado:</label>
+                                <span th:if="${sede.activo}" class="badge bg-success">Activa</span>
+                                <span th:if="${!sede.activo}" class="badge bg-secondary">Inactiva</span>
+                            </div>
+                        </div>
 
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
+                        <!-- Info ubicación -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nombre:</label>
+                                <p class="form-control-plaintext" th:text="${sede.nombre}">Complejo Deportivo</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Distrito:</label>
+                                <p class="form-control-plaintext" th:text="${sede.distrito}">San Miguel</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Actividades y alertas -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Dirección:</label>
+                                <p class="form-control-plaintext" th:text="${sede.direccion}">Av. Marina 123</p>
                             </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Referencia:</label>
+                                <p class="form-control-plaintext" th:text="${sede.referencia}">Frente a la U</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Latitud:</label>
+                                <p class="form-control-plaintext" th:text="${sede.latitud}">-12.0</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Longitud:</label>
+                                <p class="form-control-plaintext" th:text="${sede.longitud}">-77.0</p>
+                            </div>
+                        </div>
+
+                        <!-- Servicios asociados -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Servicios Asociados:</label>
+                                <ul>
+                                    <li th:each="ss : ${sede.sedeServicios}">
+                                        <span th:text="${ss.servicio.nombre}">Nombre Servicio</span>
+                                        <span class="text-muted" th:if="${ss.tarifa != null}" th:text="' - S/ ' + ${ss.tarifa.monto}">S/ 00.00</span>
                                     </li>
                                 </ul>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
-                                </div>
-                            </div>
+                        <div class="text-end">
+                            <a th:href="@{/superadmin/sedes}" class="btn btn-secondary">Volver</a>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
-
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">

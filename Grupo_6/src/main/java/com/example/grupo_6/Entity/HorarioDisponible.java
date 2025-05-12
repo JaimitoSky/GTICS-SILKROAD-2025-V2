@@ -17,8 +17,13 @@ public class HorarioDisponible {
     private Integer idhorario;
 
     @ManyToOne
-    @JoinColumn(name = "idsede_servicio", nullable = false)
-    private SedeServicio sedeServicio;
+    @JoinColumn(name = "idhorario_atencion", nullable = false)
+    private HorarioAtencion horarioAtencion;
+
+    @ManyToOne
+    @JoinColumn(name = "idservicio", nullable = false)
+    private Servicio servicio;
+
 
     @Column(name = "hora_inicio", nullable = false)
     private LocalTime horaInicio;

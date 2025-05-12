@@ -11,8 +11,11 @@ import java.util.List;
 @Repository
 public interface HorarioDisponibleRepository extends JpaRepository<HorarioDisponible, Integer> {
 
-    @Query("SELECT h FROM HorarioDisponible h WHERE h.sedeServicio.idSedeServicio = :id AND h.activo = true")
-    List<HorarioDisponible> buscarPorSedeServicioId(@Param("id") Integer id);
+    @Query("SELECT h FROM HorarioDisponible h WHERE h.horarioAtencion.sede.idsede = :idSede AND h.activo = true")
+    List<HorarioDisponible> buscarPorSedeServicioId(@Param("idSede") Integer idSede);
+    List<HorarioDisponible> findByHorarioAtencion_Sede_Idsede(Integer idsede);
+
+
     List<HorarioDisponible> findByActivoTrue();
 
 

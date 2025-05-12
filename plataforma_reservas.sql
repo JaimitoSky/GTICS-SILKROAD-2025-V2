@@ -155,24 +155,31 @@ CREATE TABLE `pago` (
   FOREIGN KEY (`idestado`) REFERENCES `estado`(`idestado`)
 );
 
+
+
+-- Horario de Atención (por sede y día)
+CREATE TABLE horario_atencion (
+  idhorario_atencion INT NOT NULL AUTO_INCREMENT,
+  idsede INT NOT NULL,
+  dia_semana ENUM('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo') NOT NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL,
+  activo TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (idhorario_atencion),
+  FOREIGN KEY (idsede) REFERENCES sede(idsede)
+);
+
+-- Horarios disponibles para reserva (por servicio y validado contra horario_atencion)
 CREATE TABLE horario_disponible (
   idhorario INT NOT NULL AUTO_INCREMENT,
-  idsede_servicio INT NOT NULL,
+  idhorario_atencion INT NOT NULL,
+  idservicio INT NOT NULL,
   hora_inicio TIME NOT NULL,
   hora_fin TIME NOT NULL,
   activo BOOLEAN DEFAULT TRUE,
   PRIMARY KEY (idhorario),
-  FOREIGN KEY (idsede_servicio) REFERENCES sede_servicio(idsede_servicio)
-);
-
-CREATE TABLE horario_atencion (
-  idhorario_atencion INT AUTO_INCREMENT PRIMARY KEY,
-  idsede_servicio INT NOT NULL,
-  dia_semana ENUM('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo') NOT NULL,
-  hora_inicio TIME NOT NULL,
-  hora_fin TIME NOT NULL,
-  activo BOOLEAN DEFAULT TRUE,
-  FOREIGN KEY (idsede_servicio) REFERENCES sede_servicio(idsede_servicio)
+  FOREIGN KEY (idhorario_atencion) REFERENCES horario_atencion(idhorario_atencion),
+  FOREIGN KEY (idservicio) REFERENCES servicio(idservicio)
 );
 
 
@@ -498,23 +505,25 @@ INSERT INTO `pago` (`idusuario`, `monto`, `metodo`, `comprobante`, `idestado`) V
 (4, 50.00, 'banco', NULL,
  (SELECT idestado FROM estado WHERE nombre = 'pendiente' AND tipo_aplicacion = 'pago'));
 
-INSERT INTO horario_atencion (idsede_servicio, dia_semana, hora_inicio, hora_fin)
-VALUES
-(1, 'Lunes', '08:00:00', '20:00:00'),
-(1, 'Martes', '08:00:00', '20:00:00'),
-(1, 'Miércoles', '08:00:00', '20:00:00'),
-(1, 'Jueves', '08:00:00', '20:00:00'),
-(1, 'Viernes', '08:00:00', '20:00:00'),
-(1, 'Sábado', '08:00:00', '15:00:00'),
-(1, 'Domingo', '00:00:00', '00:00:00'); -- para deshabilitar
+-- Horarios de atención del Complejo Deportivo Maranga (sede 1)
+INSERT INTO horario_atencion (idsede, dia_semana, hora_inicio, hora_fin)
+VALUES 
+  (1, 'Lunes', '08:00:00', '20:00:00'),
+  (1, 'Martes', '08:00:00', '20:00:00'),
+  (1, 'Miércoles', '08:00:00', '20:00:00'),
+  (1, 'Jueves', '08:00:00', '20:00:00'),
+  (1, 'Viernes', '08:00:00', '20:00:00'),
+  (1, 'Sábado', '08:00:00', '15:00:00');
 
+-- Horarios disponibles para la piscina (idservicio = 1) validados dentro del horario de atención
+INSERT INTO horario_disponible (idhorario_atencion, idservicio, hora_inicio, hora_fin)
+VALUES 
+  (1, 1, '08:00:00', '09:00:00'),
+  (1, 1, '09:00:00', '10:00:00'),
+  (2, 1, '10:00:00', '11:00:00'),
+  (2, 1, '11:00:00', '12:00:00'),
+  (3, 1, '08:00:00', '10:00:00');
 
-INSERT INTO horario_disponible (idsede_servicio, hora_inicio, hora_fin)
-VALUES
-  (1, '08:00:00', '09:00:00'),
-  (1, '09:00:00', '10:00:00'),
-  (1, '10:00:00', '11:00:00'),
-  (2, '08:00:00', '09:00:00');
 
 -- Luego insert de reservas referenciando `idsede_servicio` y `idpago` ya existentes
 INSERT INTO reserva (idusuario, idsede_servicio, fecha_reserva, idhorario, idestado, idpago, fecha_limite_pago)

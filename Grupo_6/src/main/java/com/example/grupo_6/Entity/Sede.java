@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "sede")
@@ -33,4 +34,10 @@ public class Sede {
     private Double latitud;
 
     private Double longitud;
+
+    @Column
+    private Boolean activo = true;
+
+    @OneToMany(mappedBy = "sede")
+    private List<SedeServicio> sedeServicios;
 }

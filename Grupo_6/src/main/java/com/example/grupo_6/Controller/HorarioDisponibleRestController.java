@@ -22,11 +22,12 @@ public class HorarioDisponibleRestController {
     @GetMapping("/horarios-disponibles")
     public List<Map<String, String>> obtenerHorarios(
             @RequestParam("sedeServicioId") Integer sedeServicioId,
-            @RequestParam("fecha") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecha
+            @RequestParam(value = "fecha", required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecha
     ) {
+        // Si se proporciona fecha, filtras si lo necesitas, sino traes todos
         List<HorarioDisponible> lista = horarioDisponibleRepository.buscarPorSedeServicioId(sedeServicioId);
 
-        // Devuelve idhorario, horaInicio, horaFin como JSON
         return lista.stream()
                 .map(h -> {
                     Map<String, String> map = new HashMap<>();
@@ -38,4 +39,5 @@ public class HorarioDisponibleRestController {
                 .collect(Collectors.toList());
     }
 }
+
 
