@@ -174,13 +174,16 @@
 										<div class="btn-group btn-group-sm" role="group">
 											<form th:action="@{/cambiar-rol}" method="post">
 												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-												<select name="rol" class="form-select form-select-sm" onchange="this.form.submit()">
-													<option value="1" th:selected="${usuario.idrol == 1}">Superadmin</option>
+												<select name="rol" class="form-select form-select-sm"
+														onchange="this.form.submit()"
+														th:disabled="${usuario.email == session.usuario.email}">
+													<option value="1" th:selected="${usuario.idrol == 1}" disabled>Superadmin</option>
 													<option value="2" th:selected="${usuario.idrol == 2}">Administrador</option>
 													<option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
 													<option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
 												</select>
 											</form>
+
 
 											<form th:if="${usuario.estado == 'inactivo'}"
 												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
@@ -195,6 +198,14 @@
 													<i class="bi bi-slash-circle"></i>
 												</button>
 											</form>
+											<form th:if="${usuario.email != session.usuario.email}"
+												  th:action="@{/superadmin/impersonar}" method="post" class="d-inline">
+												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+												<button type="submit" class="btn btn-outline-primary" title="Entrar como este usuario">
+													<i class="bi bi-box-arrow-in-right"></i>
+												</button>
+											</form>
+
 
 											<form th:action="@{/eliminar}" method="post" class="d-inline">
 												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />

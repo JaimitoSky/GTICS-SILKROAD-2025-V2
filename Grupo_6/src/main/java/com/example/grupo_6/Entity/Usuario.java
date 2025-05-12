@@ -2,12 +2,14 @@ package com.example.grupo_6.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
 @Table(name = "usuario")
-@Data // Genera getters, setters, toString, equals y hashCode
-public class Usuario {
+@Data
+public class Usuario implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,20 +30,23 @@ public class Usuario {
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
-
     @Column(length = 20)
     private String telefono;
 
     @Column(length = 255)
     private String direccion;
 
+    @Column(name = "idrol")
     private Integer idrol;
 
-    private String estado; // Puede ser "activo" o "inactivo"
+
+    private String estado;
 
     private Boolean notificar_recordatorio;
     private Boolean notificar_disponibilidad;
 
     private Timestamp create_time;
-}
 
+    public void setRol(Rol r) {
+    }
+}

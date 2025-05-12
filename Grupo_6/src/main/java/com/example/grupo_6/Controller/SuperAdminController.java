@@ -4,6 +4,7 @@ import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,6 +58,7 @@ public class SuperAdminController {
     // Vista principal del superadmin
     @GetMapping("/superadmin")
     public String superadminHome(Model model) {
+        System.out.println(" Entrando a controlador /superadmin");
         model.addAttribute("rol", "superadmin");
         return "superadmin/superadmin_home";
     }
@@ -92,6 +94,18 @@ public class SuperAdminController {
         return "superadmin/superadmin_usuarios";
     }
 
+    @GetMapping("/superadmin/volver")
+    public String volverASuperadmin(HttpServletRequest request) {
+        Usuario original = (Usuario) request.getSession().getAttribute("usuario_original");
+        if (original != null) {
+            request.getSession().setAttribute("usuario", original);
+            request.getSession().removeAttribute("usuario_original");
+        }
+        return "redirect:/superadmin";
+    }
+
+
+
 
 
 
@@ -99,14 +113,23 @@ public class SuperAdminController {
 
     // Cambiar rol del usuario
     @PostMapping("/cambiar-rol")
-    public String cambiarRol(@RequestParam Integer idusuario, @RequestParam Integer rol) {
+    public String cambiarRol(@RequestParam Integer idusuario, @RequestParam Integer rol, HttpSession session) {
+        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuario");
         Usuario u = usuarioRepository.findById(idusuario).orElse(null);
-        if (u != null) {
+
+        // Impedir que el superadmin se cambie a sí mismo
+        if (u != null && mapaRoles.containsKey(rol)
+                && !(usuarioLogueado.getIdusuario().equals(u.getIdusuario()))
+                && rol != 1) {
             u.setIdrol(rol);
             usuarioRepository.save(u);
         }
+
         return "redirect:/superadmin/usuarios";
     }
+
+
+
 
 
     // Banear usuario (poner inactivo)
