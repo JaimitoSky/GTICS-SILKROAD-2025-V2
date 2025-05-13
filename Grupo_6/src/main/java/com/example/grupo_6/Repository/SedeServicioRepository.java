@@ -1,5 +1,5 @@
 package com.example.grupo_6.Repository;
-
+import com.example.grupo_6.Repository.SedeServicioRepository;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.SedeServicio;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,14 +27,23 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     List<ServicioPorSedeDTO> obtenerServiciosPorSede(@Param("idSede") Integer idSede);
     Optional<SedeServicio> findBySede_IdsedeAndServicio_Idservicio(Integer idsede, Integer idservicio);
 
+    @Query("""
+    SELECT s.nombre, se.nombre, se.direccion, s.idservicio
+    FROM SedeServicio ss
+    JOIN ss.servicio s
+    JOIN ss.sede se
+    WHERE s.tipoServicio.idtipo = ?1 AND s.estado.idestado = 4
+""")
+    List<Object[]> listarServiciosSimplificadosPorTipo(int idtipo);
 
 
+    @Query("""
+        SELECT ss
+        FROM SedeServicio ss
+        JOIN FETCH ss.servicio s
+        JOIN FETCH ss.tarifa t
+        WHERE ss.idSedeServicio = :id
+    """)
+    Optional<SedeServicio> obtenerDetalleComplejoPorId(@Param("id") Integer id);
 
-
-
-
-
-
-
-    // Puedes agregar métodos personalizados si los necesitas
 }

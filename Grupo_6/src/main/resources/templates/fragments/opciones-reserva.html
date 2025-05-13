@@ -1,0 +1,33 @@
+<!-- fragments/opciones-reserva.html -->
+<div th:fragment="opciones-reserva" class="row text-center mb-5 reservar-opciones">
+    <div class="col">
+        <a th:href="@{'/vecino/ListaComplejoDeportivo'(idtipo=2)}" style="text-decoration: none; color: inherit;">
+            <img th:src="@{/img/icons/icon-gym.png}" height="40" alt="Gimnasio">
+            <p style="margin: 0;">Gimnasio</p>
+        </a>
+    </div>
+    <div class="col">
+        <a th:href="@{'/vecino/ListaComplejoDeportivo'(idtipo=4)}" style="text-decoration: none; color: inherit;">
+            <img th:src="@{/img/icons/icon-losa.jpeg}" height="40" alt="Vóley">
+            <p style="margin: 0;">Vóley</p>
+        </a>
+    </div>
+    <div class="col">
+        <a th:href="@{'/vecino/ListaComplejoDeportivo'(idtipo=3)}" style="text-decoration: none; color: inherit;">
+            <img th:src="@{/img/icons/icon-grass.jpeg}" height="40" alt="Fútbol">
+            <p style="margin: 0;">Fútbol</p>
+        </a>
+    </div>
+    <div class="col">
+        <a th:href="@{'/vecino/ListaComplejoDeportivo'(idtipo=1)}" style="text-decoration: none; color: inherit;">
+            <img th:src="@{/img/icons/icon-pool.jpeg}" height="40" alt="Piscina">
+            <p style="margin: 0;">Piscina</p>
+        </a>
+    </div>
+    <div class="col">
+        <a th:href="@{'/vecino/ListaComplejoDeportivo'(idtipo=7)}" style="text-decoration: none; color: inherit;">
+            <img th:src="@{/img/icons/icon-atletismo.jpeg}" height="40" alt="Atletismo">
+            <p style="margin: 0;">Atletismo</p>
+        </a>
+    </div>
+</div>
