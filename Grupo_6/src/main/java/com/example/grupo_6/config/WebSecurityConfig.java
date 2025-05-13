@@ -90,7 +90,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/login", "/css/**", "/img/**", "/js/**").permitAll()
                         .requestMatchers("/superadmin/**").hasAuthority("Superadmin")
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
-                        .requestMatchers("/coordinador/**").hasAuthority("Coordinador")
+
+                        .requestMatchers("/coordinador/**").permitAll()
+
                         .requestMatchers("/vecino/**").hasAuthority("Vecino")
                         .anyRequest().authenticated()
                 );
