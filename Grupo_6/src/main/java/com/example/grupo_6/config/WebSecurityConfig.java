@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.savedrequest.DefaultSavedRequest;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.sql.DataSource;
@@ -55,22 +55,15 @@ public class WebSecurityConfig {
                                 return;
                             }
 
-                            // Guardar objeto completo y su id en la sesión
                             session.setAttribute("usuario", usuario);
-                            session.setAttribute("idusuario", usuario.getIdusuario()); // 👈 NECESARIO
-
-                            // Eliminar cualquier savedRequest inválido como /.well-known
+                            session.setAttribute("idusuario", usuario.getIdusuario());
                             session.removeAttribute("SPRING_SECURITY_SAVED_REQUEST");
 
-                            // Redirección por rol
                             String rol = authentication.getAuthorities().iterator().next().getAuthority();
                             System.out.println("🟡 Rol detectado: " + rol);
 
                             switch (rol) {
-                                case "Superadmin" -> {
-                                    System.out.println("➡️ Redirigiendo a: /superadmin");
-                                    response.sendRedirect("/superadmin");
-                                }
+                                case "Superadmin" -> response.sendRedirect("/superadmin");
                                 case "Administrador" -> response.sendRedirect("/admin");
                                 case "Coordinador" -> response.sendRedirect("/coordinador/home");
                                 case "Vecino" -> response.sendRedirect("/vecino");
@@ -83,8 +76,8 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                        .logoutSuccessUrl("/login?logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
@@ -92,16 +85,13 @@ public class WebSecurityConfig {
                         .requestMatchers("/login", "/css/**", "/img/**", "/js/**").permitAll()
                         .requestMatchers("/superadmin/**").hasAuthority("Superadmin")
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
-
                         .requestMatchers("/coordinador/**").permitAll()
-
                         .requestMatchers("/vecino/**").hasAuthority("Vecino")
                         .anyRequest().authenticated()
                 );
 
         return http.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -112,9 +102,7 @@ public class WebSecurityConfig {
     public UserDetailsManager users(DataSource dataSource) {
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
         users.setUsersByUsernameQuery("SELECT email, password_hash, CASE WHEN estado = 'activo' THEN true ELSE false END FROM usuario WHERE email = ?");
-        users.setAuthoritiesByUsernameQuery(
-                "SELECT u.email, r.nombre FROM usuario u JOIN rol r ON u.idrol = r.idrol WHERE u.email = ?"
-        );
+        users.setAuthoritiesByUsernameQuery("SELECT u.email, r.nombre FROM usuario u JOIN rol r ON u.idrol = r.idrol WHERE u.email = ?");
         return users;
     }
 }
