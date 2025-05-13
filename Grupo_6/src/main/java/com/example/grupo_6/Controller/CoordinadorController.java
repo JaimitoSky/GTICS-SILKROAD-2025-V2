@@ -1,9 +1,14 @@
 package com.example.grupo_6.Controller;
 
+import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Entity.AsignacionSede;
 import com.example.grupo_6.Entity.Asistencia;
+import com.example.grupo_6.Entity.Usuario;
 import com.example.grupo_6.Repository.AsignacionSedeRepository;
 import com.example.grupo_6.Repository.AsistenciaRepository;
+import com.example.grupo_6.Repository.NotificacionRepository;
+import com.example.grupo_6.Repository.UsuarioRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,11 +30,19 @@ public class CoordinadorController {
     @Autowired
     private AsistenciaRepository asistenciaRepository;
 
-    @GetMapping("/home")
-    public String home(Model model) {
-        Integer idUsuario = 5; // reemplazar por sesión en el futuro
-        LocalDate hoy = LocalDate.now();
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private NotificacionRepository notificacionRepository;
+
+    @GetMapping("/home")
+    public String home(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
+
+        LocalDate hoy = LocalDate.now();
         Optional<AsignacionSede> asignacion = asignacionSedeRepository.findByIdUsuarioAndFecha(idUsuario, hoy);
 
         if (asignacion.isPresent()) {
@@ -47,10 +60,12 @@ public class CoordinadorController {
     }
 
     @GetMapping("/tareas")
-    public String verTareas(Model model) {
-        Integer idUsuario = 1;
-        LocalDate hoy = LocalDate.now();
+    public String verTareas(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
 
+        LocalDate hoy = LocalDate.now();
         Optional<Asistencia> asistencia = asistenciaRepository.findByIdusuarioAndFecha(idUsuario, hoy);
         asistencia.ifPresent(a -> model.addAttribute("observacionesRegistradas", a.getObservaciones()));
 
@@ -58,11 +73,14 @@ public class CoordinadorController {
     }
 
     @PostMapping("/tareas")
-    public String registrarTareas(@RequestParam(required = false) List<String> tareas,
+    public String registrarTareas(HttpSession session,
+                                  @RequestParam(required = false) List<String> tareas,
                                   @RequestParam(required = false) String extra) {
-        Integer idUsuario = 1;
-        LocalDate hoy = LocalDate.now();
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
 
+        LocalDate hoy = LocalDate.now();
         Optional<Asistencia> asistenciaOpt = asistenciaRepository.findByIdusuarioAndFecha(idUsuario, hoy);
         Asistencia asistencia = asistenciaOpt.orElseGet(() -> {
             Asistencia nueva = new Asistencia();
@@ -84,5 +102,45 @@ public class CoordinadorController {
         asistenciaRepository.save(asistencia);
 
         return "redirect:/coordinador/tareas";
+    }
+
+    @GetMapping("/perfil")
+    public String verPerfil(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
+
+        CoordinadorPerfilDTO perfil = usuarioRepository.obtenerPerfilCoordinadorPorId(idUsuario);
+        model.addAttribute("perfil", perfil);
+        return "coordinador/coordinador_perfil";
+    }
+
+    @PostMapping("/perfil/actualizar")
+    public String actualizarPerfil(HttpSession session,
+                                   @RequestParam String correo,
+                                   @RequestParam String telefono,
+                                   @RequestParam String direccion) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
+
+        Usuario u = usuarioRepository.findByIdusuario(idUsuario);
+        if (u != null) {
+            u.setEmail(correo);
+            u.setTelefono(telefono);
+            u.setDireccion(direccion);
+            usuarioRepository.save(u);
+        }
+        return "redirect:/coordinador/perfil?success";
+    }
+
+    @GetMapping("/notificaciones")
+    public String verNotificaciones(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
+
+        model.addAttribute("notificaciones", notificacionRepository.findByIdusuarioOrderByFechaEnvioDesc(idUsuario));
+        return "coordinador/coordinador_notificaciones";
     }
 }

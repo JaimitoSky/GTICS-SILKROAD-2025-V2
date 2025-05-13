@@ -55,7 +55,9 @@ public class WebSecurityConfig {
                                 return;
                             }
 
+                            // Guardar objeto completo y su id en la sesión
                             session.setAttribute("usuario", usuario);
+                            session.setAttribute("idusuario", usuario.getIdusuario()); // 👈 NECESARIO
 
                             // Eliminar cualquier savedRequest inválido como /.well-known
                             session.removeAttribute("SPRING_SECURITY_SAVED_REQUEST");
@@ -70,7 +72,7 @@ public class WebSecurityConfig {
                                     response.sendRedirect("/superadmin");
                                 }
                                 case "Administrador" -> response.sendRedirect("/admin");
-                                case "Coordinador" -> response.sendRedirect("/coordinador");
+                                case "Coordinador" -> response.sendRedirect("/coordinador/home");
                                 case "Vecino" -> response.sendRedirect("/vecino");
                                 default -> {
                                     System.out.println("⚠ Rol no reconocido, redirigiendo a inicio");
