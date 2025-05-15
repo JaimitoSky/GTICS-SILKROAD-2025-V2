@@ -284,6 +284,13 @@ public class VecinoController {
         }
         return "redirect:/vecino/reservas";
     }
+    @GetMapping("/reservas/historial")
+    public String verHistorialReservas(Model model, HttpSession session) {
+        Integer idUsuario = (Integer) session.getAttribute("idusuario");
+        List<Reserva> reservas = reservaRepository.findByUsuario_Idusuario(idUsuario);
+        model.addAttribute("listaReservas", reservas);
+        return "vecino/vecino_reservas";
+    }
 
 
 }

@@ -45,7 +45,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
     List<Reserva> findByUsuarioIdusuario(Integer idusuario);  // ✅ Correcto
 
-
+    List<Reserva> findByUsuario_Idusuario(Integer idusuario);
 
 
 

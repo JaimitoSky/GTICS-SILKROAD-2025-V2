@@ -61,7 +61,7 @@
                 cursor: not-allowed;
             }
             .btn-submit {
-                background-color: #4e73df;
+                background-color: #00bfff; /* celeste */
                 color: white;
                 padding: 0.75rem 1.5rem;
                 border: none;
@@ -71,8 +71,9 @@
                 transition: background-color 0.3s;
                 margin-top: 1rem;
             }
+
             .btn-submit:hover {
-                background-color: #3a5bc7;
+                background-color: #009fd6; /* celeste más oscuro */
             }
             .qr-title {
                 font-size: 1.2rem;
@@ -161,13 +162,12 @@
                                 <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label>
                                 <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
                             </div>
-
                             <div class="form-group mt-3">
-                                <button type="submit" class="btn btn-primary"
-                                        onclick="return confirm('¿Estás seguro de enviar el comprobante?')">
+                                <button type="button" id="btnEnviar" class="btn btn-submit">
                                     Enviar Comprobante
                                 </button>
                             </div>
+
                         </form>
 
 
@@ -210,7 +210,24 @@
                     btnEnviar.addEventListener("click", function () {
                         const confirmar = confirm("¿Estás seguro de enviar el comprobante?");
                         if (confirmar) {
-                            document.querySelector("form").submit(); // envía el formulario
+                            const form = document.querySelector("form");
+                            const formData = new FormData(form);
+
+                            fetch(form.action, {
+                                method: "POST",
+                                body: formData
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        window.location.href = "http://localhost:8080/vecino/reservas/historial";
+                                    } else {
+                                        alert("Hubo un error al enviar el comprobante.");
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error:", error);
+                                    alert("Ocurrió un error al enviar el formulario.");
+                                });
                         }
                     });
                 }
