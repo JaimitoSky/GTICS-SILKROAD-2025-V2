@@ -19,6 +19,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
             "CAST(u.idrol AS string) LIKE %:filtro%")
     List<Usuario> buscarPorNombreCorreoORol(@Param("filtro") String filtro);
 
+    //int countByActivoTrue();
+    //int countBySesionIniciadaTrue(); // opcional, si tienes ese campo
+
+
     @Query("SELECT u FROM Usuario u WHERE LOWER(u.nombres) LIKE %:valor% OR LOWER(u.apellidos) LIKE %:valor%")
     List<Usuario> buscarPorNombre(@Param("valor") String valor);
 

@@ -29,130 +29,49 @@
 
 
 
-        <!-- Contenido principal -->
-        <main class="content">
-            <div class="container-fluid p-0">
-
-                <h1 class="h3 mb-4 text-center"><strong>Bienvenido, Super Admin</strong></h1>
-
-                <!-- Métricas principales -->
-                <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2>5,200</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas</h5>
-                                <h2>1,105</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
-                            <div class="card-body">
-                                <h5 class="card-title">Servicios</h5>
-                                <h2>3</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-danger">
-                            <div class="card-body">
-                                <h5 class="card-title">Incidencias</h5>
-                                <h2>7</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividades y alertas -->
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad de Admin</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Registro de nuevo usuario
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Modificación de tarifas
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i> Activación de cuenta
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Alertas</h5>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    <li class="list-group-item">Reserva cancelada por el sistema</li>
-                                    <li class="list-group-item">Error de conexión API RENIEC</li>
-                                    <li class="list-group-item">Nueva versión del sistema disponible</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actividad gráfica -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Actividad General</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart chart-sm">
-                                    <canvas id="activity-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Métricas principales -->
+        <!--<div class="row mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Usuarios Activos</h5>
+                        <h2 th:text="${usuariosActivos}">0</h2>
                     </div>
                 </div>
             </div>
-        </main>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title">Usuarios Conectados</h5>
+                        <h2 th:text="${usuariosConectados}">0</h2>
+                    </div>
+                </div>
+            </div> -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Reservas Totales</h5>
+                        <h2 th:text="${totalReservas}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Total de Sedes</h5>
+                        <h2 th:text="${totalSedes}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
+        <!-- Comentado: Actividad y alertas -->
+        <!--
+        <div class="row"> ... </div>
+        <div class="row mt-4"> ... </div>
+        -->
+
+
 
 
         <!-- Footer -->

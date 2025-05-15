@@ -60,6 +60,10 @@ public class SuperAdminController {
     public String superadminHome(Model model) {
         System.out.println(" Entrando a controlador /superadmin");
         model.addAttribute("rol", "superadmin");
+       // model.addAttribute("usuariosActivos", usuarioRepository.countByActivoTrue());
+        model.addAttribute("usuariosConectados", 0); // o elimínalo temporalmente
+        model.addAttribute("totalReservas", reservaRepository.count());
+        model.addAttribute("totalSedes", sedeRepository.count());
         return "superadmin/superadmin_home";
     }
 

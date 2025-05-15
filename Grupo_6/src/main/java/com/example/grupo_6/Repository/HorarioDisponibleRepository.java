@@ -34,6 +34,8 @@ public interface HorarioDisponibleRepository extends JpaRepository<HorarioDispon
             Integer idSede,
             HorarioAtencion.DiaSemana diaSemana
     );
+    @Query("SELECT h FROM HorarioDisponible h WHERE h.horarioAtencion.sede.idsede = :idSede AND h.activo = true")
+    List<HorarioDisponible> buscarPorIdSede(@Param("idSede") Integer idSede);
 
 
 
