@@ -98,50 +98,79 @@
                 <main class="content">
                     <div class="container-fluid p-4">
 
-                        <!-- Opciones de Reservar -->
-                        <div th:replace="~{fragments/opciones-reserva :: opciones-reserva}"></div>
+                        <h2 class="mb-4 text-success">¡Reserva pendiente registrada!</h2>
 
-                        <div class="form-container">
-                            <!-- Sección de Imagen del Complejo -->
+                        <!-- Imagen del Servicio -->
+                        <div class="mb-4">
+                            <h4 th:text="${servicio.nombre}">Nombre del servicio</h4>
+                            <img th:if="${servicio.imagenComplejo != null}"
+                                 th:src="'data:image/jpeg;base64,' + ${T(org.apache.tomcat.util.codec.binary.Base64).encodeBase64String(servicio.imagenComplejo)}"
+                                 class="img-fluid rounded shadow"
+                                 style="max-height: 300px;"
+                                 alt="Imagen del complejo" />
+                        </div>
 
-                            <div class="image-section">
-                                <h3 class="mb-4">Gimnasio Municipal</h3>
-                                <img src="/static/img/photos/Gimnasio1.jpg" alt="Complejo Deportivo">
+                        <!-- Datos del Usuario -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Nombre:</label>
+                                <input type="text" class="form-control" th:value="${usuario.nombres + ' ' + usuario.apellidos}" readonly />
                             </div>
-
-                            <!-- Sección de Datos -->
-                            <div class="form-section">
-                                <div class="form-group">
-                                    <label for="nombre">Nombre:</label>
-                                    <input type="text" id="nombre" class="form-control" value="Sebastián Abad" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="dni">DNI:</label>
-                                    <input type="text" id="dni" class="form-control" value="12345678" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="inicio">Hora de Inicio:</label>
-                                    <input type="text" id="inicio" class="form-control" value="6:00 pm" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="fin">Horario Fin:</label>
-                                    <input type="text" id="fin" class="form-control" value="8:00 pm" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="direccion">Dirección:</label>
-                                    <input type="text" id="direccion" class="form-control" value="Jr. Agustín Gamarra N°120" readonly>
-                                </div>
-
-                                <!-- Recuadro para adjuntar imagen -->
-                                <div class="form-group">
-                                    <label for="adjuntar">Adjuntar Imagen:</label>
-                                    <input type="file" id="adjuntar" class="form-control" accept=".jpeg, .jpg, .png">
-                                </div>
-                                <div class="form-group">
-                                    <button type="button" id="btnEnviar" class="btn-submit">Enviar</button>
-                                </div>
+                            <div class="col-md-6">
+                                <label>DNI:</label>
+                                <input type="text" class="form-control" th:value="${usuario.dni}" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Email:</label>
+                                <input type="text" class="form-control" th:value="${usuario.email}" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Teléfono:</label>
+                                <input type="text" class="form-control" th:value="${usuario.telefono}" readonly />
                             </div>
                         </div>
+
+                        <!-- Horario -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label>Fecha de reserva:</label>
+                                <input type="text" class="form-control" th:value="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}" readonly />
+                            </div>
+                            <div class="col-md-3">
+                                <label>Hora de Inicio:</label>
+                                <input type="text" class="form-control" th:value="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}" readonly />
+                            </div>
+                            <div class="col-md-3">
+                                <label>Hora de Fin:</label>
+                                <input type="text" class="form-control" th:value="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}" readonly />
+                            </div>
+                        </div>
+
+                        <!-- Subir comprobante -->
+                        <!-- Subir comprobante -->
+                        <form th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
+
+                            <div class="form-group">
+                                <label for="adjuntar">Adjuntar Comprobante de Pago (.jpg, .png):</label>
+                                <input type="file" class="form-control" id="adjuntar" name="comprobante" accept=".jpg,.jpeg,.png" required />
+                            </div>
+
+                            <!-- Aquí va la imagen QR -->
+                            <div class="form-group mt-4 text-center">
+                                <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label>
+                                <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <button type="submit" class="btn btn-primary"
+                                        onclick="return confirm('¿Estás seguro de enviar el comprobante?')">
+                                    Enviar Comprobante
+                                </button>
+                            </div>
+                        </form>
+
+
                     </div>
                 </main>
 
@@ -173,6 +202,20 @@
             });
         </script>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const btnEnviar = document.getElementById("btnEnviar");
+
+                if (btnEnviar) {
+                    btnEnviar.addEventListener("click", function () {
+                        const confirmar = confirm("¿Estás seguro de enviar el comprobante?");
+                        if (confirmar) {
+                            document.querySelector("form").submit(); // envía el formulario
+                        }
+                    });
+                }
+            });
+        </script>
 
 
     </body>

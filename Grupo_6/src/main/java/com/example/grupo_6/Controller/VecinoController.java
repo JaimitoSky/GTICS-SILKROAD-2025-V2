@@ -48,6 +48,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+
+
 @Controller
 @RequestMapping("/vecino")
 public class VecinoController {
@@ -226,9 +230,12 @@ public class VecinoController {
             reserva.setEstado(estadoPendienteReserva); // siempre será pendiente
 
             reservaRepository.save(reserva);
-
-            model.addAttribute("reserva", reserva); // para mostrar en la vista de confirmación
+            model.addAttribute("reserva", reserva);
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("servicio", sedeServicio.getServicio());
+            System.out.println("Mostrando vista pendiente...");
             return "vecino/vecino_ReservaPendiente";
+
         } else {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al crear la reserva. Verifique los datos.");
             return "redirect:/vecino/reservas";
@@ -252,10 +259,31 @@ public class VecinoController {
 
         Integer idSede = sedeServicio.getSede().getIdsede();
 
-        // Aquí usas tu método existente basado en idSede
         return horarioDisponibleRepository.buscarPorSedeServicioId(idSede);
     }
 
+
+
+    @PostMapping("/reservas/comprobante")
+    public String subirComprobante(@RequestParam("idpago") Integer idPago,
+                                   @RequestParam("comprobante") MultipartFile file,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            Pago pago = pagoRepository.findById(idPago).orElse(null);
+            if (pago != null && !file.isEmpty()) {
+                pago.setComprobante(file.getBytes());
+                pago.setFechaPago(LocalDateTime.now());
+                pagoRepository.save(pago);
+                redirectAttributes.addFlashAttribute("mensajeExito", "Comprobante enviado con éxito.");
+            } else {
+                redirectAttributes.addFlashAttribute("mensajeError", "No se pudo procesar el comprobante.");
+            }
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al leer el archivo.");
+            e.printStackTrace();
+        }
+        return "redirect:/vecino/reservas";
+    }
 
 
 }
