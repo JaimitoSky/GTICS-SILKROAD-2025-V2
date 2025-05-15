@@ -3,12 +3,10 @@ package com.example.grupo_6.Repository;
 import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.Usuario;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -49,7 +47,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     CoordinadorPerfilDTO obtenerPerfilCoordinadorPorId(Integer id);
 
     Usuario findByIdusuario(Integer idusuario);
-
 
 }
 

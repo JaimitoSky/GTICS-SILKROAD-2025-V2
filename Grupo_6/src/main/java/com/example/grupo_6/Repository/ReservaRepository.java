@@ -43,6 +43,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
             @Param("fecha") LocalDate fecha
     );
 
+    List<Reserva> findByUsuarioIdusuario(Integer idusuario);  // ✅ Correcto
 
 
 
