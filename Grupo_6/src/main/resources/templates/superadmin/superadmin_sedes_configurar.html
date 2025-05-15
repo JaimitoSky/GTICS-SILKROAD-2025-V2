@@ -10,7 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
-
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <!-- Estilos internos -->
 
 </head>
@@ -37,7 +38,7 @@
                     <span th:text="${sede.nombre}"></span>
                 </h1>
 
-                <!-- Asignar Servicios con Tarifa -->
+                <!-- Servicios y Tarifas -->
                 <div class="card mb-4">
                     <div class="card-header">Servicios y Tarifas</div>
                     <div class="card-body">
@@ -68,7 +69,7 @@
                     </div>
                 </div>
 
-                <!-- Horarios de Atención (Editable por día) -->
+                <!-- Horarios de Atención -->
                 <div class="card mb-4">
                     <div class="card-header bg-light fw-bold">Horarios de Atención por Día</div>
                     <div class="card-body">
@@ -86,21 +87,9 @@
                                 <tbody>
                                 <tr th:each="dia : ${listaHorariosAtencion}">
                                     <td th:text="${dia.diaSemana}">Lunes</td>
-                                    <td>
-                                        <input type="time" class="form-control"
-                                               th:name="'horaInicio_' + ${dia.diaSemana}"
-                                               th:value="${dia.horaInicio != null} ? ${dia.horaInicio} : ''"/>
-                                    </td>
-                                    <td>
-                                        <input type="time" class="form-control"
-                                               th:name="'horaFin_' + ${dia.diaSemana}"
-                                               th:value="${dia.horaFin != null} ? ${dia.horaFin} : ''"/>
-                                    </td>
-                                    <td>
-                                        <input type="checkbox"
-                                               th:name="'activo_' + ${dia.diaSemana}"
-                                               th:checked="${dia.activo}" />
-                                    </td>
+                                    <td><input type="time" class="form-control" th:name="'horaInicio_' + ${dia.diaSemana}" th:value="${dia.horaInicio != null} ? ${dia.horaInicio} : ''"/></td>
+                                    <td><input type="time" class="form-control" th:name="'horaFin_' + ${dia.diaSemana}" th:value="${dia.horaFin != null} ? ${dia.horaFin} : ''"/></td>
+                                    <td><input type="checkbox" th:name="'activo_' + ${dia.diaSemana}" th:checked="${dia.activo}" /></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -115,107 +104,176 @@
                 <div class="card mb-5">
                     <div class="card-header bg-light fw-bold">Horarios Disponibles para Reservas</div>
                     <div class="card-body">
-                        <form th:action="@{/superadmin/sedes/configurar/intervalos}" method="post">
-                            <input type="hidden" name="idsede" th:value="${sede.idsede}" />
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Servicio</label>
-                                    <select name="idsedeServicio" class="form-select" id="servicio-select" required>
-                                        <option value="">Seleccione un servicio</option>
-                                        <option th:each="ss : ${sede.sedeServicios}"
-                                                th:value="${ss.idSedeServicio}"
-                                                th:text="${ss.servicio.nombre}"></option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Inicio</label>
-                                    <input type="time" name="horaInicio" class="form-control" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Fin</label>
-                                    <input type="time" name="horaFin" class="form-control" required>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-info">Agregar Intervalo</button>
-                        </form>
+                        <div class="mb-3">
+                            <label class="form-label">Servicio</label>
+                            <select name="idsedeServicio" class="form-select" id="servicio-select" required>
+                                <option value="">Seleccione un servicio</option>
+                                <option th:each="ss : ${sede.sedeServicios}" th:value="${ss.idSedeServicio}" th:text="${ss.servicio.nombre}"></option>
+                            </select>
+                        </div>
 
-                        <!-- Tabla dinámica -->
                         <h5 class="mt-4">Horarios Disponibles Registrados</h5>
-                        <table class="table table-bordered">
-                            <thead class="table-light text-center">
-                            <tr>
-                                <th>Inicio</th>
-                                <th>Fin</th>
-                            </tr>
-                            </thead>
-                            <tbody id="tabla-horarios">
-                            <tr>
-                                <td colspan="2" class="text-center">Seleccione un servicio para ver los horarios</td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <div id="tabla-horarios"></div>
                     </div>
                 </div>
 
-                <!-- JS para cargar horarios disponibles -->
-                <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        const selectServicio = document.getElementById("servicio-select");
-                        const tablaHorarios = document.getElementById("tabla-horarios");
-
-                        selectServicio.addEventListener("change", function () {
-                            const sedeServicioId = this.value;
-                            tablaHorarios.innerHTML = `<tr><td colspan="2" class="text-center">Cargando...</td></tr>`;
-
-                            if (sedeServicioId) {
-                                fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}`)
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        tablaHorarios.innerHTML = '';
-                                        if (data.length === 0) {
-                                            tablaHorarios.innerHTML = `<tr><td colspan="3" class="text-center">No hay horarios registrados</td></tr>`;
-                                        } else {
-                                            // Agrupar por día
-                                            const porDia = {};
-                                            data.forEach(h => {
-                                                if (!porDia[h.diaSemana]) porDia[h.diaSemana] = [];
-                                                porDia[h.diaSemana].push(h);
-                                            });
-
-                                            for (const dia in porDia) {
-                                                tablaHorarios.innerHTML += `
-                <tr class="table-secondary"><th colspan="3">${dia}</th></tr>
-            `;
-                                                porDia[dia].forEach(h => {
-                                                    tablaHorarios.innerHTML += `
-                    <tr class="text-center">
-                        <td>${h.horaInicio}</td>
-                        <td>${h.horaFin}</td>
-                        <td><a href="#" class="btn btn-sm btn-danger">Eliminar</a></td>
-                    </tr>`;
-                                                });
-                                            }
-                                        }
-                                    })
-
-                                        .catch(err => {
-                                        tablaHorarios.innerHTML = `<tr><td colspan="2" class="text-danger text-center">Error al cargar horarios</td></tr>`;
-                                        console.error("Error:", err);
-                                    });
-                            }
-                        });
-                    });
-                </script>
-
-
-
-
-
+                <!-- Volver -->
                 <div class="text-end">
                     <a th:href="@{/superadmin/sedes}" class="btn btn-secondary">Volver</a>
                 </div>
             </div>
         </main>
+
+        <!-- Script -->
+        <script>
+            function getCsrfHeaders() {
+                const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                if (!token || !header) {
+                    console.error("CSRF token o header no encontrados en el HTML");
+                    return {};
+                }
+
+                return { [header]: token };
+            }
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const selectServicio = document.getElementById("servicio-select");
+                const tablaHorarios = document.getElementById("tabla-horarios");
+                const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+                selectServicio.addEventListener("change", function () {
+                    const sedeServicioId = this.value;
+                    tablaHorarios.innerHTML = `<p class="text-center">Cargando...</p>`;
+
+                    if (!sedeServicioId) return;
+
+                    fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const porDia = {};
+                            diasSemana.forEach(d => porDia[d] = []);
+                            data.forEach(h => {
+                                if (porDia[h.diaSemana]) {
+                                    porDia[h.diaSemana].push(h);
+                                }
+                            });
+
+                            tablaHorarios.innerHTML = '';
+                            diasSemana.forEach(dia => {
+                                const cont = document.createElement("div");
+                                cont.classList.add("mb-4");
+
+                                let html = `<h6 class="fw-bold">${dia}</h6>
+                            <table class="table table-bordered">
+                                <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
+                                <tbody>`;
+
+                                if (porDia[dia].length > 0) {
+                                    porDia[dia].forEach(h => {
+                                        html += `
+                                    <tr>
+                                        <td>${h.horaInicio}</td>
+                                        <td>${h.horaFin}</td>
+                                        <td><button class="btn btn-sm btn-danger" onclick="eliminarHorario(${h.idhorario}, '${sedeServicioId}')">Eliminar</button></td>
+                                    </tr>`;
+                                    });
+                                } else {
+                                    html += `<tr><td colspan="3" class="text-center text-muted">Sin horarios registrados</td></tr>`;
+                                }
+
+                                html += `</tbody></table>
+                            <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Inicio</label>
+                                        <input type="time" class="form-control" name="inicio" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Fin</label>
+                                        <input type="time" class="form-control" name="fin" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
+                                    </div>
+                                </div>
+                            </form>`;
+
+                                cont.innerHTML = html;
+                                tablaHorarios.appendChild(cont);
+                            });
+                        })
+                        .catch(err => {
+                            tablaHorarios.innerHTML = `<p class="text-danger text-center">Error al cargar horarios</p>`;
+                            console.error("Error:", err);
+                        });
+                });
+            });
+
+            function eliminarHorario(idhorario, sedeServicioId) {
+                if (confirm("¿Seguro que deseas eliminar este horario?")) {
+                    fetch(`/api/horarios-disponibles/${idhorario}`, {
+                        method: "DELETE",
+                        headers: getCsrfHeaders()
+                    }).then(res => {
+                        if (res.ok) {
+                            document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                        } else {
+                            alert("Error al eliminar horario.");
+                        }
+                    });
+                }
+            }
+
+            function agregarHorario(event, sedeServicioId, diaSemana) {
+                event.preventDefault();
+                const form = event.target;
+                const inicio = form.querySelector("input[name=inicio]").value;
+                const fin = form.querySelector("input[name=fin]").value;
+
+                if (inicio >= fin) {
+                    alert("La hora de inicio debe ser menor que la hora de fin.");
+                    return false;
+                }
+
+                console.log("Enviando horario:", {
+                    sedeServicioId, inicio, fin, diaSemana
+                });
+
+                const formData = new URLSearchParams();
+                formData.append("sedeServicioId", sedeServicioId);
+                formData.append("horaInicio", inicio);
+                formData.append("horaFin", fin);
+                formData.append("diaSemana", diaSemana);
+
+                fetch("/api/horarios-disponibles", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        ...getCsrfHeaders()
+                    },
+                    body: formData
+                }).then(async res => {
+                    const msg = await res.text();
+                    console.log("Respuesta del servidor:", res.status, msg);
+                    if (res.ok) {
+                        document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                    } else {
+                        alert("Error: " + msg);
+                    }
+                }).catch(err => {
+                    console.error("Error en el fetch:", err);
+                    alert("Ocurrió un error al enviar los datos.");
+                });
+
+                return false;
+            }
+
+        </script>
+
+
 
 
 

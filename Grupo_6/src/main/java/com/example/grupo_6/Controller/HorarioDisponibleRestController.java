@@ -1,15 +1,21 @@
 package com.example.grupo_6.Controller;
 
-import com.example.grupo_6.Entity.HorarioDisponible;
+import com.example.grupo_6.Entity.*;
+import com.example.grupo_6.Repository.HorarioAtencionRepository;
 import com.example.grupo_6.Repository.HorarioDisponibleRepository;
+import com.example.grupo_6.Repository.SedeServicioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -19,15 +25,30 @@ public class HorarioDisponibleRestController {
     @Autowired
     private HorarioDisponibleRepository horarioDisponibleRepository;
 
+    @Autowired
+    private HorarioAtencionRepository horarioAtencionRepository;
+
+    @Autowired
+    private SedeServicioRepository sedeServicioRepository;
+
+    //  GET - Cargar horarios disponibles
+    //  GET - Listar horarios disponibles por sedeServicio
     @GetMapping("/horarios-disponibles")
     public List<Map<String, String>> obtenerHorarios(
             @RequestParam("sedeServicioId") Integer sedeServicioId,
             @RequestParam(value = "fecha", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecha
     ) {
-        // Si se proporciona fecha, filtras si lo necesitas, sino traes todos
-        List<HorarioDisponible> lista = horarioDisponibleRepository.buscarPorSedeServicioId(sedeServicioId);
+        Optional<SedeServicio> ssOpt = sedeServicioRepository.findById(sedeServicioId);
+        if (ssOpt.isEmpty()) {
+            return List.of(); // Devuelve lista vacía si no existe
+        }
 
+        SedeServicio ss = ssOpt.get();
+        Integer idSede = ss.getSede().getIdsede();
+        Integer idServicio = ss.getServicio().getIdservicio();
+
+        List<HorarioDisponible> lista = horarioDisponibleRepository.buscarPorSedeServicioId(idSede, idServicio);
         return lista.stream()
                 .map(h -> {
                     Map<String, String> map = new HashMap<>();
@@ -38,6 +59,87 @@ public class HorarioDisponibleRestController {
                     return map;
                 })
                 .collect(Collectors.toList());
+    }
+
+    //  POST - Agregar horario disponible
+    @PostMapping("/horarios-disponibles")
+    public ResponseEntity<?> agregarHorarioDisponible(
+            @RequestParam("sedeServicioId") Integer sedeServicioId,
+            @RequestParam("horaInicio") String horaInicio,
+            @RequestParam("horaFin") String horaFin,
+            @RequestParam("diaSemana") String diaSemana
+    ) {
+        try {
+            System.out.println(" POST recibido:");
+            System.out.println("  ➤ sedeServicioId = " + sedeServicioId);
+            System.out.println("  ➤ diaSemana = " + diaSemana);
+            System.out.println("  ➤ horaInicio = " + horaInicio);
+            System.out.println("  ➤ horaFin = " + horaFin);
+
+            Optional<SedeServicio> ssOpt = sedeServicioRepository.findById(sedeServicioId);
+            if (ssOpt.isEmpty()) {
+                System.out.println(" SedeServicio no encontrado");
+                return ResponseEntity.badRequest().body("SedeServicio no encontrado");
+            }
+
+            Sede sede = ssOpt.get().getSede();
+            Servicio servicio = ssOpt.get().getServicio();
+
+            Optional<HorarioAtencion> haOpt = horarioAtencionRepository.findBySedeAndDiaSemana(
+                    sede, HorarioAtencion.DiaSemana.valueOf(diaSemana)
+            );
+
+            if (haOpt.isEmpty()) {
+                System.out.println(" HorarioAtencion no encontrado para sede " + sede.getIdsede() + ", día " + diaSemana);
+                return ResponseEntity.badRequest().body("Horario de atención no encontrado para el día " + diaSemana);
+            }
+
+            HorarioAtencion ha = haOpt.get();
+
+            LocalTime ini = LocalTime.parse(horaInicio);
+            LocalTime fin = LocalTime.parse(horaFin);
+
+            if (!ini.isBefore(fin)) {
+                System.out.println(" Hora de inicio debe ser anterior a hora de fin");
+                return ResponseEntity.badRequest().body("La hora de inicio debe ser menor a la hora de fin");
+            }
+
+            boolean existe = horarioDisponibleRepository
+                    .existsByHorarioAtencionAndHoraInicioAndHoraFinAndServicio(ha, ini, fin, servicio);
+
+            if (existe) {
+                System.out.println(" Intervalo duplicado");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un intervalo idéntico");
+            }
+
+            HorarioDisponible nuevo = new HorarioDisponible();
+            nuevo.setHorarioAtencion(ha);
+            nuevo.setServicio(servicio);
+            nuevo.setHoraInicio(ini);
+            nuevo.setHoraFin(fin);
+            nuevo.setActivo(true);
+            horarioDisponibleRepository.save(nuevo);
+
+            System.out.println("Intervalo guardado con éxito");
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            System.out.println(" ERROR inesperado al agregar horario:");
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error inesperado: " + e.getMessage());
+        }
+    }
+
+
+    //  DELETE - Eliminar horario disponible
+    @DeleteMapping("/horarios-disponibles/{id}")
+    public ResponseEntity<?> eliminarHorario(@PathVariable("id") Integer id) {
+        if (horarioDisponibleRepository.existsById(id)) {
+            horarioDisponibleRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 
