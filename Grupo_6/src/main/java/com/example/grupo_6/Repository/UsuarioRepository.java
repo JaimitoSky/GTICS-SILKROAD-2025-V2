@@ -1,5 +1,6 @@
 package com.example.grupo_6.Repository;
 
+import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     VecinoPerfilDTO obtenerPerfilVecinoPorId(int id);
 
     Usuario findByEmail(String email);
+
+    @Query("SELECT u.email AS email, u.nombres AS nombres, u.apellidos AS apellidos, u.telefono AS telefono, u.direccion AS direccion FROM Usuario u WHERE u.idusuario = ?1")
+    CoordinadorPerfilDTO obtenerPerfilCoordinadorPorId(Integer id);
+
+    Usuario findByIdusuario(Integer idusuario);
+
 
 }
 

@@ -34,4 +34,18 @@ public class Servicio {
 
     @Column(name = "horario_fin")
     private LocalTime horarioFin;
+
+    @Lob
+    @Column(name = "imagen_complejo")
+    private byte[] imagenComplejo;
+
+
+    public byte[] getImagenComplejo() {
+        return imagenComplejo;
+    }
+
+    public void setImagenComplejo(byte[] imagenComplejo) {
+        this.imagenComplejo = imagenComplejo;
+    }
+
 }

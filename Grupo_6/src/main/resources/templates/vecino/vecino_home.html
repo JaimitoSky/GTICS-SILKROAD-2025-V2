@@ -33,38 +33,7 @@
 
                 <!-- Opciones de Reservar -->
                 <h3 class="mb-4">Reservar</h3>
-                <div class="row text-center mb-5">
-                    <div class="col">
-                        <a th:href="@{/vecino/lista/Gimnasio}">
-                            <img th:src="@{/img/icons/icon-gym.png}" height="40" alt="Gimnasio">
-                            <p>Gimnasio</p>
-                        </a>
-                    </div>
-                    <div class="col">
-                        <a th:href="@{/vecino/lista/CanchaLosa}">
-                            <img th:src="@{/img/icons/icon-losa.jpeg}" height="40" alt="Losa">
-                            <p>Cancha Losa</p>
-                        </a>
-                    </div>
-                    <div class="col">
-                        <a th:href="@{/vecino/lista/CanchaGrass}">
-                            <img th:src="@{/img/icons/icon-grass.jpeg}" height="40" alt="Grass">
-                            <p>Cancha Grass</p>
-                        </a>
-                    </div>
-                    <div class="col">
-                        <a th:href="@{/vecino/lista/Piscina}">
-                            <img th:src="@{/img/icons/icon-pool.jpeg}" height="40" alt="Piscina">
-                            <p>Piscina</p>
-                        </a>
-                    </div>
-                    <div class="col">
-                        <a th:href="@{/vecino/lista/Atletismo}">
-                            <img th:src="@{/img/icons/icon-atletismo.jpeg}" height="40" alt="Atletismo">
-                            <p>Atletismo</p>
-                        </a>
-                    </div>
-                </div>
+                <div th:replace="~{fragments/opciones-reserva :: opciones-reserva}"></div>
 
                 <!-- Complejos deportivos destacados -->
                 <h4 class="mb-4">Complejos deportivos más solicitados</h4>

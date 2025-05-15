@@ -22,38 +22,31 @@
             </a>
         </li>
 
+        <!-- Menú desplegable tipo tree -->
         <li class="nav-item">
-            <a th:href="@{/vecino/vecino_notificaciones}" class="nav-link">
-                <i class="bi bi-bell-fill me-2"></i>Notificaciones
+            <a class="nav-link" data-bs-toggle="collapse" href="#submenuReservar" role="button" aria-expanded="false" aria-controls="submenuReservar">
+                <i class="bi bi-bookmark-plus-fill me-2"></i>Reservar
+                <i class="bi bi-chevron-down float-end"></i>
             </a>
-        </li>
-
-        <li class="nav-item text-uppercase mt-3 mb-1 ps-3 small fw-bold text-white-50">Reservar</li>
-
-        <li class="nav-item">
-            <a th:href="@{/vecino/lista/Gimnasio}" class="nav-link">
-                <i class="bi bi-activity me-2"></i> Gimnasio
-            </a>
-        </li>
-        <li class="nav-item">
-            <a th:href="@{/vecino/lista/CanchaLosa}" class="nav-link">
-                <i class="bi bi-grid-1x2-fill me-2"></i> Cancha Losa
-            </a>
-        </li>
-        <li class="nav-item">
-            <a th:href="@{/vecino/lista/CanchaGrass}" class="nav-link">
-                <i class="bi bi-tree-fill me-2"></i> Cancha Grass
-            </a>
-        </li>
-        <li class="nav-item">
-            <a th:href="@{/vecino/lista/Piscina}" class="nav-link">
-                <i class="bi bi-droplet-fill me-2"></i> Piscina
-            </a>
-        </li>
-        <li class="nav-item">
-            <a th:href="@{/vecino/lista/Atletismo}" class="nav-link">
-                <i class="bi bi-wind me-2"></i> Atletismo
-            </a>
+            <div class="collapse ps-3" id="submenuReservar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/vecino/ListaComplejoDeportivo(idtipo=2)}">Gimnasio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/vecino/ListaComplejoDeportivo(idtipo=4)}">Cancha Losa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/vecino/ListaComplejoDeportivo(idtipo=3)}">Cancha Grass</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/vecino/ListaComplejoDeportivo(idtipo=1)}">Piscina</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/vecino/ListaComplejoDeportivo(idtipo=5)}">Atletismo</a>
+                    </li>
+                </ul>
+            </div>
         </li>
     </ul>
 </nav>

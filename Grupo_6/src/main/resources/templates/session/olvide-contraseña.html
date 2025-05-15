@@ -1,14 +1,18 @@
+<!-- olvide-contraseña.html -->
 <!DOCTYPE html>
-<html lang="es">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Recuperar contraseña</title>
-    <link rel="stylesheet" href="../../static/css/app.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recuperar Contraseña</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background-image: url('../../static/img/photos/fondo-login.jpg');
+            background-image: url('/img/photos/fondo-login.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -18,32 +22,53 @@
             justify-content: center;
         }
 
-        .container {
-            max-width: 400px;
-            margin: 7% auto;
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
+        .login-container img {
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .login-container h4 {
+            margin-bottom: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>¿Olvidaste tu contraseña?</h2>
-    <form action="verificar-codigo.html" method="get">
-        <div class="form-floating mb-4">
-            <input type="email" class="form-control" id="correoRecuperacion" name="correoRecuperacion"
-                   placeholder="Correo electrónico" required>
-            <label for="correoRecuperacion">Correo electrónico</label>
+<div class="login-container">
+    <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
+    <h4>Recuperar Contraseña</h4>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <form th:action="@{/recuperar/enviar-codigo}" method="post" onsubmit="mostrarCargando()">
+        <div class="form-floating mb-3">
+            <input type="email" name="email" class="form-control" placeholder="Correo" required />
+            <label>Correo registrado</label>
         </div>
-        <button type="submit" class="btn btn-primary w-100">Enviar código</button>
+        <button type="submit" id="btnEnviar" class="btn btn-primary w-100">Enviar código</button>
+        <div id="spinner" style="display:none; margin-top: 10px;">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...
+        </div>
     </form>
+
+    <script>
+        function mostrarCargando() {
+            document.getElementById('btnEnviar').disabled = true;
+            document.getElementById('spinner').style.display = 'block';
+        }
+    </script>
+
 </div>
 </body>
 </html>
