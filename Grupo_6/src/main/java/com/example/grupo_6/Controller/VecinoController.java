@@ -264,16 +264,20 @@ public class VecinoController {
 
     @GetMapping("/reservas/api/horarios-disponibles")
     @ResponseBody
-    public List<HorarioDisponible> obtenerHorariosDisponibles(@RequestParam("sedeServicioId") Integer sedeServicioId,
-                                                              @RequestParam("fecha") String fecha) {
+    public List<HorarioDisponible> obtenerHorariosDisponibles(
+            @RequestParam("sedeServicioId") Integer sedeServicioId,
+            @RequestParam("fecha") String fecha) {
+
         SedeServicio sedeServicio = sedeServicioRepository.findById(sedeServicioId).orElse(null);
 
         if (sedeServicio == null) return List.of();
 
         Integer idSede = sedeServicio.getSede().getIdsede();
+        Integer idServicio = sedeServicio.getServicio().getIdservicio();
 
-        return horarioDisponibleRepository.buscarPorSedeServicioId(idSede);
+        return horarioDisponibleRepository.buscarPorSedeServicioId(idSede, idServicio);
     }
+
 
 
 
