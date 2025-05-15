@@ -76,12 +76,16 @@ public class CoordinadorController {
     public String registrarTareas(HttpSession session,
                                   @RequestParam(required = false) List<String> tareas,
                                   @RequestParam(required = false) String extra) {
+        // 1. Verificar sesión
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) return "redirect:/login";
-        Integer idUsuario = usuario.getIdusuario();
 
+        Integer idUsuario = usuario.getIdusuario();
         LocalDate hoy = LocalDate.now();
+
+        // 2. Buscar si ya hay una asistencia hoy
         Optional<Asistencia> asistenciaOpt = asistenciaRepository.findByIdusuarioAndFecha(idUsuario, hoy);
+
         Asistencia asistencia = asistenciaOpt.orElseGet(() -> {
             Asistencia nueva = new Asistencia();
             nueva.setIdusuario(idUsuario);
@@ -90,6 +94,7 @@ public class CoordinadorController {
             return nueva;
         });
 
+        // 3. Combinar observaciones de tareas + extra
         String observaciones = "";
         if (tareas != null && !tareas.isEmpty()) {
             observaciones += String.join(", ", tareas);
@@ -98,11 +103,17 @@ public class CoordinadorController {
             observaciones += "\n" + extra;
         }
 
+        // 4. Guardar asistencia
         asistencia.setObservaciones(observaciones.trim());
         asistenciaRepository.save(asistencia);
 
+        // 5. Confirmación en consola
+        System.out.println("Tareas recibidas: " + tareas);
+        System.out.println("Extra: " + extra);
+
         return "redirect:/coordinador/tareas";
     }
+
 
     @GetMapping("/perfil")
     public String verPerfil(HttpSession session, Model model) {

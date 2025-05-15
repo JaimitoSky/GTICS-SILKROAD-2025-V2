@@ -65,6 +65,36 @@ public class SuperAdminController {
 
     // Vista de gestión de usuarios
 
+    // En SuperAdminController.java
+
+    @GetMapping("/perfil-superadmin")
+    public String verPerfilSuperadmin(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+        model.addAttribute("perfil", usuario);
+        return "superadmin/superadmin_perfil";
+    }
+
+    @PostMapping("/perfil-superadmin/actualizar")
+    public String actualizarPerfilSuperadmin(HttpSession session,
+                                             @RequestParam String correo,
+                                             @RequestParam String telefono,
+                                             @RequestParam String direccion) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        Usuario u = usuarioRepository.findByIdusuario(usuario.getIdusuario());
+        if (u != null) {
+            u.setEmail(correo);
+            u.setTelefono(telefono);
+            u.setDireccion(direccion);
+            usuarioRepository.save(u);
+            session.setAttribute("usuario", u); // actualizar en sesión
+        }
+        return "redirect:/perfil-superadmin?success";
+    }
+
+
 
     @GetMapping("/superadmin/usuarios")
     public String listarUsuarios(@RequestParam(required = false) String filtro,
