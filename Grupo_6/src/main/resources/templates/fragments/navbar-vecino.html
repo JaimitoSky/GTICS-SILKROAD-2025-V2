@@ -5,29 +5,14 @@
     </a>
     <div class="navbar-collapse collapse justify-content-end">
         <ul class="navbar-nav align-items-center">
-            <li class="nav-item dropdown me-3">
-                <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <li class="nav-item me-3">
+                <a class="nav-link position-relative" th:href="@{/vecino/notificaciones}">
                     <i class="bi bi-bell fs-5 text-dark"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:text="${notificacionesNoLeidas > 0 ? notificacionesNoLeidas : ''}"></span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
-                    <h6 class="dropdown-header">Notificaciones recientes</h6>
-                    <a class="dropdown-item d-flex align-items-start" href="#">
-                        <i class="bi bi-exclamation-circle text-danger me-2"></i>
-                        Reserva cancelada por el sistema
-                    </a>
-                    <a class="dropdown-item d-flex align-items-start" href="#">
-                        <i class="bi bi-cloud-slash text-warning me-2"></i>
-                        Error de conexión con API RENIEC
-                    </a>
-                    <a class="dropdown-item d-flex align-items-start" href="#">
-                        <i class="bi bi-calendar-event text-primary me-2"></i>
-                        Nueva reserva aprobada
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item text-center small text-muted" href="#">Ver todas</a>
-                </div>
             </li>
+
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle me-2 fs-5 text-dark"></i>

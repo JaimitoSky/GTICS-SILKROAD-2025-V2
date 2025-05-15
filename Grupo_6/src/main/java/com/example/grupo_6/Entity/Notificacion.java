@@ -14,15 +14,19 @@ public class Notificacion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idnotificacion;
 
-    @Column(name = "idusuario")
-    private Integer idusuario;
+    // ✅ Relación con la entidad Usuario
+    @ManyToOne
+    @JoinColumn(name = "idusuario", nullable = false)
+    private Usuario usuario;
 
     private String titulo;
 
     @Column(columnDefinition = "text")
     private String mensaje;
 
+    @Column(columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean leido;
+
 
     @Column(name = "fecha_envio")
     private Timestamp fechaEnvio;

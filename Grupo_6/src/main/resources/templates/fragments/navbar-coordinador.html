@@ -9,18 +9,18 @@
                 <span class="nav-link text-dark fw-bold" id="reloj"></span>
             </li>
 
-            <!-- Alertas -->
-            <li class="nav-item dropdown me-3">
-                <a class="nav-link position-relative" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
+            <!-- Notificaciones -->
+            <li class="nav-item me-3">
+                <a class="nav-link position-relative" th:href="@{/coordinador/notificaciones}" title="Ver notificaciones">
                     <i class="bi bi-bell fs-5 text-dark"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${notificacionesNoLeidas > 0}"
+                          th:text="${notificacionesNoLeidas}">
+        </span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="alertsDropdown">
-                    <h6 class="dropdown-header">Alertas</h6>
-                    <a class="dropdown-item" th:href="@{/coordinador/notificaciones}">
-                        <i class="bi bi-info-circle text-primary me-2"></i>Sin alertas recientes
-                    </a>
-                </div>
             </li>
+
+
 
             <!-- Perfil -->
             <li class="nav-item dropdown">

@@ -5,6 +5,7 @@ import com.example.grupo_6.Repository.UsuarioRepository;
 import com.example.grupo_6.Repository.ServicioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,9 @@ public class VecinoController {
     private ServicioRepository servicioRepository;
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -131,20 +135,29 @@ public class VecinoController {
 
     @PostMapping("/perfil/cambiar-password")
     @Transactional
-    public String cambiarPassword(@RequestParam("nuevaClave") String nuevaClave,
-                                  HttpSession session) {
+    public String cambiarPassword(@RequestParam("actual") String actual,
+                                  @RequestParam("nuevaClave") String nuevaClave,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
         Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
-        if (usuarioSesion == null) {
-            return "redirect:/login";
-        }
+        if (usuarioSesion == null) return "redirect:/login";
 
         Usuario usuario = usuarioRepository.findById(usuarioSesion.getIdusuario()).orElse(null);
         if (usuario != null) {
-            usuario.setPasswordHash(nuevaClave); // En producción, usa PasswordEncoder
+            boolean correcta = passwordEncoder.matches(actual, usuario.getPasswordHash());
+            if (!correcta) {
+                redirectAttributes.addFlashAttribute("mensajeError", "La contraseña actual es incorrecta.");
+                return "redirect:/vecino/cambiar-contrasena";
+            }
+
+            usuario.setPasswordHash(passwordEncoder.encode(nuevaClave));
             usuarioRepository.save(usuario);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Contraseña actualizada exitosamente.");
         }
+
         return "redirect:/vecino/perfil";
     }
+
 
     @GetMapping("/ListaComplejoDeportivo")
     public String mostrarComplejosPorTipo(@RequestParam("idtipo") int idtipo, Model model) {
@@ -284,12 +297,59 @@ public class VecinoController {
         }
         return "redirect:/vecino/reservas";
     }
+
     @GetMapping("/reservas/historial")
     public String verHistorialReservas(Model model, HttpSession session) {
         Integer idUsuario = (Integer) session.getAttribute("idusuario");
         List<Reserva> reservas = reservaRepository.findByUsuario_Idusuario(idUsuario);
         model.addAttribute("listaReservas", reservas);
         return "vecino/vecino_reservas";
+    }
+
+
+
+
+    // 🔔 Repositorio de notificaciones
+    @Autowired
+    private NotificacionRepository notificacionRepository;
+
+    // 🔔 Método para vista de notificaciones
+    @GetMapping("/notificaciones")
+    public String verNotificaciones(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        List<Notificacion> lista = notificacionRepository.findByUsuario_IdusuarioOrderByFechaEnvioDesc(usuario.getIdusuario());
+        model.addAttribute("notificaciones", lista);
+        model.addAttribute("rol", "vecino");
+        return "vecino/vecino_notificaciones";
+    }
+
+    // 🔔 Método para contar notificaciones no leídas y mostrarlas en el navbar
+    @ModelAttribute
+    public void cargarNotificacionesNavbar(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario != null) {
+            long sinLeer = notificacionRepository.countByUsuario_IdusuarioAndLeidoFalse(usuario.getIdusuario());
+            model.addAttribute("notificacionesNoLeidas", sinLeer);
+        }
+    }
+
+
+    @GetMapping("/reservas/{id}")
+    public String verDetalleReserva(@PathVariable("id") Integer id, Model model, HttpSession session) {
+        Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+        if (usuarioSesion == null) return "redirect:/login";
+
+        Optional<Reserva> opt = reservaRepository.findById(id);
+        if (opt.isEmpty() || !opt.get().getUsuario().getIdusuario().equals(usuarioSesion.getIdusuario())) {
+            return "redirect:/vecino/reservas";
+        }
+
+        Reserva reserva = opt.get();
+        model.addAttribute("reserva", reserva);
+        model.addAttribute("rol", "vecino");
+        return "vecino/vecino_detalle_reserva";
     }
 
 

@@ -47,6 +47,21 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
     List<Reserva> findByUsuario_Idusuario(Integer idusuario);
 
+    @Query("""
+    SELECT r FROM Reserva r 
+    WHERE r.sedeServicio.sede.idsede = :idSede 
+      AND r.fechaReserva = :fecha
+""")
+    List<Reserva> buscarReservasPorSedeYFecha(@Param("idSede") Integer idSede, @Param("fecha") LocalDate fecha);
+
+    @Query("""
+    SELECT r FROM Reserva r 
+    WHERE r.sedeServicio.sede.idsede = :idSede 
+    ORDER BY r.fechaReserva DESC
+""")
+    List<Reserva> buscarHistorialReservasPorSede(@Param("idSede") Integer idSede);
+
+
 
 
 }

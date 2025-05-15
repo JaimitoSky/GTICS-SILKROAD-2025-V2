@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis reservas - Detalle</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+
+    <!-- Estilos locales -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
+    <link rel="stylesheet" th:href="@{/datatables/datatables.min.css}" />
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
+
+
+    <div class="main">
+        <!-- Navbar -->
+        <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
+        <!-- Contenido -->
+        <main class="content">
+            <div class="container-fluid p-4">
+                <h2 class="mb-4">Detalle de Reserva</h2>
+
+                <div class="card p-4">
+                    <p><strong>Fecha de reserva:</strong>
+                        <span th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></span>
+                    </p>
+                    <p><strong>Horario:</strong>
+                        <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
+                        <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
+                    </p>
+                    <p><strong>Instalación:</strong>
+                        <span th:text="${reserva.sedeServicio.sede.nombre}"></span>
+                    </p>
+                    <p><strong>Dirección:</strong>
+                        <span th:text="${reserva.sedeServicio.sede.direccion}"></span>
+                    </p>
+                    <p><strong>Estado:</strong>
+                        <span th:text="${reserva.estado.nombre}"></span>
+                    </p>
+                    <p><strong>Monto:</strong>
+                        S/
+                        <span th:text="${reserva.pago?.monto}"></span>
+                    </p>
+                    <p><strong>Método de pago:</strong>
+                        <span th:text="${reserva.pago?.metodo}"></span>
+                    </p>
+                    <p><strong>Fecha límite de pago:</strong>
+                        <span th:text="${#temporals.format(reserva.fechaLimitePago, 'dd/MM/yyyy HH:mm')}"></span>
+                    </p>
+                </div>
+
+                <div class="mt-4">
+                    <a th:href="@{/vecino/reservas}" class="btn btn-secondary">Volver</a>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-5">
+                <img src="../../static/img/photos/logo-san-miguel.png" height="60" alt="Logo Municipalidad San Miguel">
+            </div>
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+<script th:src="@{/datatables/datatables.min.js}"></script>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script>
+    $(document).ready(function () {
+        let table = $('#tablaReservas').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+            }
+        });
+
+        $('#filtroEstado').on('change', function () {
+            table.column(4).search(this.value).draw();
+        });
+    });
+
+    function limpiarFiltros() {
+        $('#filtroEstado').val('');
+        $('#tablaReservas').DataTable().search('').columns().search('').draw();
+    }
+</script>
+
+</body>
+</html>

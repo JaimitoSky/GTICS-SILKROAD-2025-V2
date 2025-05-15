@@ -25,13 +25,21 @@
         <main class="content">
             <div class="container mt-4">
                 <h4 class="mb-4">Mis Notificaciones</h4>
-                <div class="list-group">
+
+                <div th:if="${notificaciones.isEmpty()}">
+                    <div class="alert alert-info text-center">
+                        No tienes notificaciones por el momento.
+                    </div>
+                </div>
+
+                <div class="list-group" th:if="${notificaciones.size() > 0}">
                     <div th:each="n : ${notificaciones}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <span th:text="${n.mensaje}">Notificación de ejemplo</span>
-                        <span class="badge bg-secondary" th:text="${#temporals.format(n.fecha, 'dd/MM/yyyy HH:mm')}"></span>
+                        <span class="badge bg-secondary" th:text="${#dates.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}"></span>
                     </div>
                 </div>
             </div>
+
         </main>
 
         <!-- Footer -->

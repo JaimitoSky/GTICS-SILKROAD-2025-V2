@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Perfil - Coordinador</title>
+    <title>Historial - Coordinador</title>
 
     <!-- Estilos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -24,53 +24,37 @@
         <!-- Contenido -->
         <main class="content">
             <div class="container mt-4">
-                <!-- Encabezado con hora -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="mb-0">Mi Perfil</h4>
-                    <span id="reloj" class="fw-semibold text-primary"></span>
-                </div>
+                <h2 class="mb-4">Historial de Reservas</h2>
 
-                <form th:action="@{/coordinador/perfil/actualizar}" method="post">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nombres</label>
-                        <input type="text" class="form-control" th:value="${perfil.nombres}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Apellidos</label>
-                        <input type="text" class="form-control" th:value="${perfil.apellidos}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Correo</label>
-                        <input type="email" name="correo" class="form-control"
-                               th:value="${perfil.email}" required
-                               title="Ingrese un correo válido">
+                <input type="text" id="filtroHistorial" class="form-control mb-3" placeholder="Filtrar por fecha o estado...">
 
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Celular</label>
-                        <input type="text" name="telefono" class="form-control"
-                               th:value="${perfil.telefono}" required
-                               pattern="^\d{9}$"
-                               title="Ingrese un número de 9 dígitos">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Servicio</th>
+                        <th>Usuario</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tablaHistorial">
+                    <tr th:each="reserva : ${historial}">
+                        <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${reserva.sedeServicio.servicio.nombre}"></td>
+                        <td th:text="${reserva.usuario.nombre + ' ' + reserva.usuario.apellido}"></td>
+                        <td>
+                            <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
+                            <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
+                        </td>
+                        <td th:text="${reserva.estado.nombre}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
 
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Dirección</label>
-                        <input type="text" name="direccion" class="form-control"
-                               th:value="${perfil.direccion}" required maxlength="255"
-                               title="Ingrese su dirección">
-                    </div>
-                     <div class="d-flex justify-content-between">
-                       <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                    <!--   <a th:href="@{/coordinador/cambiar-contrasena}" class="btn btn-outline-secondary">Cambiar contraseña</a>-->
-                   </div>
-               </form>
-           </div>
-       </main>
-
-
-
-       <!-- Footer -->
+        <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
                 <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo" height="60">
@@ -95,8 +79,8 @@
 <script>
     const modal = document.getElementById('popupModal');
     const btnSalida = document.getElementById('btnSalida');
-    const sedeLat = 0;
-    const sedeLon = 0;
+    const sedeLat = /*[[${latitud}]]*/ 0;
+    const sedeLon = /*[[${longitud}]]*/ 0;
 
     function cerrarModal() {
         modal.style.display = 'none';
@@ -137,6 +121,7 @@
         return R * c;
     }
 
+    // ⏰ Reloj en vivo
     function actualizarHora() {
         const reloj = document.getElementById('reloj');
         if (!reloj) return;
@@ -160,6 +145,17 @@
                 document.body.classList.toggle("sidebar-collapsed");
             });
         }
+    });
+
+    const filtro = document.getElementById("filtroHistorial");
+    const filas = document.querySelectorAll("#tablaHistorial tr");
+
+    filtro.addEventListener("input", () => {
+        const texto = filtro.value.toLowerCase();
+        filas.forEach(fila => {
+            const contenido = fila.textContent.toLowerCase();
+            fila.style.display = contenido.includes(texto) ? "" : "none";
+        });
     });
 </script>
 </body>

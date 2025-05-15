@@ -1,13 +1,8 @@
 package com.example.grupo_6.Controller;
 
 import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
-import com.example.grupo_6.Entity.AsignacionSede;
-import com.example.grupo_6.Entity.Asistencia;
-import com.example.grupo_6.Entity.Usuario;
-import com.example.grupo_6.Repository.AsignacionSedeRepository;
-import com.example.grupo_6.Repository.AsistenciaRepository;
-import com.example.grupo_6.Repository.NotificacionRepository;
-import com.example.grupo_6.Repository.UsuarioRepository;
+import com.example.grupo_6.Entity.*;
+import com.example.grupo_6.Repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,6 +30,9 @@ public class CoordinadorController {
 
     @Autowired
     private NotificacionRepository notificacionRepository;
+
+    @Autowired
+    private ReservaRepository reservaRepository;
 
     @GetMapping("/home")
     public String home(HttpSession session, Model model) {
@@ -149,9 +147,81 @@ public class CoordinadorController {
     public String verNotificaciones(HttpSession session, Model model) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) return "redirect:/login";
-        Integer idUsuario = usuario.getIdusuario();
 
-        model.addAttribute("notificaciones", notificacionRepository.findByIdusuarioOrderByFechaEnvioDesc(idUsuario));
+        Integer idUsuario = usuario.getIdusuario();
+        List<Notificacion> lista = notificacionRepository.findByUsuario_IdusuarioOrderByFechaEnvioDesc(idUsuario);
+
+        // Marcar como leídas
+        lista.forEach(n -> {
+            if (!Boolean.TRUE.equals(n.getLeido())) {
+                n.setLeido(true);
+                notificacionRepository.save(n);
+            }
+        });
+
+
+        model.addAttribute("notificaciones", lista);
         return "coordinador/coordinador_notificaciones";
     }
+
+
+    @GetMapping("/reservas-hoy")
+    public String verReservasDeHoy(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        LocalDate hoy = LocalDate.now();
+        Optional<AsignacionSede> asignacion = asignacionSedeRepository.findByIdUsuarioAndFecha(usuario.getIdusuario(), hoy);
+        if (asignacion.isEmpty()) {
+            model.addAttribute("mensaje", "No tienes asignación para hoy.");
+            return "coordinador/coordinador_reservas_hoy";
+        }
+
+        Integer idSede = asignacion.get().getSede().getIdsede();
+        List<Reserva> reservasHoy = reservaRepository.buscarReservasPorSedeYFecha(idSede, hoy);
+
+        // ⚠️ Filtrar reservas inválidas (campos null)
+        List<Reserva> reservasFiltradas = reservasHoy.stream()
+                .filter(r -> r.getUsuario() != null
+                        && r.getSedeServicio() != null
+                        && r.getHorarioDisponible() != null
+
+                        && r.getEstado() != null)
+                .toList();
+
+        model.addAttribute("reservas", reservasFiltradas);
+        model.addAttribute("rol", "coordinador");
+        return "coordinador/coordinador_reservas_hoy";
+    }
+
+
+
+    @GetMapping("/historial-reservas")
+    public String verHistorialReservas(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        Optional<AsignacionSede> asignacion = asignacionSedeRepository.findByIdUsuarioAndFecha(usuario.getIdusuario(), LocalDate.now());
+        if (asignacion.isEmpty()) {
+            model.addAttribute("mensaje", "No tienes asignación registrada.");
+            return "coordinador/coordinador_historial";
+        }
+
+        Integer idSede = asignacion.get().getSede().getIdsede();
+        List<Reserva> historial = reservaRepository.buscarHistorialReservasPorSede(idSede);
+
+        model.addAttribute("reservas", historial);
+        model.addAttribute("rol", "coordinador");
+        return "coordinador/coordinador_historial";
+    }
+
+    @ModelAttribute
+    public void cargarNotificacionesNavbar(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario != null) {
+            long sinLeer = notificacionRepository.countByUsuario_IdusuarioAndLeidoFalse(usuario.getIdusuario());
+            model.addAttribute("notificacionesNoLeidas", sinLeer);
+        }
+    }
+
 }
