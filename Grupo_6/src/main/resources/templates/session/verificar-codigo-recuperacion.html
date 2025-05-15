@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verificar Código - Sistema de Reservas</title>
+    <meta charset="UTF-8">
+    <title>Verificación de Código</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         body {
             margin: 0;
@@ -20,7 +18,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .login-container {
             background-color: rgba(255, 255, 255, 0.95);
             padding: 2rem;
@@ -30,12 +27,10 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-
         .login-container img {
             height: 60px;
             margin-bottom: 10px;
         }
-
         .login-container h4 {
             margin-bottom: 20px;
             font-weight: 600;
@@ -45,18 +40,13 @@
 <body>
 <div class="login-container">
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
-    <h4>Verificación de Cuenta</h4>
+    <h4>Verificación de Código</h4>
 
-    <div th:if="${error}" class="alert alert-danger" role="alert">
-        <span th:text="${error}"></span>
-    </div>
-
-    <form th:action="@{/registro/verificar-codigo}" method="post">
+    <form th:action="@{/recuperar/verificar-codigo}" method="post">
         <div class="form-floating mb-3">
-            <input type="text" name="codigoIngresado" id="codigoIngresado" class="form-control" required placeholder="Código de verificación" />
-            <label for="codigoIngresado">Código de verificación</label>
+            <input type="text" name="codigoIngresado" class="form-control" placeholder="Código" required>
+            <label>Código recibido</label>
         </div>
-
         <button type="submit" class="btn btn-primary w-100">Verificar</button>
     </form>
 </div>

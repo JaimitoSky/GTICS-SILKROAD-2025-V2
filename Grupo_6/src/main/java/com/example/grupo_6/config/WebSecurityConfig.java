@@ -82,7 +82,7 @@ public class WebSecurityConfig {
                         .deleteCookies("JSESSIONID")
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/img/**", "/js/**").permitAll()
+                        .requestMatchers("/login", "/registro", "/registro/**", "/recuperar/**", "/css/**", "/img/**", "/js/**").permitAll()
                         .requestMatchers("/superadmin/**").hasAuthority("Superadmin")
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
                         .requestMatchers("/coordinador/**").permitAll()
@@ -92,6 +92,7 @@ public class WebSecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

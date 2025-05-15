@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro - Sistema de Reservas</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-image: url('/img/photos/fondo-login.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 700px;
+            width: 95%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container img {
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .login-container h4 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-floating {
+            text-align: left;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .col-6 {
+            width: 48%;
+        }
+
+        @media (max-width: 600px) {
+            .col-6 {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
+    <h4>Registro de Usuario</h4>
+
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span th:text="${error}"></span>
+    </div>
+
+    <form th:action="@{/registro/enviar-codigo}" method="post" id="registroForm">
+        <div class="row">
+            <div class="form-floating mb-3 col-6">
+                <input type="text" name="dni" class="form-control" placeholder="DNI" required pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos" />
+                <label>DNI</label>
+            </div>
+            <div class="form-floating mb-3 col-6">
+                <input type="text" name="nombres" class="form-control" placeholder="Nombres" required />
+                <label>Nombres</label>
+            </div>
+            <div class="form-floating mb-3 col-6">
+                <input type="text" name="apellidos" class="form-control" placeholder="Apellidos" required />
+                <label>Apellidos</label>
+            </div>
+            <div class="form-floating mb-3 col-6">
+                <input type="email" name="email" class="form-control" placeholder="Correo" required />
+                <label>Correo</label>
+            </div>
+            <div class="form-floating mb-3 col-6">
+                <input type="text" name="telefono" class="form-control" placeholder="Celular" required pattern="[0-9]{9}" title="Ingrese un número de 9 dígitos" />
+                <label>Celular</label>
+            </div>
+            <div class="form-floating mb-3 col-6">
+                <input type="text" name="direccion" class="form-control" placeholder="Dirección" required />
+                <label>Dirección</label>
+            </div>
+            <div class="form-floating mb-3 col-12">
+                <input type="password" name="password" class="form-control" placeholder="Contraseña" required minlength="6" />
+                <label>Contraseña</label>
+            </div>
+        </div>
+
+        <div class="form-check text-start mb-3">
+            <input class="form-check-input" type="checkbox" id="rolCoordinadorCheck" name="rolCoordinador" onclick="toggleCodigoCoordinador()" />
+            <label class="form-check-label" for="rolCoordinadorCheck">Registrarme como Coordinador</label>
+        </div>
+
+        <div class="form-floating mb-3" id="codigoCoordinadorDiv" style="display: none;">
+            <input type="text" name="codigoCoordinador" class="form-control" placeholder="Código de Coordinador" />
+            <label>Código de Coordinador</label>
+        </div>
+
+        <!-- Mensaje de carga -->
+        <div id="loadingMessage" class="alert alert-info mt-3" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i> Enviando código de verificación...
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" id="submitButton">Enviar código de verificación</button>
+    </form>
+
+    <hr class="my-4">
+    <div class="text-center">
+        ¿Ya tienes una cuenta? <a th:href="@{/login}">Inicia sesión</a>
+    </div>
+</div>
+
+<script>
+    function toggleCodigoCoordinador() {
+        const check = document.getElementById("rolCoordinadorCheck");
+        const div = document.getElementById("codigoCoordinadorDiv");
+        div.style.display = check.checked ? "block" : "none";
+    }
+
+    async function obtenerDatosPorDNI() {
+        const dni = document.querySelector('input[name="dni"]').value;
+        if (dni.length !== 8) return;
+
+        try {
+            const response = await fetch(`https://apiperu.dev/api/dni/${dni}`, {
+                headers: {
+                    'Authorization': 'Bearer 5394cbd1d8a849d1be9e2ce6bd9b3d52cfd284272780f81cced91f3738234c46'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    document.querySelector('input[name="nombres"]').value = data.data.nombres;
+                    document.querySelector('input[name="apellidos"]').value = `${data.data.apellido_paterno} ${data.data.apellido_materno}`;
+                }
+            }
+        } catch (error) {
+            console.error("Error al consultar DNI:", error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dniInput = document.querySelector('input[name="dni"]');
+        dniInput.addEventListener('blur', obtenerDatosPorDNI);
+
+        // Activar mensaje "Enviando..."
+        const form = document.getElementById('registroForm');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const submitButton = document.getElementById('submitButton');
+
+        form.addEventListener('submit', () => {
+            loadingMessage.style.display = 'block';
+            submitButton.disabled = true;
+        });
+    });
+</script>
+</body>
+</html>

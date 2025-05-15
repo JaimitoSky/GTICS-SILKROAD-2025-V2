@@ -19,6 +19,7 @@
     <!-- Sidebar -->
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
+
     <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
@@ -28,65 +29,43 @@
 
 
 
-
         <!-- Contenido principal -->
-        <main class="content">
-            <div class="container-fluid p-0">
-                <h1 class="h3 mb-4"><strong>Gestión de Tarifas</strong> - Super Admin</h1>
-
-                <div class="mb-3 text-end">
-                    <a th:href="@{/superadmin/tarifas/nueva}" class="btn btn-primary">
-                        <i data-feather="plus" class="me-1"></i> Nueva Tarifa
-                    </a>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Tarifas de Servicios Deportivos</h5>
+    <main class="content">
+        <div class="container-fluid p-4">
+            <h2 class="mb-4">Mi Perfil</h2>
+            <form method="post" th:action="@{/perfil-superadmin/actualizar}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nombres" class="form-label">Nombres</label>
+                        <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
                     </div>
-                    <div class="card-body">
-                        <table class="table table-bordered table-hover align-middle">
-                            <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Descripción</th>
-                                <th>Precio por hora</th>
-                                <th>Última actualización</th>
-                                <th>Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="tarifa, i : ${listaTarifas}">
-                                <td th:text="${i.index + 1}">1</td>
-                                <td th:text="${tarifa.descripcion}">Descripción</td>
-                                <td th:text="|S/ ${#numbers.formatDecimal(tarifa.monto, 2, 2)}|">S/ 0.00</td>
-                                <td th:text="${#temporals.format(tarifa.fechaActualizacion, 'dd/MM/yyyy')}">15/04/2025</td>
-                                <td>
-                                    <a th:href="@{/superadmin/tarifas/editar/{id}(id=${tarifa.idtarifa})}" class="btn btn-sm btn-warning me-1">
-                                        <i data-feather="edit"></i> Editar
-                                    </a>
-                                    <a th:href="@{/superadmin/tarifas/eliminar/{id}(id=${tarifa.idtarifa})}"
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('¿Está seguro de eliminar esta tarifa?');">
-                                        <i data-feather="trash-2"></i> Eliminar
-                                    </a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <div class="col-md-6 mb-3">
+                        <label for="apellidos" class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
                     </div>
                 </div>
-            </div>
-        </main>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="correo" class="form-label">Correo electrónico</label>
+                        <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.email}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="telefono" class="form-label">Celular</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
+                </div>
 
-
-
-
-        <!-- Feather Icons -->
-        <script>
-            feather.replace();
-        </script>
-
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </main>
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

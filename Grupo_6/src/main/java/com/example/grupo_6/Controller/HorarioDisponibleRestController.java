@@ -34,6 +34,7 @@ public class HorarioDisponibleRestController {
                     map.put("idhorario", String.valueOf(h.getIdhorario()));
                     map.put("horaInicio", h.getHoraInicio().toString());
                     map.put("horaFin", h.getHoraFin().toString());
+                    map.put("diaSemana", h.getHorarioAtencion().getDiaSemana().toString());
                     return map;
                 })
                 .collect(Collectors.toList());

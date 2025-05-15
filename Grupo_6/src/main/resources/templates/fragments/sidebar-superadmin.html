@@ -1,0 +1,31 @@
+<!-- sidebar-superadmin.html -->
+
+<div th:fragment="sidebar">
+    <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}" />
+
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header text-center">
+            <a th:href="@{/superadmin}" class="logo-link d-block">
+                <img th:src="@{/img/logo_sanmiguel_superadmin.png}" alt="Logo Municipalidad">
+            </a>
+            <a th:href="@{/superadmin}" class="municipality-name d-block text-decoration-none">
+                San Miguel
+            </a>
+
+            <th:block th:if="${session.usuario_original != null}">
+                <a th:href="@{/superadmin/volver}" class="btn btn-sm btn-warning mt-2">Volver a Superadmin</a>
+            </th:block>
+        </div>
+
+        <ul class="nav flex-column text-white">
+            <li class="nav-item"><a th:href="@{/superadmin/usuarios}" class="nav-link"><i class="bi bi-person-fill"></i> Usuarios</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/sedes}" class="nav-link"><i class="bi bi-geo-alt-fill"></i> Sedes</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/reservas}" class="nav-link"><i class="bi bi-calendar-check"></i> Reservas</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/tarifas}" class="nav-link"><i class="bi bi-cash-coin"></i> Tarifas</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/pagos}" class="nav-link"><i class="bi bi-credit-card"></i> Pagos</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/estadisticas}" class="nav-link"><i class="bi bi-graph-up-arrow"></i> Estadísticas</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/sistema}" class="nav-link"><i class="bi bi-gear-fill"></i> Sistema</a></li>
+            <li class="nav-item"><a th:href="@{/superadmin/registros}" class="nav-link"><i class="bi bi-bar-chart-line-fill"></i> Registros</a></li>
+        </ul>
+    </nav>
+</div>
