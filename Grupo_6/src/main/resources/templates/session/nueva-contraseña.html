@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="es">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Nueva contraseña</title>
-    <link rel="stylesheet" href="../../static/css/app.css">
+    <title>Actualizar Contraseña</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
     <style>
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background-image: url('../../static/img/photos/fondo-login.jpg');
+            background-image: url('/img/photos/fondo-login.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -18,37 +19,39 @@
             justify-content: center;
         }
 
-        .container {
-            max-width: 400px;
-            margin: 7% auto;
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
+        .login-container img {
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .login-container h4 {
+            margin-bottom: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
+</head>
 <body>
-<div class="container">
-    <h2>Restablecer contraseña</h2>
-    <form action="login.html" method="post">
-        <div class="form-floating mb-4">
-            
-            <input type="password" class="form-control" id="nuevaPass" name="nuevaPass"
-                   placeholder="Nueva contraseña" required>
-            <label for="nuevaPass">Nueva contraseña</label>
+<div class="login-container">
+    <a th:href="@{/login}" class="float-start mb-2"><i class="fa fa-arrow-left"></i> Volver</a>
+    <h4>Nueva contraseña</h4>
+    <form th:action="@{/recuperar/nueva}" method="post">
+        <div class="form-floating mb-3 position-relative">
+            <input type="password" id="password" name="password" class="form-control" placeholder="Nueva contraseña" required minlength="6">
+            <label>Nueva contraseña</label>
+            <span onclick="togglePassword()" style="position:absolute; right:10px; top:15px; cursor:pointer;"><i class="fa fa-eye"></i></span>
         </div>
-        <div class="form-floating mb-4">
-            <input type="password" class="form-control" id="repetirPass" name="repetirPass"
-                   placeholder="Repetir contraseña" required>
-            <label for="repetirPass">Repetir contraseña</label>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Guardar contraseña</button>
+        <button type="submit" class="btn btn-success w-100">Actualizar</button>
     </form>
 </div>
 </body>
