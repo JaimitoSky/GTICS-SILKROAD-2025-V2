@@ -239,6 +239,7 @@ public class SuperAdminController {
     public enum DiaSemana {
         LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADO, DOMINGO
     }
+
     public String normalizarDia(String input) {
         return Normalizer.normalize(input, Normalizer.Form.NFD)
                 .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "") // elimina tildes
@@ -403,10 +404,29 @@ public class SuperAdminController {
 
 
     @PostMapping("/superadmin/sedes/guardar")
-    public String guardarSede(@ModelAttribute Sede sede, RedirectAttributes attr) {
-        sede.setActivo(true);
-        sedeRepository.save(sede);
-        attr.addFlashAttribute("mensaje", "Sede registrada exitosamente.");
+    public String guardarSede(@ModelAttribute("sede") Sede sede) {
+        sedeRepository.save(sede); // Guarda la sede y genera el ID
+
+        // Solo si es nueva (sin id previo)
+        if (sede.getIdsede() != null && horarioAtencionRepository.countBySede(sede) == 0) {
+            for (HorarioAtencion.DiaSemana dia : HorarioAtencion.DiaSemana.values()) {
+                HorarioAtencion ha = new HorarioAtencion();
+                ha.setSede(sede);
+                ha.setDiaSemana(dia);
+
+                if (dia == HorarioAtencion.DiaSemana.Domingo) {
+                    ha.setHoraInicio(LocalTime.of(0, 0));
+                    ha.setHoraFin(LocalTime.of(0, 0));
+                    ha.setActivo(false);
+                } else {
+                    ha.setHoraInicio(LocalTime.of(8, 0));
+                    ha.setHoraFin(LocalTime.of(20, 0));
+                    ha.setActivo(true);
+                }
+                horarioAtencionRepository.save(ha);
+            }
+        }
+
         return "redirect:/superadmin/sedes";
     }
 
@@ -457,31 +477,71 @@ public class SuperAdminController {
         Estado estadoAprobadaReserva = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
         Estado estadoPagado = estadoRepository.findByNombreAndTipoAplicacion("pagado", Estado.TipoAplicacion.pago);
 
-        SedeServicio sedeServicio = reserva.getSedeServicio(); // ← ya viene mapeado
+        SedeServicio sedeServicio = reserva.getSedeServicio();
 
+        // Obtener el objeto completo de horario
+        HorarioDisponible horario = horarioDisponibleRepository
+                .findById(reserva.getHorarioDisponible().getIdhorario())
+                .orElse(null);
+        reserva.setHorarioDisponible(horario);
+
+        // Validar que el horario esté definido y activo
+        if (horario == null || !horario.getActivo()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "El horario seleccionado no es válido o está inactivo.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Validar que el horario corresponda al servicio seleccionado
+        if (!horario.getServicio().equals(sedeServicio.getServicio())) {
+            redirectAttributes.addFlashAttribute("mensajeError", "El horario seleccionado no pertenece al servicio escogido.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Validar que el día de la reserva coincida con el día del horario
+        HorarioAtencion.DiaSemana diaReserva = HorarioAtencion.DiaSemana.valueOf(reserva.getFechaReserva().getDayOfWeek().name());
+        HorarioAtencion.DiaSemana diaHorario = horario.getHorarioAtencion().getDiaSemana();
+
+        if (!diaReserva.equals(diaHorario)) {
+            redirectAttributes.addFlashAttribute("mensajeError", "El horario no corresponde al día seleccionado.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Validar que la fecha no sea pasada
+        if (reserva.getFechaReserva() == null || reserva.getFechaReserva().isBefore(LocalDate.now())) {
+            redirectAttributes.addFlashAttribute("mensajeError", "La fecha de reserva no puede ser pasada.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Validar si ese día está permitido para esa sede
+        Sede sede = sedeServicio.getSede();
+        boolean diaPermitido = horarioAtencionRepository.existsBySedeAndDiaSemanaAndActivoTrue(sede, diaReserva);
+        if (!diaPermitido) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se permiten reservas el día seleccionado.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // (Opcional) Validar si ya existe una reserva para ese horario y fecha
+        boolean yaReservado = reservaRepository.existsByHorarioDisponibleAndFechaReserva(horario, reserva.getFechaReserva());
+        if (yaReservado) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Ya existe una reserva para ese horario en la fecha indicada.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Crear y guardar pago + reserva
         if (usuario != null && sedeServicio != null && estadoPendienteReserva != null && estadoPendientePago != null) {
-
-            // Crear pago asociado
             Pago pago = new Pago();
             pago.setUsuario(usuario);
-            pago.setMetodo(Pago.Metodo.banco); // o online si lo implementas
+            pago.setMetodo(Pago.Metodo.banco); // puedes ajustar según lógica futura
             pago.setMonto(BigDecimal.valueOf(sedeServicio.getTarifa().getMonto()));
             pago.setEstado(estadoPendientePago);
             pago.setFechaPago(null);
             pagoRepository.save(pago);
 
-            // Configurar la reserva
             reserva.setUsuario(usuario);
             reserva.setFechaCreacion(LocalDateTime.now());
             reserva.setFechaLimitePago(reserva.getFechaCreacion().plusHours(4));
             reserva.setPago(pago);
-
-            // Estado según pago
-            if (pago.getEstado().equals(estadoPagado)) {
-                reserva.setEstado(estadoAprobadaReserva);
-            } else {
-                reserva.setEstado(estadoPendienteReserva);
-            }
+            reserva.setEstado(pago.getEstado().equals(estadoPagado) ? estadoAprobadaReserva : estadoPendienteReserva);
 
             reservaRepository.save(reserva);
             redirectAttributes.addFlashAttribute("mensajeExito", "Reserva y pago creados correctamente.");
@@ -491,6 +551,8 @@ public class SuperAdminController {
 
         return "redirect:/superadmin/reservas";
     }
+
+
 
 
 

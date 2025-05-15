@@ -109,10 +109,10 @@
                                                 th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar</button>
                                     </form>
 
-                                    <form th:action="@{/superadmin/reservas/cancelar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
+                                    <!--<form th:action="@{/superadmin/reservas/cancelar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
                                           onsubmit="return confirm('¿Cancelar esta reserva?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
-                                    </form>
+                                    </form>-->
 
                                     <form th:action="@{/superadmin/reservas/habilitar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
                                           th:if="${reserva.estado.nombre.equals('cancelada')}">

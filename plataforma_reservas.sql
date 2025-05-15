@@ -850,4 +850,40 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+UPDATE usuario
+SET password_hash = '$2a$12$dph5tAef7Fp9jw14axukY.5YWxJ3khz8bCzGoXqHUlGUUDGxIR1em'
+WHERE idusuario > 0;
+
+INSERT INTO horario_atencion (idsede, dia_semana, hora_inicio, hora_fin, activo)
+VALUES (1, 'Domingo', '00:00:00', '00:00:00', 0);
+
+INSERT INTO horario_atencion (idsede, dia_semana, hora_inicio, hora_fin, activo) VALUES
+(2, 'Lunes', '08:00:00', '20:00:00', 1),
+(2, 'Martes', '08:00:00', '20:00:00', 1),
+(2, 'Miércoles', '08:00:00', '20:00:00', 1),
+(2, 'Jueves', '08:00:00', '20:00:00', 1),
+(2, 'Viernes', '08:00:00', '20:00:00', 1),
+(2, 'Sábado', '08:00:00', '15:00:00', 1),
+(2, 'Domingo', '00:00:00', '00:00:00', 0);
+
+INSERT INTO horario_atencion (idsede, dia_semana, hora_inicio, hora_fin, activo) VALUES
+(3, 'Lunes', '08:00:00', '20:00:00', 1),
+(3, 'Martes', '08:00:00', '20:00:00', 1),
+(3, 'Miércoles', '08:00:00', '20:00:00', 1),
+(3, 'Jueves', '08:00:00', '20:00:00', 1),
+(3, 'Viernes', '08:00:00', '20:00:00', 1),
+(3, 'Sábado', '08:00:00', '15:00:00', 1),
+(3, 'Domingo', '00:00:00', '00:00:00', 0);
+
+INSERT INTO horario_atencion (idsede, dia_semana, hora_inicio, hora_fin, activo) VALUES
+(4, 'Lunes', '08:00:00', '20:00:00', 1),
+(4, 'Martes', '08:00:00', '20:00:00', 1),
+(4, 'Miércoles', '08:00:00', '20:00:00', 1),
+(4, 'Jueves', '08:00:00', '20:00:00', 1),
+(4, 'Viernes', '08:00:00', '20:00:00', 1),
+(4, 'Sábado', '08:00:00', '15:00:00', 1),
+(4, 'Domingo', '00:00:00', '00:00:00', 0);
+
 -- Dump completed on 2025-05-12 23:57:23
+
+

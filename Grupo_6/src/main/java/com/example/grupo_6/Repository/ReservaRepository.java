@@ -1,9 +1,6 @@
 package com.example.grupo_6.Repository;
 
-import com.example.grupo_6.Entity.Estado;
-import com.example.grupo_6.Entity.Pago;
-import com.example.grupo_6.Entity.Reserva;
-import com.example.grupo_6.Entity.Servicio;
+import com.example.grupo_6.Entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,6 +39,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
             @Param("idHorario") Integer idHorario,
             @Param("fecha") LocalDate fecha
     );
+    boolean existsByHorarioDisponibleAndFechaReserva(HorarioDisponible horario, LocalDate fechaReserva);
+
 
     List<Reserva> findByUsuarioIdusuario(Integer idusuario);  // ✅ Correcto
 
