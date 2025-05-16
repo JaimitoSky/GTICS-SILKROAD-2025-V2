@@ -39,13 +39,36 @@ public class Usuario implements Serializable {
     @Column(name = "idrol")
     private Integer idrol;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idrol", referencedColumnName = "idrol", insertable = false, updatable = false)
+    private Rol rol;
+
 
     private String estado;
 
     private Boolean notificar_recordatorio;
     private Boolean notificar_disponibilidad;
 
-    private Timestamp create_time;
+    public Boolean getNotificarRecordatorio() {
+        return notificar_recordatorio;
+    }
+
+    public void setNotificarRecordatorio(Boolean notificar_recordatorio) {
+        this.notificar_recordatorio = notificar_recordatorio;
+    }
+
+    public Boolean getNotificarDisponibilidad() {
+        return notificar_disponibilidad;
+    }
+
+    public void setNotificarDisponibilidad(Boolean notificar_disponibilidad) {
+        this.notificar_disponibilidad = notificar_disponibilidad;
+    }
+
+
+    @Column(name = "create_time")
+    private Timestamp createTime;
+
 
     public void setRol(Rol r) {
     }

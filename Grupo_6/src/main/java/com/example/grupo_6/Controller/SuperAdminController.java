@@ -3,23 +3,26 @@ package com.example.grupo_6.Controller;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.*;
 
 import java.text.Normalizer;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class SuperAdminController {
@@ -53,19 +56,77 @@ public class SuperAdminController {
     @Autowired
     private HorarioAtencionRepository horarioAtencionRepository;
 
+    private void cargarEstadisticas(Model model, YearMonth mes, String rol) {
+        if (mes == null) {
+            mes = YearMonth.now();
+        }
+
+        LocalDate inicioMes = mes.atDay(1);
+        LocalDate finMes = mes.atEndOfMonth();
+        LocalDateTime inicioLdt = inicioMes.atStartOfDay();
+        LocalDateTime finLdt = finMes.atTime(LocalTime.MAX);
+        Timestamp inicioTs = Timestamp.valueOf(inicioLdt);
+        Timestamp finTs = Timestamp.valueOf(finLdt);
+
+        long reservasDelMes = reservaRepository.countByFechaCreacionBetween(inicioLdt, finLdt);
+        long usuariosTotales = (rol == null || rol.isEmpty())
+                ? usuarioRepository.count()
+                : usuarioRepository.countUsuariosPorNombreRol(rol);
+        long usuariosNuevos = usuarioRepository.countByCreateTimeBetween(inicioTs, finTs);
+
+        model.addAttribute("reservasDelMes", reservasDelMes);
+        model.addAttribute("usuariosTotales", usuariosTotales);
+        model.addAttribute("usuariosNuevos", usuariosNuevos);
+        model.addAttribute("mesActual", mes.toString());
+        model.addAttribute("rolActual", rol);
+    }
+
+
 
 
     // Vista principal del superadmin
     @GetMapping("/superadmin")
     public String superadminHome(Model model) {
-        System.out.println(" Entrando a controlador /superadmin");
+        System.out.println("Entrando a controlador /superadmin");
+
         model.addAttribute("rol", "superadmin");
-       // model.addAttribute("usuariosActivos", usuarioRepository.countByActivoTrue());
-        model.addAttribute("usuariosConectados", 0); // o elimínalo temporalmente
+        model.addAttribute("usuariosConectados", 0); // Temporal o lo puedes quitar
         model.addAttribute("totalReservas", reservaRepository.count());
         model.addAttribute("totalSedes", sedeRepository.count());
+
+        // Agregamos las métricas del mes actual y sin filtro de rol
+        YearMonth mesActual = YearMonth.now();
+        cargarEstadisticas(model, mesActual, null);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Reservas por día (para gráfico de línea)
+            List<Map<String, Object>> reservasPorDia = reservaRepository.countReservasPorDiaFormatted();
+            model.addAttribute("reservasPorDiaJson", objectMapper.writeValueAsString(reservasPorDia));
+
+            // Usuarios por rol (para gráfico de torta)
+            List<Map<String, Object>> usuariosPorRol = usuarioRepository.countUsuariosPorRolFormatted();
+            model.addAttribute("usuariosPorRolJson", objectMapper.writeValueAsString(usuariosPorRol));
+
+            // Reservas por estado (opcional)
+            List<Map<String, Object>> estadoReservas = reservaRepository.countReservasPorEstado()
+                    .stream()
+                    .map(row -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("estado", row[0]);
+                        map.put("cantidad", row[1]);
+                        return map;
+                    }).collect(Collectors.toList());
+            model.addAttribute("estadoReservasJson", objectMapper.writeValueAsString(estadoReservas));
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace(); // También puedes redirigir a una página de error o loguear mejor
+        }
+
         return "superadmin/superadmin_home";
     }
+
 
     // Vista de gestión de usuarios
 
@@ -210,18 +271,57 @@ public class SuperAdminController {
         return "error";       // Asegúrate de tener un error.html
     }
     @PostMapping("/superadmin/usuarios/guardar")
-    public String guardarUsuario(@ModelAttribute Usuario usuario) {
-        usuario.setEstado("activo"); // se registra como activo por defecto
-        usuario.setCreate_time(new Timestamp(System.currentTimeMillis())); // registrar fecha
+    public String guardarUsuario(@ModelAttribute Usuario usuario,
+                                 @RequestParam("rawPassword") String rawPassword,
+                                 RedirectAttributes attr) {
+
+        // Validar que el rol no sea Superadmin
+        if (usuario.getIdrol() != null && usuario.getIdrol() == 1) {
+            attr.addFlashAttribute("mensajeError", "No está permitido crear usuarios con rol Superadmin.");
+            return "redirect:/superadmin/usuarios/nuevo";
+        }
+
+        usuario.setEstado("activo");
+        usuario.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+        // Hashear contraseña
+        String passwordHash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        usuario.setPasswordHash(passwordHash);
+
         usuarioRepository.save(usuario);
+        attr.addFlashAttribute("mensajeExito", "Usuario registrado exitosamente.");
         return "redirect:/superadmin/usuarios";
     }
+
+
 
     @GetMapping("/superadmin/sedes")
     public String listarSedes(Model model) {
         List<Sede> sedes = sedeRepository.findAll();
         model.addAttribute("listaSedes", sedes);
         return "superadmin/superadmin_sedes";
+    }
+
+    @PostMapping("/superadmin/sedes/desactivar/{id}")
+    public String desactivarSede(@PathVariable("id") int id) {
+        Optional<Sede> optSede = sedeRepository.findById(id);
+        if (optSede.isPresent()) {
+            Sede sede = optSede.get();
+            sede.setActivo(false);
+            sedeRepository.save(sede);
+        }
+        return "redirect:/superadmin/sedes";
+    }
+
+    @PostMapping("/superadmin/sedes/activar/{id}")
+    public String activarSede(@PathVariable("id") int id) {
+        Optional<Sede> optSede = sedeRepository.findById(id);
+        if (optSede.isPresent()) {
+            Sede sede = optSede.get();
+            sede.setActivo(true);
+            sedeRepository.save(sede);
+        }
+        return "redirect:/superadmin/sedes";
     }
 
     @GetMapping("/superadmin/sedes/nueva")
@@ -409,15 +509,16 @@ public class SuperAdminController {
 
     @PostMapping("/superadmin/sedes/guardar")
     public String guardarSede(@ModelAttribute("sede") Sede sede) {
-        sedeRepository.save(sede); // Guarda la sede y genera el ID
+        // Establece el distrito fijo
+        sede.setDistrito("San Miguel");
 
-        // Solo si es nueva (sin id previo)
+        sedeRepository.save(sede);
+
         if (sede.getIdsede() != null && horarioAtencionRepository.countBySede(sede) == 0) {
             for (HorarioAtencion.DiaSemana dia : HorarioAtencion.DiaSemana.values()) {
                 HorarioAtencion ha = new HorarioAtencion();
                 ha.setSede(sede);
                 ha.setDiaSemana(dia);
-
                 if (dia == HorarioAtencion.DiaSemana.Domingo) {
                     ha.setHoraInicio(LocalTime.of(0, 0));
                     ha.setHoraFin(LocalTime.of(0, 0));
@@ -434,15 +535,8 @@ public class SuperAdminController {
         return "redirect:/superadmin/sedes";
     }
 
-    @PostMapping("/superadmin/sedes/desactivar/{id}")
-    public String desactivarSede(@PathVariable("id") Integer id) {
-        Optional<Sede> optional = sedeRepository.findById(id);
-        optional.ifPresent(sede -> {
-            sede.setActivo(false);
-            sedeRepository.save(sede);
-        });
-        return "redirect:/superadmin/sedes";
-    }
+
+
 
 
     @GetMapping("/superadmin/reservas")
@@ -472,28 +566,42 @@ public class SuperAdminController {
 
     @PostMapping("/superadmin/reservas/guardar")
     public String guardarReserva(@RequestParam("dni") String dni,
+                                 @RequestParam("idsedeServicio") Integer idsedeServicio,
+                                 @RequestParam("idhorario") Integer idhorario,
                                  @ModelAttribute("reserva") Reserva reserva,
                                  RedirectAttributes redirectAttributes) {
 
+
+
         Usuario usuario = usuarioRepository.findByDni(dni);
+        if (usuario == null) {
+            redirectAttributes.addFlashAttribute("mensajeError", "El DNI ingresado no corresponde a ningún usuario registrado.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
         Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
         Estado estadoPendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
         Estado estadoAprobadaReserva = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
         Estado estadoPagado = estadoRepository.findByNombreAndTipoAplicacion("pagado", Estado.TipoAplicacion.pago);
 
-        SedeServicio sedeServicio = reserva.getSedeServicio();
+        SedeServicio sedeServicio = sedeServicioRepository.findById(idsedeServicio).orElse(null);
 
-        // Obtener el objeto completo de horario
-        HorarioDisponible horario = horarioDisponibleRepository
-                .findById(reserva.getHorarioDisponible().getIdhorario())
-                .orElse(null);
-        reserva.setHorarioDisponible(horario);
+        if (sedeServicio == null) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se encontró el servicio seleccionado.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
 
-        // Validar que el horario esté definido y activo
+        reserva.setSedeServicio(sedeServicio);
+
+        HorarioDisponible horario = horarioDisponibleRepository.findById(idhorario).orElse(null);
         if (horario == null || !horario.getActivo()) {
             redirectAttributes.addFlashAttribute("mensajeError", "El horario seleccionado no es válido o está inactivo.");
             return "redirect:/superadmin/reservas/nueva";
         }
+        reserva.setHorarioDisponible(horario);
+
+        // Validar que el horario esté definido y activo
+
 
         // Validar que el horario corresponda al servicio seleccionado
         if (!horario.getServicio().equals(sedeServicio.getServicio())) {
@@ -502,7 +610,16 @@ public class SuperAdminController {
         }
 
         // Validar que el día de la reserva coincida con el día del horario
-        HorarioAtencion.DiaSemana diaReserva = HorarioAtencion.DiaSemana.valueOf(reserva.getFechaReserva().getDayOfWeek().name());
+        DayOfWeek dayOfWeek = reserva.getFechaReserva().getDayOfWeek();
+        HorarioAtencion.DiaSemana diaReserva = switch (dayOfWeek) {
+            case MONDAY    -> HorarioAtencion.DiaSemana.Lunes;
+            case TUESDAY   -> HorarioAtencion.DiaSemana.Martes;
+            case WEDNESDAY -> HorarioAtencion.DiaSemana.Miércoles;
+            case THURSDAY  -> HorarioAtencion.DiaSemana.Jueves;
+            case FRIDAY    -> HorarioAtencion.DiaSemana.Viernes;
+            case SATURDAY  -> HorarioAtencion.DiaSemana.Sábado;
+            case SUNDAY    -> HorarioAtencion.DiaSemana.Domingo;
+        };
         HorarioAtencion.DiaSemana diaHorario = horario.getHorarioAtencion().getDiaSemana();
 
         if (!diaReserva.equals(diaHorario)) {
@@ -717,25 +834,18 @@ public class SuperAdminController {
 
 
     @GetMapping("/superadmin/estadisticas")
-    public String verEstadisticas(Model model) {
-        model.addAttribute("reservasPorDia", reservaRepository.countReservasPorDia());
-        model.addAttribute("serviciosPopulares", reservaRepository.countReservasPorServicio());
-        model.addAttribute("estadoReservas", reservaRepository.countReservasPorEstado());
-
-        // convertir idrol -> nombre
-        List<Object[]> usuariosPorRolRaw = usuarioRepository.countUsuariosPorRol();
-        Map<String, Long> usuariosPorRol = new LinkedHashMap<>();
-        for (Object[] row : usuariosPorRolRaw) {
-            Integer idrol = (Integer) row[0];
-            Long count = (Long) row[1];
-            String nombreRol = rolRepository.findById(idrol).map(Rol::getNombre).orElse("Desconocido");
-            usuariosPorRol.put(nombreRol, count);
-        }
-
-        model.addAttribute("usuariosPorRol", usuariosPorRol);
-
+    public String verEstadisticas(@RequestParam(value = "mes", required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mes,
+                                  @RequestParam(value = "rol", required = false) String rol,
+                                  Model model) {
+        cargarEstadisticas(model, mes, rol);
         return "superadmin/superadmin_estadisticas";
     }
+
+
+
+
+
+
 
 
     @GetMapping("/superadmin/sistema")

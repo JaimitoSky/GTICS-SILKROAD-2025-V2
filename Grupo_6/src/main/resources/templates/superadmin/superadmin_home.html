@@ -47,23 +47,118 @@
                     </div>
                 </div>
             </div> -->
-            <div class="col-sm-6 col-xl-3">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <h5 class="card-title">Reservas Totales</h5>
-                        <h2 th:text="${totalReservas}">0</h2>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+                <h1 class="h3 mb-4"><strong>Dashboard General</strong> - Super Admin</h1>
+
+                <!-- Métricas rápidas -->
+                <div class="row mb-4">
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">Reservas del Mes</h5>
+                                <h2 th:text="${reservasDelMes}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">Reservas Totales</h5>
+                                <h2 th:text="${totalReservas}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Sedes Registradas</h5>
+                                <h2 th:text="${totalSedes}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5 class="card-title">Usuarios Nuevos (Mes)</h5>
+                                <h2 th:text="${usuariosNuevos}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header"><strong>Reservas por Día (Mes)</strong></div>
+                            <div class="card-body">
+                                <canvas id="chartReservasMes"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-header"><strong>Usuarios por Rol</strong></div>
+                            <div class="card-body">
+                                <canvas id="chartUsuariosRol"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-xl-3">
-                <div class="card text-white bg-warning">
-                    <div class="card-body">
-                        <h5 class="card-title">Total de Sedes</h5>
-                        <h2 th:text="${totalSedes}">0</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script th:inline="javascript">
+            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]);
+            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]);
+
+            console.log("reservasPorDia:", reservasPorDia);
+            console.log("usuariosPorRol:", usuariosPorRol);
+        </script>
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                if (document.getElementById("chartReservasMes")) {
+                    new Chart(document.getElementById("chartReservasMes"), {
+                        type: "line",
+                        data: {
+                            labels: reservasPorDia.map(e => e.dia),
+                            datasets: [{
+                                label: "Reservas",
+                                data: reservasPorDia.map(e => e.cantidad),
+                                borderColor: "#0d6efd",
+                                fill: false,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                if (document.getElementById("chartUsuariosRol")) {
+                    new Chart(document.getElementById("chartUsuariosRol"), {
+                        type: "doughnut",
+                        data: {
+                            labels: usuariosPorRol.map(e => e.rol),
+                            datasets: [{
+                                data: usuariosPorRol.map(e => e.total),
+                                backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#20c997"]
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+                }
+            });
+        </script>
+
+
 
         <!-- Comentado: Actividad y alertas -->
         <!--

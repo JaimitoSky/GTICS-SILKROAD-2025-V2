@@ -11,6 +11,8 @@
     <groupId>com.example</groupId>
     <artifactId>Grupo_6</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
     <name>Grupo_6</name>
     <description>Grupo_6</description>
     <url/>
@@ -132,6 +134,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
             <!-- Plugin de recursos configurado para UTF-8 -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>

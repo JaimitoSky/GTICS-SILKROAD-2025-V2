@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
     <!-- Estilos internos -->
 
@@ -82,6 +86,13 @@
                                 <p class="form-control-plaintext" th:text="${sede.longitud}">-77.0</p>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Ubicación en el Mapa:</label>
+                                <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
+                            </div>
+                        </div>
+
 
                         <!-- Servicios asociados -->
                         <div class="row mb-3">
@@ -103,6 +114,22 @@
                 </div>
             </div>
         </main>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const lat = [[${sede.latitud}]];
+            const lng = [[${sede.longitud}]];
+
+            const map = L.map('map').setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('Ubicación de la sede')
+                .openPopup();
+            /*]]>*/
+        </script>
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">

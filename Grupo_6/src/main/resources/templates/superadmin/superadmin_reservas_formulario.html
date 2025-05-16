@@ -51,13 +51,12 @@
                                     <option value="">Seleccione una sede</option>
                                     <option th:each="sede : ${listaSedes}" th:value="${sede.idsede}" th:text="${sede.nombre}"></option>
                                 </select>
-
                             </div>
 
-                            <!-- SERVICIO (se cargará según sede) -->
+                            <!-- SERVICIO -->
                             <div class="mb-3">
                                 <label class="form-label">Servicio</label>
-                                <select id="servicio-select" name="sedeServicio" class="form-select" required>
+                                <select id="servicio-select" name="idsedeServicio" class="form-select" required>
                                     <option value="">Seleccione una sede primero</option>
                                 </select>
                             </div>
@@ -65,19 +64,17 @@
                             <!-- FECHA -->
                             <div class="mb-3">
                                 <label class="form-label">Fecha de Reserva</label>
-                                <input type="date" class="form-control" id="fechaReserva" name="fechaReserva" th:field="*{fechaReserva}" required>
+                                <input type="date" class="form-control" id="fechaReserva" name="fechaReserva"
+                                       th:field="*{fechaReserva}" required>
                             </div>
 
-                            <!-- Horario Disponible -->
+                            <!-- HORARIO -->
                             <div class="mb-3">
                                 <label class="form-label">Horario Disponible</label>
-                                <select class="form-select" name="horarioDisponible.idhorario" id="horarioDisponible" required>
+                                <select class="form-select" name="idhorario" id="horarioDisponible" required>
                                     <option value="">Seleccione servicio y fecha</option>
                                 </select>
                             </div>
-
-
-
 
                             <button type="submit" class="btn btn-success">Registrar Reserva</button>
                             <a th:href="@{/superadmin/reservas}" class="btn btn-secondary">Cancelar</a>
@@ -96,10 +93,8 @@
 
             let diasPermitidos = [];
 
-            // Cargar servicios al cambiar sede
             sedeSelect.addEventListener("change", function () {
                 const sedeId = this.value;
-
                 servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
                 horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
 
@@ -115,16 +110,15 @@
                         });
                     });
 
-                // Cargar días permitidos
                 fetch(`/api/dias-activos?idsede=${sedeId}`)
                     .then(res => res.json())
                     .then(data => {
-                        diasPermitidos = data.map(d => d.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ''));
-                        console.log("Días permitidos actualizados:", diasPermitidos);
+                        diasPermitidos = data.map(d =>
+                            d.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '')
+                        );
                     });
             });
 
-            // Cargar horarios disponibles
             function cargarHorariosDisponibles() {
                 const sedeServicioId = servicioSelect.value;
                 const fechaStr = fechaInput.value;
@@ -135,18 +129,20 @@
                     return;
                 }
 
-                const fechaReservaDate = new Date(fechaStr);
+                const [year, month, day] = fechaStr.split("-");
+                const fechaReserva = new Date(year, month - 1, day);
+
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
 
-                if (fechaReservaDate < hoy) {
+                if (fechaReserva < hoy) {
                     alert("La fecha no puede ser pasada.");
                     horarioSelect.innerHTML = '<option value="">Fecha inválida</option>';
                     return;
                 }
 
-                let diaSemana = fechaReservaDate.toLocaleDateString('es-PE', { weekday: 'long' });
-                diaSemana = diaSemana.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ''); // Ej: "SÁBADO" → "SABADO"
+                let diaSemana = fechaReserva.toLocaleDateString('es-PE', { weekday: 'long' });
+                diaSemana = diaSemana.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
 
                 if (!diasPermitidos.includes(diaSemana)) {
                     alert(`No se permiten reservas el día ${diaSemana.toLowerCase()}.`);
@@ -154,7 +150,7 @@
                     return;
                 }
 
-                fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}&fecha=${fechaStr}`)
+                fetch(`/api/horarios-disponibles-por-fecha?sedeServicioId=${sedeServicioId}&fecha=${fechaStr}`)
                     .then(res => res.json())
                     .then(data => {
                         if (!Array.isArray(data) || data.length === 0) {
@@ -187,9 +183,10 @@
                     });
             }
 
-            fechaInput.addEventListener("change", cargarHorariosDisponibles);
             servicioSelect.addEventListener("change", cargarHorariosDisponibles);
+            fechaInput.addEventListener("change", cargarHorariosDisponibles);
         </script>
+
 
 
 

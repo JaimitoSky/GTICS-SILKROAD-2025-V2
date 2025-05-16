@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -51,6 +54,36 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     CoordinadorPerfilDTO obtenerPerfilCoordinadorPorId(Integer id);
 
     Usuario findByIdusuario(Integer idusuario);
+
+
+    //
+
+    // Para contar usuarios nuevos en el mes
+    long countByCreateTimeBetween(Timestamp inicio, Timestamp fin);
+
+    // Para contar usuarios por nombre de rol
+    @Query("""
+    SELECT COUNT(u)
+    FROM Usuario u
+    JOIN Rol r ON u.idrol = r.idrol
+    WHERE LOWER(r.nombre) = LOWER(:nombre)
+""")
+    long countUsuariosPorNombreRol(@Param("nombre") String nombre);
+
+    @Query("SELECT r.nombre, COUNT(u) FROM Usuario u JOIN u.rol r GROUP BY r.nombre")
+    List<Object[]> countUsuariosPorRolRaw();
+    default List<java.util.Map<String, Object>> countUsuariosPorRolFormatted() {
+        return countUsuariosPorRolRaw().stream()
+                .map(row -> {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("rol", row[0]);
+                    map.put("total", row[1]);
+                    return map;
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+
 
 }
 

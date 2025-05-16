@@ -37,6 +37,7 @@
 
 				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}">
 					<div class="row">
+						<!-- Columna Izquierda -->
 						<div class="col-12 col-lg-6">
 							<div class="card mb-3">
 								<div class="card-header">
@@ -45,24 +46,25 @@
 								<div class="card-body">
 									<div class="mb-3">
 										<label class="form-label">DNI</label>
-										<input type="text" th:field="*{dni}" class="form-control" />
+										<input type="text" th:field="*{dni}" class="form-control" required />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Nombres</label>
-										<input type="text" th:field="*{nombres}" class="form-control" />
+										<input type="text" th:field="*{nombres}" class="form-control" required />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Apellidos</label>
-										<input type="text" th:field="*{apellidos}" class="form-control" />
+										<input type="text" th:field="*{apellidos}" class="form-control" required />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Email</label>
-										<input type="text" th:field="*{email}" class="form-control" />
+										<input type="email" th:field="*{email}" class="form-control" required />
 									</div>
 								</div>
 							</div>
 						</div>
 
+						<!-- Columna Derecha -->
 						<div class="col-12 col-lg-6">
 							<div class="card mb-3">
 								<div class="card-header">
@@ -70,36 +72,32 @@
 								</div>
 								<div class="card-body">
 									<div class="mb-3">
-										<label class="form-label">Password Hash</label>
-										<input type="text" name="passwordHash" class="form-control" required>
-									</div>
-									<div class="mb-3">
-										<label class="form-label">Password Salt</label>
-										<input type="text" name="passwordSalt" class="form-control" required>
+										<label class="form-label">Contraseña</label>
+										<input type="password" name="rawPassword" class="form-control" required />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Teléfono</label>
-										<input type="text" name="telefono" class="form-control" required>
+										<input type="text" th:field="*{telefono}" class="form-control" required />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Dirección</label>
-										<textarea name="direccion" class="form-control" rows="2"></textarea>
+										<textarea th:field="*{direccion}" class="form-control" rows="2" required></textarea>
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Rol</label>
-										<select th:field="*{idrol}" class="form-select">
-											<option value="1">Superadmin</option>
+										<select th:field="*{idrol}" class="form-select" required>
 											<option value="2">Administrador</option>
 											<option value="3">Coordinador</option>
 											<option value="4">Vecino</option>
 										</select>
 									</div>
+
 									<div class="mb-3 form-check">
-										<input type="checkbox" name="notificar_recordatorio" class="form-check-input" id="recordatorio">
+										<input type="checkbox" th:field="*{notificarRecordatorio}" class="form-check-input" id="recordatorio" />
 										<label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
 									</div>
 									<div class="mb-3 form-check">
-										<input type="checkbox" name="notificar_disponibilidad" class="form-check-input" id="disponibilidad">
+										<input type="checkbox" th:field="*{notificarDisponibilidad}" class="form-check-input" id="disponibilidad" />
 										<label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
 									</div>
 									<button type="submit" class="btn btn-success">Registrar Usuario</button>
@@ -110,6 +108,8 @@
 				</form>
 			</div>
 		</main>
+
+
 
 
 		<script>

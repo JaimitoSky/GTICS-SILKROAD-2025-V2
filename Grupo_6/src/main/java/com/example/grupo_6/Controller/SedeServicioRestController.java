@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -18,8 +21,15 @@ public class SedeServicioRestController {
     private SedeServicioRepository sedeServicioRepository;
 
     @GetMapping("/servicios-por-sede/{idSede}")
-    public List<ServicioPorSedeDTO> obtenerServiciosPorSedeDTO(@PathVariable("idSede") Integer idSede) {
-        return sedeServicioRepository.obtenerServiciosPorSede(idSede);
+    public List<Map<String, Object>> obtenerServiciosPorSedeDTO(@PathVariable("idSede") Integer idSede) {
+        List<ServicioPorSedeDTO> lista = sedeServicioRepository.obtenerServiciosPorSede(idSede);
+        return lista.stream().map(dto -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("idSedeServicio", dto.getIdSedeServicio());
+            m.put("nombre", dto.getNombre());
+            return m;
+        }).collect(Collectors.toList());
     }
+
 }
 

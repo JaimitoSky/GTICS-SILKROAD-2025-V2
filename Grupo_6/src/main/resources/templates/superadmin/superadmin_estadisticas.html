@@ -34,59 +34,52 @@
 
                 <h1 class="h3 mb-4"><strong>Estadísticas Generales</strong> - Super Admin</h1>
 
+                <form method="get" th:action="@{/superadmin/estadisticas}" class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Filtrar por mes</label>
+                        <input type="month" class="form-control" name="mes" th:value="${mesActual}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Filtrar por rol</label>
+                        <select class="form-select" name="rol">
+                            <option value="">Todos</option>
+                            <option value="VECINO" th:selected="${rolActual == 'VECINO'}">Vecino</option>
+                            <option value="COORDINADOR" th:selected="${rolActual == 'COORDINADOR'}">Coordinador</option>
+                            <option value="SUPERADMIN" th:selected="${rolActual == 'SUPERADMIN'}">SuperAdmin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                    </div>
+                </form>
+
                 <div class="row">
-                    <!-- Reservas por día -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card flex-fill w-100">
-                            <div class="card-header">
-                                <h5 class="card-title">Reservas por Día</h5>
-                                <h6 class="card-subtitle text-muted">Cantidad de reservas registradas en la última semana.</h6>
-                            </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light text-dark mb-3">
+                            <div class="card-header">Reservas del mes</div>
                             <div class="card-body">
-                                <canvas id="chart-reservas-dia" height="300"></canvas>
+                                <h3 class="card-title" th:text="${reservasDelMes}">0</h3>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Servicios más reservados -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Servicios Más Usados</h5>
-                                <h6 class="card-subtitle text-muted">Comparativa entre los servicios deportivos disponibles.</h6>
-                            </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light text-dark mb-3">
+                            <div class="card-header">Usuarios totales</div>
                             <div class="card-body">
-                                <canvas id="chart-servicios" height="300"></canvas>
+                                <h3 class="card-title" th:text="${usuariosTotales}">0</h3>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Distribución de usuarios -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Tipos de Usuario</h5>
-                                <h6 class="card-subtitle text-muted">Porcentaje de participación de vecinos, coordinadores, etc.</h6>
-                            </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light text-dark mb-3">
+                            <div class="card-header">Usuarios nuevos (este mes)</div>
                             <div class="card-body">
-                                <canvas id="chart-usuarios" height="252"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Estado de reservas -->
-                    <div class="col-12 col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Estado de Reservas</h5>
-                                <h6 class="card-subtitle text-muted">Distribución de reservas confirmadas, pendientes o canceladas.</h6>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="chart-estados" height="252"></canvas>
+                                <h3 class="card-title" th:text="${usuariosNuevos}">0</h3>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </main>
 

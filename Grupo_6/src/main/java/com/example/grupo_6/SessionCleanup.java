@@ -15,8 +15,14 @@ public class SessionCleanup {
 
     @PostConstruct
     public void clearSessions() {
-        jdbcTemplate.update("DELETE FROM SPRING_SESSION_ATTRIBUTES");
-        jdbcTemplate.update("DELETE FROM SPRING_SESSION");
-        System.out.println("🧹 Sesiones eliminadas al iniciar el servidor.");
+        try {
+            jdbcTemplate.queryForObject("SELECT 1 FROM SPRING_SESSION LIMIT 1", Integer.class);
+            jdbcTemplate.update("DELETE FROM SPRING_SESSION_ATTRIBUTES");
+            jdbcTemplate.update("DELETE FROM SPRING_SESSION");
+            System.out.println("🧹 Sesiones eliminadas al iniciar el servidor.");
+        } catch (Exception e) {
+            System.err.println("⚠️ Las tablas de sesión no existen o no se pueden limpiar: " + e.getMessage());
+        }
     }
+
 }

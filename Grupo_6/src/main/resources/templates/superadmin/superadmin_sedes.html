@@ -73,10 +73,18 @@
                                     <a th:href="@{/superadmin/sedes/ver/{id}(id=${sede.idsede})}" class="btn btn-sm btn-primary">Ver</a>
                                     <a th:href="@{/superadmin/sedes/editar/{id}(id=${sede.idsede})}" class="btn btn-sm btn-warning">Editar</a>
                                     <a th:href="@{/superadmin/sedes/configurar/{id}(id=${sede.idsede})}" class="btn btn-sm btn-info">Configurar</a>
-                                    <form th:action="@{/superadmin/sedes/desactivar/{id}(id=${sede.idsede})}" method="post" style="display:inline;">
+                                    <!-- Si está activa: mostrar botón Desactivar -->
+                                    <form th:if="${sede.activo}" th:action="@{'/superadmin/sedes/desactivar/' + ${sede.idsede}}" method="post" style="display:inline;">
                                         <button type="submit" class="btn btn-sm btn-danger"
                                                 onclick="return confirm('¿Desactivar esta sede?');">Desactivar</button>
                                     </form>
+
+                                    <!-- Si está inactiva: mostrar botón Activar -->
+                                    <form th:if="${!sede.activo}" th:action="@{'/superadmin/sedes/activar/' + ${sede.idsede}}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-success"
+                                                onclick="return confirm('¿Activar esta sede?');">Activar</button>
+                                    </form>
+
                                 </td>
                             </tr>
                             </tbody>

@@ -10,10 +10,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
     <!-- Estilos internos -->
 
 </head>
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap">
+</script>
+
 <body>
 <div class="wrapper">
     <!-- Sidebar -->
@@ -81,6 +90,13 @@
                                         <label class="form-check-label" for="activoCheck">¿Sede activa?</label>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <label class="form-label">Ubicación en el mapa</label>
+                                        <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
+                                    </div>
+
+
+
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-primary">Actualizar Sede</button>
                                         <a th:href="@{/superadmin/sedes}" class="btn btn-secondary">Cancelar</a>
@@ -93,11 +109,35 @@
             </div>
         </main>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const latInput = document.querySelector("input[name='latitud']");
+                const lngInput = document.querySelector("input[name='longitud']");
+
+                const initialLat = parseFloat(latInput.value) || -12.0758;
+                const initialLng = parseFloat(lngInput.value) || -77.0902;
+
+                const map = L.map('map').setView([initialLat, initialLng], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+
+                marker.on('dragend', function (e) {
+                    const pos = marker.getLatLng();
+                    latInput.value = pos.lat.toFixed(8);
+                    lngInput.value = pos.lng.toFixed(8);
+                });
+            });
+        </script>
 
 
 
 
-                                        <!-- Footer -->
+
+        <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">
             <div class="container text-center text-muted">
                 Municipalidad de San Miguel © 2025

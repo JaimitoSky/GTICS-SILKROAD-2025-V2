@@ -1,5 +1,6 @@
 package com.example.grupo_6.Controller;
 
+import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.HorarioAtencionRepository;
 import com.example.grupo_6.Repository.HorarioDisponibleRepository;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -60,6 +62,47 @@ public class HorarioDisponibleRestController {
                 })
                 .collect(Collectors.toList());
     }
+
+    @GetMapping("/horarios-disponibles-por-fecha")
+    public List<Map<String, String>> obtenerHorariosPorFecha(
+            @RequestParam("sedeServicioId") Integer sedeServicioId,
+            @RequestParam("fecha") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecha
+    ) {
+        Optional<SedeServicio> ssOpt = sedeServicioRepository.findById(sedeServicioId);
+        if (ssOpt.isEmpty() || fecha == null) return List.of();
+
+        SedeServicio ss = ssOpt.get();
+        Integer idSede = ss.getSede().getIdsede();
+        Integer idServicio = ss.getServicio().getIdservicio();
+        HorarioAtencion.DiaSemana diaSemana = switch (fecha.getDayOfWeek()) {
+            case MONDAY    -> HorarioAtencion.DiaSemana.Lunes;
+            case TUESDAY   -> HorarioAtencion.DiaSemana.Martes;
+            case WEDNESDAY -> HorarioAtencion.DiaSemana.Miércoles;
+            case THURSDAY  -> HorarioAtencion.DiaSemana.Jueves;
+            case FRIDAY    -> HorarioAtencion.DiaSemana.Viernes;
+            case SATURDAY  -> HorarioAtencion.DiaSemana.Sábado;
+            case SUNDAY    -> HorarioAtencion.DiaSemana.Domingo;
+        };
+
+        System.out.println("Fecha: " + fecha);
+        System.out.println("DayOfWeek: " + fecha.getDayOfWeek());
+        System.out.println("DiaSemana (enum): " + diaSemana);
+
+
+        List<HorarioDisponible> lista = horarioDisponibleRepository
+                .findBySedeAndServicioAndDiaSemanaActivos(idSede, idServicio, diaSemana);
+
+        return lista.stream().map(h -> {
+            Map<String, String> m = new HashMap<>();
+            m.put("idhorario", String.valueOf(h.getIdhorario()));
+            m.put("horaInicio", h.getHoraInicio().toString());
+            m.put("horaFin", h.getHoraFin().toString());
+            return m;
+        }).collect(Collectors.toList());
+    }
+
+
+
 
     //  POST - Agregar horario disponible
     @PostMapping("/horarios-disponibles")

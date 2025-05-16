@@ -1,15 +1,18 @@
 package com.example.grupo_6.Repository;
 
 import com.example.grupo_6.Entity.*;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Map; import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 
@@ -18,6 +21,18 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
     @Query("SELECT r.fechaReserva, COUNT(r) FROM Reserva r GROUP BY r.fechaReserva")
     List<Object[]> countReservasPorDia();
+    default List<Map<String, Object>> countReservasPorDiaFormatted() {
+        return countReservasPorDia().stream()
+                .map(row -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("dia", ((LocalDate) row[0]).toString());
+                    map.put("cantidad", ((Number) row[1]).intValue());
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
+
 
 
     @Query("SELECT r.sedeServicio.servicio.nombre, COUNT(r) FROM Reserva r GROUP BY r.sedeServicio.servicio.nombre")
@@ -59,6 +74,13 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     ORDER BY r.fechaReserva DESC
 """)
     List<Reserva> buscarHistorialReservasPorSede(@Param("idSede") Integer idSede);
+
+
+    // ReservaRepository.java
+    long countByFechaCreacionBetween(LocalDateTime inicio, LocalDateTime fin);
+
+    @Query("SELECT COUNT(u) FROM Usuario u JOIN Rol r ON u.idrol = r.idrol WHERE LOWER(r.nombre) = LOWER(:nombre)")
+    long countUsuariosPorNombreRol(@Param("nombre") String nombre);
 
 
 
