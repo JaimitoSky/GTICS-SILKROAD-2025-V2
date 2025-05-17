@@ -36,9 +36,8 @@ public class Servicio {
     private LocalTime horarioFin;
 
     @Lob
-    @Column(name = "imagen_complejo")
+    @Column(name = "imagen_complejo", columnDefinition = "LONGBLOB")
     private byte[] imagenComplejo;
-
 
     public byte[] getImagenComplejo() {
         return imagenComplejo;
