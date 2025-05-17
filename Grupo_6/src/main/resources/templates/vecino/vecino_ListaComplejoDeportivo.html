@@ -41,14 +41,17 @@
                             <div class="row">
                                 <div class="col-md-4 mb-4" th:each="complejo : ${complejos}">
                                     <div class="card h-100">
-                                        <img th:src="@{'/vecino/imagen/' + ${complejo[3]}}" class="card-img-top" style="height: 300px; object-fit: cover;" alt="Imagen del complejo">
+                                        <img th:src="@{'/vecino/imagen/' + ${complejo.idServicio}}"
+                                             class="card-img-top" style="height: 300px; object-fit: cover;"
+                                             alt="Imagen del complejo">
                                         <div class="card-body">
-                                            <h5 class="card-title" th:text="${complejo[0]}">Nombre Servicio</h5>
-                                            <p class="card-text" th:text="|${complejo[1]} - ${complejo[2]}|">Sede - Dirección</p>
-                                            <a th:href="@{'/vecino/complejo/detalle/' + ${complejo[3]}}" class="btn btn-primary">Más detalles</a>
-
+                                            <h5 class="card-title" th:text="${complejo.nombreServicio}">Nombre Servicio</h5>
+                                            <p class="card-text" th:text="|${complejo.nombreSede} - ${complejo.direccion}|">Sede - Dirección</p>
+                                            <a th:href="@{'/vecino/complejo/detalle/' + ${complejo.idServicio}}" class="btn btn-primary">Más detalles</a>
                                         </div>
                                     </div>
+
+
                                 </div>
                             </div>
 

@@ -1,13 +1,16 @@
 package com.example.grupo_6.Controller;
+import com.example.grupo_6.Dto.ServicioSimplificado;
 import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.UsuarioRepository;
 import com.example.grupo_6.Repository.ServicioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import com.example.grupo_6.Repository.SedeServicioRepository;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +19,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import com.example.grupo_6.Entity.Reserva;
 import com.example.grupo_6.Repository.ReservaRepository;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLConnection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import com.example.grupo_6.Repository.PagoRepository;
@@ -161,23 +168,61 @@ public class VecinoController {
 
     @GetMapping("/ListaComplejoDeportivo")
     public String mostrarComplejosPorTipo(@RequestParam("idtipo") int idtipo, Model model) {
-        model.addAttribute("complejos", sedeServicioRepository.listarServiciosSimplificadosPorTipo(idtipo));
-        return "vecino/vecino_ListaComplejoDeportivo"; // Asegúrate que el archivo exista
+        List<ServicioSimplificado> complejos = sedeServicioRepository.listarServiciosSimplificadosPorTipo(idtipo);
+
+        // Debug temporal
+        for (ServicioSimplificado c : complejos) {
+            System.out.println("ID: " + c.getIdServicio() +
+                    " | Nombre: " + c.getNombreServicio() +
+                    " | Imagen: /vecino/imagen/" + c.getIdServicio());
+        }
+
+        model.addAttribute("complejos", complejos);
+        return "vecino/vecino_ListaComplejoDeportivo";
     }
+
+
+
+
     @GetMapping("/imagen/{id}")
     @ResponseBody
     public ResponseEntity<byte[]> mostrarImagen(@PathVariable("id") Integer id) {
-        var servicioOpt = servicioRepository.findById(id);
+        Optional<Servicio> servicioOpt = servicioRepository.findById(id);
 
-        if (servicioOpt.isPresent() && servicioOpt.get().getImagenComplejo() != null) {
-            byte[] imagen = servicioOpt.get().getImagenComplejo();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_JPEG); // o IMAGE_PNG si tu imagen es PNG
-            return new ResponseEntity<>(imagen, headers, HttpStatus.OK);
+        if (servicioOpt.isPresent()) {
+            Servicio servicio = servicioOpt.get();
+            System.out.println("Servicio encontrado: " + servicio.getNombre());
+
+            byte[] imagen = servicio.getImagenComplejo();
+            if (imagen != null && imagen.length > 0) {
+                System.out.println("Imagen encontrada, tamaño: " + imagen.length);
+
+                MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+                try {
+                    String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imagen));
+                    if (mimeType != null) {
+                        mediaType = MediaType.parseMediaType(mimeType);
+                    }
+                } catch (IOException ignored) {}
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(mediaType);
+                return new ResponseEntity<>(imagen, headers, HttpStatus.OK);
+            } else {
+                System.out.println("Servicio con ID " + id + " no tiene imagen.");
+            }
         } else {
-            return ResponseEntity.notFound().build(); // o puedes devolver una imagen por defecto
+            System.out.println("Servicio no encontrado con ID: " + id);
         }
+
+        return ResponseEntity.notFound().build();
     }
+
+
+
+
+
+
     @GetMapping("/complejo/detalle/{id}")
     public String mostrarDetalleComplejo(@PathVariable("id") Integer id, Model model) {
         Optional<SedeServicio> sedeServicioOpt = sedeServicioRepository.obtenerDetalleComplejoPorId(id);
@@ -243,6 +288,8 @@ public class VecinoController {
             reserva.setEstado(estadoPendienteReserva); // siempre será pendiente
 
             reservaRepository.save(reserva);
+            model.addAttribute("hoy", LocalDate.now());
+
             model.addAttribute("reserva", reserva);
             model.addAttribute("usuario", usuario);
             model.addAttribute("servicio", sedeServicio.getServicio());

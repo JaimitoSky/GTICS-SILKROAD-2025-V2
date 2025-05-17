@@ -1,5 +1,6 @@
 package com.example.grupo_6.Repository;
 
+import com.example.grupo_6.Dto.ServicioSimplificado;
 import com.example.grupo_6.Entity.*;
 import java.util.Map; import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,6 +32,19 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Query("""
+    SELECT s.nombre AS nombreServicio,
+           se.nombre AS nombreSede,
+           se.direccion AS direccion,
+           s.idservicio AS idServicio
+    FROM SedeServicio ss
+    JOIN ss.servicio s
+    JOIN ss.sede se
+    WHERE s.tipoServicio.idtipo = ?1 AND s.estado.idestado = 4
+    """)
+    List<ServicioSimplificado> listarServiciosSimplificadosPorTipo(int idtipo);
+
 
 
 

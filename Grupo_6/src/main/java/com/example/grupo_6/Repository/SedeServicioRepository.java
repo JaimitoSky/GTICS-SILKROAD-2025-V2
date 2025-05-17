@@ -1,4 +1,5 @@
 package com.example.grupo_6.Repository;
+import com.example.grupo_6.Dto.ServicioSimplificado;
 import com.example.grupo_6.Repository.SedeServicioRepository;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.SedeServicio;
@@ -28,13 +29,18 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     Optional<SedeServicio> findBySede_IdsedeAndServicio_Idservicio(Integer idsede, Integer idservicio);
 
     @Query("""
-    SELECT s.nombre, se.nombre, se.direccion, s.idservicio
+    SELECT 
+        s.nombre AS nombreServicio, 
+        se.nombre AS nombreSede, 
+        se.direccion AS direccion, 
+        s.idservicio AS idServicio
     FROM SedeServicio ss
     JOIN ss.servicio s
     JOIN ss.sede se
     WHERE s.tipoServicio.idtipo = ?1 AND s.estado.idestado = 4
 """)
-    List<Object[]> listarServiciosSimplificadosPorTipo(int idtipo);
+    List<ServicioSimplificado> listarServiciosSimplificadosPorTipo(int idtipo);
+
 
 
     @Query("""
@@ -45,5 +51,7 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
         WHERE ss.idSedeServicio = :id
     """)
     Optional<SedeServicio> obtenerDetalleComplejoPorId(@Param("id") Integer id);
+
+
 
 }

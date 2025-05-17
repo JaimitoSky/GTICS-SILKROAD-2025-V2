@@ -22,7 +22,6 @@
                 <main class="content">
                     <div class="container-fluid p-4">
 
-                        <!-- Opciones de Reservar -->
                         <div th:replace="~{fragments/opciones-reserva :: opciones-reserva}"></div>
 
                         <div class="container mt-4">
@@ -38,7 +37,7 @@
                                         </select>
                                     </div>
 
-                                    <!-- SERVICIO (se cargará según sede) -->
+                                    <!-- SERVICIO -->
                                     <div class="mb-3">
                                         <label class="form-label">Servicio</label>
                                         <select id="servicio-select" name="sedeServicio.idSedeServicio" class="form-select" required>
@@ -49,18 +48,14 @@
                                     <!-- FECHA -->
                                     <div class="mb-3">
                                         <label class="form-label">Fecha de Reserva</label>
-                                        <input type="date" class="form-control" id="fechaReserva" name="fechaReserva" th:field="*{fechaReserva}" required>
+                                        <input type="date" class="form-control" id="fechaReserva" name="fechaReserva" required>
                                     </div>
 
                                     <!-- HORARIO DISPONIBLE -->
                                     <div class="mb-3">
                                         <label class="form-label">Horario Disponible</label>
                                         <select class="form-select" name="horarioDisponible.idhorario" id="horarioDisponible" required>
-                                            <option value="">Seleccione un horario</option>
-                                            <option th:each="horario : ${listaHorarios}"
-                                                    th:value="${horario.idhorario}"
-                                                    th:text="${#temporals.format(horario.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(horario.horaFin, 'HH:mm')}">
-                                            </option>
+                                            <option value="">Seleccione servicio y fecha</option>
                                         </select>
                                     </div>
 
@@ -69,49 +64,39 @@
                                 </form>
 
                                 <script>
-                                    const servicioSelect = document.getElementById("servicio-select");
                                     const sedeSelect = document.getElementById("sede-select");
+                                    const servicioSelect = document.getElementById("servicio-select");
                                     const fechaInput = document.getElementById("fechaReserva");
                                     const horarioSelect = document.getElementById("horarioDisponible");
 
-                                    // Cargar servicios según sede seleccionada
                                     sedeSelect.addEventListener("change", function () {
                                         const sedeId = this.value;
-                                        servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
-                                        horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
+                                        servicioSelect.innerHTML = '<option>Cargando servicios...</option>';
+                                        horarioSelect.innerHTML = '<option>Seleccione servicio y fecha</option>';
 
                                         fetch(`/api/servicios-por-sede/${sedeId}`)
                                             .then(res => res.json())
                                             .then(data => {
                                                 servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
                                                 data.forEach(s => {
-                                                    let option = document.createElement("option");
-                                                    option.value = s.idSedeServicio;
-                                                    option.textContent = s.nombre;
-                                                    servicioSelect.appendChild(option);
+                                                    const opt = document.createElement("option");
+                                                    opt.value = s.idSedeServicio;
+                                                    opt.textContent = s.nombre;
+                                                    servicioSelect.appendChild(opt);
                                                 });
-                                            })
-                                            .catch(err => {
-                                                console.error("Error cargando servicios", err);
-                                                servicioSelect.innerHTML = '<option>Error al cargar</option>';
                                             });
                                     });
 
-                                    // Cargar horarios disponibles según servicio y fecha
                                     function cargarHorariosDisponibles() {
                                         const sedeServicioId = servicioSelect.value;
                                         const fecha = fechaInput.value;
 
-                                        if (!sedeServicioId || sedeServicioId === "undefined") {
-                                            horarioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+                                        if (!sedeServicioId || !fecha) {
+                                            horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
                                             return;
                                         }
 
-                                        if (!fecha) {
-                                            return;
-                                        }
-
-                                        fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}&fecha=${fecha}`)
+                                        fetch(`/api/horarios-disponibles-por-fecha?sedeServicioId=${sedeServicioId}&fecha=${fecha}`)
                                             .then(res => res.json())
                                             .then(data => {
                                                 horarioSelect.innerHTML = '';
@@ -138,8 +123,8 @@
                                                 }
                                             })
                                             .catch(error => {
-                                                horarioSelect.innerHTML = '<option>Error al cargar horarios</option>';
                                                 console.error("Error al cargar horarios:", error);
+                                                horarioSelect.innerHTML = '<option>Error al cargar horarios</option>';
                                             });
                                     }
 
@@ -151,6 +136,7 @@
                         </div>
                     </div>
                 </main>
+
 
                 <footer class="footer mt-auto py-3">
                     <div class="text-center mt-5 mb-3">

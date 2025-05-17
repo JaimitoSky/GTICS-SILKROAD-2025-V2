@@ -104,12 +104,13 @@
                         <!-- Imagen del Servicio -->
                         <div class="mb-4">
                             <h4 th:text="${servicio.nombre}">Nombre del servicio</h4>
-                            <img th:if="${servicio.imagenComplejo != null}"
-                                 th:src="'data:image/jpeg;base64,' + ${T(org.apache.tomcat.util.codec.binary.Base64).encodeBase64String(servicio.imagenComplejo)}"
+                            <img th:if="${imagenBase64 != null}"
+                                 th:src="'data:image/jpeg;base64,' + ${imagenBase64}"
                                  class="img-fluid rounded shadow"
                                  style="max-height: 300px;"
                                  alt="Imagen del complejo" />
                         </div>
+
 
                         <!-- Datos del Usuario -->
                         <div class="row mb-3">

@@ -883,6 +883,13 @@ INSERT INTO horario_atencion (idsede, dia_semana, hora_inicio, hora_fin, activo)
 (4, 'Viernes', '08:00:00', '20:00:00', 1),
 (4, 'Sábado', '08:00:00', '15:00:00', 1),
 (4, 'Domingo', '00:00:00', '00:00:00', 0);
+RENAME TABLE spring_session_attributes TO SPRING_SESSION_ATTRIBUTES;
+RENAME TABLE spring_session TO SPRING_SESSION;
+
+DROP TABLE IF EXISTS SPRING_SESSION_ATTRIBUTES;
+DROP TABLE IF EXISTS SPRING_SESSION;
+
+UPDATE sede SET activo = 1 WHERE activo IS NULL;
 
 -- Dump completed on 2025-05-12 23:57:23
 
