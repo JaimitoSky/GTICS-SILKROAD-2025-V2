@@ -35,8 +35,6 @@
 
                         <!-- Lista de complejos deportivos -->
                         <div class="container-fluid p-4">
-                            <h2 class="mb-4">RESERVAR</h2>
-
                             <!-- Lista de complejos deportivos en filas de 3 -->
                             <div class="row">
                                 <div class="col-md-4 mb-4" th:each="complejo : ${complejos}">
@@ -50,8 +48,6 @@
                                             <a th:href="@{'/vecino/complejo/detalle/' + ${complejo.idServicio}}" class="btn btn-primary">Más detalles</a>
                                         </div>
                                     </div>
-
-
                                 </div>
                             </div>
 
