@@ -3,6 +3,8 @@ package com.example.grupo_6.Repository;
 import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.Usuario;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -83,6 +85,25 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+//usuarios con paginacion
+
+    @Query("SELECT u FROM Usuario u WHERE LOWER(u.nombres) LIKE %:valor% OR LOWER(u.apellidos) LIKE %:valor%")
+    Page<Usuario> buscarPorNombre(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT u FROM Usuario u WHERE LOWER(u.email) LIKE %:valor%")
+    Page<Usuario> buscarPorCorreo(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT u FROM Usuario u WHERE LOWER(u.estado) LIKE %:valor%")
+    Page<Usuario> buscarPorEstado(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT u FROM Usuario u WHERE CAST(u.idusuario AS string) LIKE %:valor%")
+    Page<Usuario> buscarPorId(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT u FROM Usuario u WHERE CAST(u.idrol AS string) LIKE %:valor%")
+    Page<Usuario> buscarPorRol(@Param("valor") String valor, Pageable pageable);
+
+    // Versión paginada de findAll
+    Page<Usuario> findAll(Pageable pageable);
 
 
 }

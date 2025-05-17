@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio - Superadmin</title>
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Estilos internos -->
+    <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
+
+    <!-- Main -->
+    <div class="main">
+        <div th:replace="fragments/navbar-superadmin :: navbar"></div>
+
+
+
+
+
+
+
+        <main class="content">
+            <div class="container-fluid p-0">
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle">Editar Usuario</h1>
+                </div>
+
+                <form th:action="@{/superadmin/usuarios/actualizar}" method="post" th:object="${usuario}">
+                    <input type="hidden" th:field="*{idusuario}" />
+                    <div class="row">
+                        <!-- Columna Izquierda -->
+                        <div class="col-12 col-lg-6">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Datos Personales</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">DNI</label>
+                                        <input type="text" th:field="*{dni}" class="form-control" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombres</label>
+                                        <input type="text" th:field="*{nombres}" class="form-control" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Apellidos</label>
+                                        <input type="text" th:field="*{apellidos}" class="form-control" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" th:field="*{email}" class="form-control" required />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha -->
+                        <div class="col-12 col-lg-6">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Credenciales y Contacto</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nueva Contraseña</label>
+                                        <input type="password" name="rawPassword" class="form-control" />
+                                        <small class="text-muted">Dejar en blanco para mantener la contraseña actual</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Teléfono</label>
+                                        <input type="text" th:field="*{telefono}" class="form-control" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Dirección</label>
+                                        <textarea th:field="*{direccion}" class="form-control" rows="2" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Rol</label>
+                                        <select th:field="*{idrol}" class="form-select" required>
+                                            <option value="2">Administrador</option>
+                                            <option value="3">Coordinador</option>
+                                            <option value="4">Vecino</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" th:field="*{notificarRecordatorio}" class="form-check-input" id="recordatorio" />
+                                        <label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" th:field="*{notificarDisponibilidad}" class="form-check-input" id="disponibilidad" />
+                                        <label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                    <a th:href="@{/superadmin/usuarios}" class="btn btn-secondary">Cancelar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+
+
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const modal = document.getElementById("confirmModal");
+                modal.addEventListener("show.bs.modal", function (event) {
+                    const button = event.relatedTarget;
+                    const idUsuario = button.getAttribute("data-id");
+                    const nombre = button.getAttribute("data-nombre");
+                    document.getElementById("inputIdUsuario").value = idUsuario;
+                    document.getElementById("nombreUsuario").innerText = nombre;
+                });
+            });
+        </script>
+
+
+
+
+
+
+
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            document.body.classList.toggle("sidebar-collapsed");
+        });
+    });
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+</body>
+</html>

@@ -113,26 +113,34 @@
 											</form>
 
 
-											<form th:if="${usuario.estado == 'inactivo'}"
+											<form th:if="${usuario.estado == 'inactivo' and usuario.email != session.usuario.email}"
 												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
 												<button type="submit" class="btn btn-outline-success" title="Activar Usuario">
 													<i class="bi bi-check-circle"></i>
 												</button>
 											</form>
 
-											<form th:if="${usuario.estado != 'inactivo'}"
+											<form th:if="${usuario.estado != 'inactivo' and usuario.email != session.usuario.email}"
 												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
 												<button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
 													<i class="bi bi-slash-circle"></i>
 												</button>
 											</form>
 											<form th:if="${usuario.email != session.usuario.email}"
+												  th:action="@{'/superadmin/usuarios/editar/' + ${usuario.idusuario}}" method="get" class="d-inline">
+												<button type="submit" class="btn btn-outline-info" title="Editar Usuario">
+													<i class="bi bi-pencil-square"></i>
+												</button>
+											</form>
+											<!-- Botón de limpiar
+
+											<form th:if="${usuario.email != session.usuario.email}"
 												  th:action="@{/superadmin/impersonar}" method="post" class="d-inline">
 												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
 												<button type="submit" class="btn btn-outline-primary" title="Entrar como este usuario">
 													<i class="bi bi-box-arrow-in-right"></i>
 												</button>
-											</form>
+											</form>-->
 
 
 											<form th:action="@{/eliminar}" method="post" class="d-inline">
@@ -148,6 +156,27 @@
 								</tbody>
 							</table>
 						</div>
+						<nav aria-label="Paginación de usuarios">
+							<ul class="pagination justify-content-center flex-wrap">
+								<li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+									<a class="page-link"
+									   th:href="@{/superadmin/usuarios(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+								</li>
+
+								<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+									th:classappend="${i == paginaActual} ? 'active'">
+									<a class="page-link"
+									   th:href="@{/superadmin/usuarios(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
+									   th:text="${i + 1}">1</a>
+								</li>
+
+								<li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+									<a class="page-link"
+									   th:href="@{/superadmin/usuarios(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+								</li>
+							</ul>
+						</nav>
+
 					</div>
 				</div>
 			</div>

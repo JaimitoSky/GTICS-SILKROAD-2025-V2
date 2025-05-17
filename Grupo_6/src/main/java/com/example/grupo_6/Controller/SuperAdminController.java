@@ -8,8 +8,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -162,32 +171,39 @@ public class SuperAdminController {
 
 
     @GetMapping("/superadmin/usuarios")
-    public String listarUsuarios(@RequestParam(required = false) String filtro,
-                                 @RequestParam(required = false, defaultValue = "nombre") String campo,
-                                 Model model) {
-        List<Usuario> listaUsuarios;
+    public String listarUsuarios(
+            @RequestParam(required = false) String filtro,
+            @RequestParam(required = false, defaultValue = "nombre") String campo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("idusuario").ascending());
+        Page<Usuario> paginaUsuarios;
 
         if (filtro != null && !filtro.trim().isEmpty()) {
             String valor = filtro.trim().toLowerCase();
-            listaUsuarios = switch (campo) {
-                case "correo" -> usuarioRepository.buscarPorCorreo(valor);
-                case "estado" -> usuarioRepository.buscarPorEstado(valor);
-                case "rol" -> usuarioRepository.buscarPorRol(valor);
-                case "id" -> usuarioRepository.buscarPorId(valor);
-                default -> usuarioRepository.buscarPorNombre(valor);
+            paginaUsuarios = switch (campo) {
+                case "correo" -> usuarioRepository.buscarPorCorreo(valor, pageable);
+                case "estado" -> usuarioRepository.buscarPorEstado(valor, pageable);
+                case "rol" -> usuarioRepository.buscarPorRol(valor, pageable);
+                case "id" -> usuarioRepository.buscarPorId(valor, pageable);
+                default -> usuarioRepository.buscarPorNombre(valor, pageable);
             };
         } else {
-            listaUsuarios = usuarioRepository.findAll();
+            paginaUsuarios = usuarioRepository.findAll(pageable);
         }
 
-        model.addAttribute("usuarios", listaUsuarios);
-        model.addAttribute("rol", "superadmin");
-        model.addAttribute("mapaRoles", mapaRoles);
+        model.addAttribute("usuarios", paginaUsuarios.getContent());
+        model.addAttribute("pagina", paginaUsuarios);
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", paginaUsuarios.getTotalPages());
         model.addAttribute("filtro", filtro);
         model.addAttribute("campo", campo);
-
+        model.addAttribute("mapaRoles", mapaRoles);
         return "superadmin/superadmin_usuarios";
     }
+
 
     @GetMapping("/superadmin/volver")
     public String volverASuperadmin(HttpServletRequest request) {
@@ -229,7 +245,11 @@ public class SuperAdminController {
 
     // Banear usuario (poner inactivo)
     @PostMapping("/superadmin/usuarios/{id}/ban")
-    public String banearUsuario(@PathVariable("id") Integer idusuario) {
+    public String banearUsuario(@PathVariable("id") Integer idusuario, HttpSession session) {
+        Integer sessionId = (Integer) session.getAttribute("idusuario");
+        if (idusuario.equals(sessionId)) {
+            return "redirect:/superadmin/usuarios"; // prevenir auto-baneo
+        }
         Usuario u = usuarioRepository.findById(idusuario).orElse(null);
         if (u != null) {
             u.setEstado("inactivo");
@@ -238,9 +258,14 @@ public class SuperAdminController {
         return "redirect:/superadmin/usuarios";
     }
 
+
     // Activar usuario
     @PostMapping("/superadmin/usuarios/{id}/activar")
-    public String activarUsuario(@PathVariable("id") Integer idusuario) {
+    public String activarUsuario(@PathVariable("id") Integer idusuario, HttpSession session) {
+        Integer sessionId = (Integer) session.getAttribute("idusuario");
+        if (idusuario.equals(sessionId)) {
+            return "redirect:/superadmin/usuarios"; // prevenir auto-activación forzada
+        }
         Usuario usuario = usuarioRepository.findById(idusuario).orElse(null);
         if (usuario != null) {
             usuario.setEstado("activo");
@@ -249,18 +274,58 @@ public class SuperAdminController {
         return "redirect:/superadmin/usuarios";
     }
 
+
     // Eliminar usuario
     @PostMapping("/eliminar")
-    public String eliminarUsuario(@RequestParam("idusuario") Integer idusuario) {
+    public String eliminarUsuario(@RequestParam("idusuario") Integer idusuario, HttpSession session) {
+        Integer sessionId = (Integer) session.getAttribute("idusuario");
+        if (idusuario.equals(sessionId)) {
+            return "redirect:/superadmin/usuarios"; // evitar que se borre a sí mismo
+        }
         usuarioRepository.deleteById(idusuario);
         return "redirect:/superadmin/usuarios";
     }
+
 
     // Crear usuario
     @GetMapping("/superadmin/usuarios/nuevo")
     public String mostrarFormularioNuevoUsuario(Model model) {
         model.addAttribute("usuario", new Usuario()); // objeto vacío para el form
         return "superadmin/superadmin_usuarios_formulario";
+    }
+
+    @GetMapping("/superadmin/usuarios/editar/{id}")
+    public String mostrarFormularioEdicion(@PathVariable("id") Integer id, Model model) {
+        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+        if (usuario == null) return "redirect:/superadmin/usuarios";
+        model.addAttribute("usuario", usuario);
+        return "superadmin/superadmin_usuarios_update";
+    }
+
+
+    /* === 3. NUEVO POST PARA GUARDAR CAMBIOS === */
+    @PostMapping("/superadmin/usuarios/actualizar")
+    public String actualizarUsuario(@ModelAttribute("usuario") Usuario usuarioForm,
+                                    @RequestParam(value = "rawPassword", required = false) String rawPassword) {
+        Usuario existente = usuarioRepository.findById(usuarioForm.getIdusuario()).orElse(null);
+        if (existente == null) return "redirect:/superadmin/usuarios";
+
+        existente.setNombres(usuarioForm.getNombres());
+        existente.setApellidos(usuarioForm.getApellidos());
+        existente.setEmail(usuarioForm.getEmail());
+        existente.setTelefono(usuarioForm.getTelefono());
+        existente.setDireccion(usuarioForm.getDireccion());
+        existente.setIdrol(usuarioForm.getIdrol());
+        existente.setNotificarRecordatorio(usuarioForm.getNotificarRecordatorio());
+        existente.setNotificarDisponibilidad(usuarioForm.getNotificarDisponibilidad());
+
+
+        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
+            existente.setPasswordHash(new BCryptPasswordEncoder().encode(rawPassword));
+        }
+
+        usuarioRepository.save(existente);
+        return "redirect:/superadmin/usuarios";
     }
 
 
@@ -863,6 +928,39 @@ public class SuperAdminController {
         model.addAttribute("listaPagos", listaPagos);
         return "superadmin/superadmin_pagos";
     }
+    @GetMapping("/uploads/{idpago}")
+    public ResponseEntity<byte[]> mostrarComprobante(@PathVariable("idpago") Integer idpago) {
+        Optional<Pago> optPago = pagoRepository.findById(idpago);
+
+        if (optPago.isPresent()) {
+            byte[] data = optPago.get().getComprobante();
+            if (data == null || data.length < 4) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Detectar formato básico por cabecera (magic numbers)
+            MediaType tipo;
+            if (data[0] == (byte) 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47) {
+                tipo = MediaType.IMAGE_PNG;
+            } else if (data[0] == (byte) 0xFF && data[1] == (byte) 0xD8) {
+                tipo = MediaType.IMAGE_JPEG;
+            } else if (data[0] == 'G' && data[1] == 'I' && data[2] == 'F') {
+                tipo = MediaType.IMAGE_GIF;
+            } else {
+                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(tipo);
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+
+
+
     @PostMapping("/superadmin/pagos/aprobar/{id}")
     public String aprobarPagoDesdePagos(@PathVariable("id") Integer id) {
         Pago pago = pagoRepository.findById(id).orElse(null);
