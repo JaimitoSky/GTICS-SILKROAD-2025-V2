@@ -53,6 +53,12 @@ public class WebSecurityConfig {
                                 return;
                             }
 
+                            // ✅ Aquí está la corrección
+                            if ("inactivo".equalsIgnoreCase(usuario.getEstado())) {
+                                response.sendRedirect("/login?inhabilitado");
+                                return;
+                            }
+
                             session.setAttribute("usuario", usuario);
                             session.setAttribute("idusuario", usuario.getIdusuario());
                             session.removeAttribute("SPRING_SECURITY_SAVED_REQUEST");
@@ -66,6 +72,14 @@ public class WebSecurityConfig {
                                 default -> response.sendRedirect("/");
                             }
                         })
+                        .failureHandler((request, response, exception) -> {
+                            String errorParam = "error";
+                            if (exception.getMessage().toLowerCase().contains("El usuario está inhabilitado")) {
+                                errorParam = "inactivo";
+                            }
+                            response.sendRedirect("/login?" + errorParam);
+                        })
+
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -104,9 +118,10 @@ public class WebSecurityConfig {
     public UserDetailsManager users(DataSource dataSource) {
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
         users.setUsersByUsernameQuery("""
-        SELECT email, password_hash, CASE WHEN estado = 'activo' THEN true ELSE false END
+        SELECT email, password_hash, true
         FROM usuario WHERE email = ?
-    """);
+        """);
+
         users.setAuthoritiesByUsernameQuery("""
         SELECT u.email, r.nombre
         FROM usuario u JOIN rol r ON u.idrol = r.idrol

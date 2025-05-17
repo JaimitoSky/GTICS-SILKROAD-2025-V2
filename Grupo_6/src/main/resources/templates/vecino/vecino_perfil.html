@@ -38,11 +38,13 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="correo" class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.correo}">
+                            <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.correo}"
+                                   required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" title="Debe ser un correo válido">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="telefono" class="form-label">Celular</label>
-                            <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
+                            <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}"
+                                   pattern="^\d{9}$" maxlength="9" title="El celular debe tener 9 dígitos" required>
                         </div>
                     </div>
                     <div class="mb-3">

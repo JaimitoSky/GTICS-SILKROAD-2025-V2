@@ -4,7 +4,9 @@
 -- ------------------------------------------------------
 -- Server version	8.0.42
 
-USE plataforma_reservas;
+DROP SCHEMA IF EXISTS `plataforma_reservas`;
+CREATE SCHEMA `plataforma_reservas` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `plataforma_reservas`;
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
