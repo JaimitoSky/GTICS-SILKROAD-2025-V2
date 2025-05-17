@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Random;
 
@@ -41,10 +42,16 @@ public class RegistroController {
                                @RequestParam String password,
                                @RequestParam(required = false) String codigoCoordinador,
                                HttpSession session,
-                               Model model) {
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
 
         if (usuarioRepository.findByEmail(email) != null) {
             model.addAttribute("error", "Ya existe una cuenta con ese correo.");
+            return "session/registro";
+        }
+
+        if (usuarioRepository.findByDni(dni) != null) {
+            model.addAttribute("error", "Ya existe una cuenta con ese DNI.");
             return "session/registro";
         }
 
@@ -71,8 +78,11 @@ public class RegistroController {
             return "session/registro";
         }
 
+        // ✅ Aquí agregas el mensaje de éxito para mostrar en verificar-codigo.html
+        redirectAttributes.addFlashAttribute("successMessage", "Se ha enviado un código de verificación a tu correo.");
         return "redirect:/registro/verificar-codigo";
     }
+
 
     @GetMapping("/verificar-codigo")
     public String verificarForm() {
@@ -80,7 +90,11 @@ public class RegistroController {
     }
 
     @PostMapping("/verificar-codigo")
-    public String procesarCodigo(@RequestParam String codigoIngresado, HttpSession session, Model model) {
+    public String procesarCodigo(@RequestParam String codigoIngresado,
+                                 HttpSession session,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes) {
+
         String codigoGenerado = (String) session.getAttribute("codigo");
         Usuario usuario = (Usuario) session.getAttribute("nuevoUsuario");
         String codigoCoordinador = (String) session.getAttribute("codigoCoordinador");
@@ -90,7 +104,8 @@ public class RegistroController {
             return "session/verificar-codigo";
         }
 
-        if (codigoCoordinador != null && !codigoCoordinador.isBlank() && !codigoCoordinador.equals("CODIGO-COORDI-2025")) {
+        if (codigoCoordinador != null && !codigoCoordinador.isBlank()
+                && !codigoCoordinador.equals("CODIGO-COORDI-2025")) {
             model.addAttribute("error", "Código de coordinador inválido.");
             return "session/verificar-codigo";
         }
@@ -98,10 +113,13 @@ public class RegistroController {
         usuario.setIdrol((codigoCoordinador != null && codigoCoordinador.equals("CODIGO-COORDI-2025")) ? 3 : 4); // 3 = Coordinador, 4 = Vecino
         usuarioRepository.save(usuario);
 
+        // Limpieza de sesión
         session.removeAttribute("codigo");
         session.removeAttribute("nuevoUsuario");
         session.removeAttribute("codigoCoordinador");
 
+        // Agregar mensaje flash para login
+        redirectAttributes.addFlashAttribute("successMessage", "¡Cuenta verificada exitosamente! Ahora puedes iniciar sesión.");
         return "redirect:/login";
     }
 }

@@ -29,6 +29,7 @@
             width: 90%;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             text-align: center;
+            position: relative;
         }
 
         .login-container img {
@@ -40,25 +41,78 @@
             margin-bottom: 20px;
             font-weight: 600;
         }
+
+        .form-floating {
+            position: relative;
+            text-align: left;
+        }
+
+        .form-floating input {
+            padding-left: 1rem;
+        }
+
+        .form-floating label {
+            padding-left: 1rem !important;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 300px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success { background-color: #28a745; }
+        .toast.error { background-color: #dc3545; }
     </style>
 </head>
 <body>
+
+<!-- TOAST -->
+<div id="toast"
+     th:class="'toast ' + (${error} ? 'error show' : (${successMessage} ? 'success show' : ''))"
+     th:text="${error} ?: ${successMessage}">
+</div>
+
 <div class="login-container">
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
     <h4>Verificación de Cuenta</h4>
 
-    <div th:if="${error}" class="alert alert-danger" role="alert">
-        <span th:text="${error}"></span>
-    </div>
-
     <form th:action="@{/registro/verificar-codigo}" method="post">
-        <div class="form-floating mb-3">
-            <input type="text" name="codigoIngresado" id="codigoIngresado" class="form-control" required placeholder="Código de verificación" />
+        <div class="form-floating mb-3 position-relative">
+            <input type="text" name="codigoIngresado" id="codigoIngresado"
+                   class="form-control" required placeholder="Código de verificación"
+                   autocomplete="one-time-code" />
             <label for="codigoIngresado">Código de verificación</label>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Verificar</button>
+        <button type="submit" class="btn btn-success w-100">
+            <i class="fas fa-check"></i> Verificar código
+        </button>
     </form>
 </div>
+
+<script>
+    // Ocultar el toast después de 4 segundos
+    window.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById('toast');
+        if (toast && toast.classList.contains('show')) {
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+    });
+</script>
 </body>
 </html>

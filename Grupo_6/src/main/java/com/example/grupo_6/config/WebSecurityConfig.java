@@ -76,8 +76,10 @@ public class WebSecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/login", "/registro", "/recuperar/**", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico", "/error"
+                                "/login", "/registro", "/registro/enviar-codigo", "/registro/verificar-codigo",
+                                "/recuperar/**", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico", "/error"
                         ).permitAll()
+
                         .requestMatchers("/superadmin/**").hasAuthority("Superadmin")
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
                         .requestMatchers("/coordinador/**").hasAuthority("Coordinador")

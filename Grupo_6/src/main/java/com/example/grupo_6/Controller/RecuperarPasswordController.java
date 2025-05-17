@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Random;
 
@@ -32,7 +33,10 @@ public class RecuperarPasswordController {
     }
 
     @PostMapping("/enviar-codigo")
-    public String enviarCodigo(@RequestParam String email, HttpSession session, Model model) {
+    public String enviarCodigo(@RequestParam String email,
+                               HttpSession session,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioRepository.findByEmail(email);
         if (usuario == null) {
             model.addAttribute("error", "No existe una cuenta con ese correo.");
@@ -50,8 +54,10 @@ public class RecuperarPasswordController {
             return "session/olvide-contraseña";
         }
 
+        redirectAttributes.addFlashAttribute("success", "Hemos enviado un código a tu correo.");
         return "redirect:/recuperar/verificar-codigo";
     }
+
 
     @GetMapping("/verificar-codigo")
     public String mostrarVerificacion() {
@@ -59,7 +65,10 @@ public class RecuperarPasswordController {
     }
 
     @PostMapping("/verificar-codigo")
-    public String procesarVerificacion(@RequestParam String codigoIngresado, HttpSession session, Model model) {
+    public String procesarVerificacion(@RequestParam String codigoIngresado,
+                                       HttpSession session,
+                                       Model model,
+                                       RedirectAttributes redirectAttributes) {
         String codigoGuardado = (String) session.getAttribute("codigoRecuperacion");
 
         if (codigoGuardado == null || !codigoGuardado.equals(codigoIngresado)) {
@@ -67,8 +76,10 @@ public class RecuperarPasswordController {
             return "session/verificar-codigo-recuperacion";
         }
 
+        redirectAttributes.addFlashAttribute("success", "Código verificado. Establece tu nueva contraseña.");
         return "redirect:/recuperar/nueva";
     }
+
 
     @GetMapping("/nueva")
     public String mostrarNuevaPassword() {
@@ -76,7 +87,10 @@ public class RecuperarPasswordController {
     }
 
     @PostMapping("/nueva")
-    public String guardarNuevaPassword(@RequestParam("password") String password, HttpSession session, Model model) {
+    public String guardarNuevaPassword(@RequestParam("password") String password,
+                                       HttpSession session,
+                                       Model model,
+                                       RedirectAttributes redirectAttributes) {
         String email = (String) session.getAttribute("usuarioRecuperacionEmail");
         if (email == null) {
             model.addAttribute("error", "Sesión inválida. Intenta nuevamente.");
@@ -92,9 +106,13 @@ public class RecuperarPasswordController {
         usuario.setPasswordHash(passwordEncoder.encode(password));
         usuarioRepository.save(usuario);
 
+        // Limpieza de sesión
         session.removeAttribute("codigoRecuperacion");
         session.removeAttribute("usuarioRecuperacionEmail");
 
-        return "redirect:/login?recuperado";
+        // ✅ Mensaje para mostrar en login.html
+        redirectAttributes.addFlashAttribute("successMessage", "¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.");
+        return "redirect:/login";
     }
+
 }

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Actualizar Contraseña</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         body {
             margin: 0;
@@ -27,32 +28,119 @@
             width: 90%;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             text-align: center;
-        }
-
-        .login-container img {
-            height: 60px;
-            margin-bottom: 10px;
+            position: relative;
         }
 
         .login-container h4 {
             margin-bottom: 20px;
             font-weight: 600;
         }
+
+        .form-floating {
+            position: relative;
+            text-align: left;
+        }
+
+        .form-floating input {
+            padding-left: 1rem;
+            padding-right: 2.5rem;
+        }
+
+        .form-floating label {
+            padding-left: 1rem !important;
+        }
+
+        .form-floating .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 300px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.error { background-color: #dc3545; }
+
+        a.back-link {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            font-size: 0.9rem;
+            text-decoration: none;
+            color: #007bff;
+        }
     </style>
 </head>
-</head>
 <body>
+
+<!-- TOAST FLOTANTE -->
+<div id="toast" class="toast error" th:if="${error}" th:text="${error}"></div>
+
 <div class="login-container">
-    <a th:href="@{/login}" class="float-start mb-2"><i class="fa fa-arrow-left"></i> Volver</a>
-    <h4>Nueva contraseña</h4>
+    <a th:href="@{/login}" class="back-link"><i class="fas fa-arrow-left"></i> Volver</a>
+    <h4>Nueva Contraseña</h4>
+
     <form th:action="@{/recuperar/nueva}" method="post">
         <div class="form-floating mb-3 position-relative">
-            <input type="password" id="password" name="password" class="form-control" placeholder="Nueva contraseña" required minlength="6">
-            <label>Nueva contraseña</label>
-            <span onclick="togglePassword()" style="position:absolute; right:10px; top:15px; cursor:pointer;"><i class="fa fa-eye"></i></span>
+            <input type="password" id="password" name="password" class="form-control"
+                   placeholder="Nueva contraseña" required minlength="6" autocomplete="new-password" />
+            <label for="password">Nueva contraseña (mínimo 6 caracteres)</label>
+            <span class="toggle-password" onclick="togglePassword()">
+                <i id="eyeIcon" class="fas fa-eye"></i>
+            </span>
         </div>
-        <button type="submit" class="btn btn-success w-100">Actualizar</button>
+
+        <button type="submit" class="btn btn-success w-100">
+            <i class="fas fa-key"></i> Actualizar
+        </button>
     </form>
 </div>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById("password");
+        const eyeIcon = document.getElementById("eyeIcon");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeIcon.classList.remove("fa-eye");
+            eyeIcon.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            eyeIcon.classList.remove("fa-eye-slash");
+            eyeIcon.classList.add("fa-eye");
+        }
+    }
+
+    // Mostrar y ocultar automáticamente el toast si está presente
+    window.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+    });
+</script>
+
 </body>
 </html>

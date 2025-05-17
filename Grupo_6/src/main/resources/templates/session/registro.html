@@ -25,10 +25,11 @@
             background-color: rgba(255, 255, 255, 0.95);
             padding: 2rem;
             border-radius: 8px;
-            max-width: 700px;
+            max-width: 750px;
             width: 95%;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             text-align: center;
+            position: relative;
         }
 
         .login-container img {
@@ -42,7 +43,17 @@
         }
 
         .form-floating {
+            position: relative;
             text-align: left;
+        }
+
+        .form-floating input {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .form-floating label {
+            padding-left: 1rem !important;
         }
 
         .row {
@@ -60,46 +71,83 @@
                 width: 100%;
             }
         }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 300px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success { background-color: #28a745; }
+        .toast.error { background-color: #dc3545; }
     </style>
 </head>
 <body>
+
+<!-- TOAST -->
+<div id="toast"
+     th:class="'toast ' + (${error} ? 'error show' : (${successMessage} ? 'success show' : ''))"
+     th:text="${error} ?: ${successMessage}">
+</div>
+
 <div class="login-container">
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
     <h4>Registro de Usuario</h4>
 
-    <div th:if="${error}" class="alert alert-danger" role="alert">
-        <span th:text="${error}"></span>
-    </div>
-
     <form th:action="@{/registro/enviar-codigo}" method="post" id="registroForm">
         <div class="row">
-            <div class="form-floating mb-3 col-6">
-                <input type="text" name="dni" class="form-control" placeholder="DNI" required pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos" />
+            <div class="form-floating mb-3 col-6 position-relative">
+                <input type="text" name="dni" class="form-control" placeholder="DNI"
+                       required pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos" autocomplete="off" />
                 <label>DNI</label>
             </div>
-            <div class="form-floating mb-3 col-6">
-                <input type="text" name="nombres" class="form-control" placeholder="Nombres" required />
+
+            <div class="form-floating mb-3 col-6 position-relative">
+                <input type="text" name="nombres" class="form-control" placeholder="Nombres"
+                       required autocomplete="given-name" readonly />
                 <label>Nombres</label>
             </div>
-            <div class="form-floating mb-3 col-6">
-                <input type="text" name="apellidos" class="form-control" placeholder="Apellidos" required />
+
+            <div class="form-floating mb-3 col-6 position-relative">
+                <input type="text" name="apellidos" class="form-control" placeholder="Apellidos"
+                       required autocomplete="family-name" readonly />
                 <label>Apellidos</label>
             </div>
-            <div class="form-floating mb-3 col-6">
-                <input type="email" name="email" class="form-control" placeholder="Correo" required />
+
+            <div class="form-floating mb-3 col-6 position-relative">
+                <input type="email" name="email" class="form-control" placeholder="Correo" required autocomplete="email" />
                 <label>Correo</label>
             </div>
-            <div class="form-floating mb-3 col-6">
-                <input type="text" name="telefono" class="form-control" placeholder="Celular" required pattern="[0-9]{9}" title="Ingrese un número de 9 dígitos" />
+
+            <div class="form-floating mb-3 col-6 position-relative">
+                <input type="text" name="telefono" class="form-control" placeholder="Celular"
+                       required pattern="[0-9]{9}" title="Ingrese un número de 9 dígitos" autocomplete="tel" />
                 <label>Celular</label>
             </div>
-            <div class="form-floating mb-3 col-6">
-                <input type="text" name="direccion" class="form-control" placeholder="Dirección" required />
+
+            <div class="form-floating mb-3 col-6 position-relative">
+                <input type="text" name="direccion" class="form-control" placeholder="Dirección" required autocomplete="street-address" />
                 <label>Dirección</label>
             </div>
-            <div class="form-floating mb-3 col-12">
-                <input type="password" name="password" class="form-control" placeholder="Contraseña" required minlength="6" />
-                <label>Contraseña</label>
+
+            <div class="form-floating mb-3 col-12 position-relative">
+                <input type="password" name="password" class="form-control" placeholder="Contraseña"
+                       required minlength="6" autocomplete="new-password" />
+                <label>Contraseña (mínimo 6 caracteres)</label>
             </div>
         </div>
 
@@ -113,12 +161,13 @@
             <label>Código de Coordinador</label>
         </div>
 
-        <!-- Mensaje de carga -->
         <div id="loadingMessage" class="alert alert-info mt-3" style="display: none;">
             <i class="fas fa-spinner fa-spin"></i> Enviando código de verificación...
         </div>
 
-        <button type="submit" class="btn btn-primary w-100" id="submitButton">Enviar código de verificación</button>
+        <button type="submit" class="btn btn-primary w-100" id="submitButton">
+            <i class="fas fa-paper-plane"></i> Enviar código de verificación
+        </button>
     </form>
 
     <hr class="my-4">
@@ -161,7 +210,6 @@
         const dniInput = document.querySelector('input[name="dni"]');
         dniInput.addEventListener('blur', obtenerDatosPorDNI);
 
-        // Activar mensaje "Enviando..."
         const form = document.getElementById('registroForm');
         const loadingMessage = document.getElementById('loadingMessage');
         const submitButton = document.getElementById('submitButton');
@@ -170,6 +218,12 @@
             loadingMessage.style.display = 'block';
             submitButton.disabled = true;
         });
+
+        // Mostrar toast flotante si aplica
+        const toast = document.getElementById('toast');
+        if (toast && toast.classList.contains('show')) {
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
     });
 </script>
 </body>

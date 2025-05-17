@@ -1,6 +1,5 @@
-<!-- olvide-contraseña.html -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,6 +29,7 @@
             width: 90%;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             text-align: center;
+            position: relative;
         }
 
         .login-container img {
@@ -41,34 +41,87 @@
             margin-bottom: 20px;
             font-weight: 600;
         }
+
+        .form-floating {
+            position: relative;
+            text-align: left;
+        }
+
+        .form-floating input {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .form-floating label {
+            padding-left: 1rem !important;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 300px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success { background-color: #28a745; }
+        .toast.error { background-color: #dc3545; }
     </style>
 </head>
 <body>
+
+<!-- TOAST -->
+<div id="toast"
+     th:class="'toast ' + (${error} ? 'error show' : (${success} ? 'success show' : ''))"
+     th:text="${error} ?: ${success}">
+</div>
+
 <div class="login-container">
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
     <h4>Recuperar Contraseña</h4>
 
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-
     <form th:action="@{/recuperar/enviar-codigo}" method="post" onsubmit="mostrarCargando()">
-        <div class="form-floating mb-3">
-            <input type="email" name="email" class="form-control" placeholder="Correo" required />
-            <label>Correo registrado</label>
+        <div class="form-floating mb-3 position-relative">
+            <input type="email" id="email" name="email" class="form-control"
+                   placeholder="Correo electrónico" autocomplete="email" required />
+            <label for="email">Correo registrado</label>
         </div>
-        <button type="submit" id="btnEnviar" class="btn btn-primary w-100">Enviar código</button>
-        <div id="spinner" style="display:none; margin-top: 10px;">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...
+
+        <button type="submit" id="btnEnviar" class="btn btn-primary w-100">
+            <i class="fas fa-paper-plane"></i> Enviar código
+        </button>
+
+        <div id="spinner" class="text-center mt-3" style="display:none;">
+            <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+            <span> Enviando...</span>
         </div>
     </form>
-
-    <script>
-        function mostrarCargando() {
-            document.getElementById('btnEnviar').disabled = true;
-            document.getElementById('spinner').style.display = 'block';
-        }
-    </script>
-
 </div>
+
+<script>
+    function mostrarCargando() {
+        document.getElementById('btnEnviar').disabled = true;
+        document.getElementById('spinner').style.display = 'block';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById('toast');
+        if (toast && toast.classList.contains('show')) {
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+    });
+</script>
 </body>
 </html>
