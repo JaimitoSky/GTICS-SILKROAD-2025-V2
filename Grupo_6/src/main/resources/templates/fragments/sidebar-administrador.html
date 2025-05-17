@@ -1,177 +1,63 @@
-<!-- Fragmento Sidebar -->
-<style>
-    .sidebar {
-        background-color: #FFA500 !important;
-    }
+<<<!-- sidebar-admin.html -->
+<div th:fragment="sidebar">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}" />
 
-    .sidebar .sidebar-item a,
-    .sidebar .sidebar-brand,
-    .sidebar .sidebar-link {
-        color: white !important;
-    }
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header text-center">
+            <a th:href="@{/admin}" class="logo-link d-block">
+                <img th:src="@{/img/logo_sanmiguel_admin.png}" alt="Logo Municipalidad">
+            </a>
+            <a th:href="@{/admin}" class="municipality-name d-block text-decoration-none">
+                San Miguel
+            </a>
+        </div>
 
-    .sidebar .sidebar-link:hover {
-        background-color: #e69500 !important;
-    }
-</style>
-
-
-<nav id="sidebar" class="sidebar js-sidebar">
-    <div class="sidebar-content js-simplebar">
-        <a class="sidebar-brand" href="home.html">
-            <span class="align-middle">Administrador</span>
-        </a>
-        <ul class="sidebar-nav">
-
-            <!-- Inicio -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="home.html">
-                    <i class="align-middle" data-feather="home"></i>
-                    <span class="align-middle">Inicio</span>
-                </a>
-            </li>
+        <ul class="nav flex-column text-white">
 
             <!-- Usuarios -->
-            <li class="sidebar-item">
-                <a class="sidebar-link d-flex justify-content-between align-items-center"
-                   data-bs-toggle="collapse"
-                   href="#submenu-usuarios"
-                   role="button"
-                   aria-expanded="false"
-                   aria-controls="submenu-usuarios">
-                    <div>
-                        <i class="align-middle" data-feather="users"></i>
-                        <span class="align-middle">Usuarios</span>
-                    </div>
-                    <i class="align-middle" data-feather="chevron-down"></i>
-                </a>
-                <div class="collapse" id="submenu-usuarios">
-                    <ul class="sidebar-nav ps-3">
-                        <li class="sidebar-item">
-                            <a class="sidebar-link d-flex justify-content-between align-items-center" href="solicitudes.html">
-                                <span>Nuevas Solicitudes</span>
-                                <span class="badge rounded-pill bg-info text-white">3</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link d-flex justify-content-between align-items-center" href="usuarios_registrados.html">
-                                <span>Registrados</span>
-                                <span class="badge rounded-pill bg-success text-white">125</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link d-flex justify-content-between align-items-center" href="usuarios_x  baneados.html">
-                                <span>Baneados</span>
-                                <span class="badge rounded-pill bg-danger text-white">8</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-
-            <!-- Notificaciones -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="notificaciones.html">
-                    <i class="align-middle" data-feather="bell"></i>
-                    <span class="align-middle">Notificaciones</span>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/usuarios/registrados}">
+                    <i class="bi bi-person-fill"></i> Usuarios
                 </a>
             </li>
 
             <!-- Servicios -->
-            <li class="sidebar-item">
-                <a class="sidebar-link d-flex justify-content-between align-items-center"
-                   data-bs-toggle="collapse"
-                   href="#submenu-servicios"
-                   role="button"
-                   aria-expanded="false"
-                   aria-controls="submenu-servicios">
-                    <div>
-                        <i class="align-middle" data-feather="grid"></i>
-                        <span class="align-middle">Servicios</span>
-                    </div>
-                    <i class="align-middle" data-feather="chevron-down"></i>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin/servicios/disponibles}">
+                    <i class="bi bi-tools"></i> Servicios
                 </a>
-                <div class="collapse" id="submenu-servicios">
-                    <ul class="sidebar-nav ps-3">
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="servicios-disponibles.html">
-                                <i class="align-middle" data-feather="check-circle"></i>
-                                <span class="align-middle">Disponibles</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="servicios-no-disponibles.html">
-                                <i class="align-middle" data-feather="x-circle"></i>
-                                <span class="align-middle">No disponibles</span>
-                            </a>
-                        </li>
+            </li>
+            <!-- Pagos y Reembolsos -->
+            <li class="nav-item">
+                <a th:href="@{/admin/pagos/historial}" class="nav-link">
+                    <i class="bi bi-credit-card"></i> Pagos y Reembolsos
+                </a>
+            </li>
+
+            <!-- Tarifas y Promociones -->
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" href="#tarifasSubmenu" role="button" aria-expanded="false" aria-controls="tarifasSubmenu">
+                    <i class="bi bi-cash-coin"></i> Tarifas y Promociones
+                </a>
+                <div class="collapse" id="tarifasSubmenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item"><a th:href="@{/admin/tarifas}" class="nav-link">Tarifas</a></li>
+                        <li class="nav-item"><a th:href="@{/admin/promociones}" class="nav-link">Promociones</a></li>
+                        <li class="nav-item"><a th:href="@{/admin/puntos-usuario}" class="nav-link">Puntos por Usuario</a></li>
                     </ul>
                 </div>
             </li>
 
-            <!-- Pagos y Reembolsos -->
-            <li class="sidebar-item">
-                <a class="sidebar-link d-flex justify-content-between align-items-center"
-                   data-bs-toggle="collapse"
-                   href="#submenu-pagos"
-                   role="button"
-                   aria-expanded="false"
-                   aria-controls="submenu-pagos">
-                    <div>
-                        <i class="align-middle" data-feather="shopping-bag"></i>
-                        <span class="align-middle">Pagos y Reembolsos</span>
-                    </div>
-                    <i class="align-middle" data-feather="chevron-down"></i>
-                </a>
-                <div class="collapse" id="submenu-pagos">
-                    <ul class="sidebar-nav ps-3">
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="pagos-historial.html">
-                                <span>Historial</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="pagos-nuevos.html">
-                                <span>Nuevos</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="reembolsos.html">
-                                <span>Reembolsos</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+            <!-- Reservas -->
+            <li class="nav-item">
+                <a th:href="@{/admin/reservas}" class="nav-link"><i class="bi bi-calendar-check"></i> Reservas</a>
             </li>
-            <!-- Tarifas y Promociones -->
-            <li class="sidebar-item">
-                <a class="sidebar-link d-flex justify-content-between align-items-center"
-                   data-bs-toggle="collapse"
-                   href="#submenu-tarifas"
-                   role="button"
-                   aria-expanded="false"
-                   aria-controls="submenu-tarifas">
-                    <div>
-                        <i class="align-middle" data-feather="tag"></i>
-                        <span class="align-middle">Tarifas y Promociones</span>
-                    </div>
-                    <i class="align-middle" data-feather="chevron-down"></i>
-                </a>
-                <div class="collapse" id="submenu-tarifas">
-                    <ul class="sidebar-nav ps-3">
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="crear-tarifa.html">Tarifa</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="crear-promociones.html">Promociones</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="puntos-por-usuario.html">Puntos por Usuario</a>
-                        </li>
-                    </ul>
-                </div>
+
+            <!-- Estadísticas -->
+            <li class="nav-item">
+                <a th:href="@{/admin/estadisticas}" class="nav-link"><i class="bi bi-graph-up-arrow"></i> Estadísticas</a>
             </li>
+
         </ul>
-    </div>
-</nav>
+    </nav>
+</div>

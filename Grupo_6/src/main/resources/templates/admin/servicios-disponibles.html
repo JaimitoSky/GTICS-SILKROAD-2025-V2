@@ -3,102 +3,99 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Gestión de Servicios - Admin</title>
-        <link href="../../static/css/app.css" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
-        <style>
-            .table-actions .btn { margin-right: 8px; width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
-            .btn-icon svg { width: 18px; height: 18px; }
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                background: rgba(0,0,0,0.5);
-                z-index: 2000;
-            }
-            .modal.show {
-                display: flex;
-            }
-            .modal-dialog {
-                max-width: 600px;
-                width: 90%;
-                margin: auto;
-            }
-            .modal-content {
-                background: #fff;
-                padding: 1.5rem;
-                border-radius: 0.5rem;
-            }
-            .hour-slot {
-                display: inline-block;
-                margin: 6px;
-                padding: 10px 14px;
-                border-radius: 6px;
-                border: 1px solid #ccc;
-                cursor: pointer;
-                text-align: center;
-            }
-            .hour-slot.disabled {
-                background-color: #e9ecef;
-                color: #6c757d;
-                cursor: not-allowed;
-            }
-            .hour-slot.active {
-                background-color: #0d6efd;
-                color: white;
-                border-color: #0d6efd;
-            }
-            .modal-body .d-flex.flex-wrap {
-                justify-content: center;
-            }
-        </style>
+        <title>Configurar Servicio - Admin</title>
+
+        <!-- Estilos externos -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <!-- Estilos internos -->
+
     </head>
     <body>
         <div class="wrapper">
-            <div id="sidebar-container"></div>
+            <!-- Sidebar -->
+            <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+            <!-- Main -->
             <div class="main">
-                <nav class="navbar navbar-expand navbar-light navbar-bg">
-                    <a class="sidebar-toggle js-sidebar-toggle"><i class="hamburger align-self-center"></i></a>
-                    <div class="navbar-collapse collapse">
-                        <ul class="navbar-nav navbar-align ms-auto">
-                            <li class="nav-item"><a class="nav-link" href="#"><img src="../../static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;"></a></li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i data-feather="user"></i> <span class="text-dark">Administrador</span></a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="perfil.html">Mi cuenta</a></li>
-                                    <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
+                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+
+
+
+
+
+
+                <!-- Contenido principal -->
                 <main class="content">
-                    <div class="container-fluid p-4">
-                        <div class="user-table-container">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-striped">
+                    <div class="container-fluid p-0">
+                        <h1 class="h3 mb-4"><strong>Gestión de Servicios</strong> - Admin</h1>
+                        <div class="card">
+                            <div class="card-body">
+                                <table class="table table-bordered align-middle table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Servicio</th><th class="text-center">Información</th><th class="text-center">Horarios</th>
+                                            <th>#</th>
+                                            <th>Nombre</th>
+                                            <th>Dirección</th>
+                                            <th>Distrito</th>
+                                            <th>Servicios</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Cancha de Fútbol</td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-info btn-icon" title="Ver información" data-bs-toggle="modal" data-bs-target="#infoModal">
-                                                    <i data-feather="eye"></i>
-                                                </button>
+                                        <tr th:each="sede : ${listaSedes}">
+                                            <td th:text="${sede.idsede}">1</td>
+                                            <td th:text="${sede.nombre}">Complejo Maranga</td>
+                                            <td th:text="${sede.direccion}">Av. La Marina</td>
+                                            <td th:text="${sede.distrito}">San Miguel</td>
+                                            <td>
+                                                <ul class="mb-0">
+                                                    <li th:each="serv : ${sede.sedeServicios}" th:text="${serv.servicio.nombre}"></li>
+                                                </ul>
                                             </td>
-                                            <td class="text-center">
-                                                <button class="btn btn-sm btn-info btn-icon" title="Ver horarios" data-bs-toggle="modal" data-bs-target="#horariosModal">
-                                                    <i data-feather="eye"></i>
-                                                </button>
+                                            <td>
+                                <span th:class="${sede.activo} ? 'badge bg-success' : 'badge bg-secondary'"
+                                      th:text="${sede.activo} ? 'Activa' : 'Inactiva'"></span>
+                                            </td>
+                                            <td>
+                                                <a th:href="@{/admin/servicios/disponibles/ver/{id}(id=${sede.idsede})}"
+                                                   class="btn btn-sm btn-primary" title="Ver">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+
+                                                <a th:href="@{/admin/servicios/disponibles/editar/{id}(id=${sede.idsede})}"
+                                                   class="btn btn-sm btn-warning" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+
+                                                <a th:href="@{/admin/servicios/disponibles/configurar/{id}(id=${sede.idsede})}"
+                                                   class="btn btn-sm btn-info" title="Configurar">
+                                                    <i class="bi bi-gear"></i>
+                                                </a>
+
+                                                <form th:if="${sede.activo}"
+                                                      th:action="@{'/admin/servicios/disponibles/desactivar/' + ${sede.idsede}}"
+                                                      method="post" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Desactivar"
+                                                            onclick="return confirm('¿Desactivar esta sede?');">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form th:if="${!sede.activo}"
+                                                      th:action="@{'/admin/servicios/disponibles/activar/' + ${sede.idsede}}"
+                                                      method="post" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Activar"
+                                                            onclick="return confirm('¿Activar esta sede?');">
+                                                        <i class="bi bi-check-circle"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -107,83 +104,209 @@
                         </div>
                     </div>
                 </main>
+
+                <!-- Script -->
+                <script>
+                    function getCsrfHeaders() {
+                        const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                        const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                        if (!token || !header) {
+                            console.error("CSRF token o header no encontrados en el HTML");
+                            return {};
+                        }
+
+                        return { [header]: token };
+                    }
+
+
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const selectServicio = document.getElementById("servicio-select");
+                        const tablaHorarios = document.getElementById("tabla-horarios");
+                        const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+                        selectServicio.addEventListener("change", function () {
+                            const sedeServicioId = this.value;
+                            tablaHorarios.innerHTML = `<p class="text-center">Cargando...</p>`;
+
+                            if (!sedeServicioId) return;
+
+                            fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    const porDia = {};
+                                    diasSemana.forEach(d => porDia[d] = []);
+                                    data.forEach(h => {
+                                        if (porDia[h.diaSemana]) {
+                                            porDia[h.diaSemana].push(h);
+                                        }
+                                    });
+
+                                    tablaHorarios.innerHTML = '';
+                                    diasSemana.forEach(dia => {
+                                        const cont = document.createElement("div");
+                                        cont.classList.add("mb-4");
+
+                                        let html = `<h6 class="fw-bold">${dia}</h6>
+                            <table class="table table-bordered">
+                                <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
+                                <tbody>`;
+
+                                        if (porDia[dia].length > 0) {
+                                            porDia[dia].forEach(h => {
+                                                html += `
+                                    <tr>
+                                        <td>${h.horaInicio}</td>
+                                        <td>${h.horaFin}</td>
+                                        <td><button class="btn btn-sm btn-danger" onclick="eliminarHorario(${h.idhorario}, '${sedeServicioId}')">Eliminar</button></td>
+                                    </tr>`;
+                                            });
+                                        } else {
+                                            html += `<tr><td colspan="3" class="text-center text-muted">Sin horarios registrados</td></tr>`;
+                                        }
+
+                                        html += `</tbody></table>
+                            <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Inicio</label>
+                                        <input type="time" class="form-control" name="inicio" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Fin</label>
+                                        <input type="time" class="form-control" name="fin" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
+                                    </div>
+                                </div>
+                            </form>`;
+
+                                        cont.innerHTML = html;
+                                        tablaHorarios.appendChild(cont);
+                                    });
+                                })
+                                .catch(err => {
+                                    tablaHorarios.innerHTML = `<p class="text-danger text-center">Error al cargar horarios</p>`;
+                                    console.error("Error:", err);
+                                });
+                        });
+                    });
+
+                    function eliminarHorario(idhorario, sedeServicioId) {
+                        if (confirm("¿Seguro que deseas eliminar este horario?")) {
+                            fetch(`/api/horarios-disponibles/${idhorario}`, {
+                                method: "DELETE",
+                                headers: getCsrfHeaders()
+                            }).then(res => {
+                                if (res.ok) {
+                                    document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                                } else {
+                                    alert("Error al eliminar horario.");
+                                }
+                            });
+                        }
+                    }
+
+                    function agregarHorario(event, sedeServicioId, diaSemana) {
+                        event.preventDefault();
+                        const form = event.target;
+                        const inicio = form.querySelector("input[name=inicio]").value;
+                        const fin = form.querySelector("input[name=fin]").value;
+
+                        if (inicio >= fin) {
+                            alert("La hora de inicio debe ser menor que la hora de fin.");
+                            return false;
+                        }
+
+                        console.log("Enviando horario:", {
+                            sedeServicioId, inicio, fin, diaSemana
+                        });
+
+                        const formData = new URLSearchParams();
+                        formData.append("sedeServicioId", sedeServicioId);
+                        formData.append("horaInicio", inicio);
+                        formData.append("horaFin", fin);
+                        formData.append("diaSemana", diaSemana);
+
+                        fetch("/api/horarios-disponibles", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                ...getCsrfHeaders()
+                            },
+                            body: formData
+                        }).then(async res => {
+                            const msg = await res.text();
+                            console.log("Respuesta del servidor:", res.status, msg);
+                            if (res.ok) {
+                                document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                            } else {
+                                alert("Error: " + msg);
+                            }
+                        }).catch(err => {
+                            console.error("Error en el fetch:", err);
+                            alert("Ocurrió un error al enviar los datos.");
+                        });
+
+                        return false;
+                    }
+
+                </script>
+
+
+
+
+
+
+
+                <!-- Footer -->
+                <footer class="footer mt-auto py-3 bg-light border-top">
+                    <div class="container text-center text-muted">
+                        Municipalidad de San Miguel © 2025
+                    </div>
+                </footer>
             </div>
         </div>
 
-        <!-- Modal Info Servicio -->
-        <div class="modal fade" id="infoModal" tabindex="-1">
-            <div class="modal-dialog d-flex align-items-center justify-content-center">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Información del Servicio</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="mb-3">
-                                <label class="form-label">Servicio:</label>
-                                <input type="text" class="form-control" value="Cancha de Fútbol">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Dirección:</label>
-                                <input type="text" class="form-control" placeholder="Ej: Av. Las Palmas 123">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Requisitos:</label>
-                                <textarea class="form-control" rows="2" placeholder="Carnet, pago anticipado, etc."></textarea>
-                            </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Guardar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Horarios -->
-        <div class="modal fade" id="horariosModal" tabindex="-1">
-            <div class="modal-dialog d-flex align-items-center justify-content-center">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Horarios Disponibles</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="d-flex flex-wrap justify-content-center">
-                            <div class="hour-slot">06:00</div>
-                            <div class="hour-slot">07:00</div>
-                            <div class="hour-slot">08:00</div>
-                            <div class="hour-slot disabled">09:00</div>
-                            <div class="hour-slot">10:00</div>
-                            <div class="hour-slot">11:00</div>
-                            <div class="hour-slot disabled">12:00</div>
-                            <div class="hour-slot">13:00</div>
-                            <div class="hour-slot">14:00</div>
-                            <div class="hour-slot">15:00</div>
-                            <div class="hour-slot">16:00</div>
-                            <div class="hour-slot">17:00</div>
-                            <div class="hour-slot">18:00</div>
-                            <div class="hour-slot">19:00</div>
-                            <div class="hour-slot">20:00</div>
-                            <div class="hour-slot">21:00</div>
-                            <div class="hour-slot">22:00</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const toggle = document.querySelector(".js-sidebar-toggle");
+                const sidebar = document.getElementById('sidebar');
+
+                if (toggle) {
+                    toggle.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        document.body.classList.toggle("sidebar-collapsed");
+                    });
+                }
+
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', function(event) {
+                    if (window.innerWidth <= 991.98) {
+                        const isClickInsideSidebar = sidebar.contains(event.target);
+                        const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                        if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                            document.body.classList.add("sidebar-collapsed");
+                        }
+                    }
+                });
+
+                // Ajustar al redimensionar
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 991.98) {
+                        document.body.classList.remove("sidebar-collapsed");
+                    }
+                });
+            });
+        </script>
         <script src="https://unpkg.com/feather-icons"></script>
         <script>
             feather.replace();
-            fetch('../fragments/sidebar-administrador.html').then(res => res.text()).then(html => {
-                document.getElementById('sidebar-container').innerHTML = html;
-                const toggle = document.querySelector('.js-sidebar-toggle'), sidebar = document.getElementById('sidebar'), main = document.querySelector('.main');
-                if(toggle && sidebar && main) toggle.addEventListener('click', e=>{ e.preventDefault(); sidebar.classList.toggle('collapsed'); main.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed')); });
-                feather.replace();
-            });
         </script>
+
     </body>
 </html>

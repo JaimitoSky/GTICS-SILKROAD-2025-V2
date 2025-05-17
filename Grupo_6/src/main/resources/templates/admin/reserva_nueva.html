@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nueva Reserva - Admin</title>
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+
+    <!-- Estilos internos -->
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+      <!-- Main -->
+      <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+
+
+
+
+
+
+        <!-- Contenido principal -->
+        <main class="content">
+          <div class="container-fluid p-0">
+            <h1 class="h3 mb-3"><strong>Registrar Nueva Reserva</strong></h1>
+
+            <div class="card">
+              <div class="card-body">
+                <form th:action="@{/admin/reservas/guardar}" th:object="${reserva}" method="post">
+
+                  <!-- DNI -->
+                  <div class="mb-3">
+                    <label class="form-label">DNI del Vecino</label>
+                    <input type="text" class="form-control" name="dni" placeholder="Ej: 12345678" required>
+                  </div>
+
+                  <!-- SEDE -->
+                  <div class="mb-3">
+                    <label class="form-label">Sede</label>
+                    <select id="sede-select" class="form-select" required>
+                      <option value="">Seleccione una sede</option>
+                      <option th:each="sede : ${listaSedes}" th:value="${sede.idsede}" th:text="${sede.nombre}"></option>
+                    </select>
+                  </div>
+
+                  <!-- SERVICIO -->
+                  <div class="mb-3">
+                    <label class="form-label">Servicio</label>
+                    <select id="servicio-select" name="idsedeServicio" class="form-select" required>
+                      <option value="">Seleccione una sede primero</option>
+                    </select>
+                  </div>
+
+                  <!-- FECHA -->
+                  <div class="mb-3">
+                    <label class="form-label">Fecha de Reserva</label>
+                    <input type="date" class="form-control" id="fechaReserva" name="fechaReserva"
+                           th:field="*{fechaReserva}" required>
+                  </div>
+
+                  <!-- HORARIO -->
+                  <div class="mb-3">
+                    <label class="form-label">Horario Disponible</label>
+                    <select class="form-select" name="idhorario" id="horarioDisponible" required>
+                      <option value="">Seleccione servicio y fecha</option>
+                    </select>
+                  </div>
+
+                  <button type="submit" class="btn btn-success">Registrar Reserva</button>
+                  <a th:href="@{/admin/reservas}" class="btn btn-secondary">Cancelar</a>
+                </form>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Scripts -->
+        <script>
+          const servicioSelect = document.getElementById("servicio-select");
+          const sedeSelect = document.getElementById("sede-select");
+          const fechaInput = document.getElementById("fechaReserva");
+          const horarioSelect = document.getElementById("horarioDisponible");
+
+          let diasPermitidos = [];
+
+          sedeSelect.addEventListener("change", function () {
+            const sedeId = this.value;
+            servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
+            horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
+
+            fetch(`/api/servicios-por-sede/${sedeId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                      servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+                      data.forEach(s => {
+                        const opt = document.createElement("option");
+                        opt.value = s.idSedeServicio;
+                        opt.textContent = s.nombre;
+                        servicioSelect.appendChild(opt);
+                      });
+                    });
+
+            fetch(`/api/dias-activos?idsede=${sedeId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                      diasPermitidos = data.map(d =>
+                              d.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '')
+                      );
+                    });
+          });
+
+          function cargarHorariosDisponibles() {
+            const sedeServicioId = servicioSelect.value;
+            const fechaStr = fechaInput.value;
+            horarioSelect.innerHTML = '';
+
+            if (!sedeServicioId || !fechaStr) {
+              horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
+              return;
+            }
+
+            const [year, month, day] = fechaStr.split("-");
+            const fechaReserva = new Date(year, month - 1, day);
+
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+
+            if (fechaReserva < hoy) {
+              alert("La fecha no puede ser pasada.");
+              horarioSelect.innerHTML = '<option value="">Fecha inválida</option>';
+              return;
+            }
+
+            let diaSemana = fechaReserva.toLocaleDateString('es-PE', { weekday: 'long' });
+            diaSemana = diaSemana.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+
+            if (!diasPermitidos.includes(diaSemana)) {
+              alert(`No se permiten reservas el día ${diaSemana.toLowerCase()}.`);
+              horarioSelect.innerHTML = '<option value="">Día no disponible</option>';
+              return;
+            }
+
+            fetch(`/api/horarios-disponibles-por-fecha?sedeServicioId=${sedeServicioId}&fecha=${fechaStr}`)
+                    .then(res => res.json())
+                    .then(data => {
+                      if (!Array.isArray(data) || data.length === 0) {
+                        horarioSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
+                        return;
+                      }
+
+                      const opt = document.createElement("option");
+                      opt.value = "";
+                      opt.textContent = "Seleccione un horario";
+                      opt.disabled = true;
+                      opt.selected = true;
+                      horarioSelect.appendChild(opt);
+
+                      const yaAgregados = new Set();
+                      data.forEach(h => {
+                        const label = `${h.horaInicio} - ${h.horaFin}`;
+                        if (!yaAgregados.has(label)) {
+                          const opt = document.createElement("option");
+                          opt.value = h.idhorario;
+                          opt.textContent = label;
+                          horarioSelect.appendChild(opt);
+                          yaAgregados.add(label);
+                        }
+                      });
+                    })
+                    .catch(error => {
+                      console.error("Error al cargar horarios:", error);
+                      horarioSelect.innerHTML = '<option>Error al cargar horarios</option>';
+                    });
+          }
+
+          servicioSelect.addEventListener("change", cargarHorariosDisponibles);
+          fechaInput.addEventListener("change", cargarHorariosDisponibles);
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- Footer -->
+        <footer class="footer mt-auto py-3 bg-light border-top">
+          <div class="container text-center text-muted">
+            Municipalidad de San Miguel © 2025
+          </div>
+        </footer>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggle) {
+          toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            document.body.classList.toggle("sidebar-collapsed");
+          });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+          if (window.innerWidth <= 991.98) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+            if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+              document.body.classList.add("sidebar-collapsed");
+            }
+          }
+        });
+
+        // Ajustar al redimensionar
+        window.addEventListener('resize', function() {
+          if (window.innerWidth > 991.98) {
+            document.body.classList.remove("sidebar-collapsed");
+          }
+        });
+      });
+
+
+    </script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      feather.replace();
+    </script>
+
+  </body>
+</html>

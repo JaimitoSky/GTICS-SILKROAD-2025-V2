@@ -1,104 +1,147 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Mi Perfil - Vecino</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../../static/css/app.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-</head>
-<body>
-<div class="wrapper">
-    <div id="sidebar-container"></div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Perfil - Admin</title>
 
-    <div class="main">
-        <nav class="navbar navbar-expand navbar-light navbar-bg">
-            <a class="sidebar-toggle js-sidebar-toggle">
-                <i class="hamburger align-self-center"></i>
-            </a>
-            <div class="navbar-collapse collapse">
-                <ul class="navbar-nav navbar-align ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <img src="../../static/img/icons/campana.png" style="height:18px; width:18px;">
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i data-feather="user"></i> <span class="text-dark">Vecino</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item active" href="perfil.html">Mi cuenta</a></li>
-                            <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <!-- Estilos externos -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-        <main class="content">
-            <div class="container-fluid p-4">
-                <h2>Mi Perfil</h2>
-                <form class="mt-4">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nombres" class="form-label">Nombres</label>
-                            <input type="text" class="form-control" id="nombres" value="Juan" disabled>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="apellidos" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" id="apellidos" value="Pérez" disabled>
-                        </div>
+        <!-- Estilos internos -->
+
+    </head>
+    <body>
+        <div class="wrapper">
+            <!-- Sidebar -->
+            <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+
+            <!-- Main -->
+            <div class="main">
+                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+
+
+
+
+
+                <!-- Contenido principal -->
+                <main class="content">
+                    <div class="container-fluid p-4">
+                        <h2 class="mb-4">Mi Perfil</h2>
+                        <form method="post" th:action="@{/perfil-admin/actualizar}">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombres" class="form-label">Nombres</label>
+                                    <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellidos" class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="correo" class="form-label">Correo electrónico</label>
+                                    <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.email}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="telefono" class="form-label">Celular</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
+                            </div>
+
+                            <!--<div class="d-flex justify-content-between mt-4">
+                                <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
+                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                            </div>-->
+                        </form>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="correo" class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control" id="correo" value="juan@gmail.com">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label">Celular</label>
-                            <input type="text" class="form-control" id="telefono" value="987654321">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="direccion" value="Av. Ejemplo 123">
-                    </div>
+                </main>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="cambiar-contraseña.html" class="btn btn-outline-secondary">Cambiar contraseña</a>
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
+                        const ctx = document.getElementById('activity-chart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                                datasets: [{
+                                    label: 'Reservas',
+                                    data: [12, 19, 3, 5, 2, 3, 7],
+                                    borderColor: '#dc3545',
+                                    tension: 0.3
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+
+
+                <!-- Footer -->
+                <footer class="footer mt-auto py-3 bg-light border-top">
+                    <div class="container text-center text-muted">
+                        Municipalidad de San Miguel © 2025
                     </div>
-                </form>
+                </footer>
             </div>
-        </main>
+        </div>
 
-        <footer class="footer mt-auto py-3">
-            <div class="text-center mt-5 mb-5">
-                <img src="../../static/img/photos/logo-san-miguel.png" height="60">
-            </div>
-            <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
-    </div>
-</div>
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const toggle = document.querySelector(".js-sidebar-toggle");
+                const sidebar = document.getElementById('sidebar');
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
-    fetch('../fragments/sidebar-vecino.html')
-        .then(res => res.text())
-        .then(html => {
-            document.getElementById('sidebar-container').innerHTML = html;
-            document.querySelector('.js-sidebar-toggle')?.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.getElementById('sidebar')?.classList.toggle('collapsed');
-                document.querySelector('.main')?.classList.toggle('sidebar-collapsed');
+                if (toggle) {
+                    toggle.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        document.body.classList.toggle("sidebar-collapsed");
+                    });
+                }
+
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', function(event) {
+                    if (window.innerWidth <= 991.98) {
+                        const isClickInsideSidebar = sidebar.contains(event.target);
+                        const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                        if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                            document.body.classList.add("sidebar-collapsed");
+                        }
+                    }
+                });
+
+                // Ajustar al redimensionar
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 991.98) {
+                        document.body.classList.remove("sidebar-collapsed");
+                    }
+                });
             });
+        </script>
+        <script src="https://unpkg.com/feather-icons"></script>
+        <script>
             feather.replace();
-        });
-</script>
-</body>
+        </script>
+
+    </body>
 </html>

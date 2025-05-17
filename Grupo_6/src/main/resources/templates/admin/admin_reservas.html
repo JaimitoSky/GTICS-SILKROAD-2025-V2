@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reservas - Admin</title>
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+
+    <!-- Estilos internos -->
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+      <!-- Main -->
+      <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+
+
+
+
+
+
+        <!-- Contenido principal -->
+        <main class="content">
+          <div class="container-fluid p-0">
+            <h1 class="h3 mb-4"><strong>Gestión de Reservas</strong> -    Admin</h1>
+
+            <!-- Botón superior -->
+            <div class="mb-3 text-end">
+              <a th:href="@{/admin/reservas/nueva}" class="btn btn-primary">
+                <i data-feather="plus" class="me-1"></i> Crear Reserva
+              </a>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <input type="date" class="form-control" name="fechaInicio" placeholder="Fecha inicio">
+              </div>
+              <div class="col-md-3">
+                <input type="date" class="form-control" name="fechaFin" placeholder="Fecha fin">
+              </div>
+              <div class="col-md-3">
+                <select class="form-control" name="estado">
+                  <option value="" selected>Todos los estados</option>
+                  <option value="confirmada">Confirmada</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="cancelada">Cancelada</option>
+                </select>
+              </div>
+              <div class="col-md-3 text-end">
+                <button class="btn btn-danger">Filtrar</button>
+              </div>
+            </div>
+
+            <!-- Tabla de reservas -->
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Reservas Registradas</h5>
+              </div>
+              <div class="card-body">
+                <table class="table table-hover table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Vecino</th>
+                      <th>Servicio</th>
+                      <th>Sede</th>
+                      <th>Fecha</th>
+                      <th>Hora</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="reserva : ${listaReservas}">
+                      <td th:text="${reserva.idreserva}">1</td>
+                      <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Vecino</td>
+                      <td th:text="${reserva.sedeServicio.servicio.nombre}">Servicio</td>
+                      <td th:text="${reserva.sedeServicio.sede.nombre}">Sede</td>
+                      <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}">2025-06-01</td>
+                      <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">10:00</td>
+                      <td>
+                                <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
+                                                (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
+                                                (reserva.estado.nombre == 'cancelada' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                                      th:text="${reserva.estado.nombre}">
+                                </span>
+                      </td>
+                      <td>
+                        <a th:href="@{/admin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">Ver</a>
+
+                        <form th:action="@{/admin/reservas/aprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
+                          <button type="submit" class="btn btn-sm btn-success me-1"
+                                  th:if="${reserva.estado.nombre.equals('pendiente')}">Aprobar Pago</button>
+                        </form>
+
+                        <form th:action="@{/admin/reservas/desaprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
+                          <button type="submit" class="btn btn-sm btn-warning me-1"
+                                  th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar</button>
+                        </form>
+
+                        <!--<form th:action="@{/superadmin/reservas/cancelar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
+                              onsubmit="return confirm('¿Cancelar esta reserva?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
+                        </form>-->
+
+                        <form th:action="@{/admin/reservas/habilitar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
+                              th:if="${reserva.estado.nombre.equals('cancelada')}">
+                          <button type="submit" class="btn btn-sm btn-secondary">Habilitar</button>
+                        </form>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
+
+
+
+
+
+
+
+
+        <!-- Footer -->
+        <footer class="footer mt-auto py-3 bg-light border-top">
+          <div class="container text-center text-muted">
+            Municipalidad de San Miguel © 2025
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggle) {
+          toggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            document.body.classList.toggle("sidebar-collapsed");
+          });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+          if (window.innerWidth <= 991.98) {
+            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+            if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+              document.body.classList.add("sidebar-collapsed");
+            }
+          }
+        });
+
+        // Ajustar al redimensionar
+        window.addEventListener('resize', function() {
+          if (window.innerWidth > 991.98) {
+            document.body.classList.remove("sidebar-collapsed");
+          }
+        });
+      });
+    </script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      feather.replace();
+    </script>
+
+  </body>
+</html>
