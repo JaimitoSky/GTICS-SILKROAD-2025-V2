@@ -387,6 +387,8 @@ public class VecinoController {
     }
 
 
+
+
     @GetMapping("/reservas/{id}")
     public String verDetalleReserva(@PathVariable("id") Integer id, Model model, HttpSession session) {
         Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
@@ -401,6 +403,30 @@ public class VecinoController {
         model.addAttribute("reserva", reserva);
         model.addAttribute("rol", "vecino");
         return "vecino/vecino_detalle_reserva";
+    }
+
+    @GetMapping("/comprobante/{idPago}")
+    @ResponseBody
+    public ResponseEntity<byte[]> mostrarComprobante(@PathVariable("idPago") Integer idPago) {
+        Optional<Pago> pagoOpt = pagoRepository.findById(idPago);
+
+        if (pagoOpt.isPresent() && pagoOpt.get().getComprobante() != null) {
+            byte[] comprobante = pagoOpt.get().getComprobante();
+
+            MediaType mediaType = MediaType.IMAGE_JPEG;
+            try {
+                String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(comprobante));
+                if (mimeType != null) {
+                    mediaType = MediaType.parseMediaType(mimeType);
+                }
+            } catch (IOException ignored) {}
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(mediaType);
+            return new ResponseEntity<>(comprobante, headers, HttpStatus.OK);
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
 

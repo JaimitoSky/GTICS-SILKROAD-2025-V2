@@ -92,17 +92,12 @@
 </head>
 <body>
 
-<!-- TOASTS individuales -->
-<div th:if="${param.error}" id="toast" class="toast show error">
-    Correo y/o contraseña incorrectos.
+<!-- ✅ TOAST general usando los atributos 'mensaje' y 'tipo' -->
+<div th:if="${mensaje}" id="toast"
+     class="toast show"
+     th:classappend="${tipo} ?: 'error'"
+     th:text="${mensaje}">
 </div>
-<div th:if="${param.logout}" id="toast" class="toast show success">
-    Has cerrado sesión exitosamente.
-</div>
-<div th:if="${param.logoutSuccess}" id="toast" class="toast show success">
-    Tu cuenta ha sido verificada correctamente.
-</div>
-<div th:if="${successMessage}" id="toast" class="toast show success" th:text="${successMessage}"></div>
 
 <div class="login-container">
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
@@ -120,18 +115,12 @@
                    placeholder="Contraseña" autocomplete="current-password" required />
             <label for="password">Contraseña</label>
             <span class="toggle-password" onclick="togglePassword()">
-                <i id="eyeIcon" class="fas fa-eye"></i>
+                <i id="eyeIcon" class="fas fa-eye-slash"></i>
             </span>
         </div>
 
         <div class="row mb-4">
-            <div class="col-md-6 d-flex justify-content-start">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="remember-me" id="loginCheck" />
-                    <label class="form-check-label" for="loginCheck">Recordarme</label>
-                </div>
-            </div>
-            <div class="col-md-6 text-end">
+            <div class="col-md-12 text-end">
                 <a th:href="@{/recuperar/olvide}" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
             </div>
         </div>
@@ -155,12 +144,12 @@
 
         if (input.type === "password") {
             input.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            input.type = "password";
             icon.classList.remove("fa-eye-slash");
             icon.classList.add("fa-eye");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
         }
     }
 
