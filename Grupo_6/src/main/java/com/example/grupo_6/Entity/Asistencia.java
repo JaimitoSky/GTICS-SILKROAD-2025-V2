@@ -39,4 +39,9 @@ public class Asistencia {
 
     @Column(name = "observaciones", columnDefinition = "TEXT")
     private String observaciones;
+    @ManyToOne
+    @JoinColumn(name = "idreserva")
+    private Reserva reserva;
+
+
 }

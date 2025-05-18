@@ -23,51 +23,44 @@
 
         <main class="content">
             <div class="container mt-4">
-                <h2 class="mb-4">Reservas de Sede asignada</h2>
+                <h2>Detalle de Reserva</h2>
 
-                <input type="text" id="filtro" class="form-control mb-3" placeholder="Filtrar por nombre o servicio...">
+                <p><strong>Usuario:</strong> <span th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></span></p>
+                <p><strong>Fecha de reserva:</strong> <span th:text="${reserva.fechaReserva}"></span></p>
+                <p><strong>Servicio:</strong> <span th:text="${reserva.sedeServicio.servicio.nombre}"></span></p>
+                <p><strong>Sede:</strong> <span th:text="${reserva.sedeServicio.sede.nombre}"></span></p>
+                <p><strong>Estado:</strong> <span th:text="${reserva.estado.nombre}"></span></p>
 
-                <table class="table table-bordered table-hover align-middle text-center">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Servicio</th>
-                        <th>Horario</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody id="tablaReservas">
-                    <tr th:each="reserva : ${reservas}">
-                        <td th:text="${reserva.usuario != null ? reserva.usuario.nombres + ' ' + reserva.usuario.apellidos : 'Sin usuario'}"></td>
-                        <td th:text="${reserva.sedeServicio != null && reserva.sedeServicio.servicio != null ? reserva.sedeServicio.servicio.nombre : 'Sin servicio'}"></td>
-                        <td>
-                            <span th:text="${reserva.horarioDisponible != null ? #temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm') : 'Sin hora'}"></span>
-                            -
-                            <span th:text="${reserva.horarioDisponible != null ? #temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm') : 'Sin hora'}"></span>
-                        </td>
-                        <td th:text="${reserva.estado != null ? reserva.estado.nombre : 'Sin estado'}"></td>
-                        <td>
-                            <!-- Botón de asistencia -->
-                            <a th:href="@{'/coordinador/asistencia/' + ${reserva.idreserva}}" class="btn btn-success btn-sm me-1">
-                                <i class="bi bi-check2-square"></i> Asistencia
-                            </a>
+                <hr>
 
-                            <!-- Botón de incidencia -->
-                            <a th:href="@{'/coordinador/incidencia/' + ${reserva.idreserva}}" class="btn btn-warning btn-sm me-1">
-                                <i class="bi bi-exclamation-triangle"></i> Incidencia
-                            </a>
+                <h4>Asistencia</h4>
+                <div th:if="${asistencia != null}">
+                    <p><strong>Hora de entrada:</strong> <span th:text="${asistencia.horaEntrada}"></span></p>
+                    <!--<p><strong>Latitud:</strong> <span th:text="${asistencia.latitud}"></span></p>
+                    <p><strong>Longitud:</strong> <span th:text="${asistencia.longitud}"></span></p>-->
+                    <p><strong>Observaciones:</strong> <span th:text="${asistencia.observaciones}"></span></p>
+                </div>
+                <div th:unless="${asistencia != null}">
+                    <p>No se ha registrado asistencia.</p>
+                </div>
 
-                            <!-- Nuevo botón para ver detalles -->
-                            <a th:href="@{'/coordinador/reserva-detalle/' + ${reserva.idreserva}}" class="btn btn-info btn-sm">
-                                <i class="bi bi-info-circle"></i> Detalles
-                            </a>
-                        </td>
+                <hr>
 
-                    </tr>
+                <h4>Incidencia</h4>
+                <div th:if="${#lists.isEmpty(incidencias)}">
+                    No se ha registrado incidencia.
+                </div>
+                <div th:if="${!#lists.isEmpty(incidencias)}">
+                    <ul>
+                        <li th:each="inc : ${incidencias}">
+                            <strong>Fecha:</strong> <span th:text="${#temporals.format(inc.fechaLocal, 'yyyy-MM-dd HH:mm')}"></span>
+                            <br>
+                            <strong>Descripción:</strong> <span th:text="${inc.descripcion}"></span>
+                        </li>
+                    </ul>
+                </div>
 
-                    </tbody>
-                </table>
+
             </div>
         </main>
 

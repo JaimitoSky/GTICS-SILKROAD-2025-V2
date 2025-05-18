@@ -72,4 +72,5 @@ public class Usuario implements Serializable {
 
     public void setRol(Rol r) {
     }
+
 }

@@ -2,7 +2,11 @@ package com.example.grupo_6.Repository;
 
 import com.example.grupo_6.Dto.ServicioSimplificado;
 import com.example.grupo_6.Entity.*;
-import java.util.Map; import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -97,6 +101,41 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     long countUsuariosPorNombreRol(@Param("nombre") String nombre);
 
 
+    @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede = :idSede")
+    List<Reserva> buscarReservasPorIdSede(@Param("idSede") Integer idSede);
+
+//reservas con filtro
+
+    @Query("""
+SELECT r FROM Reserva r
+JOIN r.usuario u
+JOIN r.sedeServicio ss
+JOIN ss.sede s
+WHERE (:estado = '' OR LOWER(r.estado.nombre) = LOWER(:estado))
+AND (:vecino = '' OR LOWER(CONCAT(u.nombres, ' ', u.apellidos)) LIKE LOWER(CONCAT('%', :vecino, '%')))
+AND (:sede IS NULL OR s.idsede = :sede)
+AND (:fechaInicio IS NULL OR r.fechaReserva >= :fechaInicio)
+AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
+""")
+    Page<Reserva> buscarConFiltros(@Param("estado") String estado,
+                                   @Param("fechaInicio") LocalDate fechaInicio,
+                                   @Param("fechaFin") LocalDate fechaFin,
+                                   @Param("vecino") String vecino,
+                                   @Param("sede") Integer sede,
+                                   Pageable pageable);
+
+
+    @Query("SELECT r FROM Reserva r WHERE LOWER(CONCAT(r.usuario.nombres, ' ', r.usuario.apellidos)) LIKE %:valor%")
+    Page<Reserva> filtrarPorVecino(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT r FROM Reserva r WHERE LOWER(r.estado.nombre) LIKE %:valor%")
+    Page<Reserva> filtrarPorEstado(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT r FROM Reserva r WHERE LOWER(r.sedeServicio.sede.nombre) LIKE %:valor%")
+    Page<Reserva> filtrarPorSede(@Param("valor") String valor, Pageable pageable);
+
+    @Query("SELECT r FROM Reserva r WHERE DATE(r.fechaReserva) = :valor")
+    Page<Reserva> filtrarPorFecha(@Param("valor") LocalDate valor, Pageable pageable);
 
 
 }

@@ -25,36 +25,51 @@
         <!-- Navbar -->
         <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
 
-        <!-- Contenido -->
         <main class="content">
             <div class="container mt-4">
-                <div class="row">
-                    <!-- Local asignado -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Local asignado</label>
-                        <input type="text" class="form-control text-truncate"
-                               th:value="${sedeAsignada != null ? sedeAsignada.nombre : 'Sin asignación'}"
-                               readonly style="max-width: 100%;" />
+                <h2 class="mb-4">Registrar Asistencia</h2>
+
+                <form th:action="@{/coordinador/asistencia/marcar}" method="post" onsubmit="return prepararAsistencia(this)">
+                    <input type="hidden" name="idusuario" th:value="${reserva.usuario.idusuario}" />
+                    <input type="hidden" name="horaEntrada" />
+                    <input type="hidden" name="idreserva" th:value="${reserva.idreserva}" />
+
+
+                    <div class="mb-3">
+                        <label class="form-label">Usuario:</label>
+                        <span th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></span>
                     </div>
 
-                    <!-- Mapa dinámico con Leaflet -->
-                    <div class="col-md-6 mb-3">
-                        <div id="map" style="height: 300px; width: 100%;" class="rounded border"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Servicio:</label>
+                        <span th:text="${reserva.sedeServicio.servicio.nombre}"></span>
                     </div>
-                </div>
 
-                <!-- Botones
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <button class="btn btn-success w-100" onclick="validarEntrada()">Marcar entrada</button>
+                    <div class="mb-3">
+                        <label class="form-label">Horario:</label>
+                        <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
                     </div>
-                    <div class="col-6">
-                        <button id="btnSalida" class="btn btn-danger w-100" disabled>Marcar salida</button>
-                    </div>
-                </div>
-                -->
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check2-circle"></i> Confirmar Asistencia
+                    </button>
+                </form>
             </div>
         </main>
+
+        <script>
+            function prepararAsistencia(form) {
+                const now = new Date();
+                form.querySelector('input[name="horaEntrada"]').value = now.toTimeString().split(" ")[0];
+
+                form.submit(); // Envía directamente sin ubicación
+
+                return false; // evitar envío inmediato por HTML
+            }
+        </script>
+
+
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3">
@@ -156,18 +171,10 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-o9N1jG8w+FqY5Gn9W0mJ6mPyvdbGg0XtgDTevZf+0Yw=" crossorigin=""></script>
 
-<!-- Geolocalización + Mapa -->
+<!-- Geolocalización + Mapa-->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const sedeLat = /*[[${sedeAsignada.latitud}]]*/ 0;
-    const sedeLon = /*[[${sedeAsignada.longitud}]]*/ 0;
 
-    const map = L.map('map').setView([sedeLat, sedeLon], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-    }).addTo(map);
-    L.marker([sedeLat, sedeLon]).addTo(map).bindPopup("Sede asignada").openPopup();
-    /*]]>*/
 
     // ⏰ Reloj en vivo
     function actualizarHora() {

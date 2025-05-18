@@ -27,34 +27,19 @@
 
         <!-- Contenido -->
         <main class="content">
-            <div class="container mt-4">
-                <div class="row">
-                    <!-- Local asignado -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Local asignado</label>
-                        <input type="text" class="form-control text-truncate"
-                               th:value="${sedeAsignada != null ? sedeAsignada.nombre : 'Sin asignación'}"
-                               readonly style="max-width: 100%;" />
+            <div class="container mt-5">
+                <h3>Registrar Incidencia</h3>
+                <form th:action="@{/coordinador/incidencia/guardar}" method="post">
+                    <input type="hidden" th:name="idreserva" th:value="${reserva.idreserva}" />
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control" rows="4" required></textarea>
                     </div>
-
-                    <!-- Mapa dinámico con Leaflet -->
-                    <div class="col-md-6 mb-3">
-                        <div id="map" style="height: 300px; width: 100%;" class="rounded border"></div>
-                    </div>
-                </div>
-
-                <!-- Botones
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <button class="btn btn-success w-100" onclick="validarEntrada()">Marcar entrada</button>
-                    </div>
-                    <div class="col-6">
-                        <button id="btnSalida" class="btn btn-danger w-100" disabled>Marcar salida</button>
-                    </div>
-                </div>
-                -->
+                    <button type="submit" class="btn btn-warning">Guardar</button>
+                </form>
             </div>
         </main>
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3">
@@ -159,15 +144,6 @@
 <!-- Geolocalización + Mapa -->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const sedeLat = /*[[${sedeAsignada.latitud}]]*/ 0;
-    const sedeLon = /*[[${sedeAsignada.longitud}]]*/ 0;
-
-    const map = L.map('map').setView([sedeLat, sedeLon], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-    }).addTo(map);
-    L.marker([sedeLat, sedeLon]).addTo(map).bindPopup("Sede asignada").openPopup();
-    /*]]>*/
 
     // ⏰ Reloj en vivo
     function actualizarHora() {

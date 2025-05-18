@@ -22,8 +22,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 
@@ -64,6 +66,8 @@ public class SuperAdminController {
     private HorarioDisponibleRepository horarioDisponibleRepository;
     @Autowired
     private HorarioAtencionRepository horarioAtencionRepository;
+    @Autowired
+    private TipoServicioRepository tipoServicioRepository;
 
     private void cargarEstadisticas(Model model, YearMonth mes, String rol) {
         if (mes == null) {
@@ -167,6 +171,36 @@ public class SuperAdminController {
         }
         return "redirect:/perfil-superadmin?success";
     }
+
+    @GetMapping("/superadmin/servicios")
+    public String listarServicios(Model model) {
+        model.addAttribute("listaServicios", servicioRepository.findAll());
+        return "superadmin/superadmin_servicios";
+    }
+
+    @GetMapping("/superadmin/servicios/editar/{id}")
+    public String editarServicio(@PathVariable("id") int id, Model model) {
+        Servicio servicio = servicioRepository.findById(id).orElseThrow();
+        model.addAttribute("servicio", servicio);
+        return "superadmin/superadmin_servicios_update";
+    }
+
+    @PostMapping("/superadmin/servicios/actualizar")
+    public String actualizarImagenServicio(@ModelAttribute Servicio servicio,
+                                           @RequestParam("imagen") MultipartFile imagen) throws IOException {
+
+        Servicio servicioExistente = servicioRepository.findById(servicio.getIdservicio())
+                .orElseThrow();
+
+        // Solo actualiza imagen si se subió una nueva
+        if (!imagen.isEmpty()) {
+            servicioExistente.setImagenComplejo(imagen.getBytes());
+        }
+
+        servicioRepository.save(servicioExistente);
+        return "redirect:/superadmin/servicios";
+    }
+
 
 
 
@@ -605,13 +639,39 @@ public class SuperAdminController {
 
 
     @GetMapping("/superadmin/reservas")
-    public String listarReservas(Model model) {
-        List<Reserva> reservas = reservaRepository.findAll();
-        model.addAttribute("listaReservas", reservas);
+    public String listarReservas(
+            @RequestParam(required = false) String filtro,
+            @RequestParam(required = false, defaultValue = "vecino") String campo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
 
-        model.addAttribute("reserva", new Reserva()); // para evitar errores con th:field si se reutiliza
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaReserva").descending());
+        Page<Reserva> paginaReservas;
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            String valor = filtro.trim().toLowerCase();
+            paginaReservas = switch (campo) {
+                case "estado" -> reservaRepository.filtrarPorEstado(valor, pageable);
+                case "sede" -> reservaRepository.filtrarPorSede(valor, pageable);
+                case "fecha" -> reservaRepository.filtrarPorFecha(LocalDate.parse(valor), pageable);
+                default -> reservaRepository.filtrarPorVecino(valor, pageable);
+            };
+        } else {
+            paginaReservas = reservaRepository.findAll(pageable);
+        }
+
+        model.addAttribute("reservas", paginaReservas.getContent());
+        model.addAttribute("pagina", paginaReservas);
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", paginaReservas.getTotalPages());
+        model.addAttribute("campo", campo);
+        model.addAttribute("filtro", filtro);
+
         return "superadmin/superadmin_reservas";
     }
+
+
 
 
     @GetMapping("/superadmin/reservas/nueva")

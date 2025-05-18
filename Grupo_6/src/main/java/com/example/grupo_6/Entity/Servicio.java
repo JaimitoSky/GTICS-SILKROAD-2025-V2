@@ -3,6 +3,7 @@ package com.example.grupo_6.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalTime;
+import java.util.Base64;
 
 @Entity
 @Table(name = "servicio")
@@ -47,5 +48,11 @@ public class Servicio {
         this.imagenComplejo = imagenComplejo;
     }
 
+    @Transient
+    public String getImagenBase64() {
+        return (imagenComplejo != null)
+                ? Base64.getEncoder().encodeToString(imagenComplejo)
+                : "";
+    }
 
 }
