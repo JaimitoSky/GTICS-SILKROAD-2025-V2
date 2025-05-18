@@ -164,9 +164,8 @@
                                 <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
                             </div>
                             <div class="form-group mt-3">
-                                <button type="button" id="btnEnviar" class="btn btn-submit">
-                                    Enviar Comprobante
-                                </button>
+                                <button type="button" class="btn btn-primary" id="btnComprobante">Reservar</button>
+
                             </div>
 
                         </form>
@@ -204,37 +203,23 @@
         </script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const btnEnviar = document.getElementById("btnEnviar");
+            document.getElementById("btnComprobante").addEventListener("click", function () {
+                const inputFile = document.getElementById("adjuntar"); // archivo comprobante
+                const form = inputFile.closest("form"); // el formulario que contiene el botón
+                const file = inputFile?.files?.[0];
 
-                if (btnEnviar) {
-                    btnEnviar.addEventListener("click", function () {
-                        const confirmar = confirm("¿Estás seguro de enviar el comprobante?");
-                        if (confirmar) {
-                            const form = document.querySelector("form");
-                            const formData = new FormData(form);
-
-                            fetch(form.action, {
-                                method: "POST",
-                                body: formData
-                            })
-                                .then(response => {
-                                    if (response.ok) {
-                                        window.location.href = "http://localhost:8080/vecino/reservas/historial";
-                                    } else {
-                                        alert("Hubo un error al enviar el comprobante.");
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Error:", error);
-                                    alert("Ocurrió un error al enviar el formulario.");
-                                });
-                        }
-                    });
+                if (file) {
+                    // Caso: Se cargó un archivo
+                    if (confirm("¿Estás seguro de enviar el comprobante de pago?")) {
+                        form.submit();
+                    }
+                } else {
+                    // Caso: No se cargó archivo
+                    alert("No se cargó ningún comprobante de pago.\nTiene un tiempo máximo de dos horas para realizar el pago.");
+                    window.location.href = "http://localhost:8080/vecino/reservas/historial";
                 }
             });
         </script>
-
 
     </body>
 </html>

@@ -1,8 +1,81 @@
 <!DOCTYPE html>
-<html>
-<head><title>Error</title></head>
-<body>
-<h1>Ocurrió un error</h1>
-<p>Revisa la consola para más detalles.</p>
-</body>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Error - Plataforma Digital</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f3f4f6;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+            }
+
+            .container {
+                background: #fff;
+                padding: 50px 40px;
+                border-radius: 16px;
+                text-align: center;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+                max-width: 540px;
+                width: 95%;
+            }
+
+            h1 {
+                color: #dc2626;
+                font-size: 30px;
+                margin-bottom: 12px;
+            }
+
+            p {
+                color: #4b5563;
+                font-size: 17px;
+                margin-bottom: 24px;
+            }
+
+            .btn {
+                display: inline-block;
+                background-color: #2563eb;
+                color: #fff;
+                padding: 12px 24px;
+                text-decoration: none;
+                border-radius: 10px;
+                font-weight: 600;
+                transition: background-color 0.3s ease;
+            }
+
+            .btn:hover {
+                background-color: #1d4ed8;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Animación más grande -->
+            <lottie-player
+                    src="https://assets1.lottiefiles.com/packages/lf20_qp1q7mct.json"
+                    background="transparent"
+                    speed="1"
+                    style="width: 420px; height: 420px; margin: 0 auto 20px;"
+                    loop
+                    autoplay>
+            </lottie-player>
+
+            <h1>¡Ups! Algo salió mal</h1>
+            <p>
+                Ocurrió un error inesperado en la plataforma.<br>
+                Si crees que se trata de un error, por favor comunícate con un administrador o intenta nuevamente más tarde.
+            </p>
+            <a href="http://localhost:8080/login" class="btn">Volver al Login</a>
+
+
+        </div>
+    </body>
 </html>

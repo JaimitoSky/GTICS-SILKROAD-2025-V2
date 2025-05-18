@@ -57,7 +57,10 @@ import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
+import java.io.IOException;import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.LocalDateTime;
+
 
 
 @Controller
@@ -402,8 +405,14 @@ public class VecinoController {
         Reserva reserva = opt.get();
         model.addAttribute("reserva", reserva);
         model.addAttribute("rol", "vecino");
+
+        ZonedDateTime ahoraZonificado = ZonedDateTime.now(ZoneId.of("America/Lima"));
+        model.addAttribute("ahora", ahoraZonificado.toLocalDateTime());
+
+
         return "vecino/vecino_detalle_reserva";
     }
+
 
     @GetMapping("/comprobante/{idPago}")
     @ResponseBody
