@@ -42,25 +42,32 @@
             </div>
 
             <!-- Filtros -->
-            <div class="row mb-3">
-              <div class="col-md-3">
-                <input type="date" class="form-control" name="fechaInicio" placeholder="Fecha inicio">
-              </div>
-              <div class="col-md-3">
-                <input type="date" class="form-control" name="fechaFin" placeholder="Fecha fin">
-              </div>
-              <div class="col-md-3">
-                <select class="form-control" name="estado">
-                  <option value="" selected>Todos los estados</option>
-                  <option value="confirmada">Confirmada</option>
-                  <option value="pendiente">Pendiente</option>
-                  <option value="cancelada">Cancelada</option>
+            <form th:action="@{/admin/reservas}" method="get" class="row g-2 mb-3 align-items-center justify-content-end">
+              <div class="col-12 col-sm-auto">
+                <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
+                  <option th:value="'vecino'" th:selected="${campo == 'vecino'}">Vecino</option>
+                  <!-- <option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
+                   <option th:value="'sede'" th:selected="${campo == 'sede'}">Sede</option>-->
+                  <option th:value="'fecha'" th:selected="${campo == 'fecha'}">Fecha</option>
                 </select>
               </div>
-              <div class="col-md-3 text-end">
-                <button class="btn btn-danger">Filtrar</button>
+
+              <div class="col-12 col-sm" id="filtroContainer">
+                <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
               </div>
-            </div>
+
+              <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="bi bi-search"></i> Buscar
+                </button>
+              </div>
+
+              <div class="col-auto" th:if="${filtro != null and filtro != ''}">
+                <a th:href="@{/admin/reservas}" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-left"></i> Volver
+                </a>
+              </div>
+            </form>
 
             <!-- Tabla de reservas -->
             <div class="card">
@@ -82,7 +89,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr th:each="reserva : ${listaReservas}">
+                    <tr th:each="reserva : ${reservas}">
                       <td th:text="${reserva.idreserva}">1</td>
                       <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Vecino</td>
                       <td th:text="${reserva.sedeServicio.servicio.nombre}">Servicio</td>
@@ -90,11 +97,10 @@
                       <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}">2025-06-01</td>
                       <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">10:00</td>
                       <td>
-                                <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
-                                                (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
-                                                (reserva.estado.nombre == 'cancelada' ? 'badge bg-danger' : 'badge bg-secondary'))}"
-                                      th:text="${reserva.estado.nombre}">
-                                </span>
+                            <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
+                                             (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
+                                             (reserva.estado.nombre == 'cancelada' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                                  th:text="${reserva.estado.nombre}"></span>
                       </td>
                       <td>
                         <a th:href="@{/admin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">Ver</a>
@@ -109,11 +115,6 @@
                                   th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar</button>
                         </form>
 
-                        <!--<form th:action="@{/superadmin/reservas/cancelar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
-                              onsubmit="return confirm('¿Cancelar esta reserva?');">
-                            <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
-                        </form>-->
-
                         <form th:action="@{/admin/reservas/habilitar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
                               th:if="${reserva.estado.nombre.equals('cancelada')}">
                           <button type="submit" class="btn btn-sm btn-secondary">Habilitar</button>
@@ -123,6 +124,23 @@
                   </tbody>
                 </table>
               </div>
+              <!-- Paginación -->
+              <nav aria-label="Paginación de reservas">
+                <ul class="pagination justify-content-center flex-wrap">
+                  <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/reservas(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+                  </li>
+
+                  <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                      th:classappend="${i == paginaActual} ? 'active'">
+                    <a class="page-link" th:href="@{/admin/reservas(page=${i}, size=10, campo=${campo}, filtro=${filtro})}" th:text="${i + 1}">1</a>
+                  </li>
+
+                  <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/reservas(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
         </main>

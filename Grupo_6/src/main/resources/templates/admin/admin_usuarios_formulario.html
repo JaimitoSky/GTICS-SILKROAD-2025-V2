@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editar Usuario - Admin</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Editar Usuario - Admin</title>
 
-    <!-- Estilos externos -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <!-- Estilos externos -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Estilos internos -->
+        <!-- Estilos internos -->
+        <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-</head>
-<body>
-<div class="wrapper">
-    <!-- Sidebar -->
-    <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+    </head>
+    <body>
+        <div class="wrapper">
+            <!-- Sidebar -->
+            <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
 
-    <!-- Main -->
-    <div class="main">
-        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+            <!-- Main -->
+            <div class="main">
+                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
 
 
 
@@ -33,141 +29,133 @@
 
 
 
-        <!-- Contenido principal -->
-        <main class="content">
-            <div class="container-fluid p-0">
-                <div class="mb-3">
-                    <h1 class="h3 d-inline align-middle" th:text="${usuario.idusuario == null} ? 'Registrar Nuevo Usuario' : 'Editar Usuario'"></h1>
-                </div>
-
-                <form th:action="@{/admin/usuarios/registrados}" method="post" th:object="${usuario}">
-                    <input type="hidden" th:field="*{idusuario}" />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">DNI</label>
-                                <input type="text" th:field="*{dni}" class="form-control" required maxlength="8" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nombres</label>
-                                <input type="text" th:field="*{nombres}" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Apellidos</label>
-                                <input type="text" th:field="*{apellidos}" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Correo electrónico</label>
-                                <input type="email" th:field="*{email}" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Teléfono</label>
-                                <input type="text" th:field="*{telefono}" class="form-control" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Dirección</label>
-                                <input type="text" th:field="*{direccion}" class="form-control" />
-                            </div>
+                <main class="content">
+                    <div class="container-fluid p-0">
+                        <div class="mb-3">
+                            <h1 class="h3 d-inline align-middle">Editar Usuario</h1>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Estado</label>
-                                <select th:field="*{estado}" class="form-select" required>
-                                    <option value="activo">Activo</option>
-                                    <option value="inactivo">Inactivo</option>
-                                </select>
-                            </div>
+                        <form th:action="@{/admin/usuarios/registrados/actualizar}" method="post" th:object="${usuario}">
+                            <input type="hidden" th:field="*{idusuario}" />
+                            <div class="row">
+                                <!-- Columna Izquierda -->
+                                <div class="col-12 col-lg-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">Datos Personales</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">DNI</label>
+                                                <input type="text" th:field="*{dni}" class="form-control" required />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Nombres</label>
+                                                <input type="text" th:field="*{nombres}" class="form-control" required />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Apellidos</label>
+                                                <input type="text" th:field="*{apellidos}" class="form-control" required />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" th:field="*{email}" class="form-control" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-success">Guardar Usuario</button>
-                                <a th:href="@{/admin/usuarios/registrados}" class="btn btn-secondary">Cancelar</a>
+                                <!-- Columna Derecha -->
+                                <div class="col-12 col-lg-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">Credenciales y Contacto</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Nueva Contraseña</label>
+                                                <input type="password" name="rawPassword" class="form-control" />
+                                                <small class="text-muted">Dejar en blanco para mantener la contraseña actual</small>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Teléfono</label>
+                                                <input type="text" th:field="*{telefono}" class="form-control" required />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Dirección</label>
+                                                <textarea th:field="*{direccion}" class="form-control" rows="2" required></textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Rol</label>
+                                                <select th:field="*{idrol}" class="form-select" required>
+                                                    <option value="3">Coordinador</option>
+                                                    <option value="4">Vecino</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3 form-check">
+                                                <input type="checkbox" th:field="*{notificarRecordatorio}" class="form-check-input" id="recordatorio" />
+                                                <label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
+                                            </div>
+                                            <div class="mb-3 form-check">
+                                                <input type="checkbox" th:field="*{notificarDisponibilidad}" class="form-check-input" id="disponibilidad" />
+                                                <label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                            <a th:href="@{/admin/usuarios/registrados}" class="btn btn-secondary">Cancelar</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
-                </form>
+                </main>
 
+
+
+
+
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const modal = document.getElementById("confirmModal");
+                        modal.addEventListener("show.bs.modal", function (event) {
+                            const button = event.relatedTarget;
+                            const idUsuario = button.getAttribute("data-id");
+                            const nombre = button.getAttribute("data-nombre");
+                            document.getElementById("inputIdUsuario").value = idUsuario;
+                            document.getElementById("nombreUsuario").innerText = nombre;
+                        });
+                    });
+                </script>
+
+
+
+
+
+
+
+                <footer class="footer mt-auto py-3 bg-light border-top">
+                    <div class="container text-center text-muted">
+                        Municipalidad de San Miguel © 2025
+                    </div>
+                </footer>
             </div>
-        </main>
+        </div>
 
-        <!-- Leaflet -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            const latInput = document.querySelector("input[name='latitud']");
-            const lngInput = document.querySelector("input[name='longitud']");
-            const initialLat = parseFloat(latInput.value) || -12.0758;
-            const initialLng = parseFloat(lngInput.value) || -77.0902;
-
-            const map = L.map('map').setView([initialLat, initialLng], 15);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-
-            marker.on('dragend', function (e) {
-                const pos = marker.getLatLng();
-                latInput.value = pos.lat.toFixed(8);
-                lngInput.value = pos.lng.toFixed(8);
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const toggle = document.querySelector(".js-sidebar-toggle");
+                toggle.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.body.classList.toggle("sidebar-collapsed");
+                });
             });
-            /*]]>*/
         </script>
-
-
-
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
-    </div>
-</div>
-
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                    document.body.classList.add("sidebar-collapsed");
-                }
-            }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 991.98) {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-        });
-    });
-</script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
-</script>
-
-</body>
+        <script src="https://unpkg.com/feather-icons"></script>
+        <script>
+            feather.replace();
+        </script>
+    </body>
 </html>

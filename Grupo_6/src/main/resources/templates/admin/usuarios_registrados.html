@@ -62,6 +62,9 @@
 
                                 <div class="card-header d-flex align-items-center justify-content-between">
                                     <h5 class="card-title mb-0">Gestión de Usuarios</h5>
+                                    <a th:href="@{/admin/usuarios/registrados/nuevo}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-person-plus-fill"></i> Nuevo Usuario
+                                    </a>
                                 </div>
 
 
@@ -91,13 +94,13 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm" role="group">
-                                                        <form th:action="@{/cambiar-rol}" method="post">
+                                                        <form th:action="@{/admin/cambiar-rol}" method="post">
                                                             <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
                                                             <select name="rol" class="form-select form-select-sm"
                                                                     onchange="this.form.submit()"
                                                                     th:disabled="${usuario.email == session.usuario.email}">
                                                                 <option value="1" th:selected="${usuario.idrol == 1}" disabled>Superadmin</option>
-                                                                <option value="2" th:selected="${usuario.idrol == 2}" disabled>Administrador</option>
+                                                                <option value="2" th:selected="${usuario.idrol == 2}" >Administrador</option>
                                                                 <option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
                                                                 <option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
                                                             </select>
@@ -122,7 +125,7 @@
                                                            title="Editar Usuario">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <form th:action="@{/eliminar}" method="post" class="d-inline">
+                                                        <form th:action="@{admin/usuarios/registrados/eliminar}" method="post" class="d-inline">
                                                             <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
                                                             <button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
                                                                     data-bs-toggle="modal" data-bs-target="#confirmModal" th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
@@ -135,6 +138,26 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <nav aria-label="Paginación de usuarios">
+                                    <ul class="pagination justify-content-center flex-wrap">
+                                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                                            <a class="page-link"
+                                               th:href="@{/admin/usuarios/registrados(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+                                        </li>
+
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                                            th:classappend="${i == paginaActual} ? 'active'">
+                                            <a class="page-link"
+                                               th:href="@{/admin/usuarios/registrados(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
+                                               th:text="${i + 1}">1</a>
+                                        </li>
+
+                                        <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                                            <a class="page-link"
+                                               th:href="@{/admin/usuarios/registrados(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>
@@ -152,7 +175,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <form id="formEliminar" method="post" th:action="@{/eliminar}">
+                                    <form id="formEliminar" method="post" th:action="@{/admin/usuarios/registrados/eliminar}">
                                         <input type="hidden" name="idusuario" id="inputIdUsuario" />
                                         <button type="submit" class="btn btn-danger">Eliminar</button>
                                     </form>

@@ -36,18 +36,10 @@
 
             <!-- Tarifas y Promociones -->
             <li class="nav-item">
-                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" href="#tarifasSubmenu" role="button" aria-expanded="false" aria-controls="tarifasSubmenu">
+                <a class="nav-link" th:href="@{/admin/tarifas}">
                     <i class="bi bi-cash-coin"></i> Tarifas y Promociones
                 </a>
-                <div class="collapse" id="tarifasSubmenu">
-                    <ul class="nav flex-column ms-3">
-                        <li class="nav-item"><a th:href="@{/admin/tarifas}" class="nav-link">Tarifas</a></li>
-                        <li class="nav-item"><a th:href="@{/admin/promociones}" class="nav-link">Promociones</a></li>
-                        <li class="nav-item"><a th:href="@{/admin/puntos-usuario}" class="nav-link">Puntos por Usuario</a></li>
-                    </ul>
-                </div>
             </li>
-
             <!-- Reservas -->
             <li class="nav-item">
                 <a th:href="@{/admin/reservas}" class="nav-link"><i class="bi bi-calendar-check"></i> Reservas</a>

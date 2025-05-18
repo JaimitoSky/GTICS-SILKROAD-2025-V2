@@ -7,8 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -156,32 +161,73 @@ public class AdminController {
         return "redirect:/perfil-admin?success";
     }
     @GetMapping("/admin/usuarios/registrados")
-    public String listarUsuarios(@RequestParam(required = false) String filtro,
-                                 @RequestParam(required = false, defaultValue = "nombre") String campo,
-                                 Model model) {
-        List<Usuario> listaUsuarios;
+    public String listarUsuarios(
+            @RequestParam(required = false) String filtro,
+            @RequestParam(required = false, defaultValue = "nombre") String campo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("idusuario").ascending());
+        Page<Usuario> paginaUsuarios;
 
         if (filtro != null && !filtro.trim().isEmpty()) {
             String valor = filtro.trim().toLowerCase();
-            listaUsuarios = switch (campo) {
-                case "correo" -> usuarioRepository.buscarPorCorreo(valor);
-                case "estado" -> usuarioRepository.buscarPorEstado("activo");
-                case "rol" -> usuarioRepository.buscarPorRol(valor);
-                case "id" -> usuarioRepository.buscarPorId(valor);
-                default -> usuarioRepository.buscarPorNombre(valor);
+            paginaUsuarios = switch (campo) {
+                case "correo" -> usuarioRepository.buscarPorCorreo(valor, pageable);
+                case "estado" -> usuarioRepository.buscarPorEstado(valor, pageable);
+                case "rol" -> usuarioRepository.buscarPorRol(valor, pageable);
+                case "id" -> usuarioRepository.buscarPorId(valor, pageable);
+                default -> usuarioRepository.buscarPorNombre(valor, pageable);
             };
         } else {
-            listaUsuarios = usuarioRepository.findAll();
+            paginaUsuarios = usuarioRepository.findAll(pageable);
         }
 
-        model.addAttribute("usuarios", listaUsuarios);
-        model.addAttribute("rol", "admin");
-        model.addAttribute("mapaRoles", mapaRoles);
+        model.addAttribute("usuarios", paginaUsuarios.getContent());
+        model.addAttribute("pagina", paginaUsuarios);
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", paginaUsuarios.getTotalPages());
         model.addAttribute("filtro", filtro);
         model.addAttribute("campo", campo);
-
+        model.addAttribute("mapaRoles", mapaRoles);
         return "admin/usuarios_registrados";
     }
+    @PostMapping("/admin/cambiar-rol")
+    public String cambiarRolAdmin(@RequestParam Integer idusuario,
+                             @RequestParam Integer rol,
+                             HttpSession session,
+                             RedirectAttributes attr) {
+
+        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuario");
+        Usuario u = usuarioRepository.findById(idusuario).orElse(null);
+
+        // Verificar que el usuario existe
+        if (u == null) {
+            attr.addFlashAttribute("mensajeError", "El usuario no existe.");
+            return "redirect:/admin/usuarios/registrados";
+        }
+
+        //Verificar que no se trate de un superadmin o admin
+        if (u.getIdrol() == 1 || u.getIdrol() == 2) {
+            attr.addFlashAttribute("mensajeError", "No puedes cambiar el rol de un Superadmin ni de un Admin.");
+            return "redirect:/admin/usuarios/registrados";
+        }
+
+        // Verificar que no se cambie a sí mismo ni a superadmin
+        if (mapaRoles.containsKey(rol)
+                && !usuarioLogueado.getIdusuario().equals(u.getIdusuario())
+                && rol != 1 && rol !=2) {
+            u.setIdrol(rol);
+            usuarioRepository.save(u);
+            attr.addFlashAttribute("mensajeExito", "Rol actualizado correctamente.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "No está permitido asignar el rol de Superadmin.");
+        }
+
+        return "redirect:/admin/usuarios/registrados";
+    }
+
 
     @GetMapping("/admin/volver")
     public String volverAAdmin(HttpServletRequest request) {
@@ -195,31 +241,60 @@ public class AdminController {
 
     // Banear usuario (poner inactivo)
     @PostMapping("/admin/usuarios/registrados/{id}/ban")
-    public String banearUsuario(@PathVariable("id") Integer idusuario) {
+    public String banearUsuario(@PathVariable("id") Integer idusuario, RedirectAttributes attr) {
         Usuario u = usuarioRepository.findById(idusuario).orElse(null);
-        if (u != null) {
+        if (u != null && u.getIdrol() != 1 && u.getIdrol() != 2) {
             u.setEstado("inactivo");
             usuarioRepository.save(u);
+            attr.addFlashAttribute("mensajeExito", "Usuario inactivado correctamente.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "No puedes banear a un Admin o Superadmin.");
         }
         return "redirect:/admin/usuarios/registrados";
     }
 
+
     // Activar usuario
     @PostMapping("/admin/usuarios/registrados/{id}/activar")
-    public String activarUsuario(@PathVariable("id") Integer idusuario) {
+    public String activarUsuario(@PathVariable("id") Integer idusuario, RedirectAttributes attr) {
         Usuario usuario = usuarioRepository.findById(idusuario).orElse(null);
-        if (usuario != null) {
+        if (usuario != null && usuario.getIdrol() != 1 && usuario.getIdrol() != 2) {
             usuario.setEstado("activo");
             usuarioRepository.save(usuario);
+            attr.addFlashAttribute("mensajeExito", "Usuario activado correctamente.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "No puedes activar a un Admin o Superadmin.");
         }
+        return "redirect:/admin/usuarios/registrados";
+    }
+    @PostMapping("/admin/usuarios/registrados/guardar")
+    public String guardarUsuario(@ModelAttribute Usuario usuario,
+                                 @RequestParam("rawPassword") String rawPassword,
+                                 RedirectAttributes attr) {
+
+        // Validar que el rol no sea Superadmin
+        if (usuario.getIdrol() != null && usuario.getIdrol() == 1) {
+            attr.addFlashAttribute("mensajeError", "No está permitido crear usuarios con rol Superadmin.");
+            return "redirect:/admin/usuarios/registrados/nuevo";
+        }
+
+        usuario.setEstado("activo");
+        usuario.setCreateTime(new Timestamp(System.currentTimeMillis()));
+
+        // Hashear contraseña
+        String passwordHash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        usuario.setPasswordHash(passwordHash);
+
+        usuarioRepository.save(usuario);
+        attr.addFlashAttribute("mensajeExito", "Usuario registrado exitosamente.");
         return "redirect:/admin/usuarios/registrados";
     }
 
     // Crear usuario
-    @GetMapping("/admin/usuarios/nuevo")
+    @GetMapping("/admin/usuarios/registrados/nuevo")
     public String mostrarFormularioNuevoUsuario(Model model) {
         model.addAttribute("usuario", new Usuario()); // objeto vacío para el form
-        return "admin/admin_usuarios_formulario";
+        return "admin/nuevo_usuario";
     }
 
 
@@ -229,35 +304,66 @@ public class AdminController {
             e.printStackTrace(); // Log para consola
             return "error";       // Asegúrate de tener un error.html
         }
-    @PostMapping("/admin/usuarios/registrados")
-    public String actualizarUsuario(@ModelAttribute("usuario") Usuario usuario, RedirectAttributes attr) {
-        Optional<Usuario> optional = usuarioRepository.findById(usuario.getIdusuario());
-        if (optional.isPresent()) {
-            Usuario original = optional.get();
-            // Conservar datos que no se están editando
-            usuario.setPasswordHash(original.getPasswordHash());
-            usuario.setCreateTime(original.getCreateTime());
-            usuario.setIdrol(original.getIdrol());
-            usuarioRepository.save(usuario);
-            attr.addFlashAttribute("mensajeExito", "Usuario actualizado exitosamente.");
-        } else {
-            attr.addFlashAttribute("mensajeError", "No se encontró el usuario.");
+    @PostMapping("/admin/usuarios/registrados/actualizar")
+    public String actualizarUsuario(@ModelAttribute("usuario") Usuario usuarioForm,
+                                    @RequestParam(value = "rawPassword", required = false) String rawPassword) {
+        Usuario existente = usuarioRepository.findById(usuarioForm.getIdusuario()).orElse(null);
+        if (existente == null) return "redirect:/admin/usuarios/registrados";
+
+        existente.setNombres(usuarioForm.getNombres());
+        existente.setApellidos(usuarioForm.getApellidos());
+        existente.setEmail(usuarioForm.getEmail());
+        existente.setTelefono(usuarioForm.getTelefono());
+        existente.setDireccion(usuarioForm.getDireccion());
+        existente.setIdrol(usuarioForm.getIdrol());
+        existente.setNotificarRecordatorio(usuarioForm.getNotificarRecordatorio());
+        existente.setNotificarDisponibilidad(usuarioForm.getNotificarDisponibilidad());
+
+
+        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
+            existente.setPasswordHash(new BCryptPasswordEncoder().encode(rawPassword));
         }
+
+        usuarioRepository.save(existente);
         return "redirect:/admin/usuarios/registrados";
     }
-
-
-
     @GetMapping("/admin/usuarios/registrados/editar/{id}")
     public String mostrarFormularioEdicionUsuario(@PathVariable("id") Integer id, Model model, RedirectAttributes attr) {
         Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
         if (optionalUsuario.isPresent()) {
-            model.addAttribute("usuario", optionalUsuario.get());
-            return "admin/admin_usuarios_formulario"; // Cambia si tu HTML tiene otro nombre
+            Usuario usuario = optionalUsuario.get();
+            if (usuario.getIdrol() == 1 || usuario.getIdrol() == 2) {
+                attr.addFlashAttribute("mensajeError", "No puedes editar a un Admin o Superadmin.");
+                return "redirect:/admin/usuarios/registrados";
+            }
+            model.addAttribute("usuario", usuario);
+            return "admin/admin_usuarios_formulario";
         } else {
             attr.addFlashAttribute("mensajeError", "Usuario no encontrado.");
             return "redirect:/admin/usuarios/registrados";
         }
+    }
+    @PostMapping("/admin/usuarios/registrados/eliminar")
+    public String eliminarUsuario(@RequestParam("idusuario") Integer idusuario, HttpSession session, RedirectAttributes attr) {
+        Integer sessionId = (Integer) session.getAttribute("idusuario");
+
+        if (idusuario.equals(sessionId)) {
+            attr.addFlashAttribute("mensajeError", "No puedes eliminarte a ti mismo.");
+            return "redirect:/admin/usuarios/registrados";
+        }
+
+        Usuario u = usuarioRepository.findById(idusuario).orElse(null);
+
+        if (u == null) {
+            attr.addFlashAttribute("mensajeError", "Usuario no encontrado.");
+        } else if (u.getIdrol() == 1 || u.getIdrol() == 2) {
+            attr.addFlashAttribute("mensajeError", "No puedes eliminar a un Admin o Superadmin.");
+        } else {
+            usuarioRepository.deleteById(idusuario);
+            attr.addFlashAttribute("mensajeExito", "Usuario eliminado correctamente.");
+        }
+
+        return "redirect:/admin/usuarios/registrados";
     }
     @GetMapping("/admin/servicios/disponibles")
     public String listarSedes(Model model) {
@@ -615,12 +721,79 @@ public class AdminController {
         return "admin/admin_estadisticas";
     }
     @GetMapping("/admin/reservas")
-    public String listarReservas(Model model) {
-        List<Reserva> reservas = reservaRepository.findAll();
-        model.addAttribute("listaReservas", reservas);
+    public String listarReservas(
+            @RequestParam(required = false) String filtro,
+            @RequestParam(required = false, defaultValue = "vecino") String campo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
 
-        model.addAttribute("reserva", new Reserva()); // para evitar errores con th:field si se reutiliza
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaReserva").descending());
+        Page<Reserva> paginaReservas;
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            String valor = filtro.trim().toLowerCase();
+            paginaReservas = switch (campo) {
+                case "estado" -> reservaRepository.filtrarPorEstado(valor, pageable);
+                case "sede" -> reservaRepository.filtrarPorSede(valor, pageable);
+                case "fecha" -> reservaRepository.filtrarPorFecha(LocalDate.parse(valor), pageable);
+                default -> reservaRepository.filtrarPorVecino(valor, pageable);
+            };
+        } else {
+            paginaReservas = reservaRepository.findAll(pageable);
+        }
+
+        model.addAttribute("reservas", paginaReservas.getContent());
+        model.addAttribute("pagina", paginaReservas);
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", paginaReservas.getTotalPages());
+        model.addAttribute("campo", campo);
+        model.addAttribute("filtro", filtro);
+
         return "admin/admin_reservas";
+    }
+    @PostMapping("/admin/reservas/aprobar-pago/{id}")
+    public String aprobarPago(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+
+        if (reserva != null && reserva.getPago() != null) {
+            Estado aprobadoReserva = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
+            Estado confirmadoPago = estadoRepository.findByNombreAndTipoAplicacion("confirmado", Estado.TipoAplicacion.pago);
+
+            if (aprobadoReserva != null && confirmadoPago != null) {
+                reserva.setEstado(aprobadoReserva);
+                reservaRepository.save(reserva);
+
+                Pago pago = reserva.getPago();
+                pago.setEstado(confirmadoPago);
+                pago.setFechaPago(LocalDateTime.now());
+                pagoRepository.save(pago);
+
+                redirectAttributes.addFlashAttribute("mensajeExito", "Pago aprobado exitosamente.");
+            } else {
+                redirectAttributes.addFlashAttribute("mensajeError", "Estados no encontrados.");
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("mensajeError", "Reserva sin pago asociado.");
+        }
+
+        return "redirect:/admin/reservas";
+    }
+    @PostMapping("/admin/reservas/desaprobar-pago/{id}")
+    public String desaprobarPago(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva != null && reserva.getPago() != null) {
+            Estado pendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+            Estado pendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+
+            reserva.setEstado(pendienteReserva);
+            reservaRepository.save(reserva);
+
+            Pago pago = reserva.getPago();
+            pago.setEstado(pendientePago);
+            pagoRepository.save(pago);
+        }
+        return "redirect:/admin/reservas";
     }
     @GetMapping("/admin/reservas/nueva")
     public String nuevaReserva(Model model) {
@@ -747,6 +920,32 @@ public class AdminController {
         Reserva reserva = reservaRepository.findById(id).orElse(null);
         model.addAttribute("reserva", reserva);
         return "admin/reserva_detalle";
+    }
+    @PostMapping("/admin/reservas/cancelar/{id}")
+    public String cancelarReserva(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva != null) {
+            Estado cancelada = estadoRepository.findByNombreAndTipoAplicacion("cancelada", Estado.TipoAplicacion.reserva);
+            reserva.setEstado(cancelada);
+            reservaRepository.save(reserva);
+        }
+        return "redirect:/admin/reservas";
+    }
+    @PostMapping("/admin/reservas/habilitar/{id}")
+    public String habilitarReserva(@PathVariable("id") Integer id) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva != null) {
+            Estado pendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+            reserva.setEstado(pendienteReserva);
+            reservaRepository.save(reserva);
+
+            if (reserva.getPago() != null) {
+                Estado pendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+                reserva.getPago().setEstado(pendientePago);
+                pagoRepository.save(reserva.getPago());
+            }
+        }
+        return "redirect:/admin/reservas";
     }
     @GetMapping("/admin/promociones")
     public String listarPromociones(Model model) {
