@@ -93,11 +93,12 @@
 <body>
 
 <!-- ✅ TOAST general usando los atributos 'mensaje' y 'tipo' -->
-<div th:if="${mensaje}" id="toast"
+<div th:if="${mensaje} or ${successMessage}" id="toast"
      class="toast show"
-     th:classappend="${tipo} ?: 'error'"
-     th:text="${mensaje}">
+     th:classappend="${tipo} ?: (${successMessage} ? 'success' : 'error')"
+     th:text="${mensaje} ?: ${successMessage}">
 </div>
+
 
 <div class="login-container">
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
