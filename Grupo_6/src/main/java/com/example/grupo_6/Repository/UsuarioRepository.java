@@ -104,6 +104,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     // Versión paginada de findAll
     Page<Usuario> findAll(Pageable pageable);
+    @Query("SELECT u FROM Usuario u WHERE u.rol.nombre = 'COORDINADOR' AND u.estado = 'activo'")
+    List<Usuario> obtenerCoordinadoresActivos();
+
+
+
 
 
 }

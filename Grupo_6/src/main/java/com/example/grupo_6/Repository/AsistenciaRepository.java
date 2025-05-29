@@ -14,6 +14,7 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer>
     Optional<Asistencia> findByIdusuarioAndFecha(Integer idusuario, LocalDate fecha);
     List<Asistencia> findByIdusuario(Integer idusuario);
     Optional<Asistencia> findByReserva_Idreserva(Integer idreserva); //  Correcto
+    boolean existsByReserva_Idreserva(Integer idreserva);
 
     boolean existsByIdusuarioAndFecha(Integer idusuario, LocalDate fecha);
 }

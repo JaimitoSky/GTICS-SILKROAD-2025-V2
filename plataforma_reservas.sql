@@ -1,3 +1,5 @@
+DROP DATABASE IF EXISTS plataforma_reservas;
+
 CREATE DATABASE  IF NOT EXISTS `plataforma_reservas` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `plataforma_reservas`;
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
@@ -1916,6 +1918,7 @@ SET SQL_SAFE_UPDATES = 0;
 UPDATE sede
 SET activo = 1
 WHERE activo IS NULL;
+ALTER TABLE sede_servicio ADD COLUMN activo BOOLEAN DEFAULT TRUE;
 
 SET SQL_SAFE_UPDATES = 1;
 
@@ -1943,13 +1946,21 @@ CREATE TABLE incidencia (
     FOREIGN KEY (idusuario) REFERENCES usuario(idusuario)
 );
 
-ALTER TABLE Asistencia
+ALTER TABLE asistencia
 ADD COLUMN idreserva INT;
 
-ALTER TABLE Asistencia
+ALTER TABLE asistencia
 ADD CONSTRAINT asistencia_fk_reserva
-FOREIGN KEY (idreserva) REFERENCES Reserva(idreserva)
+FOREIGN KEY (idreserva) REFERENCES reserva(idreserva)
 ON UPDATE RESTRICT
 ON DELETE RESTRICT;
+
+RENAME TABLE spring_session TO spring_session_temp;
+RENAME TABLE spring_session_temp TO SPRING_SESSION;
+
+RENAME TABLE spring_session_attributes TO spring_session_attributes_temp;
+RENAME TABLE spring_session_attributes_temp TO SPRING_SESSION_ATTRIBUTES;
+
+
 
 -- Dump completed on 2025-05-17 17:53:23

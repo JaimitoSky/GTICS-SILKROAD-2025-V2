@@ -15,6 +15,17 @@
     <!-- Estilos internos -->
 
 </head>
+<script>
+    function ajustarSoloHoras(input) {
+        if (!input.value) return;
+        const partes = input.value.split(':');
+        if (partes.length >= 1) {
+            input.value = partes[0].padStart(2, '0') + ':00';
+        }
+    }
+</script>
+
+
 <body>
 <div class="wrapper">
     <!-- Sidebar -->
@@ -54,7 +65,11 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Tarifa</label>
                                     <select class="form-select" name="idtarifa" required>
-                                        <option th:each="t : ${listaTarifas}" th:value="${t.idtarifa}" th:text="|S/ ${t.monto}|"></option>
+                                        <option th:each="t : ${listaTarifas}"
+                                                th:value="${t.idtarifa}"
+                                                th:text="${t.descripcion + ' - S/ ' + t.monto}">
+                                        </option>
+
                                     </select>
                                 </div>
                             </div>
@@ -63,9 +78,46 @@
 
                         <hr/>
                         <h5 class="mt-4">Servicios Asignados</h5>
-                        <ul>
-                            <li th:each="ss : ${sede.sedeServicios}" th:text="${ss.servicio.nombre} + ' - S/ ' + ${ss.tarifa.monto}"></li>
+                        <ul class="list-unstyled">
+                            <li th:each="ss : ${sede.sedeServicios}">
+                                <div class="d-flex align-items-center mb-2">
+                                    <!-- Nombre del servicio -->
+                                    <strong th:text="${ss.servicio.nombre}"></strong>
+
+                                    <!-- Selector de tarifa -->
+                                    <form th:action="@{/superadmin/sedes/configurar/servicios/actualizar-tarifa}" method="post" class="ms-3 d-flex align-items-center">
+                                        <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
+                                        <select class="form-select form-select-sm" name="idtarifa">
+                                            <option th:each="t : ${listaTarifas}" th:value="${t.idtarifa}"
+                                                    th:selected="${t.idtarifa == ss.tarifa.idtarifa}"
+                                                    th:text="${t.descripcion + ' (S/ ' + t.monto + ')'}">
+                                            </option>
+                                        </select>
+                                        <button type="submit" class="btn btn-warning btn-sm ms-2">Guardar</button>
+                                    </form>
+
+                                    <!-- Botón de activar/desactivar -->
+                                    <form th:action="@{/superadmin/sedes/configurar/servicios/toggle-estado}" method="post" class="ms-2">
+                                        <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
+                                        <button type="submit"
+                                                th:class="'btn btn-sm ' + (${ss.activo} ? 'btn-danger' : 'btn-success')"
+                                                th:text="${ss.activo} ? 'Desactivar' : 'Activar'">
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </li>
                         </ul>
+                        <div class="card-header">
+
+                        <a th:href="@{/superadmin/sedes/asignar-coordinadores/{idsede}(idsede=${sede.idsede})}"
+                           class="btn btn-outline-primary btn-sm">
+                            Asignar Coordinadores
+                        </a>
+                        </div>
+
+
+
                     </div>
                 </div>
 
@@ -87,11 +139,35 @@
                                 <tbody>
                                 <tr th:each="dia : ${listaHorariosAtencion}">
                                     <td th:text="${dia.diaSemana}">Lunes</td>
-                                    <td><input type="time" class="form-control" th:name="'horaInicio_' + ${dia.diaSemana}" th:value="${dia.horaInicio != null} ? ${dia.horaInicio} : ''"/></td>
-                                    <td><input type="time" class="form-control" th:name="'horaFin_' + ${dia.diaSemana}" th:value="${dia.horaFin != null} ? ${dia.horaFin} : ''"/></td>
-                                    <td><input type="checkbox" th:name="'activo_' + ${dia.diaSemana}" th:checked="${dia.activo}" /></td>
+                                    <td>
+                                        <select class="form-select" th:name="'horaInicio_' + ${dia.diaSemana}" required>
+                                            <option th:each="h : ${#numbers.sequence(0, 23)}"
+                                                    th:value="${(h < 10 ? '0' : '') + h + ':00'}"
+                                                    th:text="${(h < 10 ? '0' : '') + h + ':00'}"
+                                                    th:selected="${dia.horaInicio != null and #strings.substring(dia.horaInicio.toString(), 0, 5) == ((h < 10 ? '0' : '') + h + ':00')}">
+                                            </option>
+                                        </select>
+
+                                    </td>
+                                    <td>
+                                        <select class="form-select" th:name="'horaFin_' + ${dia.diaSemana}" required>
+                                            <option th:each="h : ${#numbers.sequence(1, 24)}"
+                                                    th:value="${(h < 10 ? '0' : '') + (h % 24) + ':00'}"
+                                                    th:text="${(h < 10 ? '0' : '') + (h % 24) + ':00'}"
+                                                    th:selected="${dia.horaFin != null and #strings.substring(dia.horaFin.toString(), 0, 5) == ((h < 10 ? '0' : '') + (h % 24) + ':00')}">
+                                            </option>
+                                        </select>
+
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" th:name="'activo_' + ${dia.diaSemana}" th:checked="${dia.activo}" />
+                                    </td>
                                 </tr>
                                 </tbody>
+
+
+
+
                             </table>
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">Guardar Horarios</button>
@@ -139,6 +215,78 @@
             }
 
 
+            function generarSelectHora(name, desde, hasta) {
+                let html = `<select class='form-select' name='${name}' required>`;
+                for (let h = desde; h <= hasta; h++) {
+                    const valor = (h < 10 ? '0' + h : h) + ':00';
+                    html += `<option value='${valor}'>${valor}</option>`;
+                }
+                html += '</select>';
+                return html;
+            }
+
+            function agregarHorario(event, sedeServicioId, diaSemana) {
+                event.preventDefault();
+                const form = event.target;
+                const inicio = form.querySelector("select[name=inicio]").value;
+                const fin = form.querySelector("select[name=fin]").value;
+
+                if (inicio >= fin) {
+                    alert("La hora de inicio debe ser menor que la hora de fin.");
+                    return false;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append("sedeServicioId", sedeServicioId);
+                formData.append("horaInicio", inicio);
+                formData.append("horaFin", fin);
+                formData.append("diaSemana", diaSemana);
+
+                fetch("/api/horarios-disponibles", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        ...getCsrfHeaders()
+                    },
+                    body: formData
+                }).then(async res => {
+                    const msg = await res.text();
+                    if (res.ok) {
+                        document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                    } else {
+                        alert("Error: " + msg);
+                    }
+                }).catch(err => {
+                    console.error("Error en el fetch:", err);
+                    alert("Ocurrió un error al enviar los datos.");
+                });
+
+                return false;
+            }
+
+            function toggleHorario(idhorario, sedeServicioId, esActivo) {
+                const accion = esActivo ? "desactivar" : "activar";
+                if (confirm(`¿Seguro que deseas ${accion} este horario?`)) {
+                    fetch(`/api/horarios-disponibles/${idhorario}/toggle`, {
+                        method: "POST",
+                        headers: getCsrfHeaders()
+                    }).then(res => {
+                        if (res.ok) {
+                            document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                        } else {
+                            alert(`Error al ${accion} horario.`);
+                        }
+                    }).catch(err => {
+                        console.error("Error en la petición:", err);
+                        alert("Ocurrió un error al cambiar el estado del horario.");
+                    });
+                }
+            }
+
+
+
+
+
             document.addEventListener("DOMContentLoaded", function () {
                 const selectServicio = document.getElementById("servicio-select");
                 const tablaHorarios = document.getElementById("tabla-horarios");
@@ -167,39 +315,47 @@
                                 cont.classList.add("mb-4");
 
                                 let html = `<h6 class="fw-bold">${dia}</h6>
-                            <table class="table table-bordered">
-                                <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
-                                <tbody>`;
+                                <table class="table table-bordered">
+                                    <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
+                                    <tbody>`;
 
                                 if (porDia[dia].length > 0) {
                                     porDia[dia].forEach(h => {
+                                        const esActivo = h.activo === true || h.activo === 'true';
                                         html += `
-                                    <tr>
-                                        <td>${h.horaInicio}</td>
-                                        <td>${h.horaFin}</td>
-                                        <td><button class="btn btn-sm btn-danger" onclick="eliminarHorario(${h.idhorario}, '${sedeServicioId}')">Eliminar</button></td>
-                                    </tr>`;
+        <tr>
+            <td>${h.horaInicio}</td>
+            <td>${h.horaFin}</td>
+            <td>
+                <button type="button"
+                        class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}"
+                        onclick="toggleHorario(${h.idhorario}, '${sedeServicioId}', ${esActivo})">
+                    ${esActivo ? 'Desactivar' : 'Activar'}
+                </button>
+            </td>
+        </tr>`;
                                     });
+
                                 } else {
                                     html += `<tr><td colspan="3" class="text-center text-muted">Sin horarios registrados</td></tr>`;
                                 }
 
                                 html += `</tbody></table>
-                            <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
-                                <div class="row g-2 align-items-end">
-                                    <div class="col-md-4">
-                                        <label class="form-label mb-0">Inicio</label>
-                                        <input type="time" class="form-control" name="inicio" required>
+                                <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-md-4">
+                                            <label class="form-label mb-0">Inicio</label>
+                                            ${generarSelectHora('inicio', 6, 21)}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label mb-0">Fin</label>
+                                            ${generarSelectHora('fin', 7, 22)}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
+                                        </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label mb-0">Fin</label>
-                                        <input type="time" class="form-control" name="fin" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
-                                    </div>
-                                </div>
-                            </form>`;
+                                </form>`;
 
                                 cont.innerHTML = html;
                                 tablaHorarios.appendChild(cont);
@@ -211,67 +367,8 @@
                         });
                 });
             });
-
-            function eliminarHorario(idhorario, sedeServicioId) {
-                if (confirm("¿Seguro que deseas eliminar este horario?")) {
-                    fetch(`/api/horarios-disponibles/${idhorario}`, {
-                        method: "DELETE",
-                        headers: getCsrfHeaders()
-                    }).then(res => {
-                        if (res.ok) {
-                            document.getElementById("servicio-select").dispatchEvent(new Event("change"));
-                        } else {
-                            alert("Error al eliminar horario.");
-                        }
-                    });
-                }
-            }
-
-            function agregarHorario(event, sedeServicioId, diaSemana) {
-                event.preventDefault();
-                const form = event.target;
-                const inicio = form.querySelector("input[name=inicio]").value;
-                const fin = form.querySelector("input[name=fin]").value;
-
-                if (inicio >= fin) {
-                    alert("La hora de inicio debe ser menor que la hora de fin.");
-                    return false;
-                }
-
-                console.log("Enviando horario:", {
-                    sedeServicioId, inicio, fin, diaSemana
-                });
-
-                const formData = new URLSearchParams();
-                formData.append("sedeServicioId", sedeServicioId);
-                formData.append("horaInicio", inicio);
-                formData.append("horaFin", fin);
-                formData.append("diaSemana", diaSemana);
-
-                fetch("/api/horarios-disponibles", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        ...getCsrfHeaders()
-                    },
-                    body: formData
-                }).then(async res => {
-                    const msg = await res.text();
-                    console.log("Respuesta del servidor:", res.status, msg);
-                    if (res.ok) {
-                        document.getElementById("servicio-select").dispatchEvent(new Event("change"));
-                    } else {
-                        alert("Error: " + msg);
-                    }
-                }).catch(err => {
-                    console.error("Error en el fetch:", err);
-                    alert("Ocurrió un error al enviar los datos.");
-                });
-
-                return false;
-            }
-
         </script>
+
 
 
 

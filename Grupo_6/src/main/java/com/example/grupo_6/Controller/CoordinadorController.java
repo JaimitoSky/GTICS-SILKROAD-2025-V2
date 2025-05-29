@@ -5,9 +5,16 @@ import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -15,8 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/coordinador")
@@ -47,24 +53,30 @@ public class CoordinadorController {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) return "redirect:/login";
 
-        Integer idUsuario = usuario.getIdusuario();
-        Optional<CoordinadorSede> asignacion = coordinadorSedeRepository.findByUsuario_IdusuarioAndActivoTrue(idUsuario);
+        List<CoordinadorSede> asignaciones = coordinadorSedeRepository.findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
 
-        if (asignacion.isPresent()) {
-            Sede sede = asignacion.get().getSede();
-            model.addAttribute("sedeAsignada", sede);
-            model.addAttribute("latitud", sede.getLatitud());
-            model.addAttribute("longitud", sede.getLongitud());
+        if (!asignaciones.isEmpty()) {
+            List<Sede> sedesLimpiadas = asignaciones.stream().map(cs -> {
+                Sede sede = new Sede();
+                sede.setIdsede(cs.getSede().getIdsede());
+                sede.setNombre(cs.getSede().getNombre());
+                sede.setLatitud(cs.getSede().getLatitud());
+                sede.setLongitud(cs.getSede().getLongitud());
+                return sede;
+            }).toList();
+
+            model.addAttribute("sedesAsignadas", sedesLimpiadas);
+            model.addAttribute("sedeAsignada", sedesLimpiadas.get(0)); // Primera sede por defecto
         } else {
-            // Para evitar null en el template
-            model.addAttribute("sedeAsignada", new Sede()); // con atributos nulos
-            model.addAttribute("latitud", 0);
-            model.addAttribute("longitud", 0);
+            model.addAttribute("sedesAsignadas", List.of());
+            model.addAttribute("sedeAsignada", null);
         }
 
-        model.addAttribute("fechaActual", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         return "coordinador/coordinador_home";
     }
+
+
+
 
 
 
@@ -176,32 +188,7 @@ public class CoordinadorController {
     }
 
 
-    @GetMapping("/reservas-hoy")
-    public String verReservasDeSede(Model model, HttpSession session) {
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario == null) return "redirect:/login";
 
-        Optional<CoordinadorSede> asignacion = coordinadorSedeRepository.findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
-        if (asignacion.isEmpty()) {
-            model.addAttribute("mensaje", "No estás asignado a ninguna sede.");
-            return "coordinador/coordinador_reservas_hoy";
-        }
-
-        Integer idSede = asignacion.get().getSede().getIdsede();
-        List<Reserva> reservas = reservaRepository.buscarReservasPorIdSede(idSede);  // ajusta esto si usas otro método
-
-        // ⚠️ Filtrar reservas válidas
-        List<Reserva> reservasFiltradas = reservas.stream()
-                .filter(r -> r.getUsuario() != null
-                        && r.getSedeServicio() != null
-                        && r.getHorarioDisponible() != null
-                        && r.getEstado() != null)
-                .toList();
-
-        model.addAttribute("reservas", reservasFiltradas);
-        model.addAttribute("rol", "coordinador");
-        return "coordinador/coordinador_reservas_hoy";
-    }
     @GetMapping("/reserva-detalle/{idreserva}")
     public String detalleReserva(@PathVariable("idreserva") Integer idreserva, Model model) {
         Optional<Reserva> optReserva = reservaRepository.findById(idreserva);
@@ -221,18 +208,21 @@ public class CoordinadorController {
     }
 
     @GetMapping("/asistencia/{idreserva}")
-    public String mostrarFormularioAsistencia(@PathVariable("idreserva") Integer idreserva, Model model) {
+    public String mostrarFormularioAsistencia(@PathVariable("idreserva") Integer idreserva,
+                                              RedirectAttributes attr,
+                                              Model model) {
         Optional<Reserva> optReserva = reservaRepository.findById(idreserva);
         if (optReserva.isEmpty()) return "redirect:/coordinador/reservas-hoy";
 
+        boolean yaRegistrada = asistenciaRepository.existsByReserva_Idreserva(idreserva);
+        if (yaRegistrada) {
+            attr.addFlashAttribute("errorAsistencia", "Ya se ha registrado asistencia para esta reserva.");
+            return "redirect:/coordinador/reservas-hoy";
+        }
+
         model.addAttribute("reserva", optReserva.get());
-        return "coordinador/coordinador_asistencia"; // se mantiene esta vista
+        return "coordinador/coordinador_asistencia";
     }
-
-
-
-
-
 
 
     @PostMapping("/asistencia/marcar")
@@ -240,7 +230,13 @@ public class CoordinadorController {
                                       @RequestParam("idreserva") Integer idreserva,
                                       @RequestParam("horaEntrada") String horaEntradaStr,
                                       @RequestParam(value = "latitud", required = false) Double latitud,
-                                      @RequestParam(value = "longitud", required = false) Double longitud) {
+                                      @RequestParam(value = "longitud", required = false) Double longitud,
+                                      RedirectAttributes attr) {
+
+        if (asistenciaRepository.existsByReserva_Idreserva(idreserva)) {
+            attr.addFlashAttribute("errorAsistencia", "La asistencia ya fue registrada.");
+            return "redirect:/coordinador/reservas-hoy";
+        }
 
         Optional<Usuario> optUsuario = usuarioRepository.findById(idusuario);
         Optional<Reserva> optReserva = reservaRepository.findById(idreserva);
@@ -262,6 +258,7 @@ public class CoordinadorController {
 
         return "redirect:/coordinador/reservas-hoy";
     }
+
 
 
     @GetMapping("/incidencia/{idreserva}")
@@ -295,6 +292,58 @@ public class CoordinadorController {
 
         return "redirect:/coordinador/reservas-hoy";
     }
+
+    @GetMapping("/reservas-hoy")
+    public String verReservasDeSede(@RequestParam(value = "asistenciaRegistrada", required = false) String asistenciaRegistrada,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        List<CoordinadorSede> asignaciones = coordinadorSedeRepository.findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
+
+        if (asignaciones.isEmpty()) {
+            model.addAttribute("mensaje", "No estás asignado a ninguna sede.");
+            model.addAttribute("reservas", Page.empty());
+            model.addAttribute("sedesAsignadas", List.of());
+            return "coordinador/coordinador_reservas_hoy";
+        }
+
+        List<Sede> sedesAsignadas = asignaciones.stream()
+                .map(CoordinadorSede::getSede)
+                .toList();
+
+        List<Integer> idsSede = sedesAsignadas.stream()
+                .map(Sede::getIdsede)
+                .toList();
+
+        Pageable pageable = PageRequest.of(page, 10);
+
+        Page<Reserva> reservasPaginadas = reservaRepository.buscarReservasPorIdsSedePaginado(idsSede, pageable);
+
+        // Filtrar solo reservas válidas
+        List<Reserva> filtradas = reservasPaginadas.getContent().stream()
+                .filter(r -> r.getUsuario() != null
+                        && r.getSedeServicio() != null
+                        && r.getHorarioDisponible() != null
+                        && r.getEstado() != null)
+                .toList();
+
+        Page<Reserva> reservasFiltradas = new PageImpl<>(filtradas, pageable, filtradas.size());
+
+
+        model.addAttribute("reservas", reservasFiltradas);
+        model.addAttribute("sedesAsignadas", sedesAsignadas);
+        model.addAttribute("rol", "coordinador");
+
+        if ("true".equals(asistenciaRegistrada)) {
+            model.addAttribute("mensajeAsistencia", "Ya se ha registrado asistencia para esta reserva.");
+        }
+
+        return "coordinador/coordinador_reservas_hoy";
+    }
+
+
 
 
 

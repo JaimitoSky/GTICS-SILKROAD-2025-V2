@@ -32,4 +32,8 @@ public class SedeServicio {
     @JoinColumn(name = "idtarifa", nullable = false)
     @JsonIgnoreProperties("sedeServicio") // si Tarifa apunta de regreso a SedeServicio
     private Tarifa tarifa;
+
+    @Column(nullable = false)
+    private boolean activo = true;
+
 }

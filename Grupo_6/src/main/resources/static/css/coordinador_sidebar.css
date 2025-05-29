@@ -1,15 +1,15 @@
 body {
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
-    background-color: #fff8e1; /* Fondo amarillo muy claro */
+    background-color: #E6F7FA; /* Celeste muy claro */
 }
 
 /* Sidebar styles */
 .sidebar {
     width: 260px;
     min-height: 100vh;
-    background-color: #fbbf24; /* Amarillo */
-    color: #212529;
+    background-color: #17b5c0; /* Sidebar turquesa medio */
+    color: white;
     position: fixed;
     top: 0;
     left: 0;
@@ -38,31 +38,12 @@ body {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.4rem;
     font-weight: 700;
-    color: #212529;
+    color: white;
     text-align: center;
     line-height: 1.3;
     letter-spacing: 1px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     margin-top: 0.5rem;
-}
-
-@media (min-width: 768px) {
-    .municipality-name {
-        transition: transform 0.3s ease;
-        display: inline-block;
-    }
-
-    .municipality-name:hover {
-        transform: scale(1.05);
-    }
-
-    .sidebar-header .logo-link img {
-        transition: transform 0.3s ease;
-    }
-
-    .sidebar-header .logo-link:hover img {
-        transform: scale(1.1);
-    }
 }
 
 .sidebar .nav {
@@ -71,7 +52,7 @@ body {
 }
 
 .sidebar .nav-link {
-    color: #212529;
+    color: white;
     padding: 0.75rem 1.25rem;
     display: flex;
     align-items: center;
@@ -81,13 +62,12 @@ body {
     border-left: 3px solid transparent;
     border-radius: 4px;
     margin-bottom: 0.5rem;
-    background-color: transparent;
 }
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link:focus {
-    background-color: #f59e0b; /* Amarillo oscuro */
-    border-left: 3px solid #fde68a; /* Amarillo claro */
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid #69C7D0; /* Turquesa claro */
 }
 
 .sidebar .nav-link i {
@@ -96,6 +76,7 @@ body {
     text-align: center;
 }
 
+/* Main content */
 .main {
     margin-left: 260px;
     transition: margin-left 0.3s ease-in-out;
@@ -104,11 +85,12 @@ body {
     flex-direction: column;
 }
 
+/* Toggle button */
 .sidebar-toggle {
     cursor: pointer;
     font-size: 1.5rem;
     margin: 1rem;
-    color: #f59e0b;
+    color: #69C7D0;
     transition: all 0.2s;
     position: absolute;
     left: 10px;
@@ -117,9 +99,32 @@ body {
 }
 
 .sidebar-toggle:hover {
-    color: #b45309;
+    color: #A1E4E9;
 }
 
+/* Navbar superior */
+.top-navbar {
+    background-color: #1eeecf; /* Navbar turquesa claro */
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding-left: 60px;
+}
+
+.navbar .nav-link,
+.navbar .nav-link i,
+.navbar .dropdown-toggle span {
+    color: white !important;
+}
+
+.dropdown-menu {
+    background-color: white;
+}
+
+.dropdown-menu a.dropdown-item:hover {
+    background-color: #E0F2F1;
+}
+
+/* Responsive sidebar */
 body.sidebar-collapsed .sidebar {
     transform: translateX(-260px);
 }
@@ -178,10 +183,7 @@ body.sidebar-collapsed .main {
     }
 }
 
-.content {
-    flex: 1;
-}
-
+/* Cards */
 .card {
     height: 100%;
     transition: transform 0.2s;
@@ -198,16 +200,10 @@ body.sidebar-collapsed .main {
     object-fit: cover;
 }
 
-.top-navbar {
-    background-color: #fde68a;
-    color: #212529;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    padding-left: 60px;
-}
-
+/* Deportes */
 .sport-icon-container {
     padding: 1rem;
-    background-color: #fef9c3;
+    background-color: #D1F2F7;
     border-radius: 0.5rem;
     height: 120px;
     display: flex;
@@ -218,7 +214,7 @@ body.sidebar-collapsed .main {
 }
 
 .sport-icon-container:hover {
-    background-color: #fde68a;
+    background-color: #B2EBF2;
     transform: scale(1.05);
 }
 

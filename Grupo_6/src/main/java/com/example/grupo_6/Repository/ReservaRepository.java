@@ -137,6 +137,12 @@ AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
     @Query("SELECT r FROM Reserva r WHERE DATE(r.fechaReserva) = :valor")
     Page<Reserva> filtrarPorFecha(@Param("valor") LocalDate valor, Pageable pageable);
 
+    @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede IN :ids")
+    List<Reserva> buscarReservasPorIdsSede(@Param("ids") List<Integer> ids);
+
+    @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede IN :idsSede ORDER BY r.fechaCreacion DESC")
+    Page<Reserva> buscarReservasPorIdsSedePaginado(@Param("idsSede") List<Integer> idsSede, Pageable pageable);
+
 
 }
 

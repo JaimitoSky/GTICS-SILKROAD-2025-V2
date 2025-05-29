@@ -23,87 +23,167 @@
 
         <main class="content">
             <div class="container mt-4">
-                <h2 class="mb-4">Reservas de Sede asignada</h2>
 
-                <input type="text" id="filtro" class="form-control mb-3" placeholder="Filtrar por nombre o servicio...">
+                <h2 class="mb-4">Reservas de Sedes Asignadas</h2>
 
+                <!-- Alerta de asistencia registrada -->
+                <div th:if="${mensajeAsistencia}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong th:text="${mensajeAsistencia}"></strong><br>
+                    Hora actual: <span id="horaActual" class="fw-bold text-primary"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="sedeFiltro" class="form-label fw-bold">Filtrar por sede</label>
+                        <select id="sedeFiltro" class="form-select mb-3">
+                            <option value="todas">Todas las sedes</option>
+                            <option th:each="sede : ${sedesAsignadas}"
+                                    th:value="${sede.idsede}"
+                                    th:text="${sede.nombre}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end gap-2">
+                        <div>
+                            <label class="form-label fw-bold">Filtrar por fecha</label><br/>
+                            <button id="btnHoy" class="btn btn-outline-primary btn-sm">Hoy</button>
+                            <button id="btnTodas" class="btn btn-outline-secondary btn-sm">Todas</button>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${errorAsistencia}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> <span th:text="${errorAsistencia}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+
+
+                <!-- Tabla de reservas -->
                 <table class="table table-bordered table-hover align-middle text-center">
                     <thead class="table-light">
                     <tr>
                         <th>Usuario</th>
                         <th>Servicio</th>
                         <th>Horario</th>
-                        <th>Estado</th>
+                        <th>Fecha Registro</th>
                         <th>Acciones</th>
                     </tr>
                     </thead>
                     <tbody id="tablaReservas">
-                    <tr th:each="reserva : ${reservas}">
+                    <tr th:each="reserva : ${reservas.content}"
+
+                        th:data-sede-id="${reserva.sedeServicio.sede.idsede}"
+                        th:data-fecha="${#temporals.format(reserva.fechaCreacion, 'yyyy-MM-dd')}">
                         <td th:text="${reserva.usuario != null ? reserva.usuario.nombres + ' ' + reserva.usuario.apellidos : 'Sin usuario'}"></td>
-                        <td th:text="${reserva.sedeServicio != null && reserva.sedeServicio.servicio != null ? reserva.sedeServicio.servicio.nombre : 'Sin servicio'}"></td>
+                        <td th:text="${reserva.sedeServicio.servicio.nombre}"></td>
                         <td>
-                            <span th:text="${reserva.horarioDisponible != null ? #temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm') : 'Sin hora'}"></span>
-                            -
-                            <span th:text="${reserva.horarioDisponible != null ? #temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm') : 'Sin hora'}"></span>
+                            <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
+                            <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
                         </td>
-                        <td th:text="${reserva.estado != null ? reserva.estado.nombre : 'Sin estado'}"></td>
+                        <td th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy')}"></td>
                         <td>
-                            <!-- Botón de asistencia -->
                             <a th:href="@{'/coordinador/asistencia/' + ${reserva.idreserva}}" class="btn btn-success btn-sm me-1">
                                 <i class="bi bi-check2-square"></i> Asistencia
                             </a>
-
-                            <!-- Botón de incidencia -->
                             <a th:href="@{'/coordinador/incidencia/' + ${reserva.idreserva}}" class="btn btn-warning btn-sm me-1">
                                 <i class="bi bi-exclamation-triangle"></i> Incidencia
                             </a>
-
-                            <!-- Nuevo botón para ver detalles -->
                             <a th:href="@{'/coordinador/reserva-detalle/' + ${reserva.idreserva}}" class="btn btn-info btn-sm">
                                 <i class="bi bi-info-circle"></i> Detalles
                             </a>
                         </td>
-
                     </tr>
-
                     </tbody>
                 </table>
+                <!-- Paginación -->
+                <div class="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul class="pagination">
+                            <!-- Botón Anterior -->
+                            <li class="page-item" th:classappend="${reservas.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{|/coordinador/reservas-hoy?page=${reservas.number - 1}|}">Anterior</a>
+                            </li>
+
+                            <!-- Números de página -->
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, reservas.totalPages - 1)}"
+                                th:classappend="${reservas.number == i} ? 'active'">
+                                <a class="page-link" th:href="@{|/coordinador/reservas-hoy?page=${i}|}" th:text="${i + 1}"></a>
+                            </li>
+
+                            <!-- Botón Siguiente -->
+                            <li class="page-item" th:classappend="${reservas.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{|/coordinador/reservas-hoy?page=${reservas.number + 1}|}">Siguiente</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+
+
+
+                <!-- Script para hora actual en alerta -->
+                <script>
+                    const reloj = document.getElementById("horaActual");
+                    if (reloj) {
+                        function actualizarHora() {
+                            const ahora = new Date();
+                            const hora = ahora.toLocaleTimeString('es-PE', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                            reloj.textContent = hora;
+                        }
+                        setInterval(actualizarHora, 1000);
+                        actualizarHora();
+                    }
+                </script>
+
+                <!-- Script de filtros -->
+                <script>
+                    const sedeFiltro = document.getElementById("sedeFiltro");
+                    const btnHoy = document.getElementById("btnHoy");
+                    const btnTodas = document.getElementById("btnTodas");
+                    const filas = document.querySelectorAll("#tablaReservas tr");
+
+                    function getHoyISO() {
+                        const hoy = new Date();
+                        return hoy.toISOString().split('T')[0];
+                    }
+
+                    let filtroFecha = "todas";
+
+                    function aplicarFiltros() {
+                        const sede = sedeFiltro.value;
+                        const hoy = getHoyISO();
+
+                        filas.forEach(fila => {
+                            const sedeId = fila.getAttribute("data-sede-id");
+                            const fecha = fila.getAttribute("data-fecha");
+
+                            const coincideSede = sede === "todas" || sede === sedeId;
+                            const coincideFecha = filtroFecha === "todas" || fecha === hoy;
+
+                            fila.style.display = (coincideSede && coincideFecha) ? "" : "none";
+                        });
+                    }
+
+                    sedeFiltro.addEventListener("change", aplicarFiltros);
+                    btnHoy.addEventListener("click", () => {
+                        filtroFecha = "hoy";
+                        aplicarFiltros();
+                    });
+                    btnTodas.addEventListener("click", () => {
+                        filtroFecha = "todas";
+                        aplicarFiltros();
+                    });
+                </script>
             </div>
         </main>
 
-        <!-- Script para capturar hora y ubicación -->
-        <script>
-            function setUbicacionYHora() {
-                const now = new Date();
-                document.getElementById("horaEntrada").value = now.toTimeString().split(" ")[0]; // formato HH:mm:ss
 
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            document.getElementById("latitudInput").value = pos.coords.latitude;
-                            document.getElementById("longitudInput").value = pos.coords.longitude;
-                        },
-                        (error) => {
-                            alert("No se pudo obtener la ubicación.");
-                        }
-                    );
-                } else {
-                    alert("Tu navegador no soporta geolocalización.");
-                }
-            }
 
-            // Filtro en tiempo real
-            const filtro = document.getElementById("filtro");
-            const filas = document.querySelectorAll("#tablaReservas tr");
-
-            filtro.addEventListener("input", () => {
-                const texto = filtro.value.toLowerCase();
-                filas.forEach(fila => {
-                    const contenido = fila.textContent.toLowerCase();
-                    fila.style.display = contenido.includes(texto) ? "" : "none";
-                });
-            });
-        </script>
 
 
 
@@ -200,16 +280,7 @@
         }
     });
 
-    const filtro = document.getElementById("filtro");
-    const filas = document.querySelectorAll("#tablaReservas tr");
 
-    filtro.addEventListener("input", () => {
-        const texto = filtro.value.toLowerCase();
-        filas.forEach(fila => {
-            const contenido = fila.textContent.toLowerCase();
-            fila.style.display = contenido.includes(texto) ? "" : "none";
-        });
-    });
 </script>
 </body>
 </html>

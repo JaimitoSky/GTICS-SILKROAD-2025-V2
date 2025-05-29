@@ -143,13 +143,17 @@
 											</form>-->
 
 
-											<form th:action="@{/eliminar}" method="post" class="d-inline">
+											<form th:if="${usuario.email != session.usuario.email}" th:action="@{/eliminar}" method="post" class="d-inline">
 												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
 												<button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
-														data-bs-toggle="modal" data-bs-target="#confirmModal" th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
+														data-bs-toggle="modal"
+														data-bs-target="#confirmModal"
+														th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
 													<i class="bi bi-trash"></i>
 												</button>
 											</form>
+
+
 										</div>
 									</td>
 								</tr>

@@ -25,36 +25,67 @@
         <!-- Navbar -->
         <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
 
-        <!-- Contenido -->
         <main class="content">
             <div class="container mt-4">
+                <h3 class="mb-4">Local asignado</h3>
+
                 <div class="row">
-                    <!-- Local asignado -->
+                    <!-- Selector de sede -->
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Local asignado</label>
-                        <input type="text" class="form-control text-truncate"
-                               th:value="${sedeAsignada != null ? sedeAsignada.nombre : 'Sin asignación'}"
-                               readonly style="max-width: 100%;" />
+                        <label for="sedeSelect" class="form-label fw-bold">Selecciona un local</label>
+                        <select id="sedeSelect" class="form-select">
+                            <option th:each="sede, iStat : ${sedesAsignadas}"
+                                    th:value="${iStat.index}"
+                                    th:text="${sede.nombre}">
+                            </option>
+                        </select>
                     </div>
 
-                    <!-- Mapa dinámico con Leaflet -->
+                    <!-- Mapa dinámico -->
                     <div class="col-md-6 mb-3">
                         <div id="map" style="height: 300px; width: 100%;" class="rounded border"></div>
                     </div>
                 </div>
-
-                <!-- Botones
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <button class="btn btn-success w-100" onclick="validarEntrada()">Marcar entrada</button>
-                    </div>
-                    <div class="col-6">
-                        <button id="btnSalida" class="btn btn-danger w-100" disabled>Marcar salida</button>
-                    </div>
-                </div>
-                -->
             </div>
         </main>
+
+        <!-- Leaflet -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+        <!-- Script dinámico -->
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            // Cargar la lista de sedes del backend como JSON
+            let sedes = [[${sedesAsignadas}]];
+
+            // Inicializar el mapa con la primera sede (si hay)
+            let initialLat = sedes.length > 0 ? sedes[0].latitud : 0;
+            let initialLon = sedes.length > 0 ? sedes[0].longitud : 0;
+
+            let map = L.map('map').setView([initialLat, initialLon], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            let marker = L.marker([initialLat, initialLon]).addTo(map)
+                .bindPopup(sedes.length > 0 ? sedes[0].nombre : "Sin asignación").openPopup();
+
+            // Evento de cambio en el selector
+            document.getElementById("sedeSelect").addEventListener("change", function () {
+                let index = this.value;
+                let sede = sedes[index];
+                map.setView([sede.latitud, sede.longitud], 17);
+                marker.setLatLng([sede.latitud, sede.longitud])
+                    .setPopupContent(sede.nombre)
+                    .openPopup();
+            });
+            /*]]>*/
+        </script>
+
+
+
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3">
@@ -151,49 +182,32 @@
 </script>-->
 
 <!-- Agrega esto al final del HTML -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-sA+z0pG4Gk6fTTVJHt/nTo/l3pYFZsS3dgDiGzD4x3E=" crossorigin="" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-o9N1jG8w+FqY5Gn9W0mJ6mPyvdbGg0XtgDTevZf+0Yw=" crossorigin=""></script>
+
 
 <!-- Geolocalización + Mapa -->
+<!-- Script dinámico CORREGIDO -->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const sedeLat = /*[[${sedeAsignada.latitud}]]*/ 0;
-    const sedeLon = /*[[${sedeAsignada.longitud}]]*/ 0;
+    let sedes = [[${sedesAsignadas}]];
 
-    const map = L.map('map').setView([sedeLat, sedeLon], 16);
+    let map = L.map('map').setView([sedes[0].latitud, sedes[0].longitud], 17);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
     }).addTo(map);
-    L.marker([sedeLat, sedeLon]).addTo(map).bindPopup("Sede asignada").openPopup();
-    /*]]>*/
+    let marker = L.marker([sedes[0].latitud, sedes[0].longitud]).addTo(map)
+        .bindPopup(sedes[0].nombre).openPopup();
 
-    // ⏰ Reloj en vivo
-    function actualizarHora() {
-        const reloj = document.getElementById('reloj');
-        if (!reloj) return;
-        const ahora = new Date();
-        const hora = ahora.toLocaleTimeString('es-PE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        reloj.textContent = hora;
-    }
-    setInterval(actualizarHora, 1000);
-    actualizarHora();
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
+    document.getElementById("sedeSelect").addEventListener("change", function () {
+        let index = this.value;
+        let sede = sedes[index];
+        map.setView([sede.latitud, sede.longitud], 17);
+        marker.setLatLng([sede.latitud, sede.longitud])
+            .setPopupContent(sede.nombre)
+            .openPopup();
     });
+    /*]]>*/
 </script>
+
 </body>
 </html>

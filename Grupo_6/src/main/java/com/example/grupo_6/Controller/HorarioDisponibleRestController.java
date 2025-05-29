@@ -50,13 +50,15 @@ public class HorarioDisponibleRestController {
         Integer idSede = ss.getSede().getIdsede();
         Integer idServicio = ss.getServicio().getIdservicio();
 
-        List<HorarioDisponible> lista = horarioDisponibleRepository.buscarPorSedeServicioId(idSede, idServicio);
+        List<HorarioDisponible> lista = horarioDisponibleRepository.buscarTodosPorSedeYServicio(idSede, idServicio); // 👈 CAMBIO
         return lista.stream()
                 .map(h -> {
                     Map<String, String> map = new HashMap<>();
                     map.put("idhorario", String.valueOf(h.getIdhorario()));
                     map.put("horaInicio", h.getHoraInicio().toString());
                     map.put("horaFin", h.getHoraFin().toString());
+                    map.put("activo", String.valueOf(h.getActivo()));  // <-- línea clave
+
                     map.put("diaSemana", h.getHorarioAtencion().getDiaSemana().toString());
                     return map;
                 })
@@ -175,15 +177,18 @@ public class HorarioDisponibleRestController {
 
 
     //  DELETE - Eliminar horario disponible
-    @DeleteMapping("/horarios-disponibles/{id}")
-    public ResponseEntity<?> eliminarHorario(@PathVariable("id") Integer id) {
-        if (horarioDisponibleRepository.existsById(id)) {
-            horarioDisponibleRepository.deleteById(id);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
+    @PostMapping("/horarios-disponibles/{id}/toggle")
+    public ResponseEntity<?> toggleEstadoHorario(@PathVariable("id") Integer id) {
+        Optional<HorarioDisponible> opt = horarioDisponibleRepository.findById(id);
+        if (opt.isPresent()) {
+            HorarioDisponible horario = opt.get();
+            horario.setActivo(!Boolean.TRUE.equals(horario.getActivo())); // invierte estado
+            horarioDisponibleRepository.save(horario);
+            return ResponseEntity.ok().body("Estado actualizado correctamente");
         }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Horario no encontrado");
     }
+
 }
 
 

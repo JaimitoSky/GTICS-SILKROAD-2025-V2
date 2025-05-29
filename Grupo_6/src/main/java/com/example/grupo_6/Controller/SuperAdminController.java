@@ -69,6 +69,9 @@ public class SuperAdminController {
     @Autowired
     private TipoServicioRepository tipoServicioRepository;
 
+    @Autowired
+    private CoordinadorSedeRepository coordinadorSedeRepository;
+
     private void cargarEstadisticas(Model model, YearMonth mes, String rol) {
         if (mes == null) {
             mes = YearMonth.now();
@@ -395,11 +398,25 @@ public class SuperAdminController {
 
 
     @GetMapping("/superadmin/sedes")
-    public String listarSedes(Model model) {
-        List<Sede> sedes = sedeRepository.findAll();
-        model.addAttribute("listaSedes", sedes);
+    public String listarSedes(
+            Model model,
+            @RequestParam(defaultValue = "") String filtroNombre,
+            @RequestParam(defaultValue = "") String filtroServicio,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Sede> sedesFiltradas = sedeRepository.buscarPorNombreYServicio(filtroNombre, filtroServicio, pageable);
+
+        List<String> listaServicios = servicioRepository.obtenerNombres(); // para el selector
+        model.addAttribute("listaSedes", sedesFiltradas.getContent());
+        model.addAttribute("totalPages", sedesFiltradas.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("filtroNombre", filtroNombre);
+        model.addAttribute("filtroServicio", filtroServicio);
+        model.addAttribute("listaServicios", listaServicios);
         return "superadmin/superadmin_sedes";
     }
+
 
     @PostMapping("/superadmin/sedes/desactivar/{id}")
     public String desactivarSede(@PathVariable("id") int id) {
@@ -492,19 +509,170 @@ public class SuperAdminController {
         Optional<Tarifa> tarifaOpt = tarifaRepository.findById(idtarifa);
 
         if (sedeOpt.isPresent() && servOpt.isPresent() && tarifaOpt.isPresent()) {
-            SedeServicio ss = new SedeServicio();
-            ss.setSede(sedeOpt.get());
-            ss.setServicio(servOpt.get());
-            ss.setTarifa(tarifaOpt.get());
-            sedeServicioRepository.save(ss);
+            Sede sede = sedeOpt.get();
+            Servicio servicio = servOpt.get();
+            Tarifa tarifa = tarifaOpt.get();
 
-            attr.addFlashAttribute("mensajeExito", "Servicio asignado a la sede correctamente.");
+            SedeServicio ss = new SedeServicio();
+            ss.setSede(sede);
+            ss.setServicio(servicio);
+            ss.setTarifa(tarifa);
+            sedeServicioRepository.save(ss); // ya tiene id para ser usado
+
+            // Crear horarios disponibles desde horarios de atención activos
+            List<HorarioAtencion> horarios = horarioAtencionRepository.findBySede_IdsedeAndActivoTrue(idsede);
+            for (HorarioAtencion ha : horarios) {
+                if (ha.getHoraInicio() == null || ha.getHoraFin() == null) continue;
+
+                LocalTime start = ha.getHoraInicio();
+                LocalTime end = ha.getHoraFin();
+
+                while (!start.plusHours(1).isAfter(end)) {
+                    HorarioDisponible hd = new HorarioDisponible();
+                    hd.setHorarioAtencion(ha);
+                    hd.setServicio(servicio);
+                    hd.setHoraInicio(start);
+                    hd.setHoraFin(start.plusHours(1));
+                    hd.setActivo(true);
+
+                    horarioDisponibleRepository.save(hd);
+                    start = start.plusHours(1);
+                }
+            }
+
+            attr.addFlashAttribute("mensajeExito", "Servicio asignado y horarios generados automáticamente.");
         } else {
             attr.addFlashAttribute("mensajeError", "Error al asignar servicio.");
         }
 
         return "redirect:/superadmin/sedes/configurar/" + idsede;
     }
+    @PostMapping("/superadmin/sedes/configurar/intervalos/toggle")
+    public String toggleEstadoHorario(@RequestParam("idhorario") Integer idhorario,
+                                      RedirectAttributes attr) {
+        Optional<HorarioDisponible> opt = horarioDisponibleRepository.findById(idhorario);
+        if (opt.isPresent()) {
+            HorarioDisponible hd = opt.get();
+            hd.setActivo(!hd.getActivo());
+            horarioDisponibleRepository.save(hd);
+            Integer idSede = hd.getHorarioAtencion().getSede().getIdsede();
+            attr.addFlashAttribute("mensajeExito", "Estado del horario actualizado.");
+            return "redirect:/superadmin/sedes/configurar/" + idSede;
+        }
+        attr.addFlashAttribute("mensajeError", "Horario no encontrado.");
+        return "redirect:/superadmin/sedes";
+    }
+
+    @GetMapping("/superadmin/sedes/asignar-coordinadores/{idsede}")
+    public String vistaAsignarCoordinadores(@PathVariable("idsede") Integer idsede, Model model) {
+        Sede sede = sedeRepository.findById(idsede).orElseThrow();
+
+        // Obtener coordinadores activos (rol = COORDINADOR, estado = 'activo')
+        List<Usuario> coordinadores = usuarioRepository.obtenerCoordinadoresActivos();
+
+        // Obtener asignaciones actuales en la sede
+        List<CoordinadorSede> asignaciones = coordinadorSedeRepository.findBySede_Idsede(idsede);
+
+        // Obtener IDs de los coordinadores activos en esta sede
+        List<Integer> coordinadoresActivos = asignaciones.stream()
+                .filter(CoordinadorSede::isActivo)
+                .map(cs -> cs.getUsuario().getIdusuario())
+                .toList();
+
+        // Agregar al modelo
+        model.addAttribute("sede", sede);
+        model.addAttribute("coordinadores", coordinadores);
+        model.addAttribute("coordinadoresActivos", coordinadoresActivos);
+        model.addAttribute("coordinadoresAsignados", asignaciones.stream()
+                .filter(CoordinadorSede::isActivo)
+                .toList());
+
+        return "superadmin/superadmin_asignar_coordinadores";
+    }
+
+    @PostMapping("/superadmin/sedes/coordinadores/desasignar")
+    public String desasignarCoordinador(@RequestParam("idCoordinadorSede") Integer id,
+                                        @RequestParam("idsede") Integer idsede) {
+        CoordinadorSede cs = coordinadorSedeRepository.findById(id).orElseThrow();
+        cs.setActivo(false);
+        coordinadorSedeRepository.save(cs);
+        return "redirect:/superadmin/sedes/asignar-coordinadores/" + idsede;
+    }
+
+
+
+
+    @PostMapping("/superadmin/sedes/asignar-coordinadores")
+    public String asignarCoordinadores(@RequestParam("idsede") Integer idsede,
+                                       @RequestParam("coordinadores") List<Integer> idsUsuarios) {
+        Sede sede = sedeRepository.findById(idsede).orElseThrow();
+
+        List<CoordinadorSede> actuales = coordinadorSedeRepository.findBySede_Idsede(idsede);
+        actuales.forEach(cs -> cs.setActivo(false));
+        coordinadorSedeRepository.saveAll(actuales);
+
+        for (Integer idusuario : idsUsuarios) {
+            Optional<CoordinadorSede> existente = coordinadorSedeRepository.findByUsuario_IdusuarioAndSede_Idsede(idusuario, idsede);
+            if (existente.isPresent()) {
+                CoordinadorSede cs = existente.get();
+                cs.setActivo(true);
+                coordinadorSedeRepository.save(cs);
+            } else {
+                CoordinadorSede nuevo = new CoordinadorSede();
+                nuevo.setUsuario(usuarioRepository.findById(idusuario).orElseThrow());
+                nuevo.setSede(sede);
+                nuevo.setActivo(true);
+                coordinadorSedeRepository.save(nuevo);
+            }
+        }
+
+        return "redirect:/superadmin/sedes/asignar-coordinadores/" + idsede;
+    }
+
+
+
+
+
+    @PostMapping("/superadmin/sedes/configurar/servicios/toggle-estado")
+    public String toggleEstado(@RequestParam("idsedeServicio") Integer idsedeServicio,
+                               RedirectAttributes attr) {
+        Optional<SedeServicio> opt = sedeServicioRepository.findById(idsedeServicio);
+
+        if (opt.isPresent()) {
+            SedeServicio ss = opt.get();
+            ss.setActivo(!ss.isActivo());
+            sedeServicioRepository.save(ss);
+            attr.addFlashAttribute("mensajeExito", "Estado del servicio actualizado.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "Servicio no encontrado.");
+        }
+
+        return "redirect:/superadmin/sedes/configurar/" + opt.get().getSede().getIdsede();
+    }
+
+    @PostMapping("/superadmin/sedes/configurar/servicios/actualizar-tarifa")
+    public String actualizarTarifa(@RequestParam("idsedeServicio") Integer idsedeServicio,
+                                   @RequestParam("idtarifa") Integer idtarifa,
+                                   RedirectAttributes attr) {
+        Optional<SedeServicio> opt = sedeServicioRepository.findById(idsedeServicio);
+        Optional<Tarifa> tarifa = tarifaRepository.findById(idtarifa);
+
+        if (opt.isPresent() && tarifa.isPresent()) {
+            SedeServicio ss = opt.get();
+            ss.setTarifa(tarifa.get());
+            sedeServicioRepository.save(ss);
+            attr.addFlashAttribute("mensajeExito", "Tarifa actualizada correctamente.");
+        } else {
+            attr.addFlashAttribute("mensajeError", "Error al actualizar tarifa.");
+        }
+
+        return "redirect:/superadmin/sedes/configurar/" + opt.get().getSede().getIdsede();
+    }
+
+
+
+
+
 
 
     @PostMapping("/superadmin/sedes/configurar/atencion/guardar")
@@ -983,11 +1151,26 @@ public class SuperAdminController {
         return "superadmin/superadmin_registros";
     }
     @GetMapping("/superadmin/pagos")
-    public String listarPagos(Model model) {
-        List<Pago> listaPagos = pagoRepository.findAll();
-        model.addAttribute("listaPagos", listaPagos);
+    public String listarPagos(
+            Model model,
+            @RequestParam(defaultValue = "") String filtroNombre,
+            @RequestParam(defaultValue = "") String filtroDni,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Pago> pagosFiltrados = pagoRepository.buscarPagosFiltrados(filtroNombre, filtroDni, pageable);
+
+        model.addAttribute("listaPagos", pagosFiltrados.getContent());
+        model.addAttribute("totalPages", pagosFiltrados.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("filtroNombre", filtroNombre);
+        model.addAttribute("filtroDni", filtroDni);
+
         return "superadmin/superadmin_pagos";
     }
+
+
+
     @GetMapping("/uploads/{idpago}")
     public ResponseEntity<byte[]> mostrarComprobante(@PathVariable("idpago") Integer idpago) {
         Optional<Pago> optPago = pagoRepository.findById(idpago);

@@ -29,11 +29,20 @@
             <div class="container mt-4">
                 <h2 class="mb-4">Registrar Asistencia</h2>
 
-                <form th:action="@{/coordinador/asistencia/marcar}" method="post" onsubmit="return prepararAsistencia(this)">
+                <!-- Alerta bootstrap -->
+                <div id="alertaAsistencia" class="alert alert-warning d-none">
+                    <h5 class="alert-heading">¿Deseas registrar la asistencia?</h5>
+                    <p>Hora actual: <span id="horaActual"></span></p>
+                    <div class="d-flex justify-content-end">
+                        <button id="confirmarBtn" class="btn btn-success me-2">Confirmar</button>
+                        <button class="btn btn-secondary" onclick="ocultarAlerta()">Cancelar</button>
+                    </div>
+                </div>
+
+                <form id="formAsistencia" th:action="@{/coordinador/asistencia/marcar}" method="post">
                     <input type="hidden" name="idusuario" th:value="${reserva.usuario.idusuario}" />
                     <input type="hidden" name="horaEntrada" />
                     <input type="hidden" name="idreserva" th:value="${reserva.idreserva}" />
-
 
                     <div class="mb-3">
                         <label class="form-label">Usuario:</label>
@@ -50,28 +59,44 @@
                         <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
                     </div>
 
-                    <button type="submit" class="btn btn-success">
+                    <button type="button" onclick="mostrarAlerta()" class="btn btn-success">
                         <i class="bi bi-check2-circle"></i> Confirmar Asistencia
                     </button>
                 </form>
             </div>
+
+            <script>
+                function mostrarAlerta() {
+                    document.getElementById("alertaAsistencia").classList.remove("d-none");
+                    actualizarHora();
+                }
+
+                function ocultarAlerta() {
+                    document.getElementById("alertaAsistencia").classList.add("d-none");
+                }
+
+                function actualizarHora() {
+                    const ahora = new Date();
+                    document.getElementById("horaActual").textContent = ahora.toLocaleTimeString('es-PE', {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+                }
+
+                document.getElementById("confirmarBtn").addEventListener("click", function () {
+                    const form = document.getElementById("formAsistencia");
+                    const now = new Date();
+                    form.querySelector('input[name="horaEntrada"]').value = now.toTimeString().split(" ")[0];
+                    form.submit();
+                });
+
+                setInterval(actualizarHora, 1000);
+            </script>
         </main>
 
-        <script>
-            function prepararAsistencia(form) {
-                const now = new Date();
-                form.querySelector('input[name="horaEntrada"]').value = now.toTimeString().split(" ")[0];
-
-                form.submit(); // Envía directamente sin ubicación
-
-                return false; // evitar envío inmediato por HTML
-            }
-        </script>
 
 
 
-
-        <!-- Footer -->
+            <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
                 <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo" height="60">

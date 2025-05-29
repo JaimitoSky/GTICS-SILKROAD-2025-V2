@@ -29,20 +29,37 @@
 
 
 
-        <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
                 <h1 class="h3 mb-3"><strong>Gestión de Pagos</strong></h1>
 
                 <div class="card">
                     <div class="card-body">
+
+                        <!-- Filtros -->
+                        <form method="get" class="row g-2 mb-3">
+                            <div class="col-md-3">
+                                <input type="text" name="filtroNombre" class="form-control" placeholder="Buscar por nombre"
+                                       th:value="${filtroNombre}" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="filtroDni" class="form-control" placeholder="Buscar por DNI"
+                                       th:value="${filtroDni}" />
+                            </div>
+
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
+                                <a th:href="@{/superadmin/pagos}" class="btn btn-outline-secondary w-100">Limpiar</a>
+                            </div>
+                        </form>
+
+                        <!-- Tabla -->
                         <table class="table table-bordered table-hover align-middle">
                             <thead class="table-light">
                             <tr>
                                 <th>#</th>
                                 <th>Vecino</th>
-                                <th>Servicio</th>
-                                <th>Método de pago</th>
+                                <th>DNI</th>
                                 <th>Estado</th>
                                 <th>Comprobante</th>
                                 <th>Acciones</th>
@@ -52,15 +69,16 @@
                             <tr th:each="pago : ${listaPagos}">
                                 <td th:text="${pago.idpago}">1001</td>
                                 <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}">Juan Pérez</td>
-                                <td th:text="${pago.reserva != null ? pago.reserva.servicio.nombre : '—'}">—</td>
-                                <td th:text="${pago.metodo}">Depósito</td>
+
+
+                                <td th:text="${pago.usuario.dni}">12345678</td>
                                 <td>
-                                <span th:text="${pago.estado.nombre}"
-                                      th:classappend="
-                                        ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
-                                        (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
-                                    Pendiente
-                                </span>
+                            <span th:text="${pago.estado.nombre}"
+                                  th:classappend="
+                                    ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
+                                    (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
+                                Pendiente
+                            </span>
                                 </td>
                                 <td>
                                     <a th:if="${pago.comprobante != null}" th:href="@{'/uploads/' + ${pago.idpago}}" target="_blank">Ver</a>
@@ -77,10 +95,33 @@
                                         <button type="submit" class="btn btn-sm btn-secondary">Volver a Pendiente</button>
                                     </form>
                                 </td>
-
                             </tr>
                             </tbody>
                         </table>
+
+                        <!-- Paginación -->
+                        <div class="d-flex justify-content-center mt-4">
+                            <nav>
+                                <ul class="pagination mb-0">
+                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/superadmin/pagos(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, filtroDni=${filtroDni}, page=${currentPage - 1})}">
+                                            Anterior
+                                        </a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link" th:text="${currentPage + 1}">1</span>
+                                    </li>
+                                    <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/superadmin/pagos(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, filtroDni=${filtroDni}, page=${currentPage + 1})}">
+                                            Siguiente
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -88,33 +129,6 @@
 
 
 
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
 
 
         <!-- Footer -->
@@ -159,6 +173,8 @@
             }
         });
     });
+
+
 </script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>

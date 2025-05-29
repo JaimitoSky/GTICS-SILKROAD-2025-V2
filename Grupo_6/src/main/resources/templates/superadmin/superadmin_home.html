@@ -54,32 +54,32 @@
 
                 <!-- Métricas rápidas -->
                 <div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
+                        <div class="card text-white bg-primary h-100">
                             <div class="card-body">
                                 <h5 class="card-title">Reservas del Mes</h5>
                                 <h2 th:text="${reservasDelMes}">0</h2>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-success">
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
+                        <div class="card text-white bg-success h-100">
                             <div class="card-body">
                                 <h5 class="card-title">Reservas Totales</h5>
                                 <h2 th:text="${totalReservas}">0</h2>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-warning">
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
+                        <div class="card text-white bg-warning h-100">
                             <div class="card-body">
                                 <h5 class="card-title">Sedes Registradas</h5>
                                 <h2 th:text="${totalSedes}">0</h2>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-info">
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
+                        <div class="card text-white bg-info h-100">
                             <div class="card-body">
                                 <h5 class="card-title">Usuarios Nuevos (Mes)</h5>
                                 <h2 th:text="${usuariosNuevos}">0</h2>
@@ -87,36 +87,35 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Gráficas -->
                 <div class="row">
-                    <div class="col-lg-6 mb-4">
-                        <div class="card">
+                    <div class="col-12 col-md-6 mb-4">
+                        <div class="card h-100">
                             <div class="card-header"><strong>Reservas por Día (Mes)</strong></div>
-                            <div class="card-body">
-                                <canvas id="chartReservasMes"></canvas>
+                            <div class="card-body" style="position: relative; height: 100%; min-height: 250px;">
+                                <canvas id="chartReservasMes" class="w-100" style="height: 100%;"></canvas>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card">
+                    <div class="col-12 col-md-6 mb-4">
+                        <div class="card h-100">
                             <div class="card-header"><strong>Usuarios por Rol</strong></div>
-                            <div class="card-body">
-                                <canvas id="chartUsuariosRol"></canvas>
+                            <div class="card-body" style="position: relative; height: 100%; min-height: 250px;">
+                                <canvas id="chartUsuariosRol" class="w-100" style="height: 100%;"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script th:inline="javascript">
             const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]);
             const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]);
-
-            console.log("reservasPorDia:", reservasPorDia);
-            console.log("usuariosPorRol:", usuariosPorRol);
         </script>
-
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -135,7 +134,11 @@
                         },
                         options: {
                             responsive: true,
-                            plugins: { legend: { display: false } }
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
                         }
                     });
                 }
@@ -151,12 +154,14 @@
                             }]
                         },
                         options: {
-                            responsive: true
+                            responsive: true,
+                            maintainAspectRatio: false
                         }
                     });
                 }
             });
         </script>
+
 
 
 
