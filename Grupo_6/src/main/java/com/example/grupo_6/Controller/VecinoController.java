@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URLConnection;
+import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import com.example.grupo_6.Repository.PagoRepository;
@@ -291,6 +292,18 @@ public class VecinoController {
             reserva.setEstado(estadoPendienteReserva); // siempre será pendiente
 
             reservaRepository.save(reserva);
+
+            Notificacion noti = new Notificacion();
+            noti.setUsuario(usuario);
+            noti.setTitulo("Reserva registrada");
+            noti.setMensaje("Tu reserva en " + reserva.getSedeServicio().getServicio().getNombre() +
+                    " ha sido registrada para el día " + reserva.getFechaReserva() +
+                    " a las " + reserva.getHorarioDisponible().getHoraInicio() + ".");
+            noti.setLeido(false);
+            noti.setFechaEnvio(Timestamp.valueOf(LocalDateTime.now()));
+            notificacionRepository.save(noti);
+
+
             model.addAttribute("hoy", LocalDate.now());
 
             model.addAttribute("reserva", reserva);
@@ -437,6 +450,49 @@ public class VecinoController {
 
         return ResponseEntity.notFound().build();
     }
+
+    // 🔔 Ver detalle y marcar como leída
+    @GetMapping("/notificaciones/{id}/leer")
+    public String leerNotificacion(@PathVariable("id") Integer id, HttpSession session) {
+        Integer idusuario = (Integer) session.getAttribute("idusuario");
+        Optional<Notificacion> optional = notificacionRepository.findById(id);
+        if (optional.isPresent()) {
+            Notificacion noti = optional.get();
+            if (noti.getUsuario().getIdusuario().equals(idusuario)) {
+                noti.setLeido(true);
+                notificacionRepository.save(noti);
+            }
+        }
+        return "redirect:/vecino/notificaciones";
+    }
+
+
+    // 🔔 Marcar todas como leídas
+    @PostMapping("/notificaciones/marcar-todo")
+    public String marcarTodasComoLeidas(HttpSession session) {
+        Integer idusuario = (Integer) session.getAttribute("idusuario");
+        notificacionRepository.marcarTodasComoLeidas(idusuario);
+        return "redirect:/vecino/notificaciones";
+    }
+
+
+    @PostMapping("/notificaciones/{id}/eliminar")
+    public String eliminarNotificacion(@PathVariable("id") Integer id, HttpSession session) {
+        Integer idusuario = (Integer) session.getAttribute("idusuario");
+        Optional<Notificacion> optional = notificacionRepository.findById(id);
+        if (optional.isPresent() && optional.get().getUsuario().getIdusuario().equals(idusuario)) {
+            notificacionRepository.deleteById(id);
+        }
+        return "redirect:/vecino/notificaciones";
+    }
+
+    @PostMapping("/notificaciones/eliminar-todo")
+    public String eliminarTodasNotificaciones(HttpSession session) {
+        Integer idusuario = (Integer) session.getAttribute("idusuario");
+        notificacionRepository.deleteByUsuario_Idusuario(idusuario);
+        return "redirect:/vecino/notificaciones";
+    }
+
 
 
 }
