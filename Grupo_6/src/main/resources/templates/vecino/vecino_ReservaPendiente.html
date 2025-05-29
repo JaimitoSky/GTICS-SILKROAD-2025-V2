@@ -100,6 +100,7 @@
                     <div class="container-fluid p-4">
 
                         <h2 class="mb-4 text-success">¡Reserva pendiente registrada!</h2>
+                        <div id="mensajeAlerta" class="mt-3"></div>
 
                         <!-- Imagen del Servicio -->
                         <div class="mb-4">
@@ -201,25 +202,97 @@
                 }
             });
         </script>
-
         <script>
             document.getElementById("btnComprobante").addEventListener("click", function () {
-                const inputFile = document.getElementById("adjuntar"); // archivo comprobante
-                const form = inputFile.closest("form"); // el formulario que contiene el botón
+                const inputFile = document.getElementById("adjuntar");
+                const form = inputFile.closest("form");
                 const file = inputFile?.files?.[0];
+                const mensajeAlerta = document.getElementById("mensajeAlerta");
+
+                // Limpiar mensajes anteriores
+                mensajeAlerta.innerHTML = "";
+
+                // Desactivar botón para evitar doble clic
+                const boton = this;
+                boton.disabled = true;
+
+                // Agregar animación CSS si no existe
+                if (!document.getElementById("fadeInUpJSStyle")) {
+                    const style = document.createElement("style");
+                    style.id = "fadeInUpJSStyle";
+                    style.textContent = `
+            @keyframes fadeInUpJS {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+                    document.head.appendChild(style);
+                }
 
                 if (file) {
-                    // Caso: Se cargó un archivo
-                    if (confirm("¿Estás seguro de enviar el comprobante de pago?")) {
+                    // Crear alerta de confirmación
+                    const alertaConfirmacion = document.createElement("div");
+                    alertaConfirmacion.className = "alert alert-warning alert-dismissible fade show mx-auto text-center";
+                    alertaConfirmacion.style.maxWidth = "500px";
+                    alertaConfirmacion.style.marginTop = "2rem";
+                    alertaConfirmacion.style.padding = "1.5rem";
+                    alertaConfirmacion.style.boxShadow = "0 0 20px rgba(255,193,7,0.6)";
+                    alertaConfirmacion.style.border = "2px solid #ffc107";
+                    alertaConfirmacion.style.borderRadius = "0.75rem";
+                    alertaConfirmacion.style.animation = "fadeInUpJS 0.6s ease-out";
+
+                    alertaConfirmacion.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
+            <h5 class="fw-bold mb-2">¿Confirmar?</h5>
+            <p class="mb-0">¿Deseas enviar el comprobante de pago?</p>
+            <div class="mt-3">
+                <button type="button" class="btn btn-success btn-sm me-2" id="btnConfirmarEnvio">Sí</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnCancelarEnvio" data-bs-dismiss="alert">Cancelar</button>
+            </div>
+        `;
+                    mensajeAlerta.appendChild(alertaConfirmacion);
+
+                    alertaConfirmacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    document.getElementById("btnConfirmarEnvio").addEventListener("click", function () {
                         form.submit();
-                    }
+                    });
+
+                    document.getElementById("btnCancelarEnvio").addEventListener("click", function () {
+                        boton.disabled = false;
+                        alertaConfirmacion.remove();
+                    });
+
                 } else {
-                    // Caso: No se cargó archivo
-                    alert("No se cargó ningún comprobante de pago.\nTiene un tiempo máximo de dos horas para realizar el pago.");
-                    window.location.href = "http://localhost:8080/vecino/reservas/historial";
+                    const alertaAdvertencia = document.createElement("div");
+                    alertaAdvertencia.className = "alert alert-warning alert-dismissible fade show mx-auto text-center";
+                    alertaAdvertencia.style.maxWidth = "500px";
+                    alertaAdvertencia.style.marginTop = "2rem";
+                    alertaAdvertencia.style.padding = "1.5rem";
+                    alertaAdvertencia.style.border = "2px solid #ffc107";
+                    alertaAdvertencia.style.borderRadius = "0.75rem";
+                    alertaAdvertencia.style.animation = "fadeInUpJS 0.6s ease-out";
+
+                    alertaAdvertencia.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
+        <h5 class="fw-bold mb-2">Importante</h5>
+        <p class="mb-0">La reserva ha sido registrada.<br>Debe subir un comprobante de pago en un plazo máximo de <strong>2 horas</strong> para validarla.</p>
+        <button type="button" class="btn-close mt-2" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    `;
+
+                    mensajeAlerta.appendChild(alertaAdvertencia);
+                    alertaAdvertencia.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    setTimeout(() => {
+                        window.location.href = "http://localhost:8080/vecino/reservas/historial";
+                    }, 4000);
                 }
+
             });
         </script>
+
+
+
 
     </body>
 </html>

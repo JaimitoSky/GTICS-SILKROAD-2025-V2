@@ -29,21 +29,24 @@
                                 <h4 class="mb-4">Datos de la Reserva</h4>
                                 <form th:action="@{/vecino/reservas/guardar}" th:object="${reserva}" method="post">
                                     <!-- SEDE -->
+                                    <!-- SEDE -->
                                     <div class="mb-3">
                                         <label class="form-label">Sede</label>
-                                        <select id="sede-select" class="form-select" required>
-                                            <option value="">Seleccione una sede</option>
-                                            <option th:each="sede : ${listaSedes}" th:value="${sede.idsede}" th:text="${sede.nombre}"></option>
-                                        </select>
+                                        <div class="form-control-plaintext ps-2" style="background-color: #f5f5f5; border-radius: 5px;">
+                                            <span th:text="${reserva.sedeServicio.sede.nombre}">Nombre de sede</span>
+                                        </div>
+                                        <input type="hidden" name="sede.idsede" th:value="${reserva.sedeServicio.sede.idsede}" />
                                     </div>
 
                                     <!-- SERVICIO -->
                                     <div class="mb-3">
                                         <label class="form-label">Servicio</label>
-                                        <select id="servicio-select" name="sedeServicio.idSedeServicio" class="form-select" required>
-                                            <option value="">Seleccione una sede primero</option>
-                                        </select>
+                                        <div class="form-control-plaintext ps-2" style="background-color: #f5f5f5; border-radius: 5px;">
+                                            <span th:text="${reserva.sedeServicio.servicio.nombre}">Nombre de servicio</span>
+                                        </div>
+                                        <input type="hidden" name="sedeServicio.idSedeServicio" th:value="${reserva.sedeServicio.idSedeServicio}" />
                                     </div>
+
 
                                     <!-- FECHA -->
                                     <div class="mb-3">
@@ -62,34 +65,12 @@
                                     <button type="submit" class="btn btn-primary">Reservar</button>
                                     <a th:href="@{/vecino/reservas}" class="btn btn-secondary">Cancelar</a>
                                 </form>
-
                                 <script>
-                                    const sedeSelect = document.getElementById("sede-select");
-                                    const servicioSelect = document.getElementById("servicio-select");
-                                    const fechaInput = document.getElementById("fechaReserva");
-                                    const horarioSelect = document.getElementById("horarioDisponible");
-
-                                    sedeSelect.addEventListener("change", function () {
-                                        const sedeId = this.value;
-                                        servicioSelect.innerHTML = '<option>Cargando servicios...</option>';
-                                        horarioSelect.innerHTML = '<option>Seleccione servicio y fecha</option>';
-
-                                        fetch(`/api/servicios-por-sede/${sedeId}`)
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
-                                                data.forEach(s => {
-                                                    const opt = document.createElement("option");
-                                                    opt.value = s.idSedeServicio;
-                                                    opt.textContent = s.nombre;
-                                                    servicioSelect.appendChild(opt);
-                                                });
-                                            });
-                                    });
-
                                     function cargarHorariosDisponibles() {
-                                        const sedeServicioId = servicioSelect.value;
-                                        const fecha = fechaInput.value;
+                                        const fecha = document.getElementById("fechaReserva").value;
+                                        const sedeServicioId = document.querySelector("input[name='sedeServicio.idSedeServicio']").value;
+
+                                        const horarioSelect = document.getElementById("horarioDisponible");
 
                                         if (!sedeServicioId || !fecha) {
                                             horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
@@ -102,10 +83,7 @@
                                                 horarioSelect.innerHTML = '';
 
                                                 if (data.length === 0) {
-                                                    const opt = document.createElement("option");
-                                                    opt.value = "";
-                                                    opt.textContent = "No hay horarios disponibles";
-                                                    horarioSelect.appendChild(opt);
+                                                    horarioSelect.innerHTML = '<option>No hay horarios disponibles</option>';
                                                 } else {
                                                     const opt = document.createElement("option");
                                                     opt.value = "";
@@ -128,9 +106,10 @@
                                             });
                                     }
 
-                                    fechaInput.addEventListener("change", cargarHorariosDisponibles);
-                                    servicioSelect.addEventListener("change", cargarHorariosDisponibles);
+                                    // Ejecutar solo cuando cambia la fecha
+                                    document.getElementById("fechaReserva").addEventListener("change", cargarHorariosDisponibles);
                                 </script>
+
 
                             </div>
                         </div>

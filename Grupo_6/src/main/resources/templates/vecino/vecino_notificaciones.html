@@ -22,22 +22,16 @@
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-4">
+
                 <h2 class="mb-4">Mis Notificaciones</h2>
+                <div id="mensajeAlerta" class="mt-3"></div>
+
 
                 <div th:if="${notificaciones.isEmpty()}">
                     <div class="alert alert-info text-center">
                         No tienes notificaciones recientes.
                     </div>
                 </div>
-
-                <div class="mb-3 text-end">
-                    <form method="post" th:action="@{/vecino/notificaciones/marcar-todo}">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-check2-square"></i> Marcar todo como leído
-                        </button>
-                    </form>
-                </div>
-
 
                 <div class="list-group" th:if="${notificaciones}">
                     <div th:each="noti : ${notificaciones}" class="list-group-item flex-column align-items-start mb-2 rounded shadow-sm d-flex justify-content-between">
@@ -49,11 +43,16 @@
                             </div>
 
                         </div>
-                        <form th:action="@{'/vecino/notificaciones/' + ${noti.idnotificacion} + '/eliminar'}" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar esta notificación?')">
-                            <button type="submit" class="btn btn-sm btn-outline-danger ms-3">
+                        <form th:action="@{'/vecino/notificaciones/' + ${noti.idnotificacion} + '/eliminar'}"
+                              method="post"
+                              class="form-eliminar-noti">
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger ms-3 btn-confirmar-eliminacion"
+                                    th:attr="data-id=${noti.idnotificacion}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
+
                     </div>
                 </div>
             </div>
@@ -85,5 +84,67 @@
         }
     });
 </script>
+
+
 </body>
 </html>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const mensajeAlerta = document.getElementById("mensajeAlerta");
+
+        // Agregar animación si no existe aún
+        if (!document.getElementById("fadeInUpJSStyle")) {
+            const style = document.createElement("style");
+            style.id = "fadeInUpJSStyle";
+            style.textContent = `
+                @keyframes fadeInUpJS {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        document.querySelectorAll(".btn-confirmar-eliminacion").forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+                const form = this.closest("form");
+                const id = this.getAttribute("data-id");
+
+                // Limpiar cualquier alerta previa
+                mensajeAlerta.innerHTML = "";
+
+                // Crear alerta visual Bootstrap con animación y jerarquía
+                const alerta = document.createElement("div");
+                alerta.className = "alert alert-warning alert-dismissible fade show text-center mx-auto";
+                alerta.setAttribute("role", "alert");
+                alerta.style.maxWidth = "500px";
+                alerta.style.marginTop = "2rem";
+                alerta.style.padding = "1.5rem";
+                alerta.style.border = "2px solid #ffc107";
+                alerta.style.borderRadius = "0.75rem";
+                alerta.style.animation = "fadeInUpJS 0.6s ease-out";
+                alerta.style.boxShadow = "0 0 20px rgba(255,193,7,0.6)";
+
+                alerta.innerHTML = `
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
+                    <h5 class="fw-bold mb-2">¿Confirmar eliminación?</h5>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-danger me-2" id="confirmarEliminar${id}">Sí</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="alert">Cancelar</button>
+                    </div>
+                `;
+
+                mensajeAlerta.appendChild(alerta);
+
+                // Confirmar eliminación
+                document.getElementById(`confirmarEliminar${id}`).addEventListener("click", function () {
+                    form.submit();
+                });
+
+                // Scroll automático hacia la alerta
+                alerta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+    });
+</script>

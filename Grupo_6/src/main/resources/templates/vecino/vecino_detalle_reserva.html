@@ -24,8 +24,15 @@
         <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
         <!-- Contenido -->
         <main class="content">
+            <div class="d-flex align-items-center mb-3">
+                <a th:href="@{/vecino/reservas/historial}" class="text-decoration-none">
+                    <img th:src="@{/img/icons/retroceder.png}" alt="Retroceder" style="height: 60px; width: 60px;">
+                </a>
+            </div>
             <div class="container-fluid p-4">
                 <h2 class="mb-4">Detalle de Reserva</h2>
+                <div id="mensajeAlerta" class="mt-3"></div>
+
 
                 <div class="card p-4">
                     <p><strong>Fecha de reserva:</strong>
@@ -72,6 +79,8 @@
                         <p>No se ha subido ningún comprobante.</p>
 
                         <form th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
+
+
                             <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
 
                             <div class="form-group">
@@ -84,9 +93,11 @@
                                 <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
                             </div>
 
+                            <!-- Dentro del formulario -->
                             <div class="form-group mt-3 text-center">
-                                <button type="submit" class="btn btn-primary">Enviar Comprobante</button>
+                                <button type="button" class="btn btn-primary" id="btnComprobante">Enviar Comprobante</button>
                             </div>
+
                         </form>
                     </div>
 
@@ -134,6 +145,88 @@
         $('#tablaReservas').DataTable().search('').columns().search('').draw();
     }
 </script>
+    <script>
+        document.getElementById("btnComprobante").addEventListener("click", function () {
+            const inputFile = document.getElementById("adjuntar");
+            const form = inputFile.closest("form");
+            const file = inputFile?.files?.[0];
+            const mensajeAlerta = document.getElementById("mensajeAlerta");
+
+            mensajeAlerta.innerHTML = "";
+            const boton = this;
+            boton.disabled = true;
+
+            if (!document.getElementById("fadeInUpJSStyle")) {
+                const style = document.createElement("style");
+                style.id = "fadeInUpJSStyle";
+                style.textContent = `
+            @keyframes fadeInUpJS {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+                document.head.appendChild(style);
+            }
+
+            if (file) {
+                const alertaConfirmacion = document.createElement("div");
+                alertaConfirmacion.className = "alert alert-warning alert-dismissible fade show mx-auto text-center";
+                alertaConfirmacion.style.maxWidth = "500px";
+                alertaConfirmacion.style.marginTop = "2rem";
+                alertaConfirmacion.style.padding = "1.5rem";
+                alertaConfirmacion.style.boxShadow = "0 0 20px rgba(255,193,7,0.6)";
+                alertaConfirmacion.style.border = "2px solid #ffc107";
+                alertaConfirmacion.style.borderRadius = "0.75rem";
+                alertaConfirmacion.style.animation = "fadeInUpJS 0.6s ease-out";
+
+                alertaConfirmacion.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
+            <h5 class="fw-bold mb-2">¿Confirmar?</h5>
+            <p class="mb-0">¿Deseas enviar el comprobante de pago?</p>
+            <div class="mt-3">
+                <button type="button" class="btn btn-success btn-sm me-2" id="btnConfirmarEnvio">Sí</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnCancelarEnvio" data-bs-dismiss="alert">Cancelar</button>
+            </div>
+        `;
+                mensajeAlerta.appendChild(alertaConfirmacion);
+                alertaConfirmacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                document.getElementById("btnConfirmarEnvio").addEventListener("click", function () {
+                    form.submit();
+                });
+
+                document.getElementById("btnCancelarEnvio").addEventListener("click", function () {
+                    boton.disabled = false;
+                    alertaConfirmacion.remove();
+                });
+
+            } else {
+                const alertaAdvertencia = document.createElement("div");
+                alertaAdvertencia.className = "alert alert-warning alert-dismissible fade show mx-auto text-center";
+                alertaAdvertencia.style.maxWidth = "500px";
+                alertaAdvertencia.style.marginTop = "2rem";
+                alertaAdvertencia.style.padding = "1.5rem";
+                alertaAdvertencia.style.border = "2px solid #ffc107";
+                alertaAdvertencia.style.borderRadius = "0.75rem";
+                alertaAdvertencia.style.animation = "fadeInUpJS 0.6s ease-out";
+
+                alertaAdvertencia.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
+            <h5 class="fw-bold mb-2">Comprobante pendiente</h5>
+            <p class="mb-0">Tu reserva ha sido registrada correctamente.<br>
+            Debes subir el comprobante de pago dentro del plazo establecido para validarla.</p>
+            <button type="button" class="btn-close mt-2" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        `;
+
+                mensajeAlerta.appendChild(alertaAdvertencia);
+                alertaAdvertencia.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                boton.disabled = false;
+            }
+
+        });
+    </script>
+
 
 </body>
 </html>

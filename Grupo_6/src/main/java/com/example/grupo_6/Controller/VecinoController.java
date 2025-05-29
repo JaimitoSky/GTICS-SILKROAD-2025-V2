@@ -248,12 +248,23 @@ public class VecinoController {
     }
 
     @GetMapping("/reservas/nueva")
-    public String nuevaReserva(Model model) {
-        model.addAttribute("reserva", new Reserva());
+    public String nuevaReserva(@RequestParam("idSedeServicio") Integer idSedeServicio, Model model) {
+        SedeServicio ss = sedeServicioRepository.findById(idSedeServicio).orElse(null);
+
+        if (ss == null) {
+            return "redirect:/vecino";
+        }
+
+        Reserva reserva = new Reserva();
+        reserva.setSedeServicio(ss);
+
+        model.addAttribute("reserva", reserva);
         model.addAttribute("listaSedes", sedeRepository.findAll());
         model.addAttribute("listaHorarios", horarioDisponibleRepository.findByActivoTrue());
+
         return "vecino/vecino_FormularioReservas";
     }
+
 
     @PostMapping("/reservas/guardar")
     public String guardarReserva(@ModelAttribute("reserva") Reserva reserva,
