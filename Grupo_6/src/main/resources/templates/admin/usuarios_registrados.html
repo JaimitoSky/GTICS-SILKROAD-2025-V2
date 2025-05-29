@@ -93,45 +93,48 @@
                                       th:text="${usuario.estado}">Activo</span>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="btn-group btn-group-sm" role="group">
+                                                    <div class="d-flex flex-wrap gap-1 justify-content-center">
                                                         <form th:action="@{/admin/cambiar-rol}" method="post">
                                                             <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
                                                             <select name="rol" class="form-select form-select-sm"
                                                                     onchange="this.form.submit()"
                                                                     th:disabled="${usuario.email == session.usuario.email}">
                                                                 <option value="1" th:selected="${usuario.idrol == 1}" disabled>Superadmin</option>
-                                                                <option value="2" th:selected="${usuario.idrol == 2}" >Administrador</option>
+                                                                <option value="2" th:selected="${usuario.idrol == 2}" disabled>Administrador</option>
                                                                 <option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
                                                                 <option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
                                                             </select>
                                                         </form>
 
+                                                        <div th:if="${usuario.idrol != 1 and usuario.idrol != 2}">
+                                                            <form th:if="${usuario.estado == 'inactivo'}"
+                                                                  th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
+                                                                <button type="submit" class="btn btn-outline-success" title="Activar Usuario">
+                                                                    <i class="bi bi-check-circle"></i>
+                                                                </button>
+                                                            </form>
 
-                                                        <form th:if="${usuario.estado == 'inactivo'}"
-                                                              th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
-                                                            <button type="submit" class="btn btn-outline-success" title="Activar Usuario">
-                                                                <i class="bi bi-check-circle"></i>
-                                                            </button>
-                                                        </form>
+                                                            <form th:if="${usuario.estado != 'inactivo'}"
+                                                                  th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
+                                                                <button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
+                                                                    <i class="bi bi-slash-circle"></i>
+                                                                </button>
+                                                            </form>
 
-                                                        <form th:if="${usuario.estado != 'inactivo'}"
-                                                              th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
-                                                            <button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
-                                                                <i class="bi bi-slash-circle"></i>
-                                                            </button>
-                                                        </form>
-                                                        <a th:href="@{/admin/usuarios/registrados/editar/{id}(id=${usuario.idusuario})}"
-                                                           class="btn btn-outline-primary"
-                                                           title="Editar Usuario">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </a>
-                                                        <form th:action="@{admin/usuarios/registrados/eliminar}" method="post" class="d-inline">
-                                                            <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-                                                            <button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
-                                                                    data-bs-toggle="modal" data-bs-target="#confirmModal" th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
-                                                                <i class="bi bi-trash"></i>
-                                                            </button>
-                                                        </form>
+                                                            <a th:href="@{/admin/usuarios/registrados/editar/{id}(id=${usuario.idusuario})}"
+                                                               class="btn btn-outline-primary" title="Editar Usuario">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+
+                                                            <form th:action="@{admin/usuarios/registrados/eliminar}" method="post" class="d-inline">
+                                                                <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+                                                                <button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
+                                                                        data-bs-toggle="modal" data-bs-target="#confirmModal"
+                                                                        th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
