@@ -113,47 +113,56 @@
     <img th:src="@{/img/photos/fondo-municipalidad.jpg}" alt="Logo Municipalidad San Miguel" />
     <h4>Registro de Usuario</h4>
 
-    <form th:action="@{/registro/enviar-codigo}" method="post" id="registroForm">
+    <form th:action="@{/registro/enviar-codigo}" th:object="${usuario}" method="post" id="registroForm">
         <div class="row">
+
             <div class="form-floating mb-3 col-6 position-relative">
-                <input type="text" name="dni" class="form-control" placeholder="DNI"
+                <input type="text" th:field="*{dni}" class="form-control" placeholder="DNI"
                        required pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos" autocomplete="off" />
                 <label>DNI</label>
+                <div th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}" class="text-danger small"></div>
             </div>
 
             <div class="form-floating mb-3 col-6 position-relative">
-                <input type="text" name="nombres" class="form-control" placeholder="Nombres"
+                <input type="text" th:field="*{nombres}" class="form-control" placeholder="Nombres"
                        required autocomplete="given-name" readonly />
                 <label>Nombres</label>
+                <div th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}" class="text-danger small"></div>
             </div>
 
             <div class="form-floating mb-3 col-6 position-relative">
-                <input type="text" name="apellidos" class="form-control" placeholder="Apellidos"
+                <input type="text" th:field="*{apellidos}" class="form-control" placeholder="Apellidos"
                        required autocomplete="family-name" readonly />
                 <label>Apellidos</label>
+                <div th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}" class="text-danger small"></div>
             </div>
 
             <div class="form-floating mb-3 col-6 position-relative">
-                <input type="email" name="email" class="form-control" placeholder="Correo" required autocomplete="email" />
+                <input type="email" th:field="*{email}" class="form-control" placeholder="Correo" required autocomplete="email" />
                 <label>Correo</label>
+                <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger small"></div>
             </div>
 
             <div class="form-floating mb-3 col-6 position-relative">
-                <input type="text" name="telefono" class="form-control" placeholder="Celular"
+                <input type="text" th:field="*{telefono}" class="form-control" placeholder="Celular"
                        required pattern="[0-9]{9}" title="Ingrese un número de 9 dígitos" autocomplete="tel" />
                 <label>Celular</label>
+                <div th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}" class="text-danger small"></div>
             </div>
 
             <div class="form-floating mb-3 col-6 position-relative">
-                <input type="text" name="direccion" class="form-control" placeholder="Dirección" required autocomplete="street-address" />
+                <input type="text" th:field="*{direccion}" class="form-control" placeholder="Dirección" required autocomplete="street-address" />
                 <label>Dirección</label>
+                <div th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}" class="text-danger small"></div>
             </div>
 
             <div class="form-floating mb-3 col-12 position-relative">
-                <input type="password" name="password" class="form-control" placeholder="Contraseña"
+                <input type="password" th:field="*{passwordHash}" class="form-control" placeholder="Contraseña"
                        required minlength="6" autocomplete="new-password" />
                 <label>Contraseña (mínimo 6 caracteres)</label>
+                <div th:if="${#fields.hasErrors('passwordHash')}" th:errors="*{passwordHash}" class="text-danger small"></div>
             </div>
+
         </div>
 
         <div class="form-check text-start mb-3">
@@ -180,6 +189,7 @@
         ¿Ya tienes una cuenta? <a th:href="@{/login}">Inicia sesión</a>
     </div>
 </div>
+
 
 <script>
     function toggleCodigoCoordinador() {
