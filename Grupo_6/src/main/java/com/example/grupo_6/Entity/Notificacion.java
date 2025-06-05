@@ -30,4 +30,10 @@ public class Notificacion {
 
     @Column(name = "fecha_envio")
     private Timestamp fechaEnvio;
+
+    private String tipo;
+
+    @Column(name = "id_referencia")
+    private Integer idReferencia;
+
 }

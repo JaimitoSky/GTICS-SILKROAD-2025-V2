@@ -8,8 +8,11 @@
             <li class="nav-item me-3">
                 <a class="nav-link position-relative" th:href="@{/vecino/notificaciones}">
                     <i class="bi bi-bell fs-5 text-dark"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          th:text="${notificacionesNoLeidas > 0 ? notificacionesNoLeidas : ''}"></span>
+                    <span th:if="${notificacionesNoLeidas > 0}"
+                          class="position-absolute badge rounded-pill bg-danger"
+                          style="top: 5px; right: 0px; font-size: 0.65rem; padding: 0.35em 0.5em;"
+                          th:text="${notificacionesNoLeidas}">0</span>
+
                 </a>
             </li>
 
