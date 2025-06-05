@@ -312,6 +312,9 @@ public class VecinoController {
                     " a las " + reserva.getHorarioDisponible().getHoraInicio() + ".");
             noti.setLeido(false);
             noti.setFechaEnvio(Timestamp.valueOf(LocalDateTime.now()));
+            noti.setTipo("reserva");
+            noti.setIdReferencia(reserva.getIdreserva());
+
             notificacionRepository.save(noti);
 
 
@@ -534,6 +537,25 @@ public class VecinoController {
         return "redirect:/vecino/notificaciones";
     }
 
+    @GetMapping("/notificaciones/{id}/ver")
+    public String verContenidoNotificacion(@PathVariable("id") Integer id, HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        Optional<Notificacion> optional = notificacionRepository.findById(id);
+        if (optional.isPresent()) {
+            Notificacion noti = optional.get();
+            if (noti.getUsuario().getIdusuario().equals(usuario.getIdusuario())) {
+                noti.setLeido(true);
+                notificacionRepository.save(noti);
+
+                if ("reserva".equals(noti.getTipo()) && noti.getIdReferencia() != null) {
+                    return "redirect:/vecino/reservas/" + noti.getIdReferencia();
+                }
+            }
+        }
+        return "redirect:/vecino/notificaciones";
+    }
 
 
 }

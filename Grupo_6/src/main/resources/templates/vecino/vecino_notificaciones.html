@@ -37,7 +37,11 @@
                     <div th:each="noti : ${notificaciones}" class="list-group-item flex-column align-items-start mb-2 rounded shadow-sm d-flex justify-content-between">
                         <div class="flex-grow-1">
                             <div th:classappend="${noti.leido} ? 'text-muted' : ''">
-                                <h5 class="mb-1 text-primary fw-bold" th:text="${noti.titulo}">Título</h5>
+                                <a th:href="@{'/vecino/notificaciones/' + ${noti.idnotificacion} + '/ver'}"
+                                   th:classappend="${!noti.leido} ? 'fw-bold text-primary' : 'text-muted'"
+                                   class="mb-1 d-block text-decoration-none">
+                                    <h5 th:text="${noti.titulo}"></h5>
+                                </a>
                                 <small th:text="${#dates.format(noti.fechaEnvio, 'dd/MM/yyyy HH:mm')}">Fecha</small>
                                 <p class="mb-1" th:text="${noti.mensaje}">Contenido...</p>
                             </div>
