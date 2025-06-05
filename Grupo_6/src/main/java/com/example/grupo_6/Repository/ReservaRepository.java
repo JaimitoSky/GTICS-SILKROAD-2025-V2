@@ -36,6 +36,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
                 })
                 .collect(Collectors.toList());
     }
+    long countByHorarioDisponibleAndEstado(HorarioDisponible h, Estado estado);
 
     @Query("""
     SELECT s.nombre AS nombreServicio,
@@ -52,6 +53,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
 
 
+    long countByHorarioDisponibleAndEstadoAndFechaReserva(HorarioDisponible horario, Estado estado, LocalDate fechaReserva);
+    boolean existsByUsuarioAndHorarioDisponibleAndFechaReserva(Usuario usuario, HorarioDisponible horario, LocalDate fechaReserva);
 
     @Query("SELECT r.sedeServicio.servicio.nombre, COUNT(r) FROM Reserva r GROUP BY r.sedeServicio.servicio.nombre")
     List<Object[]> countReservasPorServicio();

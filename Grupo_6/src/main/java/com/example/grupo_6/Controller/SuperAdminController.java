@@ -864,8 +864,6 @@ public class SuperAdminController {
                                  @ModelAttribute("reserva") Reserva reserva,
                                  RedirectAttributes redirectAttributes) {
 
-
-
         Usuario usuario = usuarioRepository.findByDni(dni);
         if (usuario == null) {
             redirectAttributes.addFlashAttribute("mensajeError", "El DNI ingresado no corresponde a ningún usuario registrado.");
@@ -878,7 +876,6 @@ public class SuperAdminController {
         Estado estadoPagado = estadoRepository.findByNombreAndTipoAplicacion("pagado", Estado.TipoAplicacion.pago);
 
         SedeServicio sedeServicio = sedeServicioRepository.findById(idsedeServicio).orElse(null);
-
         if (sedeServicio == null) {
             redirectAttributes.addFlashAttribute("mensajeError", "No se encontró el servicio seleccionado.");
             return "redirect:/superadmin/reservas/nueva";
@@ -891,19 +888,22 @@ public class SuperAdminController {
             redirectAttributes.addFlashAttribute("mensajeError", "El horario seleccionado no es válido o está inactivo.");
             return "redirect:/superadmin/reservas/nueva";
         }
+
         reserva.setHorarioDisponible(horario);
 
-        // Validar que el horario esté definido y activo
-
-
-        // Validar que el horario corresponda al servicio seleccionado
         if (!horario.getServicio().equals(sedeServicio.getServicio())) {
             redirectAttributes.addFlashAttribute("mensajeError", "El horario seleccionado no pertenece al servicio escogido.");
             return "redirect:/superadmin/reservas/nueva";
         }
 
-        // Validar que el día de la reserva coincida con el día del horario
-        DayOfWeek dayOfWeek = reserva.getFechaReserva().getDayOfWeek();
+        LocalDate fecha = reserva.getFechaReserva();
+        if (fecha == null || fecha.isBefore(LocalDate.now())) {
+            redirectAttributes.addFlashAttribute("mensajeError", "La fecha de reserva no puede ser pasada.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Validar día del horario
+        DayOfWeek dayOfWeek = fecha.getDayOfWeek();
         HorarioAtencion.DiaSemana diaReserva = switch (dayOfWeek) {
             case MONDAY    -> HorarioAtencion.DiaSemana.Lunes;
             case TUESDAY   -> HorarioAtencion.DiaSemana.Martes;
@@ -913,56 +913,49 @@ public class SuperAdminController {
             case SATURDAY  -> HorarioAtencion.DiaSemana.Sábado;
             case SUNDAY    -> HorarioAtencion.DiaSemana.Domingo;
         };
-        HorarioAtencion.DiaSemana diaHorario = horario.getHorarioAtencion().getDiaSemana();
 
-        if (!diaReserva.equals(diaHorario)) {
+        if (!horario.getHorarioAtencion().getDiaSemana().equals(diaReserva)) {
             redirectAttributes.addFlashAttribute("mensajeError", "El horario no corresponde al día seleccionado.");
             return "redirect:/superadmin/reservas/nueva";
         }
 
-        // Validar que la fecha no sea pasada
-        if (reserva.getFechaReserva() == null || reserva.getFechaReserva().isBefore(LocalDate.now())) {
-            redirectAttributes.addFlashAttribute("mensajeError", "La fecha de reserva no puede ser pasada.");
-            return "redirect:/superadmin/reservas/nueva";
-        }
-
-        // Validar si ese día está permitido para esa sede
-        Sede sede = sedeServicio.getSede();
-        boolean diaPermitido = horarioAtencionRepository.existsBySedeAndDiaSemanaAndActivoTrue(sede, diaReserva);
+        boolean diaPermitido = horarioAtencionRepository.existsBySedeAndDiaSemanaAndActivoTrue(sedeServicio.getSede(), diaReserva);
         if (!diaPermitido) {
             redirectAttributes.addFlashAttribute("mensajeError", "No se permiten reservas el día seleccionado.");
             return "redirect:/superadmin/reservas/nueva";
         }
 
-        // (Opcional) Validar si ya existe una reserva para ese horario y fecha
-        boolean yaReservado = reservaRepository.existsByHorarioDisponibleAndFechaReserva(horario, reserva.getFechaReserva());
+        // Validar aforo actual para fecha
+        long aforoActual = reservaRepository.countByHorarioDisponibleAndEstadoAndFechaReserva(horario, estadoAprobadaReserva, fecha);
+        if (aforoActual >= horario.getAforoMaximo()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No hay cupos disponibles para este horario.");
+            return "redirect:/superadmin/reservas/nueva";
+        }
+
+        // Validar si el usuario ya tiene una reserva en ese horario y fecha
+        boolean yaReservado = reservaRepository.existsByUsuarioAndHorarioDisponibleAndFechaReserva(usuario, horario, fecha);
         if (yaReservado) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Ya existe una reserva para ese horario en la fecha indicada.");
+            redirectAttributes.addFlashAttribute("mensajeError", "Ya tienes una reserva para ese horario en esa fecha.");
             return "redirect:/superadmin/reservas/nueva";
         }
 
         // Crear y guardar pago + reserva
-        if (usuario != null && sedeServicio != null && estadoPendienteReserva != null && estadoPendientePago != null) {
-            Pago pago = new Pago();
-            pago.setUsuario(usuario);
-            pago.setMetodo(Pago.Metodo.banco); // puedes ajustar según lógica futura
-            pago.setMonto(BigDecimal.valueOf(sedeServicio.getTarifa().getMonto()));
-            pago.setEstado(estadoPendientePago);
-            pago.setFechaPago(null);
-            pagoRepository.save(pago);
+        Pago pago = new Pago();
+        pago.setUsuario(usuario);
+        pago.setMetodo(Pago.Metodo.banco);
+        pago.setMonto(BigDecimal.valueOf(sedeServicio.getTarifa().getMonto()));
+        pago.setEstado(estadoPendientePago);
+        pago.setFechaPago(null);
+        pagoRepository.save(pago);
 
-            reserva.setUsuario(usuario);
-            reserva.setFechaCreacion(LocalDateTime.now());
-            reserva.setFechaLimitePago(reserva.getFechaCreacion().plusHours(4));
-            reserva.setPago(pago);
-            reserva.setEstado(pago.getEstado().equals(estadoPagado) ? estadoAprobadaReserva : estadoPendienteReserva);
+        reserva.setUsuario(usuario);
+        reserva.setFechaCreacion(LocalDateTime.now());
+        reserva.setFechaLimitePago(reserva.getFechaCreacion().plusHours(4));
+        reserva.setPago(pago);
+        reserva.setEstado(pago.getEstado().equals(estadoPagado) ? estadoAprobadaReserva : estadoPendienteReserva);
 
-            reservaRepository.save(reserva);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Reserva y pago creados correctamente.");
-        } else {
-            redirectAttributes.addFlashAttribute("mensajeError", "Error al crear la reserva. Verifique los datos.");
-        }
-
+        reservaRepository.save(reserva);
+        redirectAttributes.addFlashAttribute("mensajeExito", "Reserva y pago creados correctamente.");
         return "redirect:/superadmin/reservas";
     }
 

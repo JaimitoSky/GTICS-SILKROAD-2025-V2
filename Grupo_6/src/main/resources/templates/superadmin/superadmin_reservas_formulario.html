@@ -34,17 +34,27 @@
             <div class="container-fluid p-0">
                 <h1 class="h3 mb-3"><strong>Registrar Nueva Reserva</strong></h1>
 
+                <!-- Alertas dinámicas -->
+                <div id="alertas" class="mb-3"></div>
+
                 <div class="card">
                     <div class="card-body">
-                        <form th:action="@{/superadmin/reservas/guardar}" th:object="${reserva}" method="post">
+                        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${mensajeError}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${mensajeExito}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
 
-                            <!-- DNI -->
+                        <form id="formReserva" th:action="@{/superadmin/reservas/guardar}" th:object="${reserva}" method="post" onsubmit="return validarFormulario()">
+
                             <div class="mb-3">
                                 <label class="form-label">DNI del Vecino</label>
                                 <input type="text" class="form-control" name="dni" placeholder="Ej: 12345678" required>
                             </div>
 
-                            <!-- SEDE -->
                             <div class="mb-3">
                                 <label class="form-label">Sede</label>
                                 <select id="sede-select" class="form-select" required>
@@ -53,7 +63,6 @@
                                 </select>
                             </div>
 
-                            <!-- SERVICIO -->
                             <div class="mb-3">
                                 <label class="form-label">Servicio</label>
                                 <select id="servicio-select" name="idsedeServicio" class="form-select" required>
@@ -61,14 +70,12 @@
                                 </select>
                             </div>
 
-                            <!-- FECHA -->
                             <div class="mb-3">
                                 <label class="form-label">Fecha de Reserva</label>
                                 <input type="date" class="form-control" id="fechaReserva" name="fechaReserva"
                                        th:field="*{fechaReserva}" required>
                             </div>
 
-                            <!-- HORARIO -->
                             <div class="mb-3">
                                 <label class="form-label">Horario Disponible</label>
                                 <select class="form-select" name="idhorario" id="horarioDisponible" required>
@@ -90,8 +97,17 @@
             const sedeSelect = document.getElementById("sede-select");
             const fechaInput = document.getElementById("fechaReserva");
             const horarioSelect = document.getElementById("horarioDisponible");
+            const alertasDiv = document.getElementById("alertas");
 
             let diasPermitidos = [];
+            let mapaAforo = {};
+
+            function mostrarAlerta(mensaje, tipo = 'danger') {
+                alertasDiv.innerHTML = `<div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+            ${mensaje}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>`;
+            }
 
             sedeSelect.addEventListener("change", function () {
                 const sedeId = this.value;
@@ -123,6 +139,8 @@
                 const sedeServicioId = servicioSelect.value;
                 const fechaStr = fechaInput.value;
                 horarioSelect.innerHTML = '';
+                mapaAforo = {};
+                alertasDiv.innerHTML = '';
 
                 if (!sedeServicioId || !fechaStr) {
                     horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
@@ -136,7 +154,7 @@
                 hoy.setHours(0, 0, 0, 0);
 
                 if (fechaReserva < hoy) {
-                    alert("La fecha no puede ser pasada.");
+                    mostrarAlerta("La fecha no puede ser pasada.");
                     horarioSelect.innerHTML = '<option value="">Fecha inválida</option>';
                     return;
                 }
@@ -145,7 +163,7 @@
                 diaSemana = diaSemana.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
 
                 if (!diasPermitidos.includes(diaSemana)) {
-                    alert(`No se permiten reservas el día ${diaSemana.toLowerCase()}.`);
+                    mostrarAlerta(`No se permiten reservas el día ${diaSemana.toLowerCase()}.`);
                     horarioSelect.innerHTML = '<option value="">Día no disponible</option>';
                     return;
                 }
@@ -165,16 +183,21 @@
                         opt.selected = true;
                         horarioSelect.appendChild(opt);
 
-                        const yaAgregados = new Set();
                         data.forEach(h => {
-                            const label = `${h.horaInicio} - ${h.horaFin}`;
-                            if (!yaAgregados.has(label)) {
-                                const opt = document.createElement("option");
-                                opt.value = h.idhorario;
-                                opt.textContent = label;
-                                horarioSelect.appendChild(opt);
-                                yaAgregados.add(label);
+                            const aforoMaximo = parseInt(h.aforoMaximo);
+                            const aforoDisponible = parseInt(h.aforoDisponible);
+                            mapaAforo[h.idhorario] = aforoDisponible;
+
+                            const opt = document.createElement("option");
+                            opt.value = h.idhorario;
+                            opt.textContent = `${h.horaInicio} - ${h.horaFin} (max: ${aforoMaximo}, libres: ${aforoDisponible})`;
+
+                            if (aforoDisponible <= 0) {
+                                opt.disabled = true;
+                                opt.textContent += " - SIN CUPOS";
                             }
+
+                            horarioSelect.appendChild(opt);
                         });
                     })
                     .catch(error => {
@@ -183,9 +206,26 @@
                     });
             }
 
+
+            function validarFormulario() {
+                const horarioId = horarioSelect.value;
+                if (!horarioId) {
+                    mostrarAlerta("Debe seleccionar un horario válido.");
+                    return false;
+                }
+
+                if (mapaAforo[horarioId] <= 0) {
+                    mostrarAlerta("El horario seleccionado ya no tiene cupos disponibles.");
+                    return false;
+                }
+
+                return true;
+            }
+
             servicioSelect.addEventListener("change", cargarHorariosDisponibles);
             fechaInput.addEventListener("change", cargarHorariosDisponibles);
         </script>
+
 
 
 

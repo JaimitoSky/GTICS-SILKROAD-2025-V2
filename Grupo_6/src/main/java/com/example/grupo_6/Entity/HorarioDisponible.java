@@ -33,4 +33,16 @@ public class HorarioDisponible {
 
     @Column(nullable = false)
     private Boolean activo;
+
+    @Column(name = "aforo_maximo")
+    private Integer aforoMaximo;
+
+    // Getters y Setters
+    public Integer getAforoMaximo() {
+        return aforoMaximo;
+    }
+    public void setAforoMaximo(Integer aforoMaximo) {
+        this.aforoMaximo = aforoMaximo;
+    }
+
 }

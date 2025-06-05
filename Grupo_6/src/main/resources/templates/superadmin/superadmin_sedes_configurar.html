@@ -214,7 +214,6 @@
                 return { [header]: token };
             }
 
-
             function generarSelectHora(name, desde, hasta) {
                 let html = `<select class='form-select' name='${name}' required>`;
                 for (let h = desde; h <= hasta; h++) {
@@ -230,6 +229,7 @@
                 const form = event.target;
                 const inicio = form.querySelector("select[name=inicio]").value;
                 const fin = form.querySelector("select[name=fin]").value;
+                const aforo = form.querySelector("input[name=aforoMaximo]").value;
 
                 if (inicio >= fin) {
                     alert("La hora de inicio debe ser menor que la hora de fin.");
@@ -241,6 +241,7 @@
                 formData.append("horaInicio", inicio);
                 formData.append("horaFin", fin);
                 formData.append("diaSemana", diaSemana);
+                formData.append("aforoMaximo", aforo);
 
                 fetch("/api/horarios-disponibles", {
                     method: "POST",
@@ -283,10 +284,6 @@
                 }
             }
 
-
-
-
-
             document.addEventListener("DOMContentLoaded", function () {
                 const selectServicio = document.getElementById("servicio-select");
                 const tablaHorarios = document.getElementById("tabla-horarios");
@@ -315,47 +312,64 @@
                                 cont.classList.add("mb-4");
 
                                 let html = `<h6 class="fw-bold">${dia}</h6>
-                                <table class="table table-bordered">
-                                    <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
-                                    <tbody>`;
+                        <table class="table table-bordered">
+                            <thead>
+                              <tr>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Aforo Máximo</th>
+                                <th>Acciones</th>
+                              </tr>
+                            </thead>
+                            <tbody>`;
 
                                 if (porDia[dia].length > 0) {
                                     porDia[dia].forEach(h => {
                                         const esActivo = h.activo === true || h.activo === 'true';
                                         html += `
-        <tr>
-            <td>${h.horaInicio}</td>
-            <td>${h.horaFin}</td>
-            <td>
-                <button type="button"
-                        class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}"
-                        onclick="toggleHorario(${h.idhorario}, '${sedeServicioId}', ${esActivo})">
-                    ${esActivo ? 'Desactivar' : 'Activar'}
-                </button>
-            </td>
-        </tr>`;
+<tr>
+  <td>${h.horaInicio}</td>
+  <td>${h.horaFin}</td>
+  <td>
+    <form onsubmit="return actualizarAforo(event, ${h.idhorario})" class="d-flex gap-2 align-items-center">
+      <input type="number" name="aforoMaximo" min="1" class="form-control form-control-sm w-auto" value="${h.aforoMaximo}" required />
+      <button type="submit" class="btn btn-outline-primary btn-sm">Guardar</button>
+    </form>
+  </td>
+  <td>
+    <button type="button"
+            class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}"
+            onclick="toggleHorario(${h.idhorario}, '${sedeServicioId}', ${esActivo})">
+      ${esActivo ? 'Desactivar' : 'Activar'}
+    </button>
+  </td>
+</tr>`;
                                     });
 
                                 } else {
-                                    html += `<tr><td colspan="3" class="text-center text-muted">Sin horarios registrados</td></tr>`;
+                                    html += `<tr><td colspan="4" class="text-center text-muted">Sin horarios registrados</td></tr>`;
                                 }
 
                                 html += `</tbody></table>
-                                <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
-                                    <div class="row g-2 align-items-end">
-                                        <div class="col-md-4">
-                                            <label class="form-label mb-0">Inicio</label>
-                                            ${generarSelectHora('inicio', 6, 21)}
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label mb-0">Fin</label>
-                                            ${generarSelectHora('fin', 7, 22)}
-                                        </div>
-                                        <div class="col-md-4">
-                                            <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
-                                        </div>
-                                    </div>
-                                </form>`;
+                        <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0">Inicio</label>
+                                    ${generarSelectHora('inicio', 6, 21)}
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0">Fin</label>
+                                    ${generarSelectHora('fin', 7, 22)}
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0">Aforo máximo</label>
+                                    <input type="number" name="aforoMaximo" min="1" required class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
+                                </div>
+                            </div>
+                        </form>`;
 
                                 cont.innerHTML = html;
                                 tablaHorarios.appendChild(cont);
@@ -367,7 +381,40 @@
                         });
                 });
             });
+
+            function actualizarAforo(event, idhorario) {
+                event.preventDefault();
+                const form = event.target;
+                const aforo = form.querySelector("input[name=aforoMaximo]").value;
+
+                if (parseInt(aforo) < 1) {
+                    alert("El aforo debe ser mayor o igual a 1.");
+                    return false;
+                }
+
+                fetch(`/api/horarios-disponibles/${idhorario}/aforo`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        ...getCsrfHeaders()
+                    },
+                    body: `aforoMaximo=${encodeURIComponent(aforo)}`
+                }).then(res => {
+                    if (res.ok) {
+                        alert("Aforo actualizado.");
+                    } else {
+                        alert("Error al actualizar aforo.");
+                    }
+                }).catch(err => {
+                    console.error("Error al actualizar aforo:", err);
+                    alert("Error inesperado.");
+                });
+
+                return false;
+            }
         </script>
+
+
 
 
 

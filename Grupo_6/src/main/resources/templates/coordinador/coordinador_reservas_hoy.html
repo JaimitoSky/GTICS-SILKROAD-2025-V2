@@ -74,7 +74,10 @@
                     <tr th:each="reserva : ${reservas.content}"
 
                         th:data-sede-id="${reserva.sedeServicio.sede.idsede}"
-                        th:data-fecha="${#temporals.format(reserva.fechaCreacion, 'yyyy-MM-dd')}">
+                        th:data-fecha="${#temporals.format(reserva.fechaCreacion, 'yyyy-MM-dd')}"
+                        th:data-hora-inicio="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"
+                        th:data-hora-fin="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">
+
                         <td th:text="${reserva.usuario != null ? reserva.usuario.nombres + ' ' + reserva.usuario.apellidos : 'Sin usuario'}"></td>
                         <td th:text="${reserva.sedeServicio.servicio.nombre}"></td>
                         <td>
@@ -83,9 +86,17 @@
                         </td>
                         <td th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy')}"></td>
                         <td>
-                            <a th:href="@{'/coordinador/asistencia/' + ${reserva.idreserva}}" class="btn btn-success btn-sm me-1">
-                                <i class="bi bi-check2-square"></i> Asistencia
-                            </a>
+                            <th:block th:if="${#dates.format(#dates.createNow(), 'yyyy-MM-dd') == reserva.fechaReserva.toString()}">
+                                <th:block th:if="${reserva.asistencia == null}">
+                                    <a th:href="@{'/coordinador/asistencia/' + ${reserva.idreserva}}" class="btn btn-sm btn-success">
+                                        Registrar Asistencia
+                                    </a>
+                                </th:block>
+                                <th:block th:if="${reserva.asistencia != null}">
+                                    <span class="badge bg-secondary">Asistencia registrada</span>
+                                </th:block>
+                            </th:block>
+
                             <a th:href="@{'/coordinador/incidencia/' + ${reserva.idreserva}}" class="btn btn-warning btn-sm me-1">
                                 <i class="bi bi-exclamation-triangle"></i> Incidencia
                             </a>
@@ -168,16 +179,57 @@
                             fila.style.display = (coincideSede && coincideFecha) ? "" : "none";
                         });
                     }
+                    function verificarHorariosValidos() {
+                        const hoy = getHoyISO();
+                        filas.forEach(fila => {
+                            const fecha = fila.getAttribute("data-fecha");
+                            const horaInicio = fila.getAttribute("data-hora-inicio");
+                            const horaFin = fila.getAttribute("data-hora-fin");
 
-                    sedeFiltro.addEventListener("change", aplicarFiltros);
+                            const boton = fila.querySelector("a.btn-success");
+                            if (!boton) return;
+
+                            if (fecha === hoy && esHorarioValido(horaInicio, horaFin)) {
+                                boton.style.display = "inline-block";
+                            } else {
+                                boton.style.display = "none";
+                            }
+                        });
+                    }
+
+
+                    sedeFiltro.addEventListener("change", () => {
+                        aplicarFiltros();
+                        verificarHorariosValidos();
+                    });
                     btnHoy.addEventListener("click", () => {
                         filtroFecha = "hoy";
                         aplicarFiltros();
+                        verificarHorariosValidos();
                     });
                     btnTodas.addEventListener("click", () => {
                         filtroFecha = "todas";
                         aplicarFiltros();
+                        verificarHorariosValidos();
                     });
+
+                    function esHorarioValido(horaInicio, horaFin) {
+                        const ahora = new Date();
+                        const hoy = ahora.toISOString().split("T")[0];
+
+                        const [hiH, hiM] = horaInicio.split(":").map(Number);
+                        const [hfH, hfM] = horaFin.split(":").map(Number);
+
+                        const inicio = new Date();
+                        inicio.setHours(hiH, hiM, 0);
+                        inicio.setMinutes(inicio.getMinutes() - 30); // media hora antes
+
+                        const fin = new Date();
+                        fin.setHours(hfH, hfM, 0);
+
+                        return ahora >= inicio && ahora <= fin;
+                    }
+
                 </script>
             </div>
         </main>

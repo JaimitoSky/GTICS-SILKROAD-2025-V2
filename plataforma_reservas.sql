@@ -922,6 +922,6 @@ RENAME TABLE spring_session_temp TO SPRING_SESSION;
 RENAME TABLE spring_session_attributes TO spring_session_attributes_temp;
 RENAME TABLE spring_session_attributes_temp TO SPRING_SESSION_ATTRIBUTES;
 
-
+ALTER TABLE horario_disponible ADD COLUMN aforo_maximo INT DEFAULT 30; 
 
 -- Dump completed on 2025-05-17 17:53:23
