@@ -87,12 +87,12 @@
                         <td th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy')}"></td>
                         <td>
                             <th:block th:if="${#dates.format(#dates.createNow(), 'yyyy-MM-dd') == reserva.fechaReserva.toString()}">
-                                <th:block th:if="${reserva.asistencia == null}">
+                                <th:block th:if="${reserva.asistenciaTemporal == null}">
                                     <a th:href="@{'/coordinador/asistencia/' + ${reserva.idreserva}}" class="btn btn-sm btn-success">
                                         Registrar Asistencia
                                     </a>
                                 </th:block>
-                                <th:block th:if="${reserva.asistencia != null}">
+                                <th:block th:if="${reserva.asistenciaTemporal != null}">
                                     <span class="badge bg-secondary">Asistencia registrada</span>
                                 </th:block>
                             </th:block>

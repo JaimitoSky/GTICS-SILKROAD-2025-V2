@@ -18,7 +18,7 @@
     <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-coordinador :: sidebar}"></div>
 
-    <!-- Main -->
+    <<!-- Main -->
     <div class="main bg-white">
         <!-- Navbar -->
         <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
@@ -36,19 +36,31 @@
                 <hr>
 
                 <h4>Asistencia</h4>
-                <div th:if="${asistencia != null}">
-                    <p><strong>Hora de entrada:</strong> <span th:text="${asistencia.horaEntrada}"></span></p>
-                    <p><strong>Latitud:</strong> <span th:text="${asistencia.latitud}"></span></p>
-                    <p><strong>Longitud:</strong> <span th:text="${asistencia.longitud}"></span></p>
 
-                    <div class="mb-3">
+                <div th:if="${asistencia != null}">
+                    <p th:if="${asistencia.horaEntrada != null}">
+                        <strong>Hora de entrada:</strong> <span th:text="${asistencia.horaEntrada}"></span>
+                    </p>
+                    <p th:if="${asistencia.latitud != null}">
+                        <strong>Latitud:</strong> <span th:text="${asistencia.latitud}"></span>
+                    </p>
+                    <p th:if="${asistencia.longitud != null}">
+                        <strong>Longitud:</strong> <span th:text="${asistencia.longitud}"></span>
+                    </p>
+
+                    <div class="mb-3" th:if="${asistencia.latitud != null and asistencia.longitud != null}">
                         <label class="form-label">Ubicación en Mapa:</label>
                         <div id="mapa" style="height: 300px; border: 1px solid #ccc;"></div>
                     </div>
 
-                    <p><strong>Observaciones:</strong> <span th:text="${asistencia.observaciones}"></span></p>
+                    <p th:if="${asistencia.observaciones != null}">
+                        <strong>Observaciones:</strong> <span th:text="${asistencia.observaciones}"></span>
+                    </p>
                 </div>
 
+                <div th:if="${asistencia == null}">
+                    <p>No se ha registrado asistencia.</p>
+                </div>
 
                 <hr>
 
@@ -59,14 +71,11 @@
                 <div th:if="${!#lists.isEmpty(incidencias)}">
                     <ul>
                         <li th:each="inc : ${incidencias}">
-                            <strong>Fecha:</strong> <span th:text="${#temporals.format(inc.fechaLocal, 'yyyy-MM-dd HH:mm')}"></span>
-                            <br>
+                            <strong>Fecha:</strong> <span th:text="${#temporals.format(inc.fechaLocal, 'yyyy-MM-dd HH:mm')}"></span><br>
                             <strong>Descripción:</strong> <span th:text="${inc.descripcion}"></span>
                         </li>
                     </ul>
                 </div>
-
-
             </div>
         </main>
 
@@ -74,17 +83,21 @@
         <script>
             function setUbicacionYHora() {
                 const now = new Date();
-                document.getElementById("horaEntrada").value = now.toTimeString().split(" ")[0]; // formato HH:mm:ss
+                const hora = now.toTimeString().split(" ")[0];
+                const horaInput = document.getElementById("horaEntrada");
+                if (horaInput) horaInput.value = hora;
 
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (pos) => {
-                            document.getElementById("latitudInput").value = pos.coords.latitude;
-                            document.getElementById("longitudInput").value = pos.coords.longitude;
+                            const latInput = document.getElementById("latitudInput");
+                            const lonInput = document.getElementById("longitudInput");
+                            if (latInput && lonInput) {
+                                latInput.value = pos.coords.latitude;
+                                lonInput.value = pos.coords.longitude;
+                            }
                         },
-                        (error) => {
-                            alert("No se pudo obtener la ubicación.");
-                        }
+                        () => alert("No se pudo obtener la ubicación.")
                     );
                 } else {
                     alert("Tu navegador no soporta geolocalización.");
@@ -95,7 +108,7 @@
             const filtro = document.getElementById("filtro");
             const filas = document.querySelectorAll("#tablaReservas tr");
 
-            filtro.addEventListener("input", () => {
+            filtro?.addEventListener("input", () => {
                 const texto = filtro.value.toLowerCase();
                 filas.forEach(fila => {
                     const contenido = fila.textContent.toLowerCase();
@@ -103,19 +116,28 @@
                 });
             });
         </script>
-        <script th:inline="javascript">
-            const lat = /*[[${asistencia.latitud}]]*/ 0;
-            const lon = /*[[${asistencia.longitud}]]*/ 0;
 
-            if (lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon)) {
-                const map = L.map('mapa').setView([lat, lon], 16);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
+        <!-- Script seguro para Leaflet + asistencia -->
+        <!-- Script seguro para Leaflet -->
+        <div th:if="${asistencia != null}">
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                const lat = /*[[${asistencia.latitud}]]*/ null;
+                const lon = /*[[${asistencia.longitud}]]*/ null;
 
-                L.marker([lat, lon]).addTo(map).bindPopup("Ubicación de asistencia").openPopup();
-            }
-        </script>
+                if (lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon)) {
+                    const map = L.map('mapa').setView([lat, lon], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+                    L.marker([lat, lon]).addTo(map).bindPopup("Ubicación de asistencia").openPopup();
+                }
+                /*]]>*/
+            </script>
+        </div>
+
+
+
 
 
 
