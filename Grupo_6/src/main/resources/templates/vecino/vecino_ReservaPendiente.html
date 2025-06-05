@@ -151,12 +151,14 @@
 
                         <!-- Subir comprobante -->
                         <!-- Subir comprobante -->
-                        <form th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
-                            <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
+                        <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
 
                             <div class="form-group">
                                 <label for="adjuntar">Adjuntar Comprobante de Pago (.jpg, .png):</label>
-                                <input type="file" class="form-control" id="adjuntar" name="comprobante" accept=".jpg,.jpeg,.png" required />
+                                <input type="file" class="form-control" id="adjuntar" name="comprobante"
+                                       accept=".jpg,.jpeg,.png,.heic" required />
+
                             </div>
 
                             <!-- Aquí va la imagen QR -->
@@ -186,6 +188,98 @@
                 </footer>
             </div>
         </div>
+        <!-- Modal de error -->
+        <!-- Modal de error de archivo -->
+        <div class="modal fade" id="modalErrorArchivo" tabindex="-1" aria-labelledby="modalErrorArchivoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="modalErrorArchivoLabel">Error</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-center" id="mensajeModalError">
+                        <!-- Mensaje dinámico desde JS -->
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de éxito -->
+        <div class="modal fade" id="modalExito" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-success">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="modalExitoLabel">¡Éxito!</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-center" id="mensajeModalExito">
+                        El comprobante fue enviado correctamente.
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal advertencia -->
+        <div class="modal fade" id="modalAdvertencia" tabindex="-1" aria-labelledby="modalAdvertenciaLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-warning">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="modalAdvertenciaLabel">Advertencia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-center" id="mensajeModalAdvertencia">
+                        Ya has subido un comprobante previamente.
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Entendido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal tiempo expirado -->
+        <div class="modal fade" id="modalExpirado" tabindex="-1" aria-labelledby="modalExpiradoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="modalExpiradoLabel">Tiempo expirado</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-center" id="mensajeModalExpirado">
+                        El tiempo para subir el comprobante ha expirado. Ya no puedes realizar esta acción.
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal de confirmación -->
+        <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-primary">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalConfirmacionLabel">¿Confirmar envío?</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        ¿Estás seguro de que deseas enviar el comprobante de pago?
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnModalEnviar">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -205,91 +299,59 @@
         <script>
             document.getElementById("btnComprobante").addEventListener("click", function () {
                 const inputFile = document.getElementById("adjuntar");
-                const form = inputFile.closest("form");
                 const file = inputFile?.files?.[0];
-                const mensajeAlerta = document.getElementById("mensajeAlerta");
+                const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic'];
 
-                // Limpiar mensajes anteriores
-                mensajeAlerta.innerHTML = "";
-
-                // Desactivar botón para evitar doble clic
-                const boton = this;
-                boton.disabled = true;
-
-                // Agregar animación CSS si no existe
-                if (!document.getElementById("fadeInUpJSStyle")) {
-                    const style = document.createElement("style");
-                    style.id = "fadeInUpJSStyle";
-                    style.textContent = `
-            @keyframes fadeInUpJS {
-                from { opacity: 0; transform: translateY(30px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        `;
-                    document.head.appendChild(style);
+                if (!file) {
+                    mostrarModalError("Debes seleccionar un archivo.");
+                    return;
                 }
 
-                if (file) {
-                    // Crear alerta de confirmación
-                    const alertaConfirmacion = document.createElement("div");
-                    alertaConfirmacion.className = "alert alert-warning alert-dismissible fade show mx-auto text-center";
-                    alertaConfirmacion.style.maxWidth = "500px";
-                    alertaConfirmacion.style.marginTop = "2rem";
-                    alertaConfirmacion.style.padding = "1.5rem";
-                    alertaConfirmacion.style.boxShadow = "0 0 20px rgba(255,193,7,0.6)";
-                    alertaConfirmacion.style.border = "2px solid #ffc107";
-                    alertaConfirmacion.style.borderRadius = "0.75rem";
-                    alertaConfirmacion.style.animation = "fadeInUpJS 0.6s ease-out";
+                const tipo = file.type;
+                const nombreArchivo = file.name.toLowerCase();
 
-                    alertaConfirmacion.innerHTML = `
-            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
-            <h5 class="fw-bold mb-2">¿Confirmar?</h5>
-            <p class="mb-0">¿Deseas enviar el comprobante de pago?</p>
-            <div class="mt-3">
-                <button type="button" class="btn btn-success btn-sm me-2" id="btnConfirmarEnvio">Sí</button>
-                <button type="button" class="btn btn-secondary btn-sm" id="btnCancelarEnvio" data-bs-dismiss="alert">Cancelar</button>
-            </div>
-        `;
-                    mensajeAlerta.appendChild(alertaConfirmacion);
-
-                    alertaConfirmacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                    document.getElementById("btnConfirmarEnvio").addEventListener("click", function () {
-                        form.submit();
-                    });
-
-                    document.getElementById("btnCancelarEnvio").addEventListener("click", function () {
-                        boton.disabled = false;
-                        alertaConfirmacion.remove();
-                    });
-
-                } else {
-                    const alertaAdvertencia = document.createElement("div");
-                    alertaAdvertencia.className = "alert alert-warning alert-dismissible fade show mx-auto text-center";
-                    alertaAdvertencia.style.maxWidth = "500px";
-                    alertaAdvertencia.style.marginTop = "2rem";
-                    alertaAdvertencia.style.padding = "1.5rem";
-                    alertaAdvertencia.style.border = "2px solid #ffc107";
-                    alertaAdvertencia.style.borderRadius = "0.75rem";
-                    alertaAdvertencia.style.animation = "fadeInUpJS 0.6s ease-out";
-
-                    alertaAdvertencia.innerHTML = `
-        <i class="bi bi-exclamation-triangle-fill text-warning fs-4 d-block mb-2"></i>
-        <h5 class="fw-bold mb-2">Importante</h5>
-        <p class="mb-0">La reserva ha sido registrada.<br>Debe subir un comprobante de pago en un plazo máximo de <strong>2 horas</strong> para validarla.</p>
-        <button type="button" class="btn-close mt-2" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-    `;
-
-                    mensajeAlerta.appendChild(alertaAdvertencia);
-                    alertaAdvertencia.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                    setTimeout(() => {
-                        window.location.href = "http://localhost:8080/vecino/reservas/historial";
-                    }, 4000);
+                if (!extensionesValidas.includes(tipo) || !nombreArchivo.match(/\.(jpg|jpeg|png|heic)$/)) {
+                    mostrarModalError("Archivo no válido. Solo se permiten imágenes JPG, PNG, JPEG o HEIC.");
+                    return;
                 }
 
+                const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
+                modal.show();
+
+                const botonEnviar = document.getElementById("btnModalEnviar");
+                botonEnviar.onclick = null; // limpia handlers anteriores
+                botonEnviar.onclick = function () {
+                    modal.hide(); // opcional
+                    document.getElementById("formComprobante").submit(); // usa ID del formulario directamente
+                };
             });
+
+            function mostrarModalError(mensaje) {
+                document.getElementById("mensajeModalError").innerText = mensaje;
+                const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
+                modalError.show();
+            }
+            function mostrarModalExito(mensaje) {
+                document.getElementById("mensajeModalExito").innerText = mensaje;
+                const modal = new bootstrap.Modal(document.getElementById("modalExito"));
+                modal.show();
+            }
+
+            function mostrarModalAdvertencia(mensaje) {
+                document.getElementById("mensajeModalAdvertencia").innerText = mensaje;
+                const modal = new bootstrap.Modal(document.getElementById("modalAdvertencia"));
+                modal.show();
+            }
+
+            function mostrarModalExpirado(mensaje) {
+                document.getElementById("mensajeModalExpirado").innerText = mensaje;
+                const modal = new bootstrap.Modal(document.getElementById("modalExpirado"));
+                modal.show();
+            }
+
         </script>
+
+
 
 
 

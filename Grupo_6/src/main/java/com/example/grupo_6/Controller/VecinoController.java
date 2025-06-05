@@ -361,20 +361,50 @@ public class VecinoController {
                                    RedirectAttributes redirectAttributes) {
         try {
             Pago pago = pagoRepository.findById(idPago).orElse(null);
-            if (pago != null && !file.isEmpty()) {
-                pago.setComprobante(file.getBytes());
-                pago.setFechaPago(LocalDateTime.now());
-                pagoRepository.save(pago);
-                redirectAttributes.addFlashAttribute("mensajeExito", "Comprobante enviado con éxito.");
-            } else {
-                redirectAttributes.addFlashAttribute("mensajeError", "No se pudo procesar el comprobante.");
+
+            if (pago == null) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Pago no encontrado.");
+                return "redirect:/vecino/reservas";
             }
+
+            if (file.isEmpty()) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Debe seleccionar un archivo.");
+                return "redirect:/vecino/reservas";
+            }
+
+            String tipo = file.getContentType();
+            if (tipo == null || (!tipo.equals("image/jpeg") && !tipo.equals("image/png"))) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Archivo no permitido. Solo se aceptan imágenes JPG o PNG.");
+                return "redirect:/vecino/reservas";
+            }
+
+            String nombreArchivo = file.getOriginalFilename();
+            if (nombreArchivo == null || !nombreArchivo.toLowerCase().matches(".*\\.(jpg|jpeg|png)$")) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Extensión de archivo no válida. Solo JPG o PNG.");
+                return "redirect:/vecino/reservas";
+            }
+
+            if (file.getSize() > 2 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("mensajeError", "El archivo excede el tamaño máximo (2 MB).");
+                return "redirect:/vecino/reservas";
+            }
+
+            // Hasta aquí, el archivo es válido
+            pago.setComprobante(file.getBytes());
+            pago.setFechaPago(LocalDateTime.now());
+            pagoRepository.save(pago);
+
+            redirectAttributes.addFlashAttribute("mensajeExito", "Comprobante enviado con éxito.");
+
         } catch (IOException e) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Error al leer el archivo.");
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar el archivo.");
             e.printStackTrace();
         }
+
         return "redirect:/vecino/reservas";
     }
+
+
 
     @GetMapping("/reservas/historial")
     public String verHistorialReservas(Model model, HttpSession session) {
