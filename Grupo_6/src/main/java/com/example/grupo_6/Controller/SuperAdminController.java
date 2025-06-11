@@ -502,6 +502,7 @@ public class SuperAdminController {
     public String asignarServicio(@RequestParam("idsede") Integer idsede,
                                   @RequestParam("idservicio") Integer idservicio,
                                   @RequestParam("idtarifa") Integer idtarifa,
+                                  @RequestParam("nombrePersonalizado") String nombrePersonalizado,
                                   RedirectAttributes attr) {
 
         Optional<Sede> sedeOpt = sedeRepository.findById(idsede);
@@ -517,26 +518,41 @@ public class SuperAdminController {
             ss.setSede(sede);
             ss.setServicio(servicio);
             ss.setTarifa(tarifa);
-            sedeServicioRepository.save(ss); // ya tiene id para ser usado
+            ss.setNombrePersonalizado(nombrePersonalizado);
+            ss.setActivo(true);
+            sedeServicioRepository.save(ss); // Necesario para obtener el ID de sede_servicio
 
-            // Crear horarios disponibles desde horarios de atención activos
-            List<HorarioAtencion> horarios = horarioAtencionRepository.findBySede_IdsedeAndActivoTrue(idsede);
+            // Obtener horarios de atención activos para la sede
+            List<HorarioAtencion> horarios = horarioAtencionRepository.findBySedeAndActivoTrue(sede);
             for (HorarioAtencion ha : horarios) {
-                if (ha.getHoraInicio() == null || ha.getHoraFin() == null) continue;
+                // Ajuste especial si el fin es 00:00 (lo consideramos como 23:59)
+                LocalTime horaFinComparada = ha.getHoraFin().equals(LocalTime.MIDNIGHT)
+                        ? LocalTime.of(23, 59)
+                        : ha.getHoraFin();
 
-                LocalTime start = ha.getHoraInicio();
-                LocalTime end = ha.getHoraFin();
+                for (int h = 0; h < 24; h++) {
+                    LocalTime inicio = LocalTime.of(h, 0);
+                    LocalTime fin = (h == 23) ? LocalTime.of(23, 59) : inicio.plusHours(1);
 
-                while (!start.plusHours(1).isAfter(end)) {
-                    HorarioDisponible hd = new HorarioDisponible();
-                    hd.setHorarioAtencion(ha);
-                    hd.setServicio(servicio);
-                    hd.setHoraInicio(start);
-                    hd.setHoraFin(start.plusHours(1));
-                    hd.setActivo(true);
+                    boolean yaExiste = horarioDisponibleRepository
+                            .existsByHorarioAtencionAndHoraInicioAndHoraFinAndServicio(ha, inicio, fin, servicio);
 
-                    horarioDisponibleRepository.save(hd);
-                    start = start.plusHours(1);
+                    if (!yaExiste) {
+                        HorarioDisponible nuevo = new HorarioDisponible();
+                        nuevo.setHorarioAtencion(ha);
+                        nuevo.setServicio(servicio);
+                        nuevo.setHoraInicio(inicio);
+                        nuevo.setHoraFin(fin);
+                        nuevo.setAforoMaximo(30);
+
+                        // Solo activo si está dentro del rango definido por el horario de atención
+                        boolean estaDentroDelRango = ha.isActivo() &&
+                                !inicio.isBefore(ha.getHoraInicio()) &&
+                                !fin.isAfter(horaFinComparada);
+                        nuevo.setActivo(estaDentroDelRango);
+
+                        horarioDisponibleRepository.save(nuevo);
+                    }
                 }
             }
 
@@ -547,6 +563,8 @@ public class SuperAdminController {
 
         return "redirect:/superadmin/sedes/configurar/" + idsede;
     }
+
+
     @PostMapping("/superadmin/sedes/configurar/intervalos/toggle")
     public String toggleEstadoHorario(@RequestParam("idhorario") Integer idhorario,
                                       RedirectAttributes attr) {
@@ -651,23 +669,27 @@ public class SuperAdminController {
     }
 
     @PostMapping("/superadmin/sedes/configurar/servicios/actualizar-tarifa")
-    public String actualizarTarifa(@RequestParam("idsedeServicio") Integer idsedeServicio,
-                                   @RequestParam("idtarifa") Integer idtarifa,
-                                   RedirectAttributes attr) {
-        Optional<SedeServicio> opt = sedeServicioRepository.findById(idsedeServicio);
-        Optional<Tarifa> tarifa = tarifaRepository.findById(idtarifa);
+    public String actualizarTarifaYNombre(@RequestParam("idsedeServicio") Integer idss,
+                                          @RequestParam("idtarifa") Integer idtarifa,
+                                          @RequestParam("nombrePersonalizado") String nombrePersonalizado,
+                                          RedirectAttributes attr) {
+        Optional<SedeServicio> ssOpt = sedeServicioRepository.findById(idss);
+        Optional<Tarifa> tarifaOpt = tarifaRepository.findById(idtarifa);
 
-        if (opt.isPresent() && tarifa.isPresent()) {
-            SedeServicio ss = opt.get();
-            ss.setTarifa(tarifa.get());
+        if (ssOpt.isPresent() && tarifaOpt.isPresent()) {
+            SedeServicio ss = ssOpt.get();
+            ss.setTarifa(tarifaOpt.get());
+            ss.setNombrePersonalizado(nombrePersonalizado.trim());
             sedeServicioRepository.save(ss);
-            attr.addFlashAttribute("mensajeExito", "Tarifa actualizada correctamente.");
+
+            attr.addFlashAttribute("mensajeExito", "Nombre y tarifa actualizados.");
         } else {
-            attr.addFlashAttribute("mensajeError", "Error al actualizar tarifa.");
+            attr.addFlashAttribute("mensajeError", "Error al actualizar datos.");
         }
 
-        return "redirect:/superadmin/sedes/configurar/" + opt.get().getSede().getIdsede();
+        return "redirect:/superadmin/sedes/configurar/" + ssOpt.get().getSede().getIdsede();
     }
+
 
 
 
@@ -714,6 +736,24 @@ public class SuperAdminController {
 
             horarioAtencionRepository.save(horario);
         }
+        List<SedeServicio> sedeServicios = sedeServicioRepository.findBySede_Idsede(idsede);
+        List<HorarioDisponible> horariosDisponibles = horarioDisponibleRepository.findByHorarioAtencion_Sede_Idsede(idsede);
+
+        for (HorarioDisponible hd : horariosDisponibles) {
+            LocalTime hi = hd.getHoraInicio();
+            LocalTime hf = hd.getHoraFin();
+            HorarioAtencion ha = hd.getHorarioAtencion();
+
+            boolean activo = ha.isActivo() &&
+                    ha.getHoraInicio() != null &&
+                    ha.getHoraFin() != null &&
+                    !hi.isBefore(ha.getHoraInicio()) &&
+                    !hf.isAfter(ha.getHoraFin());
+
+            hd.setActivo(activo);
+            horarioDisponibleRepository.save(hd);
+        }
+
 
         attr.addFlashAttribute("mensajeExito", "Horarios de atención actualizados.");
         return "redirect:/superadmin/sedes/configurar/" + idsede;
@@ -1223,21 +1263,24 @@ public class SuperAdminController {
         Pago pago = pagoRepository.findById(id).orElse(null);
         if (pago == null) return "redirect:/superadmin/pagos";
 
-        Estado estadoRechazado = estadoRepository.findByNombreAndTipoAplicacion("rechazado", Estado.TipoAplicacion.pago);
-        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
-        if (estadoRechazado == null || estadoPendienteReserva == null) return "redirect:/superadmin/pagos";
+        Estado estadoRechazadoPago = estadoRepository.findByNombreAndTipoAplicacion("rechazado", Estado.TipoAplicacion.pago);
+        Estado estadoRechazadoReserva = estadoRepository.findByNombreAndTipoAplicacion("rechazada", Estado.TipoAplicacion.reserva);
+        if (estadoRechazadoPago == null || estadoRechazadoReserva == null) return "redirect:/superadmin/pagos";
 
-        pago.setEstado(estadoRechazado);
+        // Actualizar el estado del pago
+        pago.setEstado(estadoRechazadoPago);
         pagoRepository.save(pago);
 
+        // Actualizar el estado de la reserva vinculada
         Reserva reserva = reservaRepository.findByPago(pago);
         if (reserva != null) {
-            reserva.setEstado(estadoPendienteReserva);
+            reserva.setEstado(estadoRechazadoReserva);
             reservaRepository.save(reserva);
         }
 
         return "redirect:/superadmin/pagos";
     }
+
 
     @PostMapping("/superadmin/pagos/pendiente/{id}")
     public String volverPagoAPendiente(@PathVariable("id") Integer id) {

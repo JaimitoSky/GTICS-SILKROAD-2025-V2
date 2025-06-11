@@ -36,4 +36,7 @@ public class SedeServicio {
     @Column(nullable = false)
     private boolean activo = true;
 
+    @Column(name = "nombre_personalizado", nullable = false)
+    private String nombrePersonalizado;
+
 }

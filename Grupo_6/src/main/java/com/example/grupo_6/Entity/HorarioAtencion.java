@@ -37,6 +37,8 @@ public class HorarioAtencion {
     @Column
     private Boolean activo = true;
 
+
+
     public enum DiaSemana {
         Lunes, Martes, Miércoles, Jueves, Viernes, Sábado, Domingo
     }
@@ -47,6 +49,9 @@ public class HorarioAtencion {
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
         this.activo = activo;
+    }
+    public Boolean isActivo() {
+        return activo;
     }
 
 

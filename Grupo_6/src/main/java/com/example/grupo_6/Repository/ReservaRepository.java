@@ -146,6 +146,11 @@ AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
     @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede IN :idsSede ORDER BY r.fechaCreacion DESC")
     Page<Reserva> buscarReservasPorIdsSedePaginado(@Param("idsSede") List<Integer> idsSede, Pageable pageable);
 
+    long countByHorarioDisponibleAndEstadoInAndFechaReserva(
+            HorarioDisponible horario,
+            List<Estado> estados,
+            LocalDate fecha
+    );
 
 }
 

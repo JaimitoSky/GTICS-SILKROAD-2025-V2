@@ -924,4 +924,90 @@ RENAME TABLE spring_session_attributes_temp TO SPRING_SESSION_ATTRIBUTES;
 
 ALTER TABLE horario_disponible ADD COLUMN aforo_maximo INT DEFAULT 30; 
 
+ALTER TABLE sede_servicio 
+ADD COLUMN nombre_personalizado VARCHAR(255) NOT NULL;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Piscina Principal - Complejo Deportivo Maranga'
+WHERE idsede_servicio = 1;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Gimnasio Municipal - Polideportivo San Miguel'
+WHERE idsede_servicio = 2;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Cancha Fútbol 1 - Polideportivo San Miguel'
+WHERE idsede_servicio = 3;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Cancha Vóley - Complejo Deportivo Maranga'
+WHERE idsede_servicio = 4;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Salón de Eventos - Centro Cultural San Miguel'
+WHERE idsede_servicio = 5;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Taller Artesanal - Centro Cultural San Miguel'
+WHERE idsede_servicio = 6;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Campo de Atletismo Principal - Polideportivo San Miguel'
+WHERE idsede_servicio = 7;
+
+UPDATE sede_servicio 
+SET nombre_personalizado = 'Piscina Principal - Complejo Deportivo San Miguel'
+WHERE idsede_servicio = 8;
+
+-- Cambiar el nombre de "Cancha Fútbol 1" a "Cancha Fútbol"
+UPDATE servicio
+SET nombre = 'Cancha Fútbol'
+WHERE idservicio = 3;
+
+-- Cambiar el nombre y la descripción de "Taller Artesanal" a algo más general
+UPDATE servicio
+SET nombre = 'Taller',
+    descripcion = 'Espacio para actividades y talleres comunitarios'
+WHERE idservicio = 6;
+
+
+-- Cambiar el nombre y la descripción de "Taller Artesanal" a algo más general
+UPDATE servicio
+SET nombre = 'Campo de Atletismo'
+WHERE idservicio = 7;
+
+
+
+
+
 -- Dump completed on 2025-05-17 17:53:23
+
+
+-- Para limpiar los datos de servicios + reservas  (opcional)
+SET SQL_SAFE_UPDATES = 0;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DELETE FROM reembolso;
+DELETE FROM pago;
+DELETE FROM reserva;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DELETE FROM horario_disponible;
+DELETE FROM taller_inscripcion;
+DELETE FROM taller;
+DELETE FROM media_servicio;
+DELETE FROM sede_servicio;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE reserva AUTO_INCREMENT = 1;
+ALTER TABLE pago AUTO_INCREMENT = 1;
+ALTER TABLE reembolso AUTO_INCREMENT = 1;
+ALTER TABLE sede_servicio AUTO_INCREMENT = 1;
+
+SET SQL_SAFE_UPDATES = 1;
+

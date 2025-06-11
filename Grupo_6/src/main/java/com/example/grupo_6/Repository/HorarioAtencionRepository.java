@@ -16,6 +16,7 @@ public interface HorarioAtencionRepository extends JpaRepository<HorarioAtencion
     int countBySede(Sede sede);
     boolean existsBySedeAndDiaSemanaAndActivoTrue(Sede sede, HorarioAtencion.DiaSemana diaSemana);
 
+    List<HorarioAtencion> findBySedeAndActivoTrue(Sede sede);
 
 
 

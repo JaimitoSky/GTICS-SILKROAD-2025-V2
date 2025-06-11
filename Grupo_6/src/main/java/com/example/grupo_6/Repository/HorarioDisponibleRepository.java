@@ -1,4 +1,5 @@
 package com.example.grupo_6.Repository;
+import com.example.grupo_6.Dto.HorarioDisponibleDTO;
 import com.example.grupo_6.Entity.Estado;
 import com.example.grupo_6.Entity.HorarioAtencion;
 import com.example.grupo_6.Entity.HorarioDisponible;
@@ -63,5 +64,25 @@ public interface HorarioDisponibleRepository extends JpaRepository<HorarioDispon
             @Param("idServicio") Integer idServicio
     );
 
+
+    @Query(value = """
+    SELECT 
+        h.idhorario AS idhorario,
+        ha.dia_semana AS diaSemana,
+        h.hora_inicio AS horaInicio,
+        h.hora_fin AS horaFin,
+        h.aforo_maximo AS aforoMaximo,
+        h.activo AS activo,
+        CASE 
+            WHEN ha.activo = true 
+             AND h.hora_inicio >= ha.hora_inicio 
+             AND h.hora_fin <= ha.hora_fin 
+            THEN true ELSE false 
+        END AS editable
+    FROM horario_disponible h
+    JOIN horario_atencion ha ON h.idhorario_atencion = ha.idhorario_atencion
+    WHERE ha.idsede = :idsede
+    """, nativeQuery = true)
+    List<HorarioDisponibleDTO> listarPorSede(@Param("idsede") Integer idsede);
 
 }

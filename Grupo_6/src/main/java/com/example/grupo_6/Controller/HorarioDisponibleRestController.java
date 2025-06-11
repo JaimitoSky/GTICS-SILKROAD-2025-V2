@@ -67,6 +67,13 @@ public class HorarioDisponibleRestController {
             map.put("activo", String.valueOf(h.getActivo()));
             map.put("diaSemana", h.getHorarioAtencion().getDiaSemana().toString());
             map.put("aforoMaximo", String.valueOf(h.getAforoMaximo()));
+
+            boolean editable = h.getHorarioAtencion() != null &&
+                    Boolean.TRUE.equals(h.getHorarioAtencion().isActivo()) &&
+                    h.getHoraInicio().compareTo(h.getHorarioAtencion().getHoraInicio()) >= 0 &&
+                    h.getHoraFin().compareTo(h.getHorarioAtencion().getHoraFin()) <= 0;
+            map.put("editable", String.valueOf(editable));
+
             long aforoActual = (fecha != null)
                     ? reservaRepository.countByHorarioDisponibleAndEstadoAndFechaReserva(h, estadoAprobado, fecha)
                     : reservaRepository.countByHorarioDisponibleAndEstado(h, estadoAprobado);
@@ -96,16 +103,19 @@ public class HorarioDisponibleRestController {
             case SUNDAY    -> HorarioAtencion.DiaSemana.Domingo;
         };
 
-        Estado estadoAprobado = estadoRepository.findByNombreAndTipoAplicacion("aprobada", Estado.TipoAplicacion.reserva);
-        if (estadoAprobado == null) {
-            throw new IllegalStateException("Estado 'aprobada' para reservas no encontrado.");
+        List<Estado> estadosValidos = estadoRepository.findByNombreInAndTipoAplicacion(
+                List.of("aprobada", "pendiente"), Estado.TipoAplicacion.reserva
+        );
+
+        if (estadosValidos.isEmpty()) {
+            throw new IllegalStateException("No se encontraron los estados requeridos (aprobada, pendiente).");
         }
 
         List<HorarioDisponible> lista = horarioDisponibleRepository
                 .findBySedeAndServicioAndDiaSemanaActivos(idSede, idServicio, diaSemana);
 
         return lista.stream().map(h -> {
-            long aforoActual = reservaRepository.countByHorarioDisponibleAndEstadoAndFechaReserva(h, estadoAprobado, fecha);
+            long aforoActual = reservaRepository.countByHorarioDisponibleAndEstadoInAndFechaReserva(h, estadosValidos, fecha);
             int aforoMax = h.getAforoMaximo();
             int aforoDisponible = Math.max(aforoMax - (int) aforoActual, 0);
 
@@ -115,8 +125,7 @@ public class HorarioDisponibleRestController {
             m.put("horaFin", h.getHoraFin().toString());
             m.put("aforoMaximo", String.valueOf(aforoMax));
             m.put("aforoActual", String.valueOf(aforoActual));
-            m.put("aforoDisponible", String.valueOf(aforoDisponible)); // NUEVO
-
+            m.put("aforoDisponible", String.valueOf(aforoDisponible));
             return m;
         }).collect(Collectors.toList());
     }
@@ -196,6 +205,32 @@ public class HorarioDisponibleRestController {
             return ResponseEntity.status(500).body("Error inesperado: " + e.getMessage());
         }
     }
+    @PostMapping("/horarios-disponibles/aforo-masivo")
+    public ResponseEntity<?> actualizarAforoMasivo(@RequestParam("sedeServicioId") Integer sedeServicioId,
+                                                   @RequestParam("aforoMaximo") Integer aforoMaximo) {
+        if (aforoMaximo == null || aforoMaximo < 1) {
+            return ResponseEntity.badRequest().body("Aforo inválido");
+        }
+
+        Optional<SedeServicio> ssOpt = sedeServicioRepository.findById(sedeServicioId);
+        if (ssOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("SedeServicio no encontrado");
+        }
+
+        SedeServicio ss = ssOpt.get();
+        Integer idSede = ss.getSede().getIdsede();
+        Integer idServicio = ss.getServicio().getIdservicio();
+
+        List<HorarioDisponible> lista = horarioDisponibleRepository.buscarTodosPorSedeYServicio(idSede, idServicio);
+        for (HorarioDisponible h : lista) {
+            h.setAforoMaximo(aforoMaximo);
+        }
+
+        horarioDisponibleRepository.saveAll(lista);
+        return ResponseEntity.ok("Aforo actualizado correctamente");
+    }
+
+
     @PostMapping("/horarios-disponibles/{id}/aforo")
     public ResponseEntity<?> actualizarAforo(
             @PathVariable("id") Integer id,
@@ -211,7 +246,7 @@ public class HorarioDisponibleRestController {
     }
 
 
-    //  DELETE - Eliminar horario disponible
+    //  Desactivar - Desactivar/Activar horario disponible
     @PostMapping("/horarios-disponibles/{id}/toggle")
     public ResponseEntity<?> toggleEstadoHorario(@PathVariable("id") Integer id) {
         Optional<HorarioDisponible> opt = horarioDisponibleRepository.findById(id);

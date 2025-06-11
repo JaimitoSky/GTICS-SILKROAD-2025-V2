@@ -62,6 +62,11 @@
                                         <option th:each="s : ${listaServicios}" th:value="${s.idservicio}" th:text="${s.nombre}"></option>
                                     </select>
                                 </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Nombre Personalizado</label>
+                                    <input type="text" name="nombrePersonalizado" class="form-control" placeholder="Ej. Cancha Fútbol 1" required />
+                                </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label">Tarifa</label>
                                     <select class="form-select" name="idtarifa" required>
@@ -82,19 +87,28 @@
                             <li th:each="ss : ${sede.sedeServicios}">
                                 <div class="d-flex align-items-center mb-2">
                                     <!-- Nombre del servicio -->
-                                    <strong th:text="${ss.servicio.nombre}"></strong>
+                                    <strong th:text="${ss.nombrePersonalizado != null ? ss.nombrePersonalizado : ss.servicio.nombre}"></strong>
 
                                     <!-- Selector de tarifa -->
-                                    <form th:action="@{/superadmin/sedes/configurar/servicios/actualizar-tarifa}" method="post" class="ms-3 d-flex align-items-center">
+                                    <form th:action="@{/superadmin/sedes/configurar/servicios/actualizar-tarifa}" method="post" class="ms-3 d-flex align-items-center gap-2">
                                         <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
+
+                                        <!-- Campo editable para nombre personalizado -->
+                                        <input type="text" name="nombrePersonalizado" class="form-control form-control-sm"
+                                               th:value="${ss.nombrePersonalizado}" placeholder="Nombre personalizado" required />
+
+                                        <!-- Selector de tarifa -->
                                         <select class="form-select form-select-sm" name="idtarifa">
                                             <option th:each="t : ${listaTarifas}" th:value="${t.idtarifa}"
                                                     th:selected="${t.idtarifa == ss.tarifa.idtarifa}"
                                                     th:text="${t.descripcion + ' (S/ ' + t.monto + ')'}">
                                             </option>
                                         </select>
-                                        <button type="submit" class="btn btn-warning btn-sm ms-2">Guardar</button>
+
+                                        <!-- Botón de guardar -->
+                                        <button type="submit" class="btn btn-warning btn-sm">Guardar</button>
                                     </form>
+
 
                                     <!-- Botón de activar/desactivar -->
                                     <form th:action="@{/superadmin/sedes/configurar/servicios/toggle-estado}" method="post" class="ms-2">
@@ -180,13 +194,28 @@
                 <div class="card mb-5">
                     <div class="card-header bg-light fw-bold">Horarios Disponibles para Reservas</div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Servicio</label>
-                            <select name="idsedeServicio" class="form-select" id="servicio-select" required>
-                                <option value="">Seleccione un servicio</option>
-                                <option th:each="ss : ${sede.sedeServicios}" th:value="${ss.idSedeServicio}" th:text="${ss.servicio.nombre}"></option>
-                            </select>
+                        <div class="mb-3 row align-items-end">
+                            <!-- Selector de servicio -->
+                            <div class="col-md-6">
+                                <label class="form-label">Servicio</label>
+                                <select name="idsedeServicio" class="form-select" id="servicio-select" required>
+                                    <option value="">Seleccione un servicio</option>
+                                    <option th:each="ss : ${sede.sedeServicios}"
+                                            th:value="${ss.idSedeServicio}"
+                                            th:text="${ss.nombrePersonalizado != null ? ss.nombrePersonalizado : ss.servicio.nombre}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Botón y campo de aforo máximo -->
+                            <div class="col-md-6">
+                                <form onsubmit="return actualizarAforoMasivo(event)" class="d-flex gap-2">
+                                    <input type="number" name="aforoMaximo" min="1" required class="form-control" placeholder="Nuevo aforo" />
+                                    <button class="btn btn-outline-dark">Actualizar Aforo</button>
+                                </form>
+                            </div>
                         </div>
+
 
                         <h5 class="mt-4">Horarios Disponibles Registrados</h5>
                         <div id="tabla-horarios"></div>
@@ -324,18 +353,16 @@
                             <tbody>`;
 
                                 if (porDia[dia].length > 0) {
-                                    porDia[dia].forEach(h => {
+                                    porDia[dia].filter(h => h.editable === true || h.editable === 'true').forEach(h => {
+                                        // ⛔️ Si no es editable, no lo mostramos
+                                        if (!h.editable) return;
+
                                         const esActivo = h.activo === true || h.activo === 'true';
                                         html += `
 <tr>
   <td>${h.horaInicio}</td>
   <td>${h.horaFin}</td>
-  <td>
-    <form onsubmit="return actualizarAforo(event, ${h.idhorario})" class="d-flex gap-2 align-items-center">
-      <input type="number" name="aforoMaximo" min="1" class="form-control form-control-sm w-auto" value="${h.aforoMaximo}" required />
-      <button type="submit" class="btn btn-outline-primary btn-sm">Guardar</button>
-    </form>
-  </td>
+  <td>${h.aforoMaximo}</td>
   <td>
     <button type="button"
             class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}"
@@ -345,31 +372,11 @@
   </td>
 </tr>`;
                                     });
-
                                 } else {
                                     html += `<tr><td colspan="4" class="text-center text-muted">Sin horarios registrados</td></tr>`;
                                 }
 
-                                html += `</tbody></table>
-                        <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
-                            <div class="row g-2 align-items-end">
-                                <div class="col-md-3">
-                                    <label class="form-label mb-0">Inicio</label>
-                                    ${generarSelectHora('inicio', 6, 21)}
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label mb-0">Fin</label>
-                                    ${generarSelectHora('fin', 7, 22)}
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label mb-0">Aforo máximo</label>
-                                    <input type="number" name="aforoMaximo" min="1" required class="form-control" />
-                                </div>
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
-                                </div>
-                            </div>
-                        </form>`;
+
 
                                 cont.innerHTML = html;
                                 tablaHorarios.appendChild(cont);
@@ -382,37 +389,52 @@
                 });
             });
 
-            function actualizarAforo(event, idhorario) {
+
+
+            function actualizarAforoMasivo(event) {
                 event.preventDefault();
                 const form = event.target;
                 const aforo = form.querySelector("input[name=aforoMaximo]").value;
+                const sedeServicioId = document.getElementById("servicio-select").value;
 
-                if (parseInt(aforo) < 1) {
-                    alert("El aforo debe ser mayor o igual a 1.");
+                if (!sedeServicioId) {
+                    alert("Seleccione un servicio primero.");
                     return false;
                 }
 
-                fetch(`/api/horarios-disponibles/${idhorario}/aforo`, {
+                if (parseInt(aforo) < 1) {
+                    alert("Aforo inválido.");
+                    return false;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append("sedeServicioId", sedeServicioId);
+                formData.append("aforoMaximo", aforo);
+
+                fetch("/api/horarios-disponibles/aforo-masivo", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                         ...getCsrfHeaders()
                     },
-                    body: `aforoMaximo=${encodeURIComponent(aforo)}`
+                    body: formData
                 }).then(res => {
                     if (res.ok) {
-                        alert("Aforo actualizado.");
+                        alert("Aforo actualizado correctamente.");
+                        document.getElementById("servicio-select").dispatchEvent(new Event("change"));
                     } else {
-                        alert("Error al actualizar aforo.");
+                        res.text().then(msg => alert("Error: " + msg));
                     }
                 }).catch(err => {
-                    console.error("Error al actualizar aforo:", err);
-                    alert("Error inesperado.");
+                    console.error("Error:", err);
+                    alert("Error inesperado al actualizar aforo.");
                 });
 
                 return false;
             }
+
         </script>
+
 
 
 
