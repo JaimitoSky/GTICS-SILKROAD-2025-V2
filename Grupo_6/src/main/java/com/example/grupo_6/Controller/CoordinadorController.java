@@ -3,6 +3,8 @@ package com.example.grupo_6.Controller;
 import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,15 +16,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.sql.Time;
 import java.util.*;
-
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/coordinador")
@@ -32,10 +34,11 @@ public class CoordinadorController {
     private AsignacionSedeRepository asignacionSedeRepository;
 
     @Autowired
-    private AsistenciaRepository asistenciaRepository;
-
+    private AsistenciaCoordinadorRepository asistenciaCoordinadorRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private SedeRepository sedeRepository;
 
     @Autowired
     private NotificacionRepository notificacionRepository;
@@ -49,30 +52,49 @@ public class CoordinadorController {
     private IncidenciaRepository incidenciaRepository;
 
     @GetMapping("/home")
-    public String home(HttpSession session, Model model) {
+    public String home(HttpSession session, Model model) throws JsonProcessingException {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) return "redirect:/login";
 
-        List<CoordinadorSede> asignaciones = coordinadorSedeRepository.findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
+        List<CoordinadorSede> asignaciones = coordinadorSedeRepository
+                .findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
 
-        if (!asignaciones.isEmpty()) {
-            List<Sede> sedesLimpiadas = asignaciones.stream().map(cs -> {
-                Sede sede = new Sede();
-                sede.setIdsede(cs.getSede().getIdsede());
-                sede.setNombre(cs.getSede().getNombre());
-                sede.setLatitud(cs.getSede().getLatitud());
-                sede.setLongitud(cs.getSede().getLongitud());
-                return sede;
-            }).toList();
-
-            model.addAttribute("sedesAsignadas", sedesLimpiadas);
-            model.addAttribute("sedeAsignada", sedesLimpiadas.get(0)); // Primera sede por defecto
-        } else {
+        if (asignaciones.isEmpty()) {
             model.addAttribute("sedesAsignadas", List.of());
             model.addAttribute("sedeAsignada", null);
+            model.addAttribute("asistenciasPorSede", Map.of());
+            return "coordinador/coordinador_home";
         }
 
-        return "coordinador/coordinador_home";
+        List<Sede> sedesAsignadas = asignaciones.stream().map(cs -> {
+            Sede sede = new Sede();
+            sede.setIdsede(cs.getSede().getIdsede());
+            sede.setNombre(cs.getSede().getNombre());
+            sede.setLatitud(cs.getSede().getLatitud());
+            sede.setLongitud(cs.getSede().getLongitud());
+            return sede;
+        }).toList();
+
+        model.addAttribute("sedesAsignadas", sedesAsignadas);
+        model.addAttribute("sedeAsignada", sedesAsignadas.get(0)); // por defecto
+
+        // Mapear asistencias del día actual por sede
+        Date fechaHoy = Date.valueOf(LocalDate.now());
+        Map<Integer, String> asistenciasPorSede = new HashMap<>();
+
+        for (Sede sede : sedesAsignadas) {
+            asistenciaCoordinadorRepository
+                    .findByUsuario_IdusuarioAndFechaAndSede_Idsede(usuario.getIdusuario(), fechaHoy, sede.getIdsede())
+                    .ifPresent(a -> {
+                        Time horaEntrada = a.getHoraEntrada();
+                        String hora = (horaEntrada != null) ? horaEntrada.toString() : "—";
+                        asistenciasPorSede.put(sede.getIdsede(), hora);
+                    });
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String asistenciasJson = objectMapper.writeValueAsString(asistenciasPorSede);
+        model.addAttribute("asistenciasPorSede", asistenciasJson);        return "coordinador/coordinador_home";
     }
 
 
@@ -80,60 +102,10 @@ public class CoordinadorController {
 
 
 
-    @GetMapping("/tareas")
-    public String verTareas(HttpSession session, Model model) {
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario == null) return "redirect:/login";
-        Integer idUsuario = usuario.getIdusuario();
 
-        LocalDate hoy = LocalDate.now();
-        Optional<Asistencia> asistencia = asistenciaRepository.findByIdusuarioAndFecha(idUsuario, hoy);
-        asistencia.ifPresent(a -> model.addAttribute("observacionesRegistradas", a.getObservaciones()));
 
-        return "coordinador/coordinador_tareas";
-    }
 
-    @PostMapping("/tareas")
-    public String registrarTareas(HttpSession session,
-                                  @RequestParam(required = false) List<String> tareas,
-                                  @RequestParam(required = false) String extra) {
-        // 1. Verificar sesión
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario == null) return "redirect:/login";
 
-        Integer idUsuario = usuario.getIdusuario();
-        LocalDate hoy = LocalDate.now();
-
-        // 2. Buscar si ya hay una asistencia hoy
-        Optional<Asistencia> asistenciaOpt = asistenciaRepository.findByIdusuarioAndFecha(idUsuario, hoy);
-
-        Asistencia asistencia = asistenciaOpt.orElseGet(() -> {
-            Asistencia nueva = new Asistencia();
-            nueva.setIdusuario(idUsuario);
-            nueva.setFecha(hoy);
-            nueva.setHoraEntrada(LocalTime.now());
-            return nueva;
-        });
-
-        // 3. Combinar observaciones de tareas + extra
-        String observaciones = "";
-        if (tareas != null && !tareas.isEmpty()) {
-            observaciones += String.join(", ", tareas);
-        }
-        if (extra != null && !extra.isBlank()) {
-            observaciones += "\n" + extra;
-        }
-
-        // 4. Guardar asistencia
-        asistencia.setObservaciones(observaciones.trim());
-        asistenciaRepository.save(asistencia);
-
-        // 5. Confirmación en consola
-        System.out.println("Tareas recibidas: " + tareas);
-        System.out.println("Extra: " + extra);
-
-        return "redirect:/coordinador/tareas";
-    }
 
 
     @GetMapping("/perfil")
@@ -197,67 +169,18 @@ public class CoordinadorController {
         Reserva reserva = optReserva.get();
 
         // Manejo con Optional para evitar NullPointer
-        Optional<Asistencia> asistenciaOpt = asistenciaRepository.findByReserva_Idreserva(idreserva);
         List<Incidencia> listaIncidencias = incidenciaRepository.findAllByReserva_Idreserva(idreserva);
 
         model.addAttribute("reserva", reserva);
-        model.addAttribute("asistencia", asistenciaOpt.orElse(null)); // si no hay, manda null
         model.addAttribute("incidencias", listaIncidencias); // usa el mismo nombre que en el HTML
 
         return "coordinador/coordinador_reservas_detalle";
     }
 
-    @GetMapping("/asistencia/{idreserva}")
-    public String mostrarFormularioAsistencia(@PathVariable("idreserva") Integer idreserva,
-                                              RedirectAttributes attr,
-                                              Model model) {
-        Optional<Reserva> optReserva = reservaRepository.findById(idreserva);
-        if (optReserva.isEmpty()) return "redirect:/coordinador/reservas-hoy";
-
-        boolean yaRegistrada = asistenciaRepository.existsByReserva_Idreserva(idreserva);
-        if (yaRegistrada) {
-            attr.addFlashAttribute("errorAsistencia", "Ya se ha registrado asistencia para esta reserva.");
-            return "redirect:/coordinador/reservas-hoy";
-        }
-
-        model.addAttribute("reserva", optReserva.get());
-        return "coordinador/coordinador_asistencia";
-    }
 
 
-    @PostMapping("/asistencia/marcar")
-    public String registrarAsistencia(@RequestParam("idusuario") Integer idusuario,
-                                      @RequestParam("idreserva") Integer idreserva,
-                                      @RequestParam("horaEntrada") String horaEntradaStr,
-                                      @RequestParam(value = "latitud", required = false) Double latitud,
-                                      @RequestParam(value = "longitud", required = false) Double longitud,
-                                      RedirectAttributes attr) {
 
-        if (asistenciaRepository.existsByReserva_Idreserva(idreserva)) {
-            attr.addFlashAttribute("errorAsistencia", "La asistencia ya fue registrada.");
-            return "redirect:/coordinador/reservas-hoy";
-        }
 
-        Optional<Usuario> optUsuario = usuarioRepository.findById(idusuario);
-        Optional<Reserva> optReserva = reservaRepository.findById(idreserva);
-        if (optUsuario.isEmpty() || optReserva.isEmpty()) return "redirect:/coordinador/reservas-hoy";
-
-        Asistencia asistencia = new Asistencia();
-        asistencia.setIdusuario(idusuario);
-        asistencia.setReserva(optReserva.get());
-        asistencia.setFecha(LocalDate.now());
-        asistencia.setHoraEntrada(LocalTime.parse(horaEntradaStr));
-
-        if (latitud != null && longitud != null) {
-            asistencia.setLatitud(BigDecimal.valueOf(latitud));
-            asistencia.setLongitud(BigDecimal.valueOf(longitud));
-        }
-
-        asistencia.setObservaciones("Asistencia registrada manualmente");
-        asistenciaRepository.save(asistencia);
-
-        return "redirect:/coordinador/reservas-hoy";
-    }
 
 
 
@@ -269,6 +192,98 @@ public class CoordinadorController {
         model.addAttribute("reserva", optReserva.get());
         return "coordinador/coordinador_incidencia";
     }
+    private double calcularDistancia(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radio de la tierra en km
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c; // Distancia en km
+    }
+    @ExceptionHandler
+    public String handleException(Exception e, RedirectAttributes redirectAttributes) {
+        e.printStackTrace(); // asegura log en consola
+        redirectAttributes.addFlashAttribute("errorAsistencia", "Error interno: " + e.getMessage());
+        return "redirect:/coordinador/home";
+    }
+
+    @PostMapping("/asistencia-dia/registrar")
+    public String registrarAsistenciaDelDia(@RequestParam("latitud") BigDecimal latitud,
+                                            @RequestParam("longitud") BigDecimal longitud,
+                                            @RequestParam("idsede") Integer idsede,
+                                            HttpSession session,
+                                            RedirectAttributes redirectAttributes) {
+        Usuario coordinador = (Usuario) session.getAttribute("usuario");
+        if (coordinador == null) return "redirect:/login";
+
+        LocalDate hoy = LocalDate.now();
+        Date fechaHoy = Date.valueOf(hoy);
+
+        if (idsede == null) {
+            redirectAttributes.addFlashAttribute("errorAsistencia", "No se seleccionó una sede válida.");
+            return "redirect:/coordinador/home";
+        }
+
+        try {
+            // Validar si ya registró asistencia
+            boolean yaRegistrada = asistenciaCoordinadorRepository
+                    .existsByUsuario_IdusuarioAndFechaAndSede_Idsede(coordinador.getIdusuario(), fechaHoy, idsede);
+
+            if (yaRegistrada) {
+                redirectAttributes.addFlashAttribute("errorAsistencia", "Ya registraste tu asistencia hoy en esta sede.");
+                return "redirect:/coordinador/home";
+            }
+
+            // Buscar sede
+            Optional<Sede> sedeOpt = sedeRepository.findById(idsede);
+            if (sedeOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorAsistencia", "La sede seleccionada no existe.");
+                return "redirect:/coordinador/home";
+            }
+
+            Sede sede = sedeOpt.get();
+            if (sede.getLatitud() == null || sede.getLongitud() == null) {
+                redirectAttributes.addFlashAttribute("errorAsistencia", "Esta sede no tiene coordenadas configuradas.");
+                return "redirect:/coordinador/home";
+            }
+
+            // Verificar distancia
+            double distancia = calcularDistancia(
+                    latitud.doubleValue(), longitud.doubleValue(),
+                    sede.getLatitud().doubleValue(), sede.getLongitud().doubleValue()
+            );
+
+            if (distancia > 0.5) {
+                redirectAttributes.addFlashAttribute("errorAsistencia", "Debes estar a menos de 500 metros del local.");
+                return "redirect:/coordinador/home";
+            }
+
+            // Registrar asistencia
+            AsistenciaCoordinador asistencia = new AsistenciaCoordinador();
+            asistencia.setUsuario(coordinador);
+            asistencia.setSede(sede); // requiere que esté bien mapeado el @ManyToOne
+            asistencia.setFecha(fechaHoy);
+            asistencia.setHoraEntrada(Time.valueOf(LocalTime.now()));
+            asistencia.setLatitud(latitud);
+            asistencia.setLongitud(longitud);
+
+            asistenciaCoordinadorRepository.save(asistencia);
+
+            redirectAttributes.addFlashAttribute("mensajeAsistencia", "Asistencia registrada exitosamente.");
+            return "redirect:/coordinador/home";
+
+        } catch (Exception e) {
+            e.printStackTrace(); // log al server
+            redirectAttributes.addFlashAttribute("errorAsistencia",
+                    "Error inesperado al registrar asistencia: " + e.getMessage());
+            return "redirect:/coordinador/home";
+        }
+    }
+
 
 
     @PostMapping("/incidencia/guardar")
@@ -336,9 +351,6 @@ public class CoordinadorController {
         model.addAttribute("sedesAsignadas", sedesAsignadas);
         model.addAttribute("rol", "coordinador");
 
-        if ("true".equals(asistenciaRegistrada)) {
-            model.addAttribute("mensajeAsistencia", "Ya se ha registrado asistencia para esta reserva.");
-        }
 
         return "coordinador/coordinador_reservas_hoy";
     }
@@ -346,27 +358,6 @@ public class CoordinadorController {
 
 
 
-
-
-
-    @GetMapping("/historial-reservas")
-    public String verHistorialReservas(Model model, HttpSession session) {
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario == null) return "redirect:/login";
-
-        Optional<AsignacionSede> asignacion = asignacionSedeRepository.findByIdUsuarioAndFecha(usuario.getIdusuario(), LocalDate.now());
-        if (asignacion.isEmpty()) {
-            model.addAttribute("mensaje", "No tienes asignación registrada.");
-            return "coordinador/coordinador_historial";
-        }
-
-        Integer idSede = asignacion.get().getSede().getIdsede();
-        List<Reserva> historial = reservaRepository.buscarHistorialReservasPorSede(idSede);
-
-        model.addAttribute("reservas", historial);
-        model.addAttribute("rol", "coordinador");
-        return "coordinador/coordinador_historial";
-    }
 
     @ModelAttribute
     public void cargarNotificacionesNavbar(HttpSession session, Model model) {

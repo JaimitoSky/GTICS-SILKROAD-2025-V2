@@ -976,12 +976,29 @@ UPDATE servicio
 SET nombre = 'Campo de Atletismo'
 WHERE idservicio = 7;
 
+DROP TABLE asistencia;
 
 
+-- Asegura que no existan restricciones activas
+SET FOREIGN_KEY_CHECKS=0;
 
+DROP TABLE IF EXISTS asistencia_coordinador;
 
--- Dump completed on 2025-05-17 17:53:23
+CREATE TABLE asistencia_coordinador (
+    idasistencia INT AUTO_INCREMENT PRIMARY KEY,
+    idusuario INT NOT NULL,
+    fecha DATE NOT NULL,
+    hora_entrada TIME,
+    latitud DECIMAL(10, 8),					
+    longitud DECIMAL(11, 8),
+    idsede INT NOT NULL,
 
+    FOREIGN KEY (idusuario) REFERENCES usuario(idusuario),
+    FOREIGN KEY (idsede) REFERENCES sede(idsede),
+    UNIQUE KEY uk_asistencia_por_sede_usuario (idusuario, idsede, fecha)
+);
+
+SET FOREIGN_KEY_CHECKS=1;
 
 -- Para limpiar los datos de servicios + reservas  (opcional)
 SET SQL_SAFE_UPDATES = 0;

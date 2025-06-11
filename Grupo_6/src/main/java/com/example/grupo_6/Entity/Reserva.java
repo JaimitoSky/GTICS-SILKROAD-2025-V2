@@ -50,15 +50,6 @@ public class Reserva {
     @JoinColumn(name = "idsede_servicio", nullable = false)
     private SedeServicio sedeServicio;
 
-    @Transient
-    private Asistencia asistenciaTemporal;
 
-    public Asistencia getAsistenciaTemporal() {
-        return asistenciaTemporal;
-    }
-
-    public void setAsistenciaTemporal(Asistencia asistenciaTemporal) {
-        this.asistenciaTemporal = asistenciaTemporal;
-    }
 
 }

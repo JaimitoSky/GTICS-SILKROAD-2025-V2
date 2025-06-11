@@ -35,32 +35,7 @@
 
                 <hr>
 
-                <h4>Asistencia</h4>
 
-                <div th:if="${asistencia != null}">
-                    <p th:if="${asistencia.horaEntrada != null}">
-                        <strong>Hora de entrada:</strong> <span th:text="${asistencia.horaEntrada}"></span>
-                    </p>
-                    <p th:if="${asistencia.latitud != null}">
-                        <strong>Latitud:</strong> <span th:text="${asistencia.latitud}"></span>
-                    </p>
-                    <p th:if="${asistencia.longitud != null}">
-                        <strong>Longitud:</strong> <span th:text="${asistencia.longitud}"></span>
-                    </p>
-
-                    <div class="mb-3" th:if="${asistencia.latitud != null and asistencia.longitud != null}">
-                        <label class="form-label">Ubicación en Mapa:</label>
-                        <div id="mapa" style="height: 300px; border: 1px solid #ccc;"></div>
-                    </div>
-
-                    <p th:if="${asistencia.observaciones != null}">
-                        <strong>Observaciones:</strong> <span th:text="${asistencia.observaciones}"></span>
-                    </p>
-                </div>
-
-                <div th:if="${asistencia == null}">
-                    <p>No se ha registrado asistencia.</p>
-                </div>
 
                 <hr>
 
@@ -78,67 +53,6 @@
                 </div>
             </div>
         </main>
-
-        <!-- Script para capturar hora y ubicación -->
-        <script>
-            function setUbicacionYHora() {
-                const now = new Date();
-                const hora = now.toTimeString().split(" ")[0];
-                const horaInput = document.getElementById("horaEntrada");
-                if (horaInput) horaInput.value = hora;
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            const latInput = document.getElementById("latitudInput");
-                            const lonInput = document.getElementById("longitudInput");
-                            if (latInput && lonInput) {
-                                latInput.value = pos.coords.latitude;
-                                lonInput.value = pos.coords.longitude;
-                            }
-                        },
-                        () => alert("No se pudo obtener la ubicación.")
-                    );
-                } else {
-                    alert("Tu navegador no soporta geolocalización.");
-                }
-            }
-
-            // Filtro en tiempo real
-            const filtro = document.getElementById("filtro");
-            const filas = document.querySelectorAll("#tablaReservas tr");
-
-            filtro?.addEventListener("input", () => {
-                const texto = filtro.value.toLowerCase();
-                filas.forEach(fila => {
-                    const contenido = fila.textContent.toLowerCase();
-                    fila.style.display = contenido.includes(texto) ? "" : "none";
-                });
-            });
-        </script>
-
-        <!-- Script seguro para Leaflet + asistencia -->
-        <!-- Script seguro para Leaflet -->
-        <div th:if="${asistencia != null}">
-            <script th:inline="javascript">
-                /*<![CDATA[*/
-                const lat = /*[[${asistencia.latitud}]]*/ null;
-                const lon = /*[[${asistencia.longitud}]]*/ null;
-
-                if (lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon)) {
-                    const map = L.map('mapa').setView([lat, lon], 16);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap contributors'
-                    }).addTo(map);
-                    L.marker([lat, lon]).addTo(map).bindPopup("Ubicación de asistencia").openPopup();
-                }
-                /*]]>*/
-            </script>
-        </div>
-
-
-
-
 
 
         <!-- Footer -->
@@ -173,40 +87,7 @@
         modal.style.display = 'none';
     }
 
-    function validarEntrada() {
-        if (!navigator.geolocation) {
-            alert("Tu navegador no soporta geolocalización.");
-            return;
-        }
 
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                const distancia = calcularDistancia(lat, lon, sedeLat, sedeLon);
-                if (distancia <= 0.1) {
-                    alert("Entrada registrada correctamente.");
-                    btnSalida.disabled = false;
-                } else {
-                    modal.style.display = 'flex';
-                }
-            },
-            () => {
-                alert("No se pudo obtener tu ubicación.");
-            }
-        );
-    }
-
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
 
     // ⏰ Reloj en vivo
     function actualizarHora() {

@@ -35,7 +35,7 @@
                         <label for="sedeSelect" class="form-label fw-bold">Selecciona un local</label>
                         <select id="sedeSelect" class="form-select">
                             <option th:each="sede, iStat : ${sedesAsignadas}"
-                                    th:value="${iStat.index}"
+                                    th:value="${sede.idsede}"
                                     th:text="${sede.nombre}">
                             </option>
                         </select>
@@ -45,43 +45,238 @@
                     <div class="col-md-6 mb-3">
                         <div id="map" style="height: 300px; width: 100%;" class="rounded border"></div>
                     </div>
+
+                    <!-- Mensaje si ya registró asistencia -->
+                    <div id="mensajeAsistencia" class="alert alert-info text-center mt-4 d-none">
+                        Ya registraste asistencia hoy a las <strong id="horaAsistenciaTexto"></strong>
+                    </div>
+
+                    <!-- Formulario -->
+                    <div class="text-center mt-4" id="bloqueFormulario">
+                        <form id="formAsistencia" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
+                            <input type="hidden" id="latitudInput" name="latitud">
+                            <input type="hidden" id="longitudInput" name="longitud">
+                            <input type="hidden" id="idsedeInput" name="idsede">
+                            <button type="button" class="btn btn-success btn-lg" id="btnAbrirModal">
+                                <i class="bi bi-check-circle"></i> Registrar asistencia del día
+                            </button>
+
+
+                        </form>
+                    </div>
+
+                    <!-- Modal de confirmación -->
+                    <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-info">
+                                    <h5 class="modal-title" id="modalConfirmacionLabel">Confirmar asistencia</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    ¿Deseas registrar tu asistencia?<br>
+                                    <strong>Hora actual: <span id="horaActual"></span></strong><br>
+                                    Esta acción no se puede modificar.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" id="btnConfirmarAsistencia">Confirmar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal fuera de rango -->
+                    <div class="modal fade" id="modalFueraDeRango" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning">
+                                    <h5 class="modal-title" id="modalLabel">¡Advertencia!</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    Estás fuera del rango permitido (500 metros) para registrar asistencia.<br>
+                                    Acércate al local seleccionado.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
                 </div>
             </div>
         </main>
+        <div id="asistencias-data" th:data-json="${asistenciasPorSede}" style="display: none;"></div>
 
-        <!-- Leaflet -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-        <!-- Script dinámico -->
+
         <script th:inline="javascript">
             /*<![CDATA[*/
-            // Cargar la lista de sedes del backend como JSON
-            let sedes = [[${sedesAsignadas}]];
+            document.addEventListener("DOMContentLoaded", () => {
+                // Obtener datos Thymeleaf
+                const sedes = /*[[${sedesAsignadas}]]*/ [];
+                const asistencias = JSON.parse(document.getElementById("asistencias-data").dataset.json);
 
-            // Inicializar el mapa con la primera sede (si hay)
-            let initialLat = sedes.length > 0 ? sedes[0].latitud : 0;
-            let initialLon = sedes.length > 0 ? sedes[0].longitud : 0;
+                if (!sedes || sedes.length === 0) return;
 
-            let map = L.map('map').setView([initialLat, initialLon], 17);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+                // Referencias a elementos
+                const sedeSelect = document.getElementById("sedeSelect");
+                const idsedeInput = document.getElementById("idsedeInput");
+                const latInput = document.getElementById("latitudInput");
+                const lonInput = document.getElementById("longitudInput");
+                const mensaje = document.getElementById("mensajeAsistencia");
+                const horaTexto = document.getElementById("horaAsistenciaTexto");
+                const bloqueForm = document.getElementById("bloqueFormulario");
 
-            let marker = L.marker([initialLat, initialLon]).addTo(map)
-                .bindPopup(sedes.length > 0 ? sedes[0].nombre : "Sin asignación").openPopup();
+                // Inicializar mapa
+                const map = L.map('map').setView([sedes[0].latitud, sedes[0].longitud], 17);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
 
-            // Evento de cambio en el selector
-            document.getElementById("sedeSelect").addEventListener("change", function () {
-                let index = this.value;
-                let sede = sedes[index];
-                map.setView([sede.latitud, sede.longitud], 17);
-                marker.setLatLng([sede.latitud, sede.longitud])
-                    .setPopupContent(sede.nombre)
-                    .openPopup();
+                let sedeMarker = L.marker([sedes[0].latitud, sedes[0].longitud]).addTo(map).bindPopup(sedes[0].nombre).openPopup();
+                let userCircle = null;
+                let coordenadasUsuario = { lat: null, lon: null };
+
+                // Actualizar estado según sede
+                function actualizarEstadoAsistencia() {
+                    const idsede = parseInt(sedeSelect.value);
+                    const hora = asistencias[idsede];
+
+                    if (hora) {
+                        mensaje.classList.remove("d-none");
+                        horaTexto.textContent = hora;
+                        bloqueForm.classList.add("d-none");
+                    } else {
+                        mensaje.classList.add("d-none");
+                        bloqueForm.classList.remove("d-none");
+                    }
+                }
+
+                // Actualizar sede seleccionada
+                sedeSelect.addEventListener("change", () => {
+                    const idsede = parseInt(sedeSelect.value);
+                    const sede = sedes.find(s => s.idsede === idsede);
+
+                    idsedeInput.value = sede.idsede;
+
+                    sedeMarker.setLatLng([sede.latitud, sede.longitud])
+                        .setPopupContent(sede.nombre)
+                        .openPopup();
+                    map.setView([sede.latitud, sede.longitud], 17);
+
+                    actualizarEstadoAsistencia();
+                });
+
+                actualizarEstadoAsistencia(); // Llamar al inicio
+
+                // Obtener ubicación
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        coordenadasUsuario.lat = pos.coords.latitude;
+                        coordenadasUsuario.lon = pos.coords.longitude;
+
+                        userCircle = L.circle([coordenadasUsuario.lat, coordenadasUsuario.lon], {
+                            radius: 5, color: 'blue', fillColor: '#00f', fillOpacity: 0.5
+                        }).addTo(map);
+
+                        navigator.geolocation.watchPosition(
+                            (pos2) => {
+                                coordenadasUsuario.lat = pos2.coords.latitude;
+                                coordenadasUsuario.lon = pos2.coords.longitude;
+
+                                if (userCircle) map.removeLayer(userCircle);
+                                userCircle = L.circle([coordenadasUsuario.lat, coordenadasUsuario.lon], {
+                                    radius: 5, color: 'blue', fillColor: '#00f', fillOpacity: 0.5
+                                }).addTo(map);
+                            },
+                            () => alert("No se pudo actualizar la ubicación."),
+                            { enableHighAccuracy: true }
+                        );
+                    },
+                    (err) => {
+                        alert("Debes permitir acceso a la ubicación para registrar asistencia.");
+                    },
+                    { enableHighAccuracy: true }
+                );
+
+                // Botón abrir modal
+                document.getElementById("btnAbrirModal").addEventListener("click", () => {
+                    const idsede = parseInt(sedeSelect.value);
+                    const sede = sedes.find(s => s.idsede === idsede);
+
+                    if (!coordenadasUsuario.lat || !coordenadasUsuario.lon) {
+                        alert("Ubicación aún no detectada. Espera unos segundos.");
+                        return;
+                    }
+
+                    const distancia = calcularDistanciaKm(
+                        coordenadasUsuario.lat, coordenadasUsuario.lon,
+                        sede.latitud, sede.longitud
+                    );
+
+                    if (distancia > 0.5) {
+                        const modal = new bootstrap.Modal(document.getElementById('modalFueraDeRango'));
+                        modal.show();
+                        return;
+                    }
+
+                    const horaYaRegistrada = asistencias[idsede];
+                    if (horaYaRegistrada) {
+                        alert("Ya registraste tu asistencia hoy a las " + horaYaRegistrada + " en esta sede.");
+                        return;
+                    }
+
+                    // Mostrar hora en el modal
+                    const ahora = new Date();
+                    document.getElementById("horaActual").textContent = ahora.toLocaleTimeString('es-PE', {
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+
+                    const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
+                    modal.show();
+                });
+
+                // Confirmar asistencia en el modal
+                document.getElementById("btnConfirmarAsistencia").addEventListener("click", () => {
+                    const idsede = parseInt(sedeSelect.value);
+                    const sede = sedes.find(s => s.idsede === idsede);
+
+                    latInput.value = coordenadasUsuario.lat.toFixed(6).replace(',', '.');
+                    lonInput.value = coordenadasUsuario.lon.toFixed(6).replace(',', '.');
+                    idsedeInput.value = sede.idsede;
+
+                    document.getElementById("formAsistencia").submit();
+                });
+
+                // Utilidad para calcular distancia
+                function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+                    const R = 6371;
+                    const dLat = (lat2 - lat1) * Math.PI / 180;
+                    const dLon = (lon2 - lon1) * Math.PI / 180;
+                    const a = Math.sin(dLat / 2) ** 2 +
+                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                        Math.sin(dLon / 2) ** 2;
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    return R * c;
+                }
             });
             /*]]>*/
         </script>
+
+
+
+
+
+
+
+
 
 
 
@@ -109,50 +304,10 @@
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<!--<script>
-    const modal = document.getElementById('popupModal');
-    const btnSalida = document.getElementById('btnSalida');
-    const sedeLat = /*[[${latitud}]]*/ 0;
-    const sedeLon = /*[[${longitud}]]*/ 0;
 
-    function cerrarModal() {
-        modal.style.display = 'none';
-    }
 
-    function validarEntrada() {
-        if (!navigator.geolocation) {
-            alert("Tu navegador no soporta geolocalización.");
-            return;
-        }
+<script>
 
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                const distancia = calcularDistancia(lat, lon, sedeLat, sedeLon);
-                if (distancia <= 0.1) {
-                    alert("Entrada registrada correctamente.");
-                    btnSalida.disabled = false;
-                } else {
-                    modal.style.display = 'flex';
-                }
-            },
-            () => {
-                alert("No se pudo obtener tu ubicación.");
-            }
-        );
-    }
-
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
 
     // ⏰ Reloj en vivo
     function actualizarHora() {
@@ -169,45 +324,9 @@
     setInterval(actualizarHora, 1000);
     actualizarHora();
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-    });
-</script>-->
-
-<!-- Agrega esto al final del HTML -->
 
 
-<!-- Geolocalización + Mapa -->
-<!-- Script dinámico CORREGIDO -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    let sedes = [[${sedesAsignadas}]];
 
-    let map = L.map('map').setView([sedes[0].latitud, sedes[0].longitud], 17);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
-    let marker = L.marker([sedes[0].latitud, sedes[0].longitud]).addTo(map)
-        .bindPopup(sedes[0].nombre).openPopup();
-
-    document.getElementById("sedeSelect").addEventListener("change", function () {
-        let index = this.value;
-        let sede = sedes[index];
-        map.setView([sede.latitud, sede.longitud], 17);
-        marker.setLatLng([sede.latitud, sede.longitud])
-            .setPopupContent(sede.nombre)
-            .openPopup();
-    });
-    /*]]>*/
 </script>
-
 </body>
 </html>
