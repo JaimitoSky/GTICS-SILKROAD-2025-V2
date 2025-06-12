@@ -15,16 +15,14 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Un fondo claro general */
+            background-color: #f8f9fa;
             color: #333;
         }
 
-        /* Agregado para transiciones más suaves en elementos dinámicos */
         .fade-in {
             animation: fadeIn 0.4s ease-in-out;
         }
 
-        /* Transición general para todos los elementos */
         * {
             transition: all 0.2s ease-in-out;
         }
@@ -35,7 +33,7 @@
 
         .form-label {
             font-weight: 600;
-            color: #555; /* Un poco más oscuro para mejor legibilidad */
+            color: #555;
         }
 
         .form-select, .btn {
@@ -44,9 +42,9 @@
         }
 
         #map {
-            border-radius: 16px; /* Ajuste para que coincida con la tarjeta */
+            border-radius: 16px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(0, 0, 0, 0.1); /* Borde suave para el mapa */
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .alert {
@@ -61,32 +59,30 @@
 
         footer.footer {
             background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef; /* Separador sutil */
+            border-top: 1px solid #e9ecef;
         }
 
-        /* Estilos para las nuevas tarjetas */
         .card {
             border-radius: 16px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: none; /* Eliminar el borde predeterminado de la tarjeta */
+            border: none;
             background-color: #ffffff;
         }
 
         .card-header {
-            background-color: #f1f3f5; /* Un fondo suave para el encabezado de la tarjeta */
+            background-color: #f1f3f5;
             border-bottom: 1px solid #e9ecef;
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
             font-weight: 600;
             color: #333;
-            padding: 1rem 1.5rem; /* Ajuste de padding para encabezados */
+            padding: 1rem 1.5rem;
         }
 
         .card-body {
-            padding: 1.5rem; /* Ajuste de padding para el cuerpo de la tarjeta */
+            padding: 1.5rem;
         }
 
-        /* Animación para fadeIn */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -98,20 +94,17 @@
             }
         }
 
-        /* Estilos para el spinner */
         .spinner-border {
             vertical-align: middle;
         }
 
-        /* Contenedor de Toasts */
         .toast-container {
-            z-index: 1080; /* Asegura que esté por encima de otros elementos */
+            z-index: 1080;
         }
 
-        /* Para el icono de usuario en el mapa */
         .my-div-icon {
             text-align: center;
-            line-height: 1; /* Para que el icono no tenga espacio extra */
+            line-height: 1;
         }
     </style>
 </head>
@@ -128,33 +121,34 @@
                     <i class="bi bi-geo-alt-fill me-2 text-primary"></i>Local asignado
                 </h3>
 
-                <div class="row g-4"> <div class="col-md-6">
-                    <div class="card h-100 fade-in">
-                        <div class="card-header">
-                            <i class="bi bi-building me-2"></i>Selecciona un local
-                        </div>
-                        <div class="card-body">
-                            <label for="sedeSelect" class="form-label visually-hidden">Selecciona un local</label>
-                            <select id="sedeSelect" class="form-select form-select-lg">
-                                <option th:each="sede, iStat : ${sedesAsignadas}"
-                                        th:value="${sede.idsede}"
-                                        th:text="${sede.nombre}">
-                                </option>
-                            </select>
-                            <div id="mensajeAsistencia" class="alert alert-info text-center mt-4 fade-in d-none" role="alert">
-                                <i class="bi bi-info-circle-fill me-2"></i>Ya registraste asistencia hoy a las <strong id="horaAsistenciaTexto"></strong>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 fade-in">
+                            <div class="card-header">
+                                <i class="bi bi-building me-2"></i>Selecciona un local
+                            </div>
+                            <div class="card-body">
+                                <label for="sedeSelect" class="form-label visually-hidden">Selecciona un local</label>
+                                <select id="sedeSelect" class="form-select form-select-lg">
+                                    <option th:each="sede, iStat : ${sedesAsignadas}"
+                                            th:value="${sede.idsede}"
+                                            th:text="${sede.nombre}">
+                                    </option>
+                                </select>
+                                <div id="mensajeAsistencia" class="alert alert-info text-center mt-4 fade-in d-none" role="alert">
+                                    <i class="bi bi-info-circle-fill me-2"></i>Ya registraste asistencia hoy a las <strong id="horaAsistenciaTexto"></strong>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
                     <div class="col-md-6">
                         <div class="card h-100 fade-in">
                             <div class="card-header">
                                 <i class="bi bi-map-fill me-2"></i>Ubicación del Local
                             </div>
-                            <div class="card-body p-0"> <div id="map" style="height: 350px; width: 100%; border-radius: 0 0 16px 16px;">
-                            </div>
+                            <div class="card-body p-0">
+                                <div id="map" style="height: 350px; width: 100%; border-radius: 0 0 16px 16px;"></div>
                             </div>
                         </div>
                     </div>
@@ -238,7 +232,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
 
@@ -259,55 +252,49 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     document.addEventListener("DOMContentLoaded", () => {
-        // --- Constantes y Selectores del DOM ---
-        const Constants = {
-            GEOLOCATION_OPTIONS: { enableHighAccuracy: true },
-            DISTANCE_THRESHOLD_KM: 0.5 // 500 metros
+        // Constantes
+        const GEOLOCATION_OPTIONS = {
+            enableHighAccuracy: true,
+            timeout: 10000, // 10 segundos de espera
+            maximumAge: 0 // No usar caché de ubicación
         };
+        const DISTANCE_THRESHOLD_KM = 0.5; // 500 metros
 
-        const DOM = {
-            sedeSelect: document.getElementById("sedeSelect"),
-            idsedeInput: document.getElementById("idsedeInput"),
-            latitudInput: document.getElementById("latitudInput"),
-            longitudInput: document.getElementById("longitudInput"),
-            mensajeAsistencia: document.getElementById("mensajeAsistencia"),
-            horaAsistenciaTexto: document.getElementById("horaAsistenciaTexto"),
-            bloqueFormulario: document.getElementById("bloqueFormulario"),
-            mapContainer: document.getElementById("map"),
-            btnAbrirModal: document.getElementById("btnAbrirModal"),
-            btnConfirmarAsistencia: document.getElementById("btnConfirmarAsistencia"),
-            horaActualSpan: document.getElementById("horaActual"),
-            formAsistencia: document.getElementById("formAsistencia"),
-            asistenciasData: document.getElementById("asistencias-data"),
-            successToast: document.getElementById("successToast"),
-            errorToast: document.getElementById("errorToast")
-        };
+        // Selectores del DOM
+        const sedeSelect = document.getElementById("sedeSelect");
+        const idsedeInput = document.getElementById("idsedeInput");
+        const latitudInput = document.getElementById("latitudInput");
+        const longitudInput = document.getElementById("longitudInput");
+        const mensajeAsistencia = document.getElementById("mensajeAsistencia");
+        const horaAsistenciaTexto = document.getElementById("horaAsistenciaTexto");
+        const bloqueFormulario = document.getElementById("bloqueFormulario");
+        const mapContainer = document.getElementById("map");
+        const btnAbrirModal = document.getElementById("btnAbrirModal");
+        const btnConfirmarAsistencia = document.getElementById("btnConfirmarAsistencia");
+        const horaActualSpan = document.getElementById("horaActual");
+        const formAsistencia = document.getElementById("formAsistencia");
+        const asistenciasData = document.getElementById("asistencias-data");
+        const successToast = document.getElementById("successToast");
+        const errorToast = document.getElementById("errorToast");
 
-        // --- Datos de la aplicación ---
+        // Datos de la aplicación
         const sedesAsignadas = /*[[${sedesAsignadas}]]*/ [];
-        const asistenciasRegistradas = JSON.parse(DOM.asistenciasData.dataset.json);
+        const asistenciasRegistradas = JSON.parse(asistenciasData.dataset.json);
 
         if (!sedesAsignadas || sedesAsignadas.length === 0) {
             console.warn("No hay sedes asignadas. La funcionalidad de asistencia no estará disponible.");
             return;
         }
 
-        // --- Variables de estado del mapa y geolocalización ---
+        // Variables de estado del mapa y geolocalización
         let leafletMap = null;
         let sedeMarker = null;
-        let userLocationCircle = null; // Círculo de precisión
-        let userLocationMarker = null; // Marcador de ubicación del usuario
-        let attendanceRadiusCircle = null; // Círculo de radio de asistencia
+        let userLocationCircle = null;
+        let userLocationMarker = null;
+        let attendanceRadiusCircle = null;
         let currentUserCoordinates = { lat: null, lon: null };
 
-        // --- Funciones de Utilidad ---
-
-        /**
-         * Muestra un Toast de Bootstrap.
-         * @param {HTMLElement} toastElement - El elemento DOM del toast (ej. DOM.successToast).
-         * @param {string} message - El mensaje a mostrar en el toast.
-         * @param {string} [iconClass=''] - Clase de ícono de Bootstrap (ej. 'bi-check-circle-fill').
-         */
+        // Funciones de utilidad
         function showToast(toastElement, message, iconClass = '') {
             const toastBody = toastElement.querySelector('.toast-body');
             toastBody.innerHTML = `<i class="${iconClass} me-2"></i>${message}`;
@@ -315,54 +302,43 @@
             toast.show();
         }
 
-        /**
-         * Inicializa y configura el mapa de Leaflet.
-         * @param {Object} initialSede - La sede inicial para centrar el mapa.
-         */
         function initializeMap(initialSede) {
-            leafletMap = L.map(DOM.mapContainer).setView([initialSede.latitud, initialSede.longitud], 17);
+            leafletMap = L.map(mapContainer).setView([initialSede.latitud, initialSede.longitud], 17);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors',
                 maxZoom: 19
             }).addTo(leafletMap);
-            sedeMarker = L.marker([initialSede.latitud, initialSede.longitud]).addTo(leafletMap).bindPopup(initialSede.nombre).openPopup();
 
-            // Dibuja el círculo de radio de asistencia
+            // Marcador de la sede
+            sedeMarker = L.marker([initialSede.latitud, initialSede.longitud]).addTo(leafletMap)
+                .bindPopup(initialSede.nombre)
+                .openPopup();
+
+            // Círculo de radio de asistencia
             attendanceRadiusCircle = L.circle([initialSede.latitud, initialSede.longitud], {
-                radius: Constants.DISTANCE_THRESHOLD_KM * 1000, // Convertir km a metros
+                radius: DISTANCE_THRESHOLD_KM * 1000,
                 color: 'red',
                 fillColor: '#f03',
                 fillOpacity: 0.1
             }).addTo(leafletMap);
         }
 
-        /**
-         * Actualiza la interfaz de usuario para mostrar si la asistencia ya fue registrada.
-         */
         function updateAttendanceUI() {
-            const selectedSedeId = parseInt(DOM.sedeSelect.value);
+            const selectedSedeId = parseInt(sedeSelect.value);
             const registeredTime = asistenciasRegistradas[selectedSedeId];
 
             if (registeredTime) {
-                DOM.mensajeAsistencia.classList.remove("d-none");
-                DOM.bloqueFormulario.classList.add("d-none");
-                DOM.horaAsistenciaTexto.textContent = registeredTime;
+                mensajeAsistencia.classList.remove("d-none");
+                bloqueFormulario.classList.add("d-none");
+                horaAsistenciaTexto.textContent = registeredTime;
             } else {
-                DOM.mensajeAsistencia.classList.add("d-none");
-                DOM.bloqueFormulario.classList.remove("d-none");
+                mensajeAsistencia.classList.add("d-none");
+                bloqueFormulario.classList.remove("d-none");
             }
         }
 
-        /**
-         * Calcula la distancia entre dos puntos geográficos en kilómetros.
-         * @param {number} lat1 - Latitud del punto 1.
-         * @param {number} lon1 - Longitud del punto 1.
-         * @param {number} lat2 - Latitud del punto 2.
-         * @param {number} lon2 - Longitud del punto 2.
-         * @returns {number} Distancia en kilómetros.
-         */
         function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Radio de la Tierra en kilómetros
+            const R = 6371; // Radio de la Tierra en km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) ** 2 +
@@ -372,22 +348,17 @@
             return R * c;
         }
 
-        // --- Manejo de Geolocalización ---
-
-        /**
-         * Callback exitoso para obtener la posición del usuario.
-         * @param {Object} position - Objeto de posición de Geolocation API.
-         */
+        // Manejo de geolocalización
         function onGeolocationSuccess(position) {
             currentUserCoordinates.lat = position.coords.latitude;
             currentUserCoordinates.lon = position.coords.longitude;
-            const accuracy = position.coords.accuracy; // Precisión en metros
+            const accuracy = position.coords.accuracy;
 
             // Eliminar marcadores y círculos anteriores si existen
             if (userLocationCircle) leafletMap.removeLayer(userLocationCircle);
             if (userLocationMarker) leafletMap.removeLayer(userLocationMarker);
 
-            // Muestra un círculo para la precisión
+            // Círculo de precisión
             userLocationCircle = L.circle([currentUserCoordinates.lat, currentUserCoordinates.lon], {
                 radius: accuracy,
                 color: 'blue',
@@ -395,21 +366,17 @@
                 fillOpacity: 0.1
             }).addTo(leafletMap);
 
-            // Muestra un marcador para la ubicación exacta del usuario
+            // Marcador de ubicación del usuario
             userLocationMarker = L.marker([currentUserCoordinates.lat, currentUserCoordinates.lon], {
                 icon: L.divIcon({
                     className: 'my-div-icon',
                     html: '<i class="bi bi-person-fill" style="font-size: 24px; color: #00f;"></i>',
                     iconSize: [24, 24],
-                    iconAnchor: [12, 24] // Centra el ícono en la posición
+                    iconAnchor: [12, 24]
                 })
             }).addTo(leafletMap).bindPopup("Tu ubicación actual").openPopup();
         }
 
-        /**
-         * Callback de error para la geolocalización.
-         * @param {Object} error - Objeto de error de Geolocation API.
-         */
         function onGeolocationError(error) {
             let errorMessage = "No se pudo obtener tu ubicación.";
             switch(error.code) {
@@ -425,41 +392,48 @@
                 default:
                     break;
             }
-            alert(errorMessage); // Se mantiene el alert por su importancia inicial.
+            showToast(errorToast, errorMessage, "bi-exclamation-triangle-fill");
             console.error("Error de geolocalización:", error);
         }
 
-        /**
-         * Inicia la vigilancia de la posición del usuario.
-         */
         function startGeolocationWatch() {
             if ("geolocation" in navigator) {
-                // Obtener la posición inicial y luego vigilar cambios
-                navigator.geolocation.watchPosition(onGeolocationSuccess, onGeolocationError, Constants.GEOLOCATION_OPTIONS);
+                // Primero obtenemos la posición actual
+                navigator.geolocation.getCurrentPosition(
+                    onGeolocationSuccess,
+                    onGeolocationError,
+                    GEOLOCATION_OPTIONS
+                );
+
+                // Luego iniciamos el seguimiento de cambios
+                navigator.geolocation.watchPosition(
+                    onGeolocationSuccess,
+                    onGeolocationError,
+                    GEOLOCATION_OPTIONS
+                );
             } else {
-                alert("Tu navegador no soporta la geolocalización. No podrás registrar asistencia.");
+                showToast(errorToast, "Tu navegador no soporta la geolocalización. No podrás registrar asistencia.", "bi-exclamation-triangle-fill");
             }
         }
 
-        // --- Event Handlers ---
-
-        DOM.sedeSelect.addEventListener("change", () => {
-            const selectedSedeId = parseInt(DOM.sedeSelect.value);
+        // Event listeners
+        sedeSelect.addEventListener("change", () => {
+            const selectedSedeId = parseInt(sedeSelect.value);
             const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
 
             if (selectedSede) {
-                DOM.idsedeInput.value = selectedSede.idsede;
+                idsedeInput.value = selectedSede.idsede;
                 sedeMarker.setLatLng([selectedSede.latitud, selectedSede.longitud])
                     .setPopupContent(selectedSede.nombre)
                     .openPopup();
                 leafletMap.setView([selectedSede.latitud, selectedSede.longitud], 17);
 
-                // Actualiza el círculo de radio de asistencia para la nueva sede
+                // Actualizar círculo de radio de asistencia
                 if (attendanceRadiusCircle) {
                     leafletMap.removeLayer(attendanceRadiusCircle);
                 }
                 attendanceRadiusCircle = L.circle([selectedSede.latitud, selectedSede.longitud], {
-                    radius: Constants.DISTANCE_THRESHOLD_KM * 1000,
+                    radius: DISTANCE_THRESHOLD_KM * 1000,
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.1
@@ -468,12 +442,12 @@
             updateAttendanceUI();
         });
 
-        DOM.btnAbrirModal.addEventListener("click", () => {
-            const selectedSedeId = parseInt(DOM.sedeSelect.value);
+        btnAbrirModal.addEventListener("click", () => {
+            const selectedSedeId = parseInt(sedeSelect.value);
             const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
 
             if (!currentUserCoordinates.lat || !currentUserCoordinates.lon) {
-                showToast(DOM.errorToast, "Ubicación aún no detectada. Por favor, espera unos segundos y asegúrate de haber permitido el acceso a tu ubicación.", "bi-exclamation-circle-fill");
+                showToast(errorToast, "Ubicación aún no detectada. Por favor, espera unos segundos y asegúrate de haber permitido el acceso a tu ubicación.", "bi-exclamation-circle-fill");
                 return;
             }
 
@@ -482,19 +456,20 @@
                 selectedSede.latitud, selectedSede.longitud
             );
 
-            if (distance > Constants.DISTANCE_THRESHOLD_KM) {
+            if (distance > DISTANCE_THRESHOLD_KM) {
                 const modalFueraDeRango = new bootstrap.Modal(document.getElementById('modalFueraDeRango'));
                 modalFueraDeRango.show();
                 return;
             }
 
             if (asistenciasRegistradas[selectedSedeId]) {
-                showToast(DOM.errorToast, `Ya registraste tu asistencia hoy a las ${asistenciasRegistradas[selectedSedeId]} en esta sede.`, "bi-info-circle-fill");
+                showToast(errorToast, `Ya registraste tu asistencia hoy a las ${asistenciasRegistradas[selectedSedeId]} en esta sede.`, "bi-info-circle-fill");
                 return;
             }
 
+            // Mostrar hora actual en el modal
             const now = new Date();
-            DOM.horaActualSpan.textContent = now.toLocaleTimeString('es-PE', {
+            horaActualSpan.textContent = now.toLocaleTimeString('es-PE', {
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             });
 
@@ -502,93 +477,33 @@
             modalConfirmacion.show();
         });
 
-        DOM.btnConfirmarAsistencia.addEventListener("click", () => {
+        btnConfirmarAsistencia.addEventListener("click", () => {
             // Deshabilitar botón y mostrar spinner
-            DOM.btnConfirmarAsistencia.disabled = true;
-            DOM.btnConfirmarAsistencia.querySelector('.spinner-border').classList.remove('d-none');
+            btnConfirmarAsistencia.disabled = true;
+            btnConfirmarAsistencia.querySelector('.spinner-border').classList.remove('d-none');
 
-            const selectedSedeId = parseInt(DOM.sedeSelect.value);
+            const selectedSedeId = parseInt(sedeSelect.value);
             const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
 
-            DOM.latitudInput.value = currentUserCoordinates.lat.toFixed(6);
-            DOM.longitudInput.value = currentUserCoordinates.lon.toFixed(6);
-            DOM.idsedeInput.value = selectedSede.idsede;
+            // Formatear coordenadas con 6 decimales
+            latitudInput.value = currentUserCoordinates.lat.toFixed(6);
+            longitudInput.value = currentUserCoordinates.lon.toFixed(6);
+            idsedeInput.value = selectedSede.idsede;
 
-            // ***** ATENCIÓN: Simulación de envío AJAX. *****
-            // Si tu formulario envía directamente al servidor (con action y method="post"),
-            // la página se recargará y los toasts no se verán a menos que manejes los mensajes
-            // en el servidor y los muestres en la siguiente carga de la página (ej. flash messages).
-            // Si quieres un envío real sin recarga, deberías usar `fetch()` o `XMLHttpRequest` aquí.
-
-            // Ejemplo de cómo sería un envío con fetch y manejo de éxito/error:
-            /*
-            fetch(DOM.formAsistencia.action, {
-                method: DOM.formAsistencia.method,
-                body: new FormData(DOM.formAsistencia) // Envía los datos del formulario
-            })
-            .then(response => response.json()) // O response.text() dependiendo de tu backend
-            .then(data => {
-                if (data.success) { // Asumiendo que tu backend devuelve { success: true }
-                    const now = new Date();
-                    const horaRegistro = now.toLocaleTimeString('es-PE', {hour: '2-digit', minute:'2-digit'});
-                    asistenciasRegistradas[selectedSedeId] = horaRegistro;
-                    updateAttendanceUI();
-                    showToast(DOM.successToast, "Asistencia registrada exitosamente!", "bi-check-circle-fill");
-                } else {
-                    showToast(DOM.errorToast, data.message || "Error al registrar asistencia.", "bi-x-circle-fill");
-                }
-            })
-            .catch(error => {
-                console.error("Error al enviar asistencia:", error);
-                showToast(DOM.errorToast, "Error de red o del servidor al registrar asistencia.", "bi-x-circle-fill");
-            })
-            .finally(() => {
-                // Restablecer botón y ocultar spinner
-                DOM.btnConfirmarAsistencia.disabled = false;
-                DOM.btnConfirmarAsistencia.querySelector('.spinner-border').classList.add('d-none');
-                // Ocultar modal de confirmación
-                const modalConfirmacion = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
-                if (modalConfirmacion) {
-                    modalConfirmacion.hide();
-                }
-            });
-            */
-
-            // *** Mantenemos la simulación por ahora para que veas el efecto de los toasts y spinner ***
-            setTimeout(() => { // Simula un retraso de red
-                // Simula éxito: actualiza el estado local y el UI
-                const now = new Date();
-                const horaRegistro = now.toLocaleTimeString('es-PE', {hour: '2-digit', minute:'2-digit'});
-                asistenciasRegistradas[selectedSedeId] = horaRegistro;
-                updateAttendanceUI();
-
-                showToast(DOM.successToast, "Asistencia registrada exitosamente!", "bi-check-circle-fill"); // Muestra toast de éxito
-
-                // Restablecer botón y ocultar spinner
-                DOM.btnConfirmarAsistencia.disabled = false;
-                DOM.btnConfirmarAsistencia.querySelector('.spinner-border').classList.add('d-none');
-
-                // Ocultar modal de confirmación
-                const modalConfirmacion = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
-                if (modalConfirmacion) {
-                    modalConfirmacion.hide();
-                }
-
-                // Si de verdad usas el submit directo, descomenta la siguiente línea y borra la simulación:
-                // DOM.formAsistencia.submit();
-            }, 1500); // 1.5 segundos de simulación de carga
+            // Enviar el formulario directamente (recargará la página)
+            formAsistencia.submit();
         });
 
-        // --- Inicialización al cargar la página ---
-        initializeMap(sedesAsignadas[0]); // Inicializa con la primera sede
-        DOM.idsedeInput.value = sedesAsignadas[0].idsede; // Establece el ID de la primera sede
-        updateAttendanceUI(); // Actualiza el UI con la primera sede
-        startGeolocationWatch(); // Inicia la vigilancia de la geolocalización
+        // Inicialización
+        initializeMap(sedesAsignadas[0]);
+        idsedeInput.value = sedesAsignadas[0].idsede;
+        updateAttendanceUI();
+        startGeolocationWatch();
     });
 
-    // --- Función para el reloj independiente (fuera del DOMContentLoaded) ---
+    // Reloj en vivo
     function updateClock() {
-        const clockElement = document.getElementById('reloj'); // Asumo que tienes un elemento con id='reloj' en tu navbar o similar
+        const clockElement = document.getElementById('reloj');
         if (!clockElement) return;
         const now = new Date();
         const time = now.toLocaleTimeString('es-PE', {
@@ -599,7 +514,7 @@
         clockElement.textContent = time;
     }
     setInterval(updateClock, 1000);
-    updateClock(); // Llama una vez para mostrar la hora inmediatamente al cargar
+    updateClock();
     /*]]>*/
 </script>
 </body>
