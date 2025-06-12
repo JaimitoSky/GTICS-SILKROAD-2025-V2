@@ -3,224 +3,92 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Local Asignado</title>
 
-    <!-- Estilos externos -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Estilos y fuentes -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-    <!-- Estilos internos -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
 
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-success {
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.25);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 0.75rem;
+        }
+
+        footer img {
+            height: 60px;
+        }
+    </style>
 </head>
 <body>
-<div class="wrapper">
-    <!-- Sidebar -->
-    <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-
-    <!-- Main -->
-    <div class="main">
-        <div th:replace="fragments/navbar-superadmin :: navbar"></div>
-
-
-
-
-
-
-        <!-- Métricas principales -->
-        <!--<div class="row mb-4">
-            <div class="col-sm-6 col-xl-3">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
-                        <h5 class="card-title">Usuarios Activos</h5>
-                        <h2 th:text="${usuariosActivos}">0</h2>
-                    </div>
+<div class="container py-5">
+    <div class="card rounded-4 shadow">
+        <div class="card-header bg-white border-0 pt-4 pb-2">
+            <h4 class="mb-0 fw-bold text-primary">Local asignado</h4>
+        </div>
+        <div class="card-body">
+            <div class="row g-4 align-items-start">
+                <div class="col-md-6">
+                    <label for="selectLocal" class="form-label fw-semibold">Selecciona un local</label>
+                    <select id="selectLocal" class="form-select form-select-lg rounded-3 shadow-sm">
+                        <option selected>Complejo Deportivo Maranga</option>
+                        <!-- Otras opciones -->
+                    </select>
                 </div>
-            </div>
-            <div class="col-sm-6 col-xl-3">
-                <div class="card text-white bg-info">
-                    <div class="card-body">
-                        <h5 class="card-title">Usuarios Conectados</h5>
-                        <h2 th:text="${usuariosConectados}">0</h2>
-                    </div>
-                </div>
-            </div> -->
-
-        <main class="content">
-            <div class="container-fluid p-0">
-                <h1 class="h3 mb-4"><strong>Dashboard General</strong> - Super Admin</h1>
-
-                <!-- Métricas rápidas -->
-                <div class="row mb-4">
-                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-primary h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas del Mes</h5>
-                                <h2 th:text="${reservasDelMes}">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-success h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">Reservas Totales</h5>
-                                <h2 th:text="${totalReservas}">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-warning h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">Sedes Registradas</h5>
-                                <h2 th:text="${totalSedes}">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-info h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Nuevos (Mes)</h5>
-                                <h2 th:text="${usuariosNuevos}">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gráficas -->
-                <div class="row">
-                    <div class="col-12 col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header"><strong>Reservas por Día (Mes)</strong></div>
-                            <div class="card-body" style="position: relative; height: 100%; min-height: 250px;">
-                                <canvas id="chartReservasMes" class="w-100" style="height: 100%;"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header"><strong>Usuarios por Rol</strong></div>
-                            <div class="card-body" style="position: relative; height: 100%; min-height: 250px;">
-                                <canvas id="chartUsuariosRol" class="w-100" style="height: 100%;"></canvas>
-                            </div>
+                <div class="col-md-6">
+                    <div class="rounded shadow-sm overflow-hidden" style="height: 250px;">
+                        <!-- Mapa aquí -->
+                        <div id="map">
+                            <!-- Puedes insertar aquí el mapa Leaflet con tu lógica -->
+                            <iframe
+                                    src="https://www.openstreetmap.org/export/embed.html?bbox=-77.085%2C-12.085%2C-77.05%2C-12.06&layer=mapnik&marker=-12.072%2C-77.067"
+                                    style="width: 100%; height: 100%; border:0;" allowfullscreen="" loading="lazy">
+                            </iframe>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-        <script th:inline="javascript">
-            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]);
-            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]);
-        </script>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                if (document.getElementById("chartReservasMes")) {
-                    new Chart(document.getElementById("chartReservasMes"), {
-                        type: "line",
-                        data: {
-                            labels: reservasPorDia.map(e => e.dia),
-                            datasets: [{
-                                label: "Reservas",
-                                data: reservasPorDia.map(e => e.cantidad),
-                                borderColor: "#0d6efd",
-                                fill: false,
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { beginAtZero: true }
-                            }
-                        }
-                    });
-                }
-
-                if (document.getElementById("chartUsuariosRol")) {
-                    new Chart(document.getElementById("chartUsuariosRol"), {
-                        type: "doughnut",
-                        data: {
-                            labels: usuariosPorRol.map(e => e.rol),
-                            datasets: [{
-                                data: usuariosPorRol.map(e => e.total),
-                                backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#20c997"]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false
-                        }
-                    });
-                }
-            });
-        </script>
-
-
-
-
-        <!-- Comentado: Actividad y alertas -->
-        <!--
-        <div class="row"> ... </div>
-        <div class="row mt-4"> ... </div>
-        -->
-
-
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
+            <div class="text-center mt-4">
+                <button class="btn btn-success btn-lg rounded-pill shadow-sm px-4">
+                    <i class="bi bi-check-circle me-2"></i>Registrar asistencia del día
+                </button>
             </div>
-        </footer>
+        </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 text-muted small">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Escudo_de_San_Miguel%2C_Lima.svg/1200px-Escudo_de_San_Miguel%2C_Lima.svg.png" alt="Logo San Miguel" class="mb-2"><br>
+        Municipalidad de San Miguel © 2025
+    </footer>
 </div>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                    document.body.classList.add("sidebar-collapsed");
-                }
-            }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 991.98) {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-        });
-    });
-</script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
-</script>
 
 </body>
 </html>

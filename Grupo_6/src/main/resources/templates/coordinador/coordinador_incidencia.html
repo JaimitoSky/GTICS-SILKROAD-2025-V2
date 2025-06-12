@@ -3,57 +3,196 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Coordinador</title>
-
-    <!-- Estilos -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Registrar Incidencia - Coordinador</title> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/coordinador_sidebar.css}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* Base y tipografía */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Fondo claro general */
+            color: #333;
+        }
 
+        /* Transiciones uniformes */
+        * {
+            transition: all 0.2s ease-in-out;
+        }
 
+        /* Encabezados de contenido principal */
+        h3 {
+            font-weight: 700;
+            color: #333; /* Color oscuro para el título */
+            animation: fadeIn 0.4s ease-in-out;
+            display: flex; /* Para alinear el icono con el texto */
+            align-items: center;
+            gap: 0.75rem; /* Espacio entre icono y texto */
+        }
+
+        /* Etiquetas de formulario */
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem; /* Espacio debajo de la etiqueta */
+        }
+
+        /* Campos de texto y textarea */
+        textarea.form-control,
+        input.form-control { /* Añadido input.form-control por si hay otros campos */
+            border-radius: 12px; /* Más redondeado */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra más pronunciada al campo */
+            border: 1px solid #dee2e6; /* Borde suave */
+            padding: 1rem 1.25rem; /* Más padding para comodidad */
+            transition: all 0.3s ease-in-out;
+        }
+
+        textarea.form-control:focus,
+        input.form-control:focus {
+            border-color: #17b5c0; /* Turquesa al enfocar */
+            box-shadow: 0 0 0 0.25rem rgba(23, 181, 192, 0.25); /* Sombra de enfoque turquesa */
+            outline: none;
+        }
+
+        /* Botones generales */
+        button.btn {
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
+            padding: 0.85rem 2.5rem; /* Mayor padding para un botón más robusto */
+            font-size: 1.1rem; /* Texto un poco más grande */
+            transition: all 0.2s ease-in-out;
+        }
+
+        button.btn:hover {
+            transform: translateY(-2px); /* Pequeña elevación al hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra más grande al hover */
+        }
+
+        /* Contenido principal */
+        main.content {
+            padding: 2.5rem; /* Mayor padding general */
+            animation: fadeIn 0.3s ease-in-out;
+            background-color: #f8f9fa; /* Asegura que el contenido principal tenga este fondo */
+        }
+
+        /* Contenedor del formulario (añadido para aplicar sombra y fondo) */
+        .form-container-card {
+            background-color: #ffffff; /* Fondo blanco para el formulario */
+            border-radius: 16px; /* Bordes redondeados */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra suave para la tarjeta */
+            padding: 2.5rem; /* Padding interno */
+            margin-top: 1.5rem; /* Espacio debajo del título */
+        }
+
+        /* Footer */
+        footer.footer {
+            background-color: #f8f9fa; /* Fondo consistente */
+            border-top: 1px solid #e9ecef; /* Separador sutil */
+            padding-top: 2rem; /* Más padding para el footer */
+            padding-bottom: 2rem;
+        }
+
+        footer.footer img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* Sombra al logo del footer */
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos para el modal (si se mantiene, aunque no es ideal que esté en este archivo) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060; /* Superior a la navbar */
+        }
+
+        .modal-box {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        .modal-box h5 {
+            font-weight: 700;
+            color: #dc3545; /* Rojo para advertencia */
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-coordinador :: sidebar}"></div>
 
-    <!-- Main -->
-    <div class="main bg-white">
-        <!-- Navbar -->
-        <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
+    <div class="main"> <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
 
-        <!-- Contenido -->
         <main class="content">
             <div class="container mt-5">
-                <h3>Registrar Incidencia</h3>
-                <form th:action="@{/coordinador/incidencia/guardar}" method="post">
+                <h3 class="mb-4">
+                    <i class="bi bi-exclamation-triangle-fill text-danger"></i> Registrar Incidencia
+                </h3>
+
+                <div class="form-container-card"> <form th:action="@{/coordinador/incidencia/guardar}" method="post">
                     <input type="hidden" th:name="idreserva" th:value="${reserva.idreserva}" />
-                    <div class="mb-3">
-                        <label for="descripcion" class="form-label">Descripción</label>
-                        <textarea name="descripcion" id="descripcion" class="form-control" rows="4" required></textarea>
+
+                    <div class="mb-4"> <label for="descripcion" class="form-label">Descripción de la Incidencia</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control" rows="6" placeholder="Detalle la incidencia ocurrida..." required></textarea>
+                        <div class="form-text text-muted mt-2">
+                            Por favor, sea lo más detallado posible al describir la incidencia.
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-warning">Guardar</button>
+                    <div class="d-grid gap-2"> <button type="submit" class="btn btn-primary"> <i class="bi bi-save me-2"></i>Guardar Incidencia
+                    </button>
+                    </div>
                 </form>
+                </div>
             </div>
         </main>
 
-
-        <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo" height="60">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
             </div>
-            <div class="container text-center text-muted">
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Modal -->
 <div id="popupModal" class="modal-overlay" style="display: none;">
     <div class="modal-box">
         <h5 class="mb-3">Estás fuera de la zona permitida</h5>
@@ -61,115 +200,70 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<!--<script>
-    const modal = document.getElementById('popupModal');
-    const btnSalida = document.getElementById('btnSalida');
-    const sedeLat = /*[[${latitud}]]*/ 0;
-    const sedeLon = /*[[${longitud}]]*/ 0;
-
-    function cerrarModal() {
-        modal.style.display = 'none';
-    }
-
-    function validarEntrada() {
-        if (!navigator.geolocation) {
-            alert("Tu navegador no soporta geolocalización.");
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                const distancia = calcularDistancia(lat, lon, sedeLat, sedeLon);
-                if (distancia <= 0.1) {
-                    alert("Entrada registrada correctamente.");
-                    btnSalida.disabled = false;
-                } else {
-                    modal.style.display = 'flex';
-                }
-            },
-            () => {
-                alert("No se pudo obtener tu ubicación.");
-            }
-        );
-    }
-
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    // ⏰ Reloj en vivo
-    function actualizarHora() {
-        const reloj = document.getElementById('reloj');
-        if (!reloj) return;
-        const ahora = new Date();
-        const hora = ahora.toLocaleTimeString('es-PE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        reloj.textContent = hora;
-    }
-    setInterval(actualizarHora, 1000);
-    actualizarHora();
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-    });
-</script>-->
-
-<!-- Agrega esto al final del HTML -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-sA+z0pG4Gk6fTTVJHt/nTo/l3pYFZsS3dgDiGzD4x3E=" crossorigin="" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-o9N1jG8w+FqY5Gn9W0mJ6mPyvdbGg0XtgDTevZf+0Yw=" crossorigin=""></script>
-
-<!-- Geolocalización + Mapa -->
 <script th:inline="javascript">
     /*<![CDATA[*/
+    // Función para actualizar la hora y la fecha en la navbar
+    function updateDateTime() {
+        const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
+        const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
 
-    // ⏰ Reloj en vivo
-    function actualizarHora() {
-        const reloj = document.getElementById('reloj');
-        if (!reloj) return;
-        const ahora = new Date();
-        const hora = ahora.toLocaleTimeString('es-PE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        reloj.textContent = hora;
+        if (relojElement || fechaElement) {
+            const now = new Date();
+            // Formato de hora (ej: 01:19:03 a. m.)
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
+
+            // Formato de fecha (ej: 12/06/2025)
+            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const dateString = now.toLocaleDateString('es-PE', dateOptions);
+
+            if (relojElement) {
+                relojElement.textContent = timeString;
+            }
+            if (fechaElement) {
+                fechaElement.textContent = dateString;
+            }
+        }
     }
-    setInterval(actualizarHora, 1000);
-    actualizarHora();
 
+    // Actualizar cada segundo
+    setInterval(updateDateTime, 1000);
+    // Llamar al inicio para mostrar la hora inmediatamente
+    updateDateTime();
+
+    // Lógica para el toggle de la sidebar
     document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
+        const sidebarToggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
+        const mainContent = document.querySelector('.main');
+
+        if (sidebarToggle && sidebar && mainContent) {
+            sidebarToggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
+                // Guarda el estado en localStorage
+                localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
             });
+
+            // Recupera el estado guardado al cargar la página
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                document.body.classList.add('sidebar-collapsed');
+            }
         }
     });
+
+    // Funciones del modal (asegúrate de que estas funciones se llamen correctamente desde tu JS principal)
+    // Para el modal, necesitas una función `cerrarModal()` en tu JS.
+    // Esto es solo un ejemplo, la lógica real del modal podría ser más compleja.
+    function cerrarModal() {
+        const modal = document.getElementById('popupModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    /*]]>*/
 </script>
 </body>
 </html>

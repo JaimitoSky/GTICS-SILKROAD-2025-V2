@@ -5,135 +5,260 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Notificaciones - Coordinador</title>
 
-    <!-- Estilos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/coordinador_sidebar.css}">
+
+    <style>
+        /* Base y tipografía */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Fondo claro general */
+            color: #333;
+        }
+
+        /* Transiciones uniformes */
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Encabezados de contenido principal */
+        h4 {
+            font-weight: 700;
+            color: #333; /* Color oscuro para el título */
+            animation: fadeIn 0.4s ease-in-out;
+            display: flex; /* Para alinear el icono con el texto */
+            align-items: center;
+            gap: 0.75rem; /* Espacio entre icono y texto */
+        }
+
+        /* Contenedor de la lista */
+        .list-group {
+            margin-top: 1.5rem; /* Espacio debajo del título */
+        }
+
+        /* Elementos individuales de la lista (cada notificación) */
+        .list-group-item {
+            background-color: #ffffff; /* Fondo blanco para cada tarjeta de notificación */
+            border: none; /* Eliminar bordes por defecto de list-group-item */
+            border-left: 6px solid #17b5c0; /* Borde turquesa para destacar */
+            border-radius: 16px; /* Bordes más redondeados */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra más pronunciada */
+            margin-bottom: 1.25rem; /* Mayor espacio entre notificaciones */
+            padding: 1.5rem 2rem; /* Más padding para contenido */
+            display: flex;
+            align-items: flex-start; /* Alineación superior de los elementos */
+            gap: 1.25rem; /* Espacio entre el icono de la notificación y el contenido */
+            cursor: pointer; /* Indica que son clicables */
+            position: relative; /* Para el badge de no leído */
+        }
+
+        /* Efecto hover en las notificaciones */
+        .list-group-item:hover {
+            background-color: #f5f5f5; /* Un gris muy claro al hover */
+            transform: translateY(-3px); /* Ligeramente elevado */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12); /* Sombra más grande al hover */
+        }
+
+        /* Icono de notificación dentro del list-group-item */
+        .notification-icon-lg {
+            font-size: 2rem; /* Tamaño grande para el icono */
+            color: #17b5c0; /* Color turquesa para el icono */
+            min-width: 40px; /* Ancho fijo para el icono */
+            text-align: center;
+        }
+
+        /* Contenido del mensaje de la notificación */
+        .notification-content {
+            flex-grow: 1; /* Permite que el contenido tome el espacio disponible */
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .notification-message {
+            font-weight: 600;
+            font-size: 1.15rem; /* Mensaje un poco más grande */
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .notification-timestamp {
+            font-size: 0.85rem;
+            color: #777;
+            text-align: right;
+            white-space: nowrap; /* Evita que la fecha/hora se rompa */
+        }
+
+        /* Badge para notificaciones no leídas (ejemplo) */
+        .notification-unread-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545; /* Rojo para no leído */
+            color: white;
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            padding: 0;
+            font-size: 0; /* Oculta el texto del badge si es solo un punto */
+            border: 2px solid white; /* Borde blanco para destacar */
+        }
+
+        /* Alerta de no notificaciones */
+        .alert-info {
+            background-color: #e6f7ff; /* Fondo azul muy claro */
+            color: #0056b3; /* Texto azul oscuro */
+            border: 1px solid #b3e0ff; /* Borde azul claro */
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Contenido principal */
+        main.content {
+            padding: 2.5rem; /* Mayor padding general */
+            background-color: #f8f9fa; /* Asegura que el contenido principal tenga este fondo */
+        }
+
+        /* Footer */
+        footer.footer {
+            background-color: #f8f9fa; /* Fondo consistente */
+            border-top: 1px solid #e9ecef; /* Separador sutil */
+            padding-top: 2rem; /* Más padding para el footer */
+            padding-bottom: 2rem;
+        }
+
+        footer.footer img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* Sombra al logo del footer */
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-coordinador :: sidebar}"></div>
 
-    <!-- Main -->
-    <div class="main bg-white">
-        <!-- Navbar -->
-        <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
+    <div class="main"> <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
 
-        <!-- NOTIFICACIONES - coordinador_notificaciones.html -->
         <main class="content">
             <div class="container mt-4">
-                <h4 class="mb-4">Mis Notificaciones</h4>
+                <h4 class="mb-4">
+                    <i class="bi bi-bell-fill text-warning"></i> Mis Notificaciones
+                </h4>
 
-                <div th:if="${notificaciones.isEmpty()}">
+                <div th:if="${notificaciones.isEmpty()}" class="mt-4">
                     <div class="alert alert-info text-center">
-                        No tienes notificaciones por el momento.
+                        <i class="bi bi-info-circle-fill me-2"></i> No tienes notificaciones por el momento.
                     </div>
                 </div>
 
                 <div class="list-group" th:if="${notificaciones.size() > 0}">
-                    <div th:each="n : ${notificaciones}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        <span th:text="${n.mensaje}">Notificación de ejemplo</span>
-                        <span class="badge bg-secondary" th:text="${#dates.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}"></span>
-                    </div>
+                    <a th:each="n : ${notificaciones}"
+                       th:href="@{/coordinador/notificaciones/{id}(id=${n.id})}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+
+                        <div class="notification-icon-lg">
+                            <i class="bi bi-envelope-fill"></i> </div>
+
+                        <div class="notification-content">
+                            <span class="notification-message" th:text="${n.mensaje}">Notificación de ejemplo</span>
+                            <span class="notification-timestamp" th:text="${#dates.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
+
+                    </a>
                 </div>
             </div>
-
         </main>
 
-        <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo" height="60">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
             </div>
-            <div class="container text-center text-muted">
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Modal -->
-<div id="popupModal" class="modal-overlay" style="display: none;">
-    <div class="modal-box">
-        <h5 class="mb-3">Estás fuera de la zona permitida</h5>
-        <button class="btn btn-primary" onclick="cerrarModal()">Cerrar</button>
-    </div>
-</div>
-
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const modal = document.getElementById('popupModal');
-    const btnSalida = document.getElementById('btnSalida');
-    const sedeLat = /*[[${latitud}]]*/ 0;
-    const sedeLon = /*[[${longitud}]]*/ 0;
 
-    function cerrarModal() {
-        modal.style.display = 'none';
-    }
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Función para actualizar la hora y la fecha en la navbar
+    function updateDateTime() {
+        const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
+        const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
 
-    function validarEntrada() {
-        if (!navigator.geolocation) {
-            alert("Tu navegador no soporta geolocalización.");
-            return;
-        }
+        if (relojElement || fechaElement) {
+            const now = new Date();
+            // Formato de hora (ej: 01:19:03 a. m.)
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
 
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                const distancia = calcularDistancia(lat, lon, sedeLat, sedeLon);
-                if (distancia <= 0.1) {
-                    alert("Entrada registrada correctamente.");
-                    btnSalida.disabled = false;
-                } else {
-                    modal.style.display = 'flex';
-                }
-            },
-            () => {
-                alert("No se pudo obtener tu ubicación.");
+            // Formato de fecha (ej: 12/06/2025)
+            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const dateString = now.toLocaleDateString('es-PE', dateOptions);
+
+            if (relojElement) {
+                relojElement.textContent = timeString;
             }
-        );
+            if (fechaElement) {
+                fechaElement.textContent = dateString;
+            }
+        }
     }
 
-    function calcularDistancia(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
+    // Actualizar cada segundo
+    setInterval(updateDateTime, 1000);
+    // Llamar al inicio para mostrar la hora inmediatamente
+    updateDateTime();
 
-    // ⏰ Reloj en vivo
-    function actualizarHora() {
-        const reloj = document.getElementById('reloj');
-        if (!reloj) return;
-        const ahora = new Date();
-        const hora = ahora.toLocaleTimeString('es-PE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        reloj.textContent = hora;
-    }
-    setInterval(actualizarHora, 1000);
-    actualizarHora();
-
+    // Lógica para el toggle de la sidebar
     document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
+        const sidebarToggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
+        const mainContent = document.querySelector('.main');
+
+        if (sidebarToggle && sidebar && mainContent) {
+            sidebarToggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
+                // Guarda el estado en localStorage
+                localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
             });
+
+            // Recupera el estado guardado al cargar la página
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                document.body.classList.add('sidebar-collapsed');
+            }
         }
     });
+
+    // Se eliminó la lógica de geolocalización y el modal de "fuera de zona"
+    // ya que no son relevantes para la vista de listado de notificaciones.
+    // Si necesitas estas funcionalidades, deberían estar en las páginas donde son aplicables.
+    /*]]>*/
 </script>
 </body>
 </html>

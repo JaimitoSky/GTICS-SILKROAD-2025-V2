@@ -1,26 +1,30 @@
-<nav id="sidebar" class="sidebar js-sidebar ">
+<nav id="sidebar" class="sidebar js-sidebar">
     <div class="sidebar-content js-simplebar">
-        <a class="sidebar-brand" href="coordinador-home.html" style="background-color: #fbb202;">
-            <span class="align-middle" style="color: grey">Reservas San Miguel</span>
-        </a>
-        <ul class="sidebar-nav" style="background-color: #fbb202;">
+        <div class="sidebar-header">
+            <img th:src="@{/img/logo-san-miguel.png}" alt="Logo Municipalidad">
+            <div class="municipality-name">Coordinador</div> </div>
 
-            <!-- Inicio -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="coordinador-home.html" style="background-color: #fbb202;">
-                    <i class="align-middle" data-feather="home" style="color: grey"></i>
-                    <span class="align-middle" style="color: grey">Inicio</span>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/coordinador/home') ? 'active' : ''}" th:href="@{/coordinador/home}">
+                    <i class="bi bi-house-door-fill"></i>
+                    <span>Inicio</span>
                 </a>
             </li>
 
-            <!-- Notificaciones -->
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="coordinador-notificaciones.html" style="background-color: #fbb202;">
-                    <i class="align-middle" data-feather="bell" style="color: grey"></i>
-                    <span class="align-middle" style="color: grey">Notificaciones</span>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/coordinador/reservas') ? 'active' : ''}" th:href="@{/coordinador/reservas}">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Reservas</span>
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/coordinador/perfil') ? 'active' : ''}" th:href="@{/coordinador/perfil}">
+                    <i class="bi bi-person"></i>
+                    <span>Mi Perfil</span>
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
