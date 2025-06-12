@@ -7,98 +7,90 @@
 
         <!-- Estilos externos -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
         <!-- Estilos internos -->
-
+        <style>
+            .card-stats {
+                border: none;
+                border-radius: 1rem;
+                transition: all 0.3s ease;
+            }
+            .card-stats:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            }
+            canvas {
+                max-height: 300px;
+            }
+        </style>
     </head>
     <body>
         <div class="wrapper">
             <!-- Sidebar -->
             <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
 
-
             <!-- Main -->
             <div class="main">
                 <div th:replace="fragments/navbar-admin.html :: navbar"></div>
 
-
-
-
-
-
-                <!-- Métricas principales -->
-                <!--<div class="row mb-4">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-primary">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Activos</h5>
-                                <h2 th:text="${usuariosActivos}">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card text-white bg-info">
-                            <div class="card-body">
-                                <h5 class="card-title">Usuarios Conectados</h5>
-                                <h2 th:text="${usuariosConectados}">0</h2>
-                            </div>
-                        </div>
-                    </div> -->
-
                 <main class="content">
-                    <div class="container-fluid p-0">
-                        <h1 class="h3 mb-4"><strong>Dashboard General</strong> - Admin</h1>
+                    <div class="container-fluid p-4">
+                        <div class="text-center mb-4">
+                            <h1 class="h3 fw-bold">Dashboard General - Admin</h1>
+                        </div>
 
                         <!-- Métricas rápidas -->
-                        <div class="row mb-4">
-                            <div class="col-sm-6 col-xl-3">
-                                <div class="card text-white bg-primary">
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6 col-xl-3">
+                                <div class="card card-stats bg-primary text-white">
                                     <div class="card-body">
-                                        <h5 class="card-title">Reservas del Mes</h5>
-                                        <h2 th:text="${reservasDelMes}">0</h2>
+                                        <h6 class="text-uppercase">Reservas del Mes</h6>
+                                        <h2 class="fw-bold" th:text="${reservasDelMes}">0</h2>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6 col-xl-3">
-                                <div class="card text-white bg-success">
+                            <div class="col-md-6 col-xl-3">
+                                <div class="card card-stats bg-success text-white">
                                     <div class="card-body">
-                                        <h5 class="card-title">Reservas Totales</h5>
-                                        <h2 th:text="${totalReservas}">0</h2>
+                                        <h6 class="text-uppercase">Reservas Totales</h6>
+                                        <h2 class="fw-bold" th:text="${totalReservas}">0</h2>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6 col-xl-3">
-                                <div class="card text-white bg-warning">
+                            <div class="col-md-6 col-xl-3">
+                                <div class="card card-stats bg-warning text-white">
                                     <div class="card-body">
-                                        <h5 class="card-title">Sedes Registradas</h5>
-                                        <h2 th:text="${totalSedes}">0</h2>
+                                        <h6 class="text-uppercase">Sedes Registradas</h6>
+                                        <h2 class="fw-bold" th:text="${totalSedes}">0</h2>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6 col-xl-3">
-                                <div class="card text-white bg-info">
+                            <div class="col-md-6 col-xl-3">
+                                <div class="card card-stats bg-info text-white">
                                     <div class="card-body">
-                                        <h5 class="card-title">Usuarios Nuevos (Mes)</h5>
-                                        <h2 th:text="${usuariosNuevos}">0</h2>
+                                        <h6 class="text-uppercase">Usuarios Nuevos</h6>
+                                        <h2 class="fw-bold" th:text="${usuariosNuevos}">0</h2>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Gráficos -->
                         <div class="row">
                             <div class="col-lg-6 mb-4">
-                                <div class="card">
-                                    <div class="card-header"><strong>Reservas por Día (Mes)</strong></div>
+                                <div class="card shadow-sm">
+                                    <div class="card-header fw-semibold">Reservas por Día (Mes)</div>
                                     <div class="card-body">
                                         <canvas id="chartReservasMes"></canvas>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-4">
-                                <div class="card">
-                                    <div class="card-header"><strong>Usuarios por Rol</strong></div>
+                                <div class="card shadow-sm">
+                                    <div class="card-header fw-semibold">Usuarios por Rol</div>
                                     <div class="card-body">
                                         <canvas id="chartUsuariosRol"></canvas>
                                     </div>
@@ -107,67 +99,6 @@
                         </div>
                     </div>
                 </main>
-                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-                <script th:inline="javascript">
-                    const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]);
-                    const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]);
-
-                    console.log("reservasPorDia:", reservasPorDia);
-                    console.log("usuariosPorRol:", usuariosPorRol);
-                </script>
-
-
-                <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        if (document.getElementById("chartReservasMes")) {
-                            new Chart(document.getElementById("chartReservasMes"), {
-                                type: "line",
-                                data: {
-                                    labels: reservasPorDia.map(e => e.dia),
-                                    datasets: [{
-                                        label: "Reservas",
-                                        data: reservasPorDia.map(e => e.cantidad),
-                                        borderColor: "#0d6efd",
-                                        fill: false,
-                                        tension: 0.4
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: { legend: { display: false } }
-                                }
-                            });
-                        }
-
-                        if (document.getElementById("chartUsuariosRol")) {
-                            new Chart(document.getElementById("chartUsuariosRol"), {
-                                type: "doughnut",
-                                data: {
-                                    labels: usuariosPorRol.map(e => e.rol),
-                                    datasets: [{
-                                        data: usuariosPorRol.map(e => e.total),
-                                        backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#20c997"]
-                                    }]
-                                },
-                                options: {
-                                    responsive: true
-                                }
-                            });
-                        }
-                    });
-                </script>
-
-
-
-                <!-- Comentado: Actividad y alertas -->
-                <!--
-                <div class="row"> ... </div>
-                <div class="row mt-4"> ... </div>
-                -->
-
-
-
 
                 <!-- Footer -->
                 <footer class="footer mt-auto py-3 bg-light border-top">
@@ -180,42 +111,60 @@
 
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script th:inline="javascript">
+            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]) || [];
+            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]) || [];
+        </script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                const toggle = document.querySelector(".js-sidebar-toggle");
-                const sidebar = document.getElementById('sidebar');
-
-                if (toggle) {
-                    toggle.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        document.body.classList.toggle("sidebar-collapsed");
+                if (document.getElementById("chartReservasMes")) {
+                    new Chart(document.getElementById("chartReservasMes"), {
+                        type: "line",
+                        data: {
+                            labels: reservasPorDia.map(e => e.dia),
+                            datasets: [{
+                                label: "Reservas",
+                                data: reservasPorDia.map(e => e.cantidad),
+                                borderColor: "#0d6efd",
+                                fill: true,
+                                backgroundColor: "rgba(13, 110, 253, 0.1)",
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: true } }
+                        }
                     });
                 }
 
-                // Close sidebar when clicking outside on mobile
-                document.addEventListener('click', function(event) {
-                    if (window.innerWidth <= 991.98) {
-                        const isClickInsideSidebar = sidebar.contains(event.target);
-                        const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-                        if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                            document.body.classList.add("sidebar-collapsed");
+                if (document.getElementById("chartUsuariosRol")) {
+                    new Chart(document.getElementById("chartUsuariosRol"), {
+                        type: "doughnut",
+                        data: {
+                            labels: usuariosPorRol.map(e => e.rol),
+                            datasets: [{
+                                data: usuariosPorRol.map(e => e.total),
+                                backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#20c997"]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
                         }
-                    }
-                });
-
-                // Ajustar al redimensionar
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 991.98) {
-                        document.body.classList.remove("sidebar-collapsed");
-                    }
-                });
+                    });
+                }
             });
         </script>
         <script src="https://unpkg.com/feather-icons"></script>
         <script>
             feather.replace();
         </script>
-
     </body>
 </html>

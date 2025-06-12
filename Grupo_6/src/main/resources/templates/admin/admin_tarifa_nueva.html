@@ -10,33 +10,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
-
-    <!-- Estilos internos -->
-
   </head>
   <body>
     <div class="wrapper">
       <!-- Sidebar -->
       <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
 
+      <!-- Main -->
       <div class="main">
         <div th:replace="fragments/navbar-admin.html :: navbar"></div>
 
-
-
-
-
-
-
         <!-- Contenido principal -->
         <main class="content">
-          <div class="container-fluid p-0">
-            <h1 class="h3 mb-3"><strong>Registrar Nueva Tarifa</strong></h1>
+          <div class="container d-flex flex-column align-items-center justify-content-center">
+            <h1 class="h3 text-center mb-4"><strong>Registrar Nueva Tarifa</strong></h1>
 
-            <div class="card">
+            <div class="card w-100" style="max-width: 600px;">
               <div class="card-body">
                 <form th:action="@{/admin/tarifas/guardar}" th:object="${tarifa}" method="post">
-
                   <div class="mb-3">
                     <label class="form-label">Precio por hora (S/)</label>
                     <input type="number" step="0.01" min="0" class="form-control" th:field="*{monto}" required>
@@ -47,114 +38,15 @@
                     <textarea class="form-control" th:field="*{descripcion}" rows="2"></textarea>
                   </div>
 
-                  <button type="submit" class="btn btn-success">Registrar Tarifa</button>
-                  <a th:href="@{/admin/tarifas}" class="btn btn-secondary">Cancelar</a>
+                  <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">Registrar Tarifa</button>
+                    <a th:href="@{/admin/tarifas}" class="btn btn-secondary">Cancelar</a>
+                  </div>
                 </form>
               </div>
             </div>
           </div>
         </main>
-
-
-
-
-
-
-        <!-- Script para Chart.js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            // Línea: Reservas por día
-            new Chart(document.getElementById("chart-reservas-dia"), {
-              type: "line",
-              data: {
-                labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
-                datasets: [{
-                  label: "Reservas",
-                  data: [12, 19, 3, 5, 9, 7, 11],
-                  borderColor: "#0d6efd",
-                  tension: 0.3
-                }]
-              },
-              options: {
-                responsive: true,
-                plugins: { legend: { display: false } }
-              }
-            });
-
-            // Barras: Servicios más usados
-            new Chart(document.getElementById("chart-servicios"), {
-              type: "bar",
-              data: {
-                labels: ["Fútbol", "Piscina", "Gimnasio", "Básquet"],
-                datasets: [{
-                  label: "Reservas",
-                  data: [80, 50, 40, 30],
-                  backgroundColor: "#198754"
-                }]
-              },
-              options: {
-                responsive: true,
-                plugins: { legend: { display: false } }
-              }
-            });
-
-            // Doughnut: Tipos de usuarios
-            new Chart(document.getElementById("chart-usuarios"), {
-              type: "doughnut",
-              data: {
-                labels: ["Vecinos", "Coordinadores", "Admins", "Superadmins"],
-                datasets: [{
-                  data: [65, 15, 10, 10],
-                  backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#6f42c1"]
-                }]
-              },
-              options: { responsive: true }
-            });
-
-            // Pie: Estados de reserva
-            new Chart(document.getElementById("chart-estados"), {
-              type: "pie",
-              data: {
-                labels: ["Confirmadas", "Pendientes", "Canceladas"],
-                datasets: [{
-                  data: [60, 25, 15],
-                  backgroundColor: ["#198754", "#ffc107", "#dc3545"]
-                }]
-              },
-              options: { responsive: true }
-            });
-          });
-        </script>
-
-
-        <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-            const ctx = document.getElementById('activity-chart').getContext('2d');
-            new Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                datasets: [{
-                  label: 'Reservas',
-                  data: [12, 19, 3, 5, 2, 3, 7],
-                  borderColor: '#dc3545',
-                  tension: 0.3
-                }]
-              },
-              options: {
-                responsive: true,
-                plugins: {
-                  legend: {
-                    display: false
-                  }
-                }
-              }
-            });
-          });
-        </script>
-
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">
@@ -167,7 +59,10 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
     <script>
+      feather.replace();
+
       document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
         const sidebar = document.getElementById('sidebar');
@@ -179,10 +74,9 @@
           });
         }
 
-        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
           if (window.innerWidth <= 991.98) {
-            const isClickInsideSidebar = sidebar.contains(event.target);
+            const isClickInsideSidebar = sidebar?.contains(event.target);
             const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
             if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
@@ -191,7 +85,6 @@
           }
         });
 
-        // Ajustar al redimensionar
         window.addEventListener('resize', function() {
           if (window.innerWidth > 991.98) {
             document.body.classList.remove("sidebar-collapsed");
@@ -199,10 +92,5 @@
         });
       });
     </script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-      feather.replace();
-    </script>
-
   </body>
 </html>
