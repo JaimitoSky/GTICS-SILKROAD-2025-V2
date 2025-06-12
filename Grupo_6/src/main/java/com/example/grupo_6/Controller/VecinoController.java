@@ -557,5 +557,16 @@ public class VecinoController {
         return "redirect:/vecino/notificaciones";
     }
 
+    @GetMapping("/vecino/home")
+    public String home(HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+
+        return "vecino/vecino_home";
+    }
+
 
 }

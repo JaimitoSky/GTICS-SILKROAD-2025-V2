@@ -5,7 +5,11 @@
         <a th:href="@{/vecino}" class="logo-link d-block">
             <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad">
         </a>
-        <span class="municipality-name d-block">Vecino</span>
+        <span class="municipality-name d-block text-white"
+              th:text="${usuario != null ? usuario.nombres + ' ' + usuario.apellidos : 'Vecino'}">
+    Vecino
+</span>
+
     </div>
 
     <!-- Menú de navegación -->

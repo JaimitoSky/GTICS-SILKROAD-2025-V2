@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
@@ -106,8 +107,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     Page<Usuario> findAll(Pageable pageable);
     @Query("SELECT u FROM Usuario u WHERE u.rol.nombre = 'COORDINADOR' AND u.estado = 'activo'")
     List<Usuario> obtenerCoordinadoresActivos();
-
-
 
 
 
