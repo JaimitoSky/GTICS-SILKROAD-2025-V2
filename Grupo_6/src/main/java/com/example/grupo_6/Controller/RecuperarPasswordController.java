@@ -48,7 +48,7 @@ public class RecuperarPasswordController {
         session.setAttribute("usuarioRecuperacionEmail", usuario.getEmail());
 
         try {
-            emailService.enviarCodigoVerificacion(email, codigo);
+            emailService.enviarCodigoRecuperacion(email, codigo);
         } catch (MessagingException e) {
             model.addAttribute("error", "No se pudo enviar el correo de verificación.");
             return "session/olvide-contraseña";

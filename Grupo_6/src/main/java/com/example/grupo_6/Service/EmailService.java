@@ -48,4 +48,36 @@ public class EmailService {
         mailSender.send(mensaje);
     }
 
+    @Async
+    public void enviarCodigoRecuperacion(String destinatario, String codigo) throws MessagingException {
+        String asunto = "Recuperación de contraseña - Municipalidad de San Miguel";
+
+        String contenido = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                + "<h2>Recuperación de Contraseña</h2>"
+                + "<p>Estimado(a) usuario:</p>"
+                + "<p>Hemos recibido una solicitud para restablecer tu contraseña en el sistema de reservas deportivas de la <strong>Municipalidad de San Miguel</strong>.</p>"
+                + "<p>Para continuar con el proceso, por favor ingresa el siguiente código de verificación:</p>"
+                + "<div style='margin: 20px 0; font-size: 28px; font-weight: bold; color: #d9534f;'>" + codigo + "</div>"
+                + "<p>Este código es válido solo por unos minutos y es necesario para completar el proceso de recuperación.</p>"
+                + "<p>Si tú no solicitaste esta recuperación, puedes ignorar este mensaje.</p>"
+                + "<br><br>"
+                + "<p>Atentamente,</p>"
+                + "<p><strong>Municipalidad de San Miguel - Lima</strong></p>"
+                + "<img src='cid:logoSanMiguel' style='margin-top:20px; width:180px;'/>"
+                + "</div>";
+
+        MimeMessage mensaje = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mensaje, true);
+
+        helper.setTo(destinatario);
+        helper.setSubject(asunto);
+        helper.setText(contenido, true); // true = HTML
+
+        ClassPathResource logo = new ClassPathResource("static/img/photos/logo-san-miguel.png");
+        helper.addInline("logoSanMiguel", logo);
+
+        mailSender.send(mensaje);
+    }
+
+
 }
