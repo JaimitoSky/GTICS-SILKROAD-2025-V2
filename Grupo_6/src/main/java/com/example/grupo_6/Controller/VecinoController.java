@@ -121,10 +121,24 @@ public class VecinoController {
     public String actualizarPerfil(@RequestParam("correo") String correo,
                                    @RequestParam("telefono") String telefono,
                                    @RequestParam("direccion") String direccion,
+                                   RedirectAttributes attr,
                                    HttpSession session) {
+
         Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
         if (usuarioSesion == null) {
             return "redirect:/login";
+        }
+
+        // Validación manual de correo
+        if (!correo.matches("^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$")) {
+            attr.addFlashAttribute("error", "Solo se permiten correos @gmail.com, @outlook.com, @hotmail.com o @pucp.edu.pe.");
+            return "redirect:/vecino/perfil";
+        }
+
+        // Validación de teléfono (9 dígitos)
+        if (!telefono.matches("^\\d{9}$")) {
+            attr.addFlashAttribute("error", "El número de celular debe tener 9 dígitos.");
+            return "redirect:/vecino/perfil";
         }
 
         Usuario usuario = usuarioRepository.findById(usuarioSesion.getIdusuario()).orElse(null);
@@ -134,8 +148,11 @@ public class VecinoController {
             usuario.setDireccion(direccion);
             usuarioRepository.save(usuario);
         }
+
+        attr.addFlashAttribute("success", "Perfil actualizado correctamente.");
         return "redirect:/vecino/perfil";
     }
+
 
     // --- Cambiar contraseña ---
     @GetMapping("/cambiar-contrasena")
@@ -566,6 +583,15 @@ public class VecinoController {
         }
 
         return "vecino/vecino_home";
+    }
+    @GetMapping("/vecino/ListaComplejoDeportivo")
+    public String listaPorTipo(@RequestParam("idtipo") int idtipo, Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
+
+        model.addAttribute("usuario", usuario); // ✅ sigue siendo necesario
+        model.addAttribute("idtipoActivo", idtipo); // ✅ esto es lo que usa el sidebar
+        return "vecino/vecino_ListaComplejoDeportivo";
     }
 
 

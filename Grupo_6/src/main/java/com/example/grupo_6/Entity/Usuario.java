@@ -31,7 +31,10 @@ public class Usuario implements Serializable {
     @Column(length = 100)
     private String apellidos;
 
-    @NotBlank(message = "El correo no puede estar vacío")
+    @Pattern(
+            regexp = "^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe|upc\\.edu\\.pe)$",
+            message = "Formato de correo inválido"
+    )
     @Email(message = "Formato de correo inválido")
     @Size(max = 255)
     @Column(length = 255)

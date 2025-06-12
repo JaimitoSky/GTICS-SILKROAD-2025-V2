@@ -39,7 +39,10 @@
                         <div class="col-md-6 mb-3">
                             <label for="correo" class="form-label">Correo electrónico</label>
                             <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.correo}"
-                                   required pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" title="Debe ser un correo válido">
+                                   required
+                                   pattern="^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$"
+                                   title="Dominio de correo inválido">
+
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="telefono" class="form-label">Celular</label>
