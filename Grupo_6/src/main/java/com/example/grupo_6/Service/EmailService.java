@@ -3,6 +3,7 @@ package com.example.grupo_6.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -41,8 +42,8 @@ public class EmailService {
         helper.setText(contenido, true); // true = HTML
 
         // Adjuntar imagen del logo (asegúrate de tener el archivo en el path indicado)
-        FileSystemResource logo = new FileSystemResource("src/main/resources/static/img/photos/logo-san-miguel.png");
-        helper.addInline("logoSanMiguel", logo); // el cid debe coincidir con el usado en el HTML
+        ClassPathResource logo = new ClassPathResource("static/img/photos/logo-san-miguel.png");
+        helper.addInline("logoSanMiguel", logo);
 
         mailSender.send(mensaje);
     }
