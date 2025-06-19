@@ -37,6 +37,9 @@ public class HorarioDisponible {
     @Column(name = "aforo_maximo")
     private Integer aforoMaximo;
 
+    @Column(name = "aforo_disponible")
+    private Integer aforoDisponible;
+
     // Getters y Setters
     public Integer getAforoMaximo() {
         return aforoMaximo;

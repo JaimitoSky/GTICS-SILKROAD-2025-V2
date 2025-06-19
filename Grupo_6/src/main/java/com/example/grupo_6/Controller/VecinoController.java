@@ -245,16 +245,24 @@ public class VecinoController {
 
 
     @GetMapping("/complejo/detalle/{id}")
-    public String mostrarDetalleComplejo(@PathVariable("id") Integer id, Model model) {
-        Optional<SedeServicio> sedeServicioOpt = sedeServicioRepository.obtenerDetalleComplejoPorId(id);
+    public String descripcionComplejo(@PathVariable("id") Integer id, Model model) {
+        Optional<SedeServicio> optional = sedeServicioRepository.findById(id);
+        if (optional.isPresent()) {
+            SedeServicio sedeServicio = optional.get();
+            model.addAttribute("sedeServicio", sedeServicio);
 
-        if (sedeServicioOpt.isPresent()) {
-            model.addAttribute("sedeServicio", sedeServicioOpt.get());
+            List<HorarioDisponible> horarios = horarioDisponibleRepository.buscarPorSedeServicioId(
+                    sedeServicio.getSede().getIdsede(),
+                    sedeServicio.getServicio().getIdservicio()
+            );
+            model.addAttribute("horarios", horarios);
+
             return "vecino/vecino_DescripcionComplejoDeportivo";
         } else {
             return "redirect:/vecino";
         }
     }
+
     @GetMapping("/reservas")
     public String listarReservas(Model model, HttpSession session) {
         Integer idUsuario = (Integer) session.getAttribute("idusuario");
@@ -265,11 +273,40 @@ public class VecinoController {
     }
 
     @GetMapping("/reservas/nueva")
-    public String nuevaReserva(@RequestParam("idSedeServicio") Integer idSedeServicio, Model model) {
-        SedeServicio ss = sedeServicioRepository.findById(idSedeServicio).orElse(null);
+    public String nuevaReserva(@RequestParam("idSedeServicio") Integer idSedeServicio,
+                               Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return "redirect:/login";
 
-        if (ss == null) {
-            return "redirect:/vecino";
+        SedeServicio ss = sedeServicioRepository.findById(idSedeServicio).orElse(null);
+        if (ss == null) return "redirect:/vecino";
+        int idtipo = ss.getServicio().getTipoServicio().getIdtipo();
+        model.addAttribute("idtipoActivo", idtipo);
+        // Verifica si ya tiene una reserva activa en esa sede
+        List<Reserva> reservasActivas = reservaRepository
+                .findByUsuario_IdusuarioAndSedeServicio_IdSedeServicio(usuario.getIdusuario(), idSedeServicio)
+                .stream()
+                .filter(r -> r.getEstado().getIdestado() == 1 || r.getEstado().getIdestado() == 2)
+                .toList();
+
+        if (!reservasActivas.isEmpty()) {
+            int estado = reservasActivas.get(0).getEstado().getIdestado();
+
+            model.addAttribute("reservaBloqueada", true);
+
+            if (estado == 1) {
+                model.addAttribute("mensajeBloqueoPrincipal", "Usted tiene una reserva pendiente.");
+                model.addAttribute("modalColor", "warning");
+            } else {
+                model.addAttribute("mensajeBloqueoPrincipal", "Usted presenta una reserva registrada.");
+                model.addAttribute("mensajeBloqueoSecundario", "Llame al número de soporte para más información.");
+                model.addAttribute("modalColor", "success");
+            }
+        }
+
+
+        else {
+            model.addAttribute("reservaBloqueada", false);
         }
 
         Reserva reserva = new Reserva();
@@ -281,6 +318,7 @@ public class VecinoController {
 
         return "vecino/vecino_FormularioReservas";
     }
+
 
 
     @PostMapping("/reservas/guardar")
@@ -318,6 +356,12 @@ public class VecinoController {
             reserva.setSedeServicio(sedeServicio);
             reserva.setHorarioDisponible(horario);
             reserva.setEstado(estadoPendienteReserva); // siempre será pendiente
+
+            Integer aforoActual = horario.getAforoDisponible();
+            if (aforoActual != null && aforoActual > 0) {
+                horario.setAforoDisponible(aforoActual - 1);
+                horarioDisponibleRepository.save(horario);
+            }
 
             reservaRepository.save(reserva);
 

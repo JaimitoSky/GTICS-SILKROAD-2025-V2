@@ -151,6 +151,8 @@ AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
             List<Estado> estados,
             LocalDate fecha
     );
+    List<Reserva> findByUsuario_IdusuarioAndSedeServicio_IdSedeServicio(Integer idUsuario, Integer idSedeServicio);
+    List<Reserva> findByEstado(Estado estado);
 
 }
 
