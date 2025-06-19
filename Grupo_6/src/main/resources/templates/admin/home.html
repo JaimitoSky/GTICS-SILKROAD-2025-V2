@@ -1,170 +1,341 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Inicio - Admin</title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio - Admin</title>
 
-        <!-- Estilos externos -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-        <!-- Estilos internos -->
-        <style>
-            .card-stats {
-                border: none;
-                border-radius: 1rem;
-                transition: all 0.3s ease;
-            }
-            .card-stats:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-            }
-            canvas {
-                max-height: 300px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="wrapper">
-            <!-- Sidebar -->
-            <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+    <style>
+        /* Variables CSS Globales para consistencia */
+        :root {
+            --primary-color: #007bff; /* Azul principal */
+            --dark-primary-color: #0056b3; /* Azul oscuro para hover */
+            --secondary-color: #6c757d; /* Gris para textos secundarios/botones */
+            --success-color: #28a745; /* Verde para éxito */
+            --info-color: #17a2b8; /* Celeste para información */
+            --warning-color: #ffc107; /* Amarillo para advertencia */
+            --danger-color: #dc3545; /* Rojo para peligro/error */
+            --text-color: #333; /* Color de texto general */
+            --light-text-color: #666; /* Color de texto más claro */
+            --border-color: #e0e0e0; /* Color de bordes */
+            --background-light: #f8f9fa; /* Fondo claro para la aplicación */
+            --card-background: #ffffff; /* Fondo de tarjetas */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
+            --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
+            --border-radius-base: 0.5rem; /* Radio de borde base */
+            --border-radius-lg: 0.75rem; /* Radio de borde grande */
+        }
 
-            <!-- Main -->
-            <div class="main">
-                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light); /* Fondo general de la aplicación */
+            color: var(--text-color);
+        }
 
-                <main class="content">
-                    <div class="container-fluid p-4">
-                        <div class="text-center mb-4">
-                            <h1 class="h3 fw-bold">Dashboard General - Admin</h1>
-                        </div>
+        /* Estilos para el main content (área de trabajo principal) */
+        .main {
+            min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+            background-color: var(--background-light);
+        }
 
-                        <!-- Métricas rápidas -->
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6 col-xl-3">
-                                <div class="card card-stats bg-primary text-white">
-                                    <div class="card-body">
-                                        <h6 class="text-uppercase">Reservas del Mes</h6>
-                                        <h2 class="fw-bold" th:text="${reservasDelMes}">0</h2>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-xl-3">
-                                <div class="card card-stats bg-success text-white">
-                                    <div class="card-body">
-                                        <h6 class="text-uppercase">Reservas Totales</h6>
-                                        <h2 class="fw-bold" th:text="${totalReservas}">0</h2>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-xl-3">
-                                <div class="card card-stats bg-warning text-white">
-                                    <div class="card-body">
-                                        <h6 class="text-uppercase">Sedes Registradas</h6>
-                                        <h2 class="fw-bold" th:text="${totalSedes}">0</h2>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-xl-3">
-                                <div class="card card-stats bg-info text-white">
-                                    <div class="card-body">
-                                        <h6 class="text-uppercase">Usuarios Nuevos</h6>
-                                        <h2 class="fw-bold" th:text="${usuariosNuevos}">0</h2>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        .content {
+            padding: 1.5rem; /* Padding general para el contenido */
+        }
 
-                        <!-- Gráficos -->
-                        <div class="row">
-                            <div class="col-lg-6 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-header fw-semibold">Reservas por Día (Mes)</div>
-                                    <div class="card-body">
-                                        <canvas id="chartReservasMes"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 mb-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-header fw-semibold">Usuarios por Rol</div>
-                                    <div class="card-body">
-                                        <canvas id="chartUsuariosRol"></canvas>
-                                    </div>
-                                </div>
+        /* Título de la página */
+        h1.h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: 2rem; /* Más espacio debajo del título */
+            font-size: 1.8rem;
+        }
+
+        h1.h3 strong {
+            color: var(--primary-color);
+        }
+
+        /* Tarjetas de estadísticas */
+        .card-stats {
+            border: 1px solid var(--border-color); /* Borde sutil */
+            border-radius: var(--border-radius-lg); /* Bordes más redondeados */
+            box-shadow: 0 3px 10px var(--shadow-light); /* Sombra más sutil */
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-color: var(--card-background); /* Fondo de tarjeta blanco */
+            color: var(--text-color); /* Color de texto predeterminado para las tarjetas de stats */
+        }
+        .card-stats:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+        .card-stats .card-body {
+            padding: 1.5rem;
+        }
+        .card-stats h6 {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--light-text-color);
+        }
+        .card-stats h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 0;
+            color: var(--dark-primary-color); /* Color para el número */
+        }
+
+        /* Colores específicos para las tarjetas de estadísticas */
+        .card-stats.bg-primary { background-color: var(--primary-color) !important; color: white !important; }
+        .card-stats.bg-primary h6, .card-stats.bg-primary h2 { color: white !important; }
+
+        .card-stats.bg-success { background-color: var(--success-color) !important; color: white !important; }
+        .card-stats.bg-success h6, .card-stats.bg-success h2 { color: white !important; }
+
+        .card-stats.bg-warning { background-color: var(--warning-color) !important; color: var(--text-color) !important; } /* Texto oscuro para warning */
+        .card-stats.bg-warning h6, .card-stats.bg-warning h2 { color: var(--text-color) !important; }
+
+        .card-stats.bg-info { background-color: var(--info-color) !important; color: white !important; }
+        .card-stats.bg-info h6, .card-stats.bg-info h2 { color: white !important; }
+
+
+        /* Tarjetas de gráficos */
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 3px 10px var(--shadow-light);
+            overflow: hidden;
+            background-color: var(--card-background);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+        .card .card-header {
+            background-color: var(--background-light);
+            color: var(--text-color);
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1rem;
+        }
+        .card .card-body {
+            padding: 1.5rem;
+        }
+
+        canvas {
+            max-height: 300px; /* Mantener el tamaño original */
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-background) !important;
+            border-top: 1px solid var(--border-color) !important;
+            padding: 1rem 0;
+            color: var(--light-text-color) !important;
+            font-size: 0.85rem;
+            margin-top: 2rem; /* Espacio superior para separar del contenido */
+        }
+
+        /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .mb-2 { margin-bottom: 0.75rem !important; }
+        .p-4 { padding: 1.5rem !important; }
+        .g-4 { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+    <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+        <main class="content">
+            <div class="container-fluid p-4">
+                <div class="text-center mb-4">
+                    <h1 class="h3 fw-bold">Dashboard General - Admin</h1>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-stats bg-primary text-white">
+                            <div class="card-body">
+                                <h6 class="text-uppercase">Reservas del Mes</h6>
+                                <h2 class="fw-bold" th:text="${reservasDelMes}">0</h2>
                             </div>
                         </div>
                     </div>
-                </main>
-
-                <!-- Footer -->
-                <footer class="footer mt-auto py-3 bg-light border-top">
-                    <div class="container text-center text-muted">
-                        Municipalidad de San Miguel © 2025
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-stats bg-success text-white">
+                            <div class="card-body">
+                                <h6 class="text-uppercase">Reservas Totales</h6>
+                                <h2 class="fw-bold" th:text="${totalReservas}">0</h2>
+                            </div>
+                        </div>
                     </div>
-                </footer>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-stats bg-warning text-white">
+                            <div class="card-body">
+                                <h6 class="text-uppercase">Sedes Registradas</h6>
+                                <h2 class="fw-bold" th:text="${totalSedes}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card card-stats bg-info text-white">
+                            <div class="card-body">
+                                <h6 class="text-uppercase">Usuarios Nuevos</h6>
+                                <h2 class="fw-bold" th:text="${usuariosNuevos}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header fw-semibold">Reservas por Día (Mes)</div>
+                            <div class="card-body">
+                                <canvas id="chartReservasMes"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header fw-semibold">Usuarios por Rol</div>
+                            <div class="card-body">
+                                <canvas id="chartUsuariosRol"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
 
-        <script th:inline="javascript">
-            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]) || [];
-            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]) || [];
-        </script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                if (document.getElementById("chartReservasMes")) {
-                    new Chart(document.getElementById("chartReservasMes"), {
-                        type: "line",
-                        data: {
-                            labels: reservasPorDia.map(e => e.dia),
-                            datasets: [{
-                                label: "Reservas",
-                                data: reservasPorDia.map(e => e.cantidad),
-                                borderColor: "#0d6efd",
-                                fill: true,
-                                backgroundColor: "rgba(13, 110, 253, 0.1)",
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: { legend: { display: true } }
-                        }
-                    });
-                }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-                if (document.getElementById("chartUsuariosRol")) {
-                    new Chart(document.getElementById("chartUsuariosRol"), {
-                        type: "doughnut",
-                        data: {
-                            labels: usuariosPorRol.map(e => e.rol),
-                            datasets: [{
-                                data: usuariosPorRol.map(e => e.total),
-                                backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#20c997"]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom'
+<script th:inline="javascript">
+    const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]) || [];
+    const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]) || [];
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Función para obtener un color de la paleta de variables CSS
+        function getCssVariable(variableName) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+        }
+
+        if (document.getElementById("chartReservasMes")) {
+            new Chart(document.getElementById("chartReservasMes"), {
+                type: "line",
+                data: {
+                    labels: reservasPorDia.map(e => e.dia),
+                    datasets: [{
+                        label: "Reservas",
+                        data: reservasPorDia.map(e => e.cantidad),
+                        borderColor: getCssVariable('--primary-color'), // Usar variable CSS
+                        fill: true,
+                        backgroundColor: "rgba(0, 123, 255, 0.1)", // Color con opacidad para el área
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: getCssVariable('--text-color'), // Color de texto para la leyenda
+                                font: {
+                                    family: 'Inter', // Fuente para la leyenda
                                 }
                             }
                         }
-                    });
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: getCssVariable('--light-text-color'), // Color de ticks en X
+                                font: {
+                                    family: 'Inter',
+                                }
+                            },
+                            grid: {
+                                color: getCssVariable('--border-color') // Color de la grilla
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: getCssVariable('--light-text-color'), // Color de ticks en Y
+                                font: {
+                                    family: 'Inter',
+                                }
+                            },
+                            grid: {
+                                color: getCssVariable('--border-color') // Color de la grilla
+                            }
+                        }
+                    }
                 }
             });
-        </script>
-        <script src="https://unpkg.com/feather-icons"></script>
-        <script>
-            feather.replace();
-        </script>
-    </body>
+        }
+
+        if (document.getElementById("chartUsuariosRol")) {
+            new Chart(document.getElementById("chartUsuariosRol"), {
+                type: "doughnut",
+                data: {
+                    labels: usuariosPorRol.map(e => e.rol),
+                    datasets: [{
+                        data: usuariosPorRol.map(e => e.total),
+                        backgroundColor: [
+                            getCssVariable('--primary-color'),
+                            getCssVariable('--warning-color'),
+                            getCssVariable('--danger-color'),
+                            getCssVariable('--success-color')
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: getCssVariable('--text-color'), // Color de texto para la leyenda
+                                font: {
+                                    family: 'Inter', // Fuente para la leyenda
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+</body>
 </html>

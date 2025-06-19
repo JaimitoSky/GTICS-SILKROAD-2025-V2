@@ -1,244 +1,580 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Usuarios - Admin</title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Usuarios - Admin</title>
 
-        <!-- Estilos externos -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-        <!-- Estilos internos -->
-        <style>
-            table {
-                background-color: white;
-            }
-            table td, table th {
-                background-color: white !important;
-            }
-            .card-title {
-                font-size: 1.4rem;
-                font-weight: 600;
-            }
-            body.sidebar-collapsed .wrapper .sidebar {
-                display: none;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="wrapper">
-            <!-- Sidebar -->
-            <div class="sidebar" th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+    <style>
+        /* Variables CSS Globales para consistencia */
+        :root {
+            --primary-color: #007bff; /* Azul principal */
+            --dark-primary-color: #0056b3; /* Azul oscuro para hover */
+            --secondary-color: #6c757d; /* Gris para textos secundarios/botones */
+            --success-color: #28a745; /* Verde para éxito */
+            --info-color: #17a2b8; /* Celeste para información */
+            --warning-color: #ffc107; /* Amarillo para advertencia */
+            --danger-color: #dc3545; /* Rojo para peligro/error */
+            --text-color: #333; /* Color de texto general */
+            --light-text-color: #666; /* Color de texto más claro */
+            --border-color: #e0e0e0; /* Color de bordes */
+            --background-light: #f8f9fa; /* Fondo claro para la aplicación */
+            --card-background: #ffffff; /* Fondo de tarjetas */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
+            --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
+            --border-radius-base: 0.5rem; /* Radio de borde base */
+            --border-radius-lg: 0.75rem; /* Radio de borde grande */
+        }
 
-            <!-- Main -->
-            <div class="main">
-                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light); /* Fondo general de la aplicación */
+            color: var(--text-color);
+        }
 
-                <button class="btn btn-outline-secondary d-md-none m-2 js-sidebar-toggle">
-                    <i class="bi bi-list"></i>
-                </button>
+        /* Estilos para el main content (área de trabajo principal) */
+        .main {
+            min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+            background-color: var(--background-light);
+        }
 
-                <main class="content py-3 px-4" style="background-color: white;">
-                    <div class="row g-0">
-                        <div class="col-12">
-                            <div class="card flex-fill" style="background-color: white;">
-                                <form th:action="@{/admin/usuarios/registrados}" method="get" class="row g-2 mb-1 align-items-center justify-content-end">
-                                    <div class="col-12 col-sm-auto">
-                                        <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
-                                            <option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
-                                            <option th:value="'correo'" th:selected="${campo == 'correo'}">Correo</option>
-                                            <option th:value="'rol'" th:selected="${campo == 'rol'}">Rol</option>
-                                            <option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
-                                            <option th:value="'id'" th:selected="${campo == 'id'}">ID</option>
-                                        </select>
-                                    </div>
+        .content {
+            padding: 1.5rem; /* Padding general para el contenido */
+            background-color: var(--background-light) !important; /* Asegura que el fondo sea consistente */
+        }
 
-                                    <div class="col-12 col-sm" id="filtroContainer">
-                                        <input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." th:value="${filtro}">
-                                    </div>
+        /* Título de la página (ajustado de h5 a h2 para consistencia) */
+        h2.page-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: 2rem; /* Más espacio debajo del título */
+            font-size: 1.8rem;
+        }
 
-                                    <div class="col-auto">
-                                        <button type="submit" class="btn btn-outline-primary">
-                                            <i class="bi bi-search"></i> Buscar
-                                        </button>
-                                    </div>
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
 
-                                    <div class="col-auto" th:if="${filtro != null and filtro != ''}">
-                                        <a th:href="@{/admin/usuarios/registrados}" class="btn btn-outline-secondary">
-                                            <i class="bi bi-arrow-left"></i> Volver
-                                        </a>
-                                    </div>
-                                </form>
+        /* Tarjeta principal (contiene el formulario y la tabla) */
+        .card {
+            border: 1px solid var(--border-color); /* Borde sutil */
+            border-radius: var(--border-radius-lg); /* Bordes más redondeados */
+            box-shadow: 0 3px 10px var(--shadow-light); /* Sombra más sutil */
+            overflow: hidden; /* Asegura que los bordes redondeados se apliquen al contenido */
+            background-color: var(--card-background); /* Fondo de tarjeta blanco */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
 
-                                <div class="card-header d-flex justify-content-between align-items-center pt-2 pb-2" style="background-color: white;">
-                                    <h5 class="card-title mb-0">Gestión de Usuarios</h5>
-                                    <a th:href="@{/admin/usuarios/registrados/nuevo}" class="btn btn-outline-primary btn-sm px-3">
-                                        <i class="bi bi-person-plus-fill"></i> Nuevo Usuario
-                                    </a>
-                                </div>
-                                <div class="table-responsive mt-0">
-                                    <table class="table table-hover table-striped align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Nombre</th>
-                                                <th class="d-none d-md-table-cell">Correo</th>
-                                                <th class="d-none d-md-table-cell">Rol</th>
-                                                <th class="d-none d-md-table-cell">Estado</th>
-                                                <th class="text-center">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:each="usuario : ${usuarios}">
-                                                <td th:text="${usuario.idusuario}">1</td>
-                                                <td th:text="${usuario.nombres + ' ' + usuario.apellidos}">Juan Pérez</td>
-                                                <td class="d-none d-md-table-cell" th:text="${usuario.email}">juan@mail.com</td>
-                                                <td class="d-none d-md-table-cell" th:text="${mapaRoles[usuario.idrol]}">admin</td>
-                                                <td class="d-none d-md-table-cell">
-            <span class="badge text-uppercase px-3 py-2"
-                  th:classappend="${usuario.estado} == 'activo' ? 'bg-success' : (usuario.estado == 'inactivo' ? 'bg-danger' : 'bg-warning')"
-                  th:text="${usuario.estado}">Activo</span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="d-flex flex-wrap gap-1 justify-content-center">
-                                                        <div th:if="${usuario.idrol == 3 or usuario.idrol == 4}">
-                                                            <form th:action="@{/admin/cambiar-rol}" method="post">
-                                                                <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-                                                                <select name="rol" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                                    <option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
-                                                                    <option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
-                                                                </select>
-                                                            </form>
-                                                        </div>
+        .card:hover {
+            transform: translateY(-2px); /* Menos movimiento al hover */
+            box-shadow: 0 6px 15px var(--shadow-medium); /* Sombra un poco más visible al hover */
+        }
 
-                                                        <div th:if="${usuario.idrol != 1 and usuario.idrol != 2}">
-                                                            <form th:if="${usuario.estado == 'inactivo'}"
-                                                                  th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
-                                                                <button type="submit" class="btn btn-outline-success" title="Activar Usuario">
-                                                                    <i class="bi bi-check-circle"></i>
-                                                                </button>
-                                                            </form>
+        .card-header {
+            background-color: var(--card-background) !important; /* Fondo de tarjeta blanco para el header */
+            color: var(--text-color); /* Texto oscuro */
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color); /* Borde inferior sutil */
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1rem; /* Un poco más grande para títulos de tabla */
+        }
 
-                                                            <form th:if="${usuario.estado != 'inactivo'}"
-                                                                  th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
-                                                                <button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
-                                                                    <i class="bi bi-slash-circle"></i>
-                                                                </button>
-                                                            </form>
+        .card-title { /* Ajuste del card-title dentro del card-header */
+            font-size: 1.25rem; /* Un poco más grande que el valor predeterminado de Bootstrap h5 */
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
 
-                                                            <a th:href="@{/admin/usuarios/registrados/editar/{id}(id=${usuario.idusuario})}"
-                                                               class="btn btn-outline-primary" title="Editar Usuario">
-                                                                <i class="bi bi-pencil"></i>
-                                                            </a>
+        /* Formulario de búsqueda y filtros */
+        .search-filter-form {
+            background-color: var(--card-background); /* Asegura fondo blanco */
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+        }
 
-                                                            <form th:action="@{admin/usuarios/registrados/eliminar}" method="post" class="d-inline">
-                                                                <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-                                                                <button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
-                                                                        data-bs-toggle="modal" data-bs-target="#confirmModal"
-                                                                        th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+        .form-control, .form-select {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,.05);
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            background-color: var(--card-background);
+        }
 
-                                    <nav aria-label="Paginación de usuarios">
-                                        <ul class="pagination justify-content-center flex-wrap">
-                                            <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-                                                <a class="page-link"
-                                                   th:href="@{/admin/usuarios/registrados(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
-                                            </li>
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
 
-                                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
-                                                th:classappend="${i == paginaActual} ? 'active'">
-                                                <a class="page-link"
-                                                   th:href="@{/admin/usuarios/registrados(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
-                                                   th:text="${i + 1}">1</a>
-                                            </li>
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
 
-                                            <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
-                                                <a class="page-link"
-                                                   th:href="@{/admin/usuarios/registrados(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: all 0.2s ease;
+            padding: 0.75rem 1rem; /* Consistente con form-control */
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transition: all 0.2s ease;
+            padding: 0.75rem 1rem; /* Consistente con form-control */
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-sm { /* Para el botón "Nuevo Usuario" */
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+            border-radius: var(--border-radius-base);
+        }
+
+        /* Estilos de tabla */
+        .table {
+            --bs-table-bg: var(--card-background); /* Fondo de tabla blanco */
+            --bs-table-color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--background-light); /* Resaltado sutil al pasar el ratón */
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: var(--background-light); /* Fondo para filas impares */
+        }
+
+        .table thead.table-light {
+            background-color: var(--background-light) !important;
+            color: var(--dark-primary-color);
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            border-bottom-width: 2px; /* Borde inferior más grueso en thead */
+            border-color: var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 0.85rem 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Badges de estado */
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: var(--border-radius-base);
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .badge.bg-success { background-color: var(--success-color) !important; color: white !important;}
+        .badge.bg-danger { background-color: var(--danger-color) !important; color: white !important;}
+        .badge.bg-warning { background-color: var(--warning-color) !important; color: var(--text-color) !important;}
+
+        /* Botones de acción en la tabla */
+        .table .btn {
+            width: 36px; /* Ancho fijo para botones de ícono */
+            height: 36px; /* Alto fijo para botones de ícono */
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem; /* Ajuste para que el ícono se vea bien */
+            border-radius: var(--border-radius-base);
+            margin-right: 0.25rem; /* Pequeño margen entre botones */
+        }
+        .table .btn:last-child {
+            margin-right: 0;
+        }
+
+        .table .btn-outline-success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        .table .btn-outline-success:hover {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .table .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        .table .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .table .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .table .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .table .btn-outline-warning {
+            color: var(--warning-color);
+            border-color: var(--warning-color);
+        }
+        .table .btn-outline-warning:hover {
+            background-color: var(--warning-color);
+            color: var(--text-color); /* Texto oscuro para warning */
+        }
+
+        /* Select para cambiar rol en la tabla */
+        .form-select-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            height: calc(1.5em + 0.5rem + 2px); /* Ajuste de altura */
+            border-radius: var(--border-radius-base);
+            background-position: right 0.5rem center; /* Ajuste de posición de la flecha */
+            max-width: 120px; /* Limitar ancho del select */
+        }
 
 
+        /* Paginación */
+        .pagination {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            padding: 0;
+            margin-top: 1.5rem; /* Más espacio superior */
+        }
+        .pagination .page-item { margin: 0 0.25rem; } /* Margen consistente */
+        .pagination .page-link {
+            display: block;
+            padding: 0.5rem 1rem; /* Padding consistente */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-base);
+            color: var(--primary-color);
+            text-decoration: none;
+            background-color: var(--card-background);
+            transition: all 0.2s ease;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .pagination .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+        }
+        .pagination .page-link:hover:not(.disabled) {
+            background-color: var(--background-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-background) !important;
+            border-top: 1px solid var(--border-color) !important;
+            padding: 1rem 0;
+            color: var(--light-text-color) !important;
+            font-size: 0.85rem;
+            margin-top: 2rem; /* Espacio superior para separar del contenido */
+        }
+
+        /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
+        .mb-1 { margin-bottom: 0.5rem !important; } /* Pequeño ajuste */
+        .mb-3 { margin-bottom: 1.5rem !important; }
+        .mb-4 { margin-bottom: 2rem !important; }
+        .py-3 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+        .px-4 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+        .g-0 { --bs-gutter-x: 0; --bs-gutter-y: 0; } /* Resetear gutters del row si no se necesitan */
+        .g-2 { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; } /* Consistencia en gutters para el form */
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+    <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <main class="content">
+            <div class="container-fluid p-4">
+                <h2 class="page-title mb-4">Gestión de Usuarios</h2>
+
+                <div class="card">
+                    <form th:action="@{/admin/usuarios/registrados}" method="get" class="search-filter-form row g-2 mb-0 align-items-center">
+                        <div class="col-12 col-md-auto">
+                            <label for="campoSelect" class="visually-hidden">Filtrar por</label>
+                            <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
+                                <option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
+                                <option th:value="'correo'" th:selected="${campo == 'correo'}">Correo</option>
+                                <option th:value="'rol'" th:selected="${campo == 'rol'}">Rol</option>
+                                <option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
+                                <option th:value="'id'" th:selected="${campo == 'id'}">ID</option>
+                            </select>
                         </div>
+
+                        <div class="col-12 col-md" id="filtroContainer">
+                            <input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." th:value="${filtro}">
+                        </div>
+
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-search me-1"></i> Buscar
+                            </button>
+                        </div>
+
+                        <div class="col-auto" th:if="${filtro != null and filtro != ''}">
+                            <a th:href="@{/admin/usuarios/registrados}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Limpiar
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-auto ms-auto text-end"> <a th:href="@{/admin/usuarios/registrados/nuevo}" class="btn btn-primary btn-sm px-3">
+                            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
+                        </a>
+                        </div>
+                    </form>
+
+                    <div class="card-body px-0 pt-0"> <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle mb-0"> <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th class="d-none d-sm-table-cell">Correo</th> <th class="d-none d-md-table-cell">Rol</th>
+                            <th class="d-none d-lg-table-cell">Estado</th> <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                            <tbody>
+                            <tr th:each="usuario : ${usuarios}">
+                                <td th:text="${usuario.idusuario}">1</td>
+                                <td th:text="${usuario.nombres + ' ' + usuario.apellidos}">Juan Pérez</td>
+                                <td class="d-none d-sm-table-cell" th:text="${usuario.email}">juan@mail.com</td>
+                                <td class="d-none d-md-table-cell" th:text="${mapaRoles[usuario.idrol]}">admin</td>
+                                <td class="d-none d-lg-table-cell">
+                                                    <span class="badge text-uppercase"
+                                                          th:classappend="${usuario.estado} == 'activo' ? 'bg-success' : (usuario.estado == 'inactivo' ? 'bg-danger' : 'bg-warning')"
+                                                          th:text="${usuario.estado}">Activo</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                        <div th:if="${usuario.idrol == 3 or usuario.idrol == 4}">
+                                            <form th:action="@{/admin/cambiar-rol}" method="post">
+                                                <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+                                                <select name="rol" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                    <option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
+                                                    <option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
+                                                </select>
+                                            </form>
+                                        </div>
+
+                                        <div th:if="${usuario.idrol != 1 and usuario.idrol != 2}">
+                                            <form th:if="${usuario.estado == 'inactivo'}"
+                                                  th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-success" title="Activar Usuario">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                            </form>
+
+                                            <form th:if="${usuario.estado != 'inactivo'}"
+                                                  th:action="@{'/admin/usuarios/registrados/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
+                                                    <i class="bi bi-slash-circle"></i>
+                                                </button>
+                                            </form>
+
+                                            <a th:href="@{/admin/usuarios/registrados/editar/{id}(id=${usuario.idusuario})}"
+                                               class="btn btn-outline-primary" title="Editar Usuario">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <form th:action="@{admin/usuarios/registrados/eliminar}" method="post" class="d-inline">
+                                                <input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+                                                <button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
+                                                        data-bs-toggle="modal" data-bs-target="#confirmModal"
+                                                        th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(usuarios)}">
+                                <td colspan="6" class="text-center py-4 text-muted">No se encontraron usuarios registrados.</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-            </div>
-            </main>
 
-            <footer class="footer mt-auto py-3 bg-light border-top">
-                <div class="container text-center text-muted">
-                    Municipalidad de San Miguel © 2025
+                        <nav aria-label="Paginación de usuarios" class="mt-4">
+                            <ul class="pagination justify-content-center flex-wrap">
+                                <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/usuarios/registrados(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+                                </li>
+
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                                    th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/usuarios/registrados(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/admin/usuarios/registrados(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            </footer>
+            </div>
+        </main>
+
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar al usuario <strong id="nombreUsuario"></strong> (ID: <span id="idUsuarioModal"></span>)? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteUserForm" th:action="@{/admin/usuarios/registrados/eliminar}" method="post" class="d-inline">
+                    <input type="hidden" name="idusuario" id="inputIdUsuario" value="" />
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
         </div>
-        </div>
+    </div>
+</div>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            function actualizarInputFiltro() {
-                const campo = document.getElementById("campoSelect").value;
-                const contenedor = document.getElementById("filtroContainer");
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    function actualizarInputFiltro() {
+        const campo = document.getElementById("campoSelect").value;
+        const contenedor = document.getElementById("filtroContainer");
+        const filtroActual = new URLSearchParams(window.location.search).get('filtro');
 
-                let nuevoInput = '';
+        let nuevoInput = '';
 
-                if (campo === 'estado') {
-                    nuevoInput = `
-                <select class="form-select" name="filtro">
+        if (campo === 'estado') {
+            nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
                   <option value="">Seleccionar estado</option>
-                  <option value="activo">Activo</option>
-                  <option value="inactivo">Inactivo</option>
+                  <option value="activo" ${filtroActual === 'activo' ? 'selected' : ''}>Activo</option>
+                  <option value="inactivo" ${filtroActual === 'inactivo' ? 'selected' : ''}>Inactivo</option>
                 </select>`;
-                } else if (campo === 'rol') {
-                    nuevoInput = `
-                <select class="form-select" name="filtro">
+        } else if (campo === 'rol') {
+            nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
                   <option value="">Seleccionar rol</option>
-                  <option value="1">Superadmin</option>
-                  <option value="2">Administrador</option>
-                  <option value="3">Coordinador</option>
-                  <option value="4">Vecino</option>
+                  <option value="1" ${filtroActual === '1' ? 'selected' : ''}>Superadmin</option>
+                  <option value="2" ${filtroActual === '2' ? 'selected' : ''}>Administrador</option>
+                  <option value="3" ${filtroActual === '3' ? 'selected' : ''}>Coordinador</option>
+                  <option value="4" ${filtroActual === '4' ? 'selected' : ''}>Vecino</option>
                 </select>`;
-                } else {
-                    nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
-                }
+        } else {
+            nuevoInput = `<input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." value="${filtroActual ? filtroActual : ''}">`;
+        }
 
-                contenedor.innerHTML = nuevoInput;
-            }
+        contenedor.innerHTML = nuevoInput;
+    }
 
-            document.addEventListener("DOMContentLoaded", () => {
-                actualizarInputFiltro();
+    document.addEventListener("DOMContentLoaded", function () {
+        feather.replace(); // Inicializar Feather Icons
 
-                const modal = document.getElementById("confirmModal");
-                if (modal) {
-                    modal.addEventListener("show.bs.modal", function (event) {
-                        const button = event.relatedTarget;
-                        const idUsuario = button.getAttribute("data-id");
-                        const nombre = button.getAttribute("data-nombre");
-                        document.getElementById("inputIdUsuario").value = idUsuario;
-                        document.getElementById("nombreUsuario").innerText = nombre;
-                    });
-                }
+        // Lógica del sidebar
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar'); // Asegúrate de que tu sidebar tenga este ID
 
-                const toggle = document.querySelector(".js-sidebar-toggle");
-                if (toggle) {
-                    toggle.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        document.body.classList.toggle("sidebar-collapsed");
-                    });
-                }
+        if (toggle && sidebar) {
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
             });
-        </script>
-    </body>
+        }
+
+        // Close sidebar when clicking outside on mobile (for `d-lg-none` sidebar)
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 991.98) { // Bootstrap 'lg' breakpoint
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                if (!isClickInsideSidebar && !isClickOnToggle && document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.remove("sidebar-collapsed");
+                } else if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
+            }
+        });
+
+        // Ajustar al redimensionar (asegura que el sidebar esté visible en pantallas grandes)
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed");
+            }
+        });
+
+        // Lógica para el modal de confirmación
+        const confirmModal = document.getElementById("confirmModal");
+        if (confirmModal) {
+            confirmModal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget; // Botón que activó el modal
+                const idUsuario = button.getAttribute("data-id");
+                const nombreUsuario = button.getAttribute("data-nombre");
+
+                const modalBody = confirmModal.querySelector(".modal-body");
+                modalBody.innerHTML = `¿Estás seguro de que deseas eliminar al usuario <strong>${nombreUsuario}</strong> (ID: ${idUsuario})? Esta acción no se puede deshacer.`;
+
+                const form = document.getElementById("deleteUserForm");
+                const inputIdUsuario = document.getElementById("inputIdUsuario");
+                inputIdUsuario.value = idUsuario;
+            });
+        }
+
+        // Asegurar que el filtro se cargue correctamente al inicio
+        actualizarInputFiltro();
+    });
+</script>
+</body>
 </html>

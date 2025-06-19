@@ -1,204 +1,274 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Estadisticas - Admin</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estadísticas - Admin</title>
 
-    <!-- Estilos externos -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-    <!-- Estilos internos -->
+  <style>
+    /* Variables CSS Globales para consistencia */
+    :root {
+      --primary-color: #007bff; /* Azul principal */
+      --dark-primary-color: #0056b3; /* Azul oscuro para hover */
+      --secondary-color: #6c757d; /* Gris para textos secundarios */
+      --success-color: #28a745; /* Verde para éxito */
+      --info-color: #17a2b8; /* Celeste para información */
+      --warning-color: #ffc107; /* Amarillo para advertencia */
+      --danger-color: #dc3545; /* Rojo para peligro/error */
+      --text-color: #333; /* Color de texto general */
+      --light-text-color: #666; /* Color de texto más claro */
+      --border-color: #e0e0e0; /* Color de bordes */
+      --background-light: #f8f9fa; /* Fondo claro para la aplicación (usado en headers de tarjetas de resumen) */
+      --card-background: #ffffff; /* Fondo de tarjetas (blanco) */
+      --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
+      --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
+      --border-radius-base: 0.5rem; /* Radio de borde base */
+      --border-radius-lg: 0.75rem; /* Radio de borde grande */
+    }
 
-  </head>
-  <body>
-    <div class="wrapper">
-      <!-- Sidebar -->
-      <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background-light); /* Fondo general de la aplicación */
+      color: var(--text-color);
+    }
 
-      <!-- navbar -->
-      <div class="main">
-        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+    /* Estilos para el main content (área de trabajo principal) */
+    .main {
+      min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+      background-color: var(--background-light);
+    }
 
+    .content {
+      padding: 1.5rem; /* Padding general para el contenido */
+    }
 
+    /* Título de la página */
+    h1.h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--dark-primary-color);
+      margin-bottom: 2rem; /* Más espacio debajo del título */
+      font-size: 1.8rem;
+    }
 
+    h1.h3 strong {
+      color: var(--primary-color);
+    }
 
+    /* Formulario de filtros */
+    .form-label {
+      font-weight: 600;
+      color: var(--light-text-color);
+      margin-bottom: 0.5rem;
+      display: block; /* Asegura que la etiqueta esté en su propia línea */
+    }
 
+    .form-control, .form-select {
+      border-radius: var(--border-radius-base);
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1rem; /* Padding consistente */
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.05); /* Sombra interior más sutil */
+      transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+      font-size: 0.95rem;
+      color: var(--text-color);
+      background-color: var(--card-background); /* Fondo blanco para inputs */
+    }
 
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    }
 
-        <main class="content">
-          <div class="container-fluid p-0">
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: var(--border-radius-base);
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+      transition: all 0.2s ease;
+    }
 
-            <h1 class="h3 mb-4"><strong>Estadísticas Generales</strong> - Admin</h1>
+    .btn-primary:hover {
+      background-color: var(--dark-primary-color);
+      border-color: var(--dark-primary-color);
+      box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+      transform: translateY(-1px);
+    }
 
-            <form method="get" th:action="@{/admin/estadisticas}" class="row g-3 mb-4">
-              <div class="col-md-3">
-                <label class="form-label">Filtrar por mes</label>
-                <input type="month" class="form-control" name="mes" th:value="${mesActual}">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Filtrar por rol</label>
-                <select class="form-select" name="rol">
-                  <option value="">Todos</option>
-                  <option value="VECINO" th:selected="${rolActual == 'VECINO'}">Vecino</option>
-                  <option value="COORDINADOR" th:selected="${rolActual == 'COORDINADOR'}">Coordinador</option>
-                  <option value="SUPERADMIN" th:selected="${rolActual == 'SUPERADMIN'}">SuperAdmin</option>
-                </select>
-              </div>
-              <div class="col-md-3 align-self-end">
-                <button type="submit" class="btn btn-primary">Aplicar filtros</button>
-              </div>
-            </form>
+    /* Tarjetas de Resumen (Info Cards) - MANTIENEN SU ESTILO ORIGINAL */
+    .card {
+      border: 1px solid var(--border-color); /* Borde sutil */
+      border-radius: var(--border-radius-lg); /* Bordes más redondeados */
+      box-shadow: 0 3px 10px var(--shadow-light); /* Sombra más sutil */
+      overflow: hidden;
+      background-color: var(--card-background); /* Fondo de tarjeta blanco */
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: 100%; /* Asegura que las tarjetas tengan la misma altura en una fila */
+    }
 
-            <div class="row">
-              <div class="col-md-4">
-                <div class="card bg-light text-dark mb-3">
-                  <div class="card-header">Reservas del mes</div>
-                  <div class="card-body">
-                    <h3 class="card-title" th:text="${reservasDelMes}">0</h3>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card bg-light text-dark mb-3">
-                  <div class="card-header">Usuarios totales</div>
-                  <div class="card-body">
-                    <h3 class="card-title" th:text="${usuariosTotales}">0</h3>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card bg-light text-dark mb-3">
-                  <div class="card-header">Usuarios nuevos (este mes)</div>
-                  <div class="card-body">
-                    <h3 class="card-title" th:text="${usuariosNuevos}">0</h3>
-                  </div>
-                </div>
+    .card:hover {
+      transform: translateY(-2px); /* Menos movimiento al hover */
+      box-shadow: 0 6px 15px var(--shadow-medium); /* Sombra un poco más visible al hover */
+    }
+
+    .card .card-header {
+      background-color: var(--background-light); /* Fondo claro como en la imagen de los cuadros de resumen */
+      color: var(--text-color); /* Texto oscuro */
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color); /* Borde inferior sutil */
+      border-top-left-radius: var(--border-radius-lg);
+      border-top-right-radius: var(--border-radius-lg);
+      font-size: 1rem;
+    }
+
+    .card .card-body {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .card .card-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 2.5rem; /* Tamaño de fuente más grande para los números */
+      color: var(--dark-primary-color);
+      margin-bottom: 0;
+      line-height: 1;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--card-background) !important;
+      border-top: 1px solid var(--border-color) !important;
+      padding: 1rem 0;
+      color: var(--light-text-color) !important;
+      font-size: 0.85rem;
+    }
+
+    /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
+    .mb-4 { margin-bottom: 1.5rem !important; } /* Aumento de margen inferior */
+    .mb-3 { margin-bottom: 1rem !important; }
+    .p-0 { padding: 0 !important; }
+    .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; } /* Más espacio entre columnas */
+    .g-3 { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+  <div class="main">
+    <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+    <main class="content">
+      <div class="container-fluid p-0">
+
+        <h1 class="h3 mb-4"><strong>Estadísticas Generales</strong> - Admin</h1>
+
+        <form method="get" th:action="@{/admin/estadisticas}" class="row g-3 mb-4">
+          <div class="col-md-3">
+            <label class="form-label">Filtrar por mes</label>
+            <input type="month" class="form-control" name="mes" th:value="${mesActual}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Filtrar por rol</label>
+            <select class="form-select" name="rol">
+              <option value="">Todos</option>
+              <option value="VECINO" th:selected="${rolActual == 'VECINO'}">Vecino</option>
+              <option value="COORDINADOR" th:selected="${rolActual == 'COORDINADOR'}">Coordinador</option>
+              <option value="SUPERADMIN" th:selected="${rolActual == 'SUPERADMIN'}">SuperAdmin</option>
+            </select>
+          </div>
+          <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+          </div>
+        </form>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card mb-3">
+              <div class="card-header">Reservas del mes</div>
+              <div class="card-body">
+                <h3 class="card-title" th:text="${reservasDelMes}">0</h3>
               </div>
             </div>
-
           </div>
-        </main>
-
-        <!-- Script para Chart.js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-        <!-- Cargar datos del backend con Thymeleaf -->
-        <script th:inline="javascript">
-          const reservasPorDia = [[${reservasPorDiaJson}]];
-          const serviciosPopulares = [[${serviciosPopularesJson}]];
-          const usuariosPorRol = [[${usuariosPorRolJson}]];
-          const estadoReservas = [[${estadoReservasJson}]];
-        </script>
-
-        <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            new Chart(document.getElementById("chart-reservas-dia"), {
-              type: "line",
-              data: {
-                labels: reservasPorDia.map(e => e.dia),
-                datasets: [{
-                  label: "Reservas",
-                  data: reservasPorDia.map(e => e.cantidad),
-                  borderColor: "#0d6efd",
-                  tension: 0.3
-                }]
-              },
-              options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-
-            new Chart(document.getElementById("chart-servicios"), {
-              type: "bar",
-              data: {
-                labels: serviciosPopulares.map(e => e.nombre),
-                datasets: [{
-                  label: "Reservas",
-                  data: serviciosPopulares.map(e => e.cantidad),
-                  backgroundColor: "#198754"
-                }]
-              },
-              options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-
-            new Chart(document.getElementById("chart-usuarios"), {
-              type: "doughnut",
-              data: {
-                labels: usuariosPorRol.map(e => e.rol),
-                datasets: [{
-                  data: usuariosPorRol.map(e => e.total),
-                  backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#6f42c1"]
-                }]
-              },
-              options: { responsive: true }
-            });
-
-            new Chart(document.getElementById("chart-estados"), {
-              type: "pie",
-              data: {
-                labels: estadoReservas.map(e => e.estado),
-                datasets: [{
-                  data: estadoReservas.map(e => e.cantidad),
-                  backgroundColor: ["#198754", "#ffc107", "#dc3545"]
-                }]
-              },
-              options: { responsive: true }
-            });
-          });
-        </script>
-
-
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-          <div class="container text-center text-muted">
-            Municipalidad de San Miguel © 2025
+          <div class="col-md-4">
+            <div class="card mb-3">
+              <div class="card-header">Usuarios totales</div>
+              <div class="card-body">
+                <h3 class="card-title" th:text="${usuariosTotales}">0</h3>
+              </div>
+            </div>
           </div>
-        </footer>
+          <div class="col-md-4">
+            <div class="card mb-3">
+              <div class="card-header">Usuarios nuevos (este mes)</div>
+              <div class="card-body">
+                <h3 class="card-title" th:text="${usuariosNuevos}">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
+    </main>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
+    <footer class="footer mt-auto py-3 bg-light border-top">
+      <div class="container text-center text-muted">
+        Municipalidad de San Miguel © 2025
+      </div>
+    </footer>
+  </div>
+</div>
 
-        if (toggle) {
-          toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            document.body.classList.toggle("sidebar-collapsed");
-          });
-        }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Scripts para el sidebar (sin cambios solicitados)
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.querySelector(".js-sidebar-toggle");
+    const sidebar = document.getElementById('sidebar');
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-          if (window.innerWidth <= 991.98) {
-            const isClickInsideSidebar = sidebar.contains(event.target);
-            const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-            if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-              document.body.classList.add("sidebar-collapsed");
-            }
-          }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-          if (window.innerWidth > 991.98) {
-            document.body.classList.remove("sidebar-collapsed");
-          }
-        });
+    if (toggle) {
+      toggle.addEventListener("click", function (e) {
+        e.preventDefault();
+        document.body.classList.toggle("sidebar-collapsed");
       });
-    </script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-      feather.replace();
-    </script>
+    }
 
-  </body>
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      if (window.innerWidth <= 991.98) {
+        const isClickInsideSidebar = sidebar.contains(event.target);
+        const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+        if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+          document.body.classList.add("sidebar-collapsed");
+        }
+      }
+    });
+
+    // Ajustar al redimensionar
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 991.98) {
+        document.body.classList.remove("sidebar-collapsed");
+      }
+    });
+  });
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  feather.replace();
+</script>
+
+</body>
 </html>

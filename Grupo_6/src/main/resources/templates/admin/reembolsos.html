@@ -1,106 +1,282 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Gestión de Usuarios - Admin</title>
-        <link href="../../static/css/app.css" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
-        <style>
-            .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-            .table-actions .btn { margin-right: 8px; width: 38px; height: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
-            .btn-icon svg { width: 18px; height: 18px; }
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                background: rgba(0,0,0,0.5);
-                z-index: 2000;
-            }
-            .modal.show {
-                display: flex;
-            }
-            .modal-dialog {
-                max-width: 500px;
-                width: 90%;
-                margin: auto;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .modal-content {
-                position: relative;
-                z-index: 2002;
-                background: #fff;
-                padding: 1.5rem;
-                border-radius: 0.5rem;
-            }
-            .modal-header, .modal-footer { border: none; }
-            .modal-header { padding-bottom: 0; }
-            .modal-footer { padding-top: 0; }
-            .badge-user-type { font-size: 0.85rem; padding: 0.35em 0.65em; }
-            .search-container { margin-bottom: 1rem; }
-            .pagination { display: flex; list-style: none; justify-content: center; padding: 0; margin-top: 1rem; }
-            .pagination .page-item { margin: 0 4px; }
-            .pagination .page-link { display: block; padding: 8px 16px; border: 1px solid #dee2e6; border-radius: .25rem; color: #007bff; text-decoration: none; }
-            .pagination .page-item.active .page-link { background-color: #007bff; color: #fff; border-color: #007bff; }
-            .pagination .page-item.disabled .page-link { color: #6c757d; pointer-events: none; background-color: #fff; border-color: #dee2e6; }
-            .modal-backdrop.show { display: none !important; }
-        </style>
-    </head>
-    <body>
-        <div class="wrapper">
-            <div id="sidebar-container"></div>
-            <div class="main">
-                <nav class="navbar navbar-expand navbar-light navbar-bg">
-                    <a class="sidebar-toggle js-sidebar-toggle"><i class="hamburger align-self-center"></i></a>
-                    <div class="navbar-collapse collapse">
-                        <ul class="navbar-nav navbar-align ms-auto">
-                            <li class="nav-item"><a class="nav-link" href="#"><img src="../../static/img/icons/campana.png" alt="Notificaciones" style="height: 18px; width: 18px;"></a></li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i data-feather="user"></i> <span class="text-dark">Administrador</span></a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="perfil.html">Mi cuenta</a></li>
-                                    <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-                <main class="content">
-                    <div class="container-fluid p-4">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="input-group search-container">
-                                    <input type="text" class="form-control" placeholder="Buscar reembolsos...">
-                                    <button class="btn btn-primary" type="button"><i data-feather="search"></i></button>
-                                </div>
-                            </div>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reembolsos - Admin</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+
+    <style>
+        /* Variables CSS Globales para consistencia */
+        :root {
+            --primary-color: #007bff; /* Azul principal */
+            --dark-primary-color: #0056b3; /* Azul oscuro para hover */
+            --secondary-color: #6c757d; /* Gris para textos secundarios/botones */
+            --success-color: #28a745; /* Verde para éxito */
+            --info-color: #17a2b8; /* Celeste para información */
+            --warning-color: #ffc107; /* Amarillo para advertencia */
+            --danger-color: #dc3545; /* Rojo para peligro/error */
+            --text-color: #333; /* Color de texto general */
+            --light-text-color: #666; /* Color de texto más claro */
+            --border-color: #e0e0e0; /* Color de bordes */
+            --background-light: #f8f9fa; /* Fondo claro para la aplicación */
+            --card-background: #ffffff; /* Fondo de tarjetas */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
+            --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
+            --border-radius-base: 0.5rem; /* Radio de borde base */
+            --border-radius-lg: 0.75rem; /* Radio de borde grande */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light); /* Fondo general de la aplicación */
+            color: var(--text-color);
+        }
+
+        /* Estilos para el main content (área de trabajo principal) */
+        .main {
+            min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: 1.5rem; /* Padding general para el contenido */
+        }
+
+        /* Título de la página (ajustado de h5 a h2 para consistencia) */
+        h2.page-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: 2rem; /* Más espacio debajo del título */
+            font-size: 1.8rem;
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        /* Formulario de búsqueda */
+        .search-container .form-control {
+            border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            background-color: var(--card-background);
+        }
+        .search-container .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .search-container .btn-primary {
+            border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .search-container .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+        }
+
+        /* Tarjeta principal (contiene la tabla) */
+        .card {
+            border: 1px solid var(--border-color); /* Borde sutil */
+            border-radius: var(--border-radius-lg); /* Bordes más redondeados */
+            box-shadow: 0 3px 10px var(--shadow-light); /* Sombra más sutil */
+            overflow: hidden; /* Asegura que los bordes redondeados se apliquen al contenido */
+            background-color: var(--card-background); /* Fondo de tarjeta blanco */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px); /* Menos movimiento al hover */
+            box-shadow: 0 6px 15px var(--shadow-medium); /* Sombra un poco más visible al hover */
+        }
+
+        .card .card-header {
+            background-color: var(--background-light); /* Fondo claro como en la imagen de los cuadros de resumen */
+            color: var(--text-color); /* Texto oscuro */
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color); /* Borde inferior sutil */
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1rem; /* Un poco más grande para títulos de tabla */
+        }
+
+        /* Estilos de tabla */
+        .table {
+            --bs-table-bg: var(--card-background); /* Fondo de tabla blanco */
+            --bs-table-color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--background-light); /* Resaltado sutil al pasar el ratón */
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: var(--background-light); /* Fondo para filas impares */
+        }
+
+        .table thead.table-light {
+            background-color: var(--background-light) !important;
+            color: var(--dark-primary-color);
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            border-bottom-width: 2px; /* Borde inferior más grueso en thead */
+            border-color: var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 0.85rem 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Paginación */
+        .pagination {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            padding: 0;
+            margin-top: 1.5rem; /* Más espacio superior */
+        }
+        .pagination .page-item { margin: 0 0.25rem; } /* Margen consistente */
+        .pagination .page-link {
+            display: block;
+            padding: 0.5rem 1rem; /* Padding consistente */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-base);
+            color: var(--primary-color);
+            text-decoration: none;
+            background-color: var(--card-background);
+            transition: all 0.2s ease;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .pagination .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+        }
+        .pagination .page-link:hover:not(.disabled) {
+            background-color: var(--background-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-background) !important;
+            border-top: 1px solid var(--border-color) !important;
+            padding: 1rem 0;
+            color: var(--light-text-color) !important;
+            font-size: 0.85rem;
+            margin-top: 2rem; /* Espacio superior para separar del contenido */
+        }
+
+        /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .mb-3 { margin-bottom: 1rem !important; }
+        .mt-5 { margin-top: 2rem !important; } /* Ajustado a un valor más Bootstrap */
+        .p-4 { padding: 1.5rem !important; }
+        .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; } /* Consistencia en gutters */
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+    <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <main class="content">
+            <div class="container-fluid p-4">
+                <h2 class="page-title mb-4">Gestión de Reembolsos</h2>
+
+                <div class="row mb-4 justify-content-center">
+                    <div class="col-12 col-md-8 col-lg-6">
+                        <div class="input-group search-container">
+                            <input type="text" class="form-control" placeholder="Buscar por ID, usuario o motivo...">
+                            <button class="btn btn-primary" type="button">
+                                <i data-feather="search" class="align-middle"></i>
+                            </button>
                         </div>
-                        <div class="mt-5">
-                            <h5>Reembolsos</h5>
-                            <div class="table-responsive">
-                                <table class="table table-hover table-striped">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>ID</th><th>Usuario</th><th>Monto</th><th>Motivo</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>#R001</td>
-                                            <td>Carlos Gómez</td>
-                                            <td>S/ 85.00</td>
-                                            <td>Cancelación del evento por lluvia</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Monto</th>
+                                    <th>Motivo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>#R001</td>
+                                    <td>Carlos Gómez</td>
+                                    <td>S/ 85.00</td>
+                                    <td>Cancelación del evento por lluvia</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-success me-2" title="Aprobar Reembolso"><i class="bi bi-check-lg"></i></a>
+                                        <a href="#" class="btn btn-sm btn-danger" title="Rechazar Reembolso"><i class="bi bi-x-lg"></i></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#R002</td>
+                                    <td>Ana Torres</td>
+                                    <td>S/ 50.00</td>
+                                    <td>Servicio no prestado</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-success me-2" title="Aprobar Reembolso"><i class="bi bi-check-lg"></i></a>
+                                        <a href="#" class="btn btn-sm btn-danger" title="Rechazar Reembolso"><i class="bi bi-x-lg"></i></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#R003</td>
+                                    <td>Luis Martínez</td>
+                                    <td>S/ 120.00</td>
+                                    <td>Reserva duplicada</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-success me-2" title="Aprobar Reembolso"><i class="bi bi-check-lg"></i></a>
+                                        <a href="#" class="btn btn-sm btn-danger" title="Rechazar Reembolso"><i class="bi bi-x-lg"></i></a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${#lists.isEmpty(listaReembolsos)}" class="text-center p-4">
+                            <p class="text-muted mb-0">No se encontraron reembolsos pendientes.</p>
                         </div>
                         <nav aria-label="Paginación">
                             <ul class="pagination">
@@ -112,19 +288,60 @@
                             </ul>
                         </nav>
                     </div>
-                </main>
+                </div>
             </div>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://unpkg.com/feather-icons"></script>
-        <script>
-            feather.replace();
-            fetch('../fragments/sidebar-administrador.html').then(res => res.text()).then(html => {
-                document.getElementById('sidebar-container').innerHTML = html;
-                const toggle = document.querySelector('.js-sidebar-toggle'), sidebar = document.getElementById('sidebar'), main = document.querySelector('.main');
-                if(toggle && sidebar && main) toggle.addEventListener('click', e=>{ e.preventDefault(); sidebar.classList.toggle('collapsed'); main.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed')); });
-                feather.replace();
+        </main>
+
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        feather.replace(); // Inicializar Feather Icons
+
+        // Control del sidebar
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar'); // Asegúrate de que tu sidebar tenga este ID
+
+        if (toggle && sidebar) {
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
             });
-        </script>
-    </body>
+        }
+
+        // Close sidebar when clicking outside on mobile (for `d-lg-none` sidebar)
+        document.addEventListener('click', function(event) {
+            // Solo aplica en pantallas pequeñas donde el sidebar se colapsa
+            if (window.innerWidth <= 991.98) { // Bootstrap 'lg' breakpoint
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                if (!isClickInsideSidebar && !isClickOnToggle && document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.remove("sidebar-collapsed"); // Si está colapsado y no se hizo clic en sidebar/toggle, mostrarlo.
+                } else if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    // Este caso es para cuando el sidebar NO está colapsado y se hace clic fuera.
+                    // Aquí se debería colapsar.
+                    document.body.classList.add("sidebar-collapsed");
+                }
+            }
+        });
+
+
+        // Ajustar al redimensionar (asegura que el sidebar esté visible en pantallas grandes)
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed"); // Asegura que no esté colapsado en pantallas grandes
+            }
+        });
+    });
+</script>
+</body>
 </html>

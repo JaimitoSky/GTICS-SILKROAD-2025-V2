@@ -1,147 +1,266 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Perfil - Admin</title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Perfil - Admin</title>
 
-        <!-- Estilos externos -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-        <!-- Estilos internos -->
+    <style>
+        /* Variables CSS Globales para consistencia */
+        :root {
+            --primary-color: #007bff; /* Azul principal */
+            --dark-primary-color: #0056b3; /* Azul oscuro para hover */
+            --secondary-color: #6c757d; /* Gris para textos secundarios/botones */
+            --success-color: #28a745; /* Verde para éxito */
+            --info-color: #17a2b8; /* Celeste para información */
+            --warning-color: #ffc107; /* Amarillo para advertencia */
+            --danger-color: #dc3545; /* Rojo para peligro/error */
+            --text-color: #333; /* Color de texto general */
+            --light-text-color: #666; /* Color de texto más claro */
+            --border-color: #e0e0e0; /* Color de bordes */
+            --background-light: #f8f9fa; /* Fondo claro para la aplicación */
+            --card-background: #ffffff; /* Fondo de tarjetas */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
+            --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
+            --border-radius-base: 0.5rem; /* Radio de borde base */
+            --border-radius-lg: 0.75rem; /* Radio de borde grande */
+        }
 
-    </head>
-    <body>
-        <div class="wrapper">
-            <!-- Sidebar -->
-            <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light); /* Fondo general de la aplicación */
+            color: var(--text-color);
+        }
 
+        /* Estilos para el main content (área de trabajo principal) */
+        .main {
+            min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+            background-color: var(--background-light);
+        }
 
-            <!-- Main -->
-            <div class="main">
-                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+        .content {
+            padding: 1.5rem; /* Padding general para el contenido */
+        }
 
+        /* Título de la página */
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: 2rem; /* Más espacio debajo del título */
+            font-size: 1.8rem;
+        }
 
+        /* Formulario */
+        .form-label {
+            font-weight: 600;
+            color: var(--light-text-color);
+            margin-bottom: 0.5rem;
+            display: block; /* Asegura que la etiqueta esté en su propia línea */
+        }
 
+        .form-control {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Padding consistente */
+            box-shadow: inset 0 1px 2px rgba(0,0,0,.05); /* Sombra interior más sutil */
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            background-color: var(--card-background); /* Fondo blanco para inputs */
+        }
 
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
 
+        .form-control:disabled {
+            background-color: var(--background-light); /* Fondo ligeramente gris para campos deshabilitados */
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
 
-                <!-- Contenido principal -->
-                <main class="content">
-                    <div class="container-fluid p-4">
-                        <h2 class="mb-4">Mi Perfil</h2>
-                        <form method="post" th:action="@{/perfil-admin/actualizar}">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="nombres" class="form-label">Nombres</label>
-                                    <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="apellidos" class="form-label">Apellidos</label>
-                                    <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="correo" class="form-label">Correo electrónico</label>
-                                    <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.email}">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="telefono" class="form-label">Celular</label>
-                                    <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="direccion" class="form-label">Dirección</label>
-                                <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
-                            </div>
+        /* Botones */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: var(--border-radius-base);
+            transition: all 0.2s ease;
+        }
 
-                            <!--<div class="d-flex justify-content-between mt-4">
-                                <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
-                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                            </div>-->
-                        </form>
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            box-shadow: none;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-outline-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Contenedor del formulario para aplicar estilos de tarjeta si se desea */
+        .form-container-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 3px 10px var(--shadow-light);
+            padding: 1.5rem; /* Ajustar padding si ya hay padding en .content */
+            margin-bottom: 2rem; /* Espacio para separar del footer */
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-background) !important;
+            border-top: 1px solid var(--border-color) !important;
+            padding: 1rem 0;
+            color: var(--light-text-color) !important;
+            font-size: 0.85rem;
+            margin-top: 2rem; /* Espacio superior para separar del contenido */
+        }
+
+        /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .mb-3 { margin-bottom: 1rem !important; }
+        .p-4 { padding: 1.5rem !important; }
+        .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; } /* Consistencia en gutters */
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+    <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+        <main class="content">
+            <div class="container-fluid p-4">
+                <h2 class="mb-4">Mi Perfil</h2>
+                <div class="form-container-card"> <form method="post" th:action="@{/perfil-admin/actualizar}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombres" class="form-label">Nombres</label>
+                            <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="apellidos" class="form-label">Apellidos</label>
+                            <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
+                        </div>
                     </div>
-                </main>
-
-                <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                        const ctx = document.getElementById('activity-chart').getContext('2d');
-                        new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                                datasets: [{
-                                    label: 'Reservas',
-                                    data: [12, 19, 3, 5, 2, 3, 7],
-                                    borderColor: '#dc3545',
-                                    tension: 0.3
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
-                            }
-                        });
-                    });
-                </script>
-
-
-                <!-- Footer -->
-                <footer class="footer mt-auto py-3 bg-light border-top">
-                    <div class="container text-center text-muted">
-                        Municipalidad de San Miguel © 2025
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="correo" name="email" th:value="${perfil.email}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Celular</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
+                        </div>
                     </div>
-                </footer>
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+                </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const toggle = document.querySelector(".js-sidebar-toggle");
-                const sidebar = document.getElementById('sidebar');
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
 
-                if (toggle) {
-                    toggle.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        document.body.classList.toggle("sidebar-collapsed");
-                    });
-                }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar'); // Asegúrate de que el sidebar tenga este ID
 
-                // Close sidebar when clicking outside on mobile
-                document.addEventListener('click', function(event) {
-                    if (window.innerWidth <= 991.98) {
-                        const isClickInsideSidebar = sidebar.contains(event.target);
-                        const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-                        if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                            document.body.classList.add("sidebar-collapsed");
-                        }
-                    }
-                });
-
-                // Ajustar al redimensionar
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 991.98) {
-                        document.body.classList.remove("sidebar-collapsed");
-                    }
-                });
+        // Asegúrate de que el botón de toggle solo se muestre en pantallas pequeñas
+        const mainDiv = document.querySelector('.main');
+        if (mainDiv && toggle) {
+            const toggleButtonHtml = `
+                        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle-mobile">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    `;
+            // Añadir el botón solo si no existe ya
+            if (!mainDiv.querySelector('.js-sidebar-toggle-mobile')) {
+                mainDiv.insertAdjacentHTML('afterbegin', toggleButtonHtml);
+            }
+            const mobileToggle = mainDiv.querySelector('.js-sidebar-toggle-mobile');
+            mobileToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
             });
-        </script>
-        <script src="https://unpkg.com/feather-icons"></script>
-        <script>
-            feather.replace();
-        </script>
 
-    </body>
+            // Si el toggle original está en el HTML, deshabilitarlo o eliminarlo
+            if (toggle && toggle !== mobileToggle) {
+                toggle.style.display = 'none'; // O toggle.remove();
+            }
+        }
+
+
+        if (sidebar) { // Solo añadir listeners si el sidebar existe
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 991.98) { // Bootstrap 'lg' breakpoint
+                    const isClickInsideSidebar = sidebar.contains(event.target);
+                    const isClickOnToggle = event.target.closest('.js-sidebar-toggle-mobile'); // Usar el nuevo toggle móvil
+
+                    if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                        document.body.classList.add("sidebar-collapsed");
+                    }
+                }
+            });
+
+            // Ajustar al redimensionar
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991.98) {
+                    document.body.classList.remove("sidebar-collapsed");
+                }
+            });
+        }
+    });
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+</body>
 </html>
