@@ -82,6 +82,9 @@
                 color: #333;
                 text-align: center;
             }
+            ::-webkit-scrollbar {
+                display: none;
+            }
         </style>
         <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
 
@@ -188,7 +191,7 @@
                 </footer>
             </div>
         </div>
-        <!-- Modal de error -->
+
         <!-- Modal de error de archivo -->
         <div class="modal fade" id="modalErrorArchivo" tabindex="-1" aria-labelledby="modalErrorArchivoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -279,6 +282,23 @@
             </div>
         </div>
 
+        <!-- Modal sin comprobante (advertencia y redirección) -->
+        <div class="modal fade" id="modalSinComprobante" tabindex="-1" aria-labelledby="modalSinComprobanteLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-warning">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="modalSinComprobanteLabel">Advertencia</h5>
+                    </div>
+                    <div class="modal-body text-center fw-semibold">
+                        No se ha subido ningún comprobante.<br>
+                        Tienes <strong>2 horas</strong> para hacerlo o tu reserva será cancelada automáticamente.
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-warning" id="btnEntendido">Entendido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
         <!-- Scripts -->
@@ -303,9 +323,17 @@
                 const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic'];
 
                 if (!file) {
-                    mostrarModalError("Debes seleccionar un archivo.");
+                    const modalAdvertencia = new bootstrap.Modal(document.getElementById("modalSinComprobante"));
+                    modalAdvertencia.show();
+
+                    document.getElementById("btnEntendido").onclick = function () {
+                        modalAdvertencia.hide();
+                        window.location.href = "/vecino/reservas";
+                    };
+
                     return;
                 }
+
 
                 const tipo = file.type;
                 const nombreArchivo = file.name.toLowerCase();

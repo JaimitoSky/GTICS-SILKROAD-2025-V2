@@ -12,6 +12,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
     <link rel="stylesheet" th:href="@{/datatables/datatables.min.css}" />
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
@@ -94,9 +99,10 @@
                             </div>
 
                             <!-- Dentro del formulario -->
-                            <div class="form-group mt-3 text-center">
+                            <div class="form-group mt-3 d-flex justify-content-center">
                                 <button type="button" class="btn btn-primary" id="btnComprobante">Enviar Comprobante</button>
                             </div>
+
 
                         </form>
                     </div>
@@ -184,43 +190,68 @@
         $('#tablaReservas').DataTable().search('').columns().search('').draw();
     }
 </script>
-    <script>
-        document.getElementById("btnComprobante").addEventListener("click", function () {
-            const inputFile = document.getElementById("adjuntar");
-            const file = inputFile?.files?.[0];
-            const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic'];
+<script>
+    document.getElementById("btnComprobante").addEventListener("click", function () {
+        const inputFile = document.getElementById("adjuntar");
+        const file = inputFile?.files?.[0];
+        const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic', 'image/jpg'];
 
-            if (!file) {
-                mostrarModalError("Debes seleccionar un archivo.");
-                return;
-            }
-
-            const tipo = file.type;
-            const nombreArchivo = file.name.toLowerCase();
-
-            if (!extensionesValidas.includes(tipo) || !nombreArchivo.match(/\.(jpg|jpeg|png|heic)$/)) {
-                mostrarModalError("Archivo no válido. Solo se permiten imágenes JPG, PNG, JPEG o HEIC.");
-                return;
-            }
-
-            const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
-            modal.show();
-
-            const botonEnviar = document.getElementById("btnModalEnviar");
-            botonEnviar.onclick = null; // limpia handlers anteriores
-            botonEnviar.onclick = function () {
-                modal.hide(); // opcional
-                document.getElementById("formComprobante").submit(); // usa ID del formulario directamente
-            };
-        });
-
-        function mostrarModalError(mensaje) {
-            document.getElementById("mensajeModalError").innerText = mensaje;
-            const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
-            modalError.show();
+        if (!file) {
+            mostrarModalError("Debes seleccionar un comprobante de pago.", true);
+            return;
         }
-    </script>
 
+        const tipo = file.type;
+        const nombreArchivo = file.name.toLowerCase();
+
+        const extensionValida = extensionesValidas.includes(tipo) && nombreArchivo.match(/\.(jpg|jpeg|png|heic)$/);
+        if (!extensionValida) {
+            mostrarModalError("Archivo no válido. Solo se permiten imágenes JPG, PNG, JPEG o HEIC.", false);
+            return;
+        }
+
+        // Si todo es válido, confirmar envío
+        const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
+        modal.show();
+
+        const botonEnviar = document.getElementById("btnModalEnviar");
+        botonEnviar.onclick = null;
+        botonEnviar.onclick = function () {
+            modal.hide();
+            document.getElementById("formComprobante").submit();
+        };
+    });
+
+    function mostrarModalError(mensaje, redirigir) {
+        document.getElementById("mensajeModalError").innerText = mensaje;
+
+        const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
+        modalError.show();
+
+        if (redirigir) {
+            modalError._element.addEventListener("hidden.bs.modal", function () {
+                window.location.href = "/vecino/reservas";
+            }, { once: true });
+        }
+    }
+</script>
+<!-- Modal de advertencia sin comprobante -->
+<div class="modal fade" id="modalAdvertencia" tabindex="-1" aria-labelledby="modalAdvertenciaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-warning">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalAdvertenciaLabel">Reserva registrada</h5>
+            </div>
+            <div class="modal-body fw-semibold text-center">
+                No se ha subido ningún comprobante de pago.<br>
+                Recuerda que tienes un plazo de <strong>2 horas</strong> para enviarlo o tu reserva será cancelada.
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

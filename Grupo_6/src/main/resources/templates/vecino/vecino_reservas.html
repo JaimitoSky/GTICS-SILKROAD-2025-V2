@@ -20,6 +20,9 @@
         .table-responsive {
             overflow-x: auto !important;
         }
+        ::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 
 </head>
@@ -35,7 +38,7 @@
         <!-- Contenido -->
         <main class="content">
             <div class="container-fluid p-4">
-                <h2 class="mb-4">Mis Reservas</h2>
+                <h2 class="mb-4 text-center fw-bold">Mis Reservas</h2>
 
                 <!-- Filtros -->
                 <div class="row mb-4">
@@ -120,7 +123,7 @@
 
 <script>
     $(document).ready(function () {
-        $('#tablaReservas').DataTable({
+        const table = $('#tablaReservas').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
             },
@@ -128,9 +131,8 @@
             pageLength: 5
         });
 
-
         $('#filtroEstado').on('change', function () {
-            table.column(4).search(this.value).draw();
+            table.column(4).search(this.value).draw();  // ahora sí funciona
         });
     });
 
@@ -138,6 +140,7 @@
         $('#filtroEstado').val('');
         $('#tablaReservas').DataTable().search('').columns().search('').draw();
     }
+
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
