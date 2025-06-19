@@ -14,5 +14,7 @@ public interface ServicioRepository extends JpaRepository<Servicio, Integer> {
     List<String> obtenerNombres();
 
     // Puedes agregar métodos personalizados si es necesario, como buscar por nombre
+    @Query("SELECT s FROM Servicio s WHERE s.estado.idestado = 4") // Solo activos
+    List<Servicio> listarServiciosActivos();
 }
 

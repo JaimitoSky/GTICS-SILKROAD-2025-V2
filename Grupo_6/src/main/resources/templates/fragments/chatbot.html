@@ -1,0 +1,27 @@
+<!-- Script para setear user-id como idusuario -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const idUsuario = /*[[${session.usuario.idusuario}]]*/ '0';
+    console.log("🧪 ID de usuario desde sesión:", idUsuario);
+
+    window.addEventListener('dfMessengerLoaded', function () {
+        const dfMessengerEl = document.querySelector('df-messenger');
+        if (dfMessengerEl) {
+            dfMessengerEl.setAttribute('user-id', idUsuario);
+            console.log("✅ user-id seteado en chatbot:", idUsuario);
+        }
+    });
+    /*]]>*/
+</script>
+
+
+
+<!-- Chatbot Dialogflow con user-id personalizado -->
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+<df-messenger
+        id="chatbot"
+        intent="WELCOME"
+        chat-title="ReservaSanMiguelBot"
+        agent-id="86beb279-f2f8-4833-a2a5-62510565b625"
+        language-code="es">
+</df-messenger>

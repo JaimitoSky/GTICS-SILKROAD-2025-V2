@@ -97,13 +97,17 @@ public class VecinoController {
     public String vecinoHome(Model model, HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) {
+            System.out.println("🔴 Usuario no encontrado en sesión");
             return "redirect:/login";
         }
 
+        System.out.println("🟢 Usuario en sesión: " + usuario.getNombres());
+
         model.addAttribute("rol", "vecino");
-        model.addAttribute("usuario", usuario); // ✅ ahora Thymeleaf podrá usar ${usuario.nombres}
+        model.addAttribute("usuario", usuario);
         return "vecino/vecino_home";
     }
+
 
 
     // --- Vista de perfil ---

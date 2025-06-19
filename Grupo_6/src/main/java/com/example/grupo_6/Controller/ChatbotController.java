@@ -1,9 +1,10 @@
 package com.example.grupo_6.Controller;
 
-import com.example.grupo_6.Entity.HorarioDisponible;
-import com.example.grupo_6.Entity.HorarioAtencion;
-import com.example.grupo_6.Entity.Usuario;
+import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.HorarioDisponibleRepository;
+import com.example.grupo_6.Repository.ReservaRepository;
+import com.example.grupo_6.Repository.ServicioRepository;
+import com.example.grupo_6.Repository.UsuarioRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,16 @@ import java.util.*;
 public class ChatbotController {
 
     @Autowired
+    private ServicioRepository servicioRepository;
+
+    @Autowired
     private HorarioDisponibleRepository horarioDisponibleRepository;
+
+    @Autowired
+    private ReservaRepository reservaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @PostMapping("/procesar")
     public ResponseEntity<Map<String, Object>> procesarMensaje(
@@ -35,35 +45,102 @@ public class ChatbotController {
 
         System.out.println("🔎 Intent detectado: " + intent);
 
-        // 🧠 Detectar nombre desde user-id
-        String nombreUsuario = "usuario";
+        // 🧠 Obtener el ID del usuario desde user-id
+        Integer idUsuarioChatbot = null;
         try {
             Map<String, Object> originalDetectIntentRequest = (Map<String, Object>) payload.get("originalDetectIntentRequest");
             if (originalDetectIntentRequest != null) {
                 Map<String, Object> dfPayload = (Map<String, Object>) originalDetectIntentRequest.get("payload");
                 if (dfPayload != null && dfPayload.get("userId") != null) {
-                    nombreUsuario = dfPayload.get("userId").toString().split(" ")[0];
-                    System.out.println("👤 Nombre recibido por userId: " + nombreUsuario);
+                    idUsuarioChatbot = Integer.parseInt(dfPayload.get("userId").toString());
+                    System.out.println("🧾 ID usuario desde user-id: " + idUsuarioChatbot);
                 }
             }
         } catch (Exception e) {
-            System.out.println("⚠️ No se pudo extraer el userId desde el payload: " + e.getMessage());
+            System.out.println("⚠️ No se pudo extraer el ID del usuario desde el payload: " + e.getMessage());
         }
 
-        // Fallback desde sesión
+        // 🔄 Obtener usuario desde sesión o por ID
         Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario != null && usuario.getNombres() != null && !usuario.getNombres().isBlank()) {
-            nombreUsuario = usuario.getNombres().split(" ")[0];
-            System.out.println("👤 Nombre extraído desde sesión: " + nombreUsuario);
+        if (usuario == null && idUsuarioChatbot != null) {
+            usuario = usuarioRepository.findById(idUsuarioChatbot).orElse(null);
         }
 
+        // 🔤 Extraer nombre del usuario
+        String nombreUsuario = (usuario != null && usuario.getNombres() != null)
+                ? usuario.getNombres().split(" ")[0]
+                : "usuario";
+
+        // ----- INTENT: Saludo -----
         if ("Saludo".equals(intent)) {
             return ResponseEntity.ok(Map.of(
                     "fulfillmentText", "¡Hola " + nombreUsuario + "! ¿En qué puedo ayudarte hoy?"
             ));
         }
+        if ("OpcionesBot".equals(intent)) {
+            String respuesta = """
+🤖 *¡Hola!* Aquí tienes lo que puedo hacer por ti:
 
-        // 📍 Parámetros
+1️⃣ *Ver los servicios deportivos disponibles*  
+2️⃣ *Consultar tus reservas* (hoy, mañana o todas)  
+3️⃣ *Ver canchas disponibles* por sede y fecha  
+
+💬 *Ejemplos que puedes decirme:*  
+• ¿Qué servicios hay?  
+• ¿Cuáles son mis reservas?  
+• ¿Qué canchas hay libres mañana en Magdalena?
+""";
+
+            return ResponseEntity.ok(Map.of("fulfillmentText", respuesta));
+        }
+
+
+
+        // ----- INTENT: ConsultarServiciosDisponibles -----
+        if ("ConsultarServiciosDisponibles".equals(intent)) {
+            List<Servicio> servicios = servicioRepository.listarServiciosActivos();
+
+            if (servicios.isEmpty()) {
+                return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontraron servicios disponibles en este momento."));
+            }
+
+            StringBuilder respuestaServicios = new StringBuilder("📋 *Estos son los servicios deportivos disponibles:*\n\n");
+            for (Servicio s : servicios) {
+                respuestaServicios.append("• ").append(s.getNombre()).append("\n");
+            }
+
+            return ResponseEntity.ok(Map.of("fulfillmentText", respuestaServicios.toString()));
+        }
+
+
+        // ----- INTENT: ConsultarReservasUsuario -----
+        if ("ConsultarReservasUsuario".equals(intent)) {
+            if (usuario == null) {
+                return ResponseEntity.ok(Map.of("fulfillmentText", "Primero debes iniciar sesión para consultar tus reservas."));
+            }
+
+            List<Reserva> reservasUsuario = reservaRepository.findByUsuarioIdusuario(usuario.getIdusuario());
+
+            if (reservasUsuario.isEmpty()) {
+                return ResponseEntity.ok(Map.of(
+                        "fulfillmentText", "No tienes reservas registradas por el momento."
+                ));
+            }
+
+            StringBuilder respuestaReservas = new StringBuilder("🗓 Estas son tus reservas:\n");
+            for (Reserva r : reservasUsuario) {
+                String nombreServicio = r.getSedeServicio().getServicio().getNombre();
+                String fecha = r.getFechaReserva().toString();
+                String hora = r.getHorarioDisponible().getHoraInicio().toString();
+                respuestaReservas.append("• ").append(nombreServicio)
+                        .append(" el ").append(fecha)
+                        .append(" a las ").append(hora).append("\n");
+            }
+
+            return ResponseEntity.ok(Map.of("fulfillmentText", respuestaReservas.toString()));
+        }
+
+        // Parámetros comunes
         String sede = "";
         if (parametros.containsKey("sede")) {
             sede = (String) parametros.get("sede");
@@ -86,6 +163,7 @@ public class ChatbotController {
 
         String respuesta;
 
+        // ----- INTENT: ConsultarCanchasLibres -----
         if ("ConsultarCanchasLibres".equals(intent)) {
             if (fechaStr.isBlank() || sede.isBlank()) {
                 respuesta = "Por favor indica una sede y una fecha válidas para consultar disponibilidad.";
@@ -129,11 +207,11 @@ public class ChatbotController {
                     System.out.println("❌ Error al parsear la fecha: " + e.getMessage());
                 }
             }
-        } else {
-            respuesta = "No entendí tu solicitud. Puedes preguntarme por canchas disponibles, por ejemplo.";
+
+            return ResponseEntity.ok(Map.of("fulfillmentText", respuesta));
         }
 
-        return ResponseEntity.ok(Map.of("fulfillmentText", respuesta));
+        // ----- INTENT desconocido -----
+        return ResponseEntity.ok(Map.of("fulfillmentText", "No entendí tu solicitud. Puedes preguntarme por servicios, canchas disponibles o tus reservas."));
     }
-
 }

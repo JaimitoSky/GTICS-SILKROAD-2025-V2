@@ -74,28 +74,8 @@
                 }
             });
         </script>
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            const nombreUsuario = /*[[${usuario.nombres}]]*/ 'usuario';
-            const dfMessenger = document.querySelector('df-messenger');
-            if (dfMessenger) {
-                dfMessenger.setAttribute('user-id', nombreUsuario);
-            }
-            /*]]>*/
-        </script>
 
-
-
-        <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
-        <df-messenger
-                intent="WELCOME"
-                chat-title="ReservaSanMiguelBot"
-                agent-id="86beb279-f2f8-4833-a2a5-62510565b625"
-                language-code="es">
-        </df-messenger>
-
-
-
+        <div th:replace="~{fragments/chatbot.html}"></div>
 
 
     </body>
