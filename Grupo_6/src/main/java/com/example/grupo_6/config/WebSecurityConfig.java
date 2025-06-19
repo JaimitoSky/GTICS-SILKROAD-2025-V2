@@ -94,6 +94,9 @@ public class WebSecurityConfig {
                                 "/recuperar/**", "/css/**", "/js/**", "/img/**", "/fonts/**", "/favicon.ico", "/error"
                         ).permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/api/chatbot/procesar").permitAll()
+
+
                         .requestMatchers("/superadmin/**").hasAuthority("Superadmin")
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
                         .requestMatchers("/coordinador/**").hasAuthority("Coordinador")

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -85,4 +86,21 @@ public interface HorarioDisponibleRepository extends JpaRepository<HorarioDispon
     """, nativeQuery = true)
     List<HorarioDisponibleDTO> listarPorSede(@Param("idsede") Integer idsede);
 
+    @Query("""
+    SELECT h FROM HorarioDisponible h
+    WHERE h.activo = true
+      AND h.horarioAtencion.sede.nombre = :nombreSede
+      AND h.horarioAtencion.diaSemana = :diaSemana
+      AND NOT EXISTS (
+          SELECT r FROM Reserva r
+          WHERE r.horarioDisponible = h
+            AND r.estado.nombre NOT IN ('Cancelado', 'Expirado')
+      )
+""")
+    List<HorarioDisponible> listarHorariosDisponiblesPorSedeYDiaSemana(@Param("nombreSede") String nombreSede,
+                                                                       @Param("diaSemana") HorarioAtencion.DiaSemana diaSemana);
+
+
 }
+
+
