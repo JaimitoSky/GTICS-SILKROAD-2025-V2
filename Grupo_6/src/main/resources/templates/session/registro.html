@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registro - Sistema de Reservas</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
+        :root {
+            --primary-color: #007bff; /* Un azul primario */
+            --dark-primary-color: #0056b3; /* Un azul más oscuro para hover */
+            --text-color: #333;
+            --light-text-color: #666;
+            --border-color: #ddd;
+            --focus-border-color: #88c0eb;
+            --background-light: rgba(255, 255, 255, 0.98);
+            --shadow-light: rgba(0, 0, 0, 0.15);
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --info-color: #17a2b8; /* Color para mensajes de información/spinner */
+        }
+
         body {
             margin: 0;
             font-family: 'Inter', sans-serif;
@@ -19,32 +33,97 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--text-color);
         }
 
-        .login-container {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 750px;
+        .login-container { /* Renombrado de .login-container a .auth-container o similar sería ideal, pero manteniendo lo existente */
+            background-color: var(--background-light);
+            padding: 2.5rem; /* Aumento del padding */
+            border-radius: 12px; /* Mayor redondez */
+            max-width: 800px; /* Ancho ajustado para el formulario de registro */
             width: 95%;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px var(--shadow-light); /* Sombra más pronunciada */
             text-align: center;
             position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px; /* Una pequeña barra de color en la parte superior */
+            background-color: var(--primary-color);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
         }
 
         .login-container img {
-            height: 60px;
-            margin-bottom: 10px;
+            height: 80px; /* Aumento del tamaño del logo */
+            margin-bottom: 20px; /* Más espacio debajo del logo */
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1)); /* Pequeña sombra para el logo */
         }
 
         .login-container h4 {
-            margin-bottom: 20px;
-            font-weight: 600;
+            margin-bottom: 30px; /* Más espacio debajo del título */
+            font-weight: 700; /* Más énfasis en el título */
+            color: var(--dark-primary-color);
+            font-size: 1.75rem; /* Tamaño de fuente un poco más grande */
+            padding-top: 10px; /* Espacio para la barra superior */
         }
 
         .form-floating {
             position: relative;
             text-align: left;
+            margin-bottom: 20px; /* Espacio entre los campos */
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem; /* Ajuste del padding para mayor altura */
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem; /* Bordes más redondeados */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            color: var(--text-color);
+            background-color: #fff;
+            border-color: var(--focus-border-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Sombra al enfocar */
+        }
+
+        .form-floating > label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 0.75rem 1rem;
+            pointer-events: none;
+            border: 1px solid transparent;
+            transform-origin: 0 0;
+            transition: opacity .15s ease-in-out, transform .15s ease-in-out;
+            color: var(--light-text-color);
+        }
+
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+            opacity: 0.75;
+        }
+
+        .form-floating > .form-control:focus ~ label {
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+            opacity: 0.75;
+            color: var(--primary-color); /* Color de la etiqueta al enfocar */
         }
 
         .form-floating input {
@@ -56,54 +135,225 @@
             padding-left: 1rem !important;
         }
 
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--background-light);
+            text-align: center;
+            text-decoration: none;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-color: transparent;
+            border: 1px solid transparent;
+            padding: 0.75rem 1.5rem; /* Más padding para el botón */
+            font-size: 1.1rem; /* Fuente más grande */
+            border-radius: 0.5rem; /* Bordes más redondeados */
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Sombra para el botón */
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4); /* Sombra más pronunciada al hover */
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--dark-primary-color);
+            text-decoration: underline;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem !important; /* Ajuste para mayor densidad */
+        }
+
+        .mt-3 {
+            margin-top: 1rem !important;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem !important;
+        }
+
+        .my-4 {
+            margin-top: 1.5rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .text-start {
+            text-align: left !important;
+        }
+
+        .text-end {
+            text-align: right !important;
+        }
+
+        .text-decoration-none {
+            text-decoration: none !important;
+        }
+
+        .toast {
+            position: fixed;
+            top: 25px; /* Un poco más abajo */
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 320px; /* Ancho ligeramente mayor */
+            padding: 0.9rem 1.5rem; /* Más padding */
+            border-radius: 6px; /* Más redondeado */
+            color: white;
+            font-weight: 600; /* Texto más fuerte */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Sombra más visible */
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Transición más suave */
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0); /* Vuelve a su posición */
+        }
+
+        .toast.success { background-color: var(--success-color); }
+        .toast.error { background-color: var(--error-color); }
+
+        /* Estilos específicos para el layout de registro */
         .row {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            margin-left: -0.5rem; /* Negativo para compensar padding de columnas */
+            margin-right: -0.5rem;
         }
 
         .col-6 {
-            width: 48%;
+            flex: 0 0 auto;
+            width: 50%;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
         }
 
-        @media (max-width: 600px) {
+        .col-12 {
+            flex: 0 0 auto;
+            width: 100%;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) { /* Ajuste el breakpoint para tabletas/móviles */
             .col-6 {
                 width: 100%;
             }
         }
 
+        /* Estilo para inputs readonly */
         input[readonly] {
-            background-color: #e9ecef !important;
+            background-color: #e9ecef; /* Color de fondo estándar de Bootstrap para readonly */
             cursor: not-allowed;
+            opacity: 0.8; /* Ligeramente más opaco para indicar que no es editable */
         }
 
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            min-width: 300px;
-            padding: 0.75rem 1.25rem;
-            border-radius: 4px;
-            color: white;
+        /* Estilo para los mensajes de error de Thymeleaf */
+        .text-danger {
+            color: var(--error-color);
+            font-size: 0.875rem; /* Tamaño de fuente más pequeño para errores */
+            margin-top: 0.25rem; /* Espacio superior para separar del input */
+            display: block; /* Para que ocupe su propia línea */
+        }
+
+        .form-check {
+            margin-bottom: 1.5rem; /* Más espacio debajo del checkbox */
+            display: flex;
+            align-items: center;
+        }
+
+        .form-check-input {
+            width: 1.25em;
+            height: 1.25em;
+            margin-top: 0.25em;
+            vertical-align: top;
+            background-color: #fff;
+            border: 1px solid rgba(0,0,0,.25);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-radius: 0.25rem;
+            transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .form-check-input:focus {
+            border-color: var(--focus-border-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-check-label {
+            margin-left: 0.5rem; /* Espacio entre el checkbox y el texto */
+            font-size: 1rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        /* Estilos para el mensaje de cargando */
+        .alert {
+            position: relative;
+            padding: 1rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+        }
+
+        .alert-info {
+            color: var(--info-color);
+            background-color: rgba(23, 162, 184, 0.1); /* Fondo muy claro del color info */
+            border-color: rgba(23, 162, 184, 0.2);
             font-weight: 500;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem; /* Espacio entre icono y texto */
         }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        .toast.success { background-color: #28a745; }
-        .toast.error { background-color: #dc3545; }
     </style>
 </head>
 <body>
 
-<!-- TOAST -->
 <div id="toast"
      th:class="'toast ' + (${error} ? 'error show' : (${successMessage} ? 'success show' : ''))"
      th:text="${error} ?: ${successMessage}">
@@ -116,67 +366,65 @@
     <form th:action="@{/registro/enviar-codigo}" th:object="${usuario}" method="post" id="registroForm">
         <div class="row">
 
-            <div class="form-floating mb-3 col-6 position-relative">
+            <div class="form-floating col-6 position-relative">
                 <input type="text" th:field="*{dni}" class="form-control" placeholder="DNI"
                        required pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos" autocomplete="off" />
-                <label>DNI</label>
+                <label for="dni">DNI</label>
                 <div th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}" class="text-danger small"></div>
             </div>
 
-            <div class="form-floating mb-3 col-6 position-relative">
+            <div class="form-floating col-6 position-relative">
                 <input type="text" th:field="*{nombres}" class="form-control" placeholder="Nombres"
                        required autocomplete="given-name" readonly />
-                <label>Nombres</label>
+                <label for="nombres">Nombres</label>
                 <div th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}" class="text-danger small"></div>
             </div>
 
-            <div class="form-floating mb-3 col-6 position-relative">
+            <div class="form-floating col-6 position-relative">
                 <input type="text" th:field="*{apellidos}" class="form-control" placeholder="Apellidos"
                        required autocomplete="family-name" readonly />
-                <label>Apellidos</label>
+                <label for="apellidos">Apellidos</label>
                 <div th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}" class="text-danger small"></div>
             </div>
 
-            <div class="form-floating mb-3 col-6 position-relative">
+            <div class="form-floating col-6 position-relative">
                 <input type="email" th:field="*{email}" class="form-control" placeholder="Correo" required autocomplete="email" />
-                <label>Correo</label>
+                <label for="email">Correo</label>
                 <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger small"></div>
             </div>
 
-            <div class="form-floating mb-3 col-6 position-relative">
+            <div class="form-floating col-6 position-relative">
                 <input type="text" th:field="*{telefono}" class="form-control" placeholder="Celular"
                        required pattern="[0-9]{9}" title="Ingrese un número de 9 dígitos" autocomplete="tel" />
-                <label>Celular</label>
+                <label for="telefono">Celular</label>
                 <div th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}" class="text-danger small"></div>
             </div>
 
-            <div class="form-floating mb-3 col-6 position-relative">
+            <div class="form-floating col-6 position-relative">
                 <input type="text" th:field="*{direccion}" class="form-control" placeholder="Dirección" required autocomplete="street-address" />
-                <label>Dirección</label>
+                <label for="direccion">Dirección</label>
                 <div th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}" class="text-danger small"></div>
             </div>
 
-            <div class="form-floating mb-3 col-12 position-relative">
+            <div class="form-floating col-12 position-relative">
                 <input type="password" th:field="*{passwordHash}" class="form-control" placeholder="Contraseña"
                        required minlength="6" autocomplete="new-password" />
-                <label>Contraseña (mínimo 6 caracteres)</label>
+                <label for="passwordHash">Contraseña (mínimo 6 caracteres)</label>
                 <div th:if="${#fields.hasErrors('passwordHash')}" th:errors="*{passwordHash}" class="text-danger small"></div>
             </div>
 
         </div>
 
-        <div class="form-check text-start mb-3">
-            <input class="form-check-input" type="checkbox" id="rolCoordinadorCheck" name="rolCoordinador" onclick="toggleCodigoCoordinador()" />
+        <div class="form-check text-start"> <input class="form-check-input" type="checkbox" id="rolCoordinadorCheck" name="rolCoordinador" onclick="toggleCodigoCoordinador()" />
             <label class="form-check-label" for="rolCoordinadorCheck">Registrarme como Coordinador</label>
         </div>
 
-        <div class="form-floating mb-3" id="codigoCoordinadorDiv" style="display: none;">
-            <input type="text" name="codigoCoordinador" class="form-control" placeholder="Código de Coordinador" />
-            <label>Código de Coordinador</label>
+        <div class="form-floating" id="codigoCoordinadorDiv" style="display: none;"> <input type="text" name="codigoCoordinador" class="form-control" placeholder="Código de Coordinador" />
+            <label for="codigoCoordinador">Código de Coordinador</label>
         </div>
 
         <div id="loadingMessage" class="alert alert-info mt-3" style="display: none;">
-            <i class="fas fa-spinner fa-spin"></i> Enviando código de verificación...
+            <i class="fas fa-spinner fa-spin"></i> <span class="ms-2"> Enviando código de verificación...</span>
         </div>
 
         <button type="submit" class="btn btn-primary w-100" id="submitButton">
@@ -199,8 +447,16 @@
     }
 
     async function obtenerDatosPorDNI() {
-        const dni = document.querySelector('input[name="dni"]').value;
-        if (dni.length !== 8) return;
+        const dniInput = document.querySelector('input[name="dni"]');
+        const nombresInput = document.querySelector('input[name="nombres"]');
+        const apellidosInput = document.querySelector('input[name="apellidos"]');
+
+        const dni = dniInput.value;
+        if (dni.length !== 8) {
+            nombresInput.value = '';
+            apellidosInput.value = '';
+            return;
+        }
 
         try {
             const response = await fetch(`https://apiperu.dev/api/dni/${dni}`, {
@@ -212,14 +468,36 @@
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.data) {
-                    document.querySelector('input[name="nombres"]').value = data.data.nombres;
-                    document.querySelector('input[name="apellidos"]').value = `${data.data.apellido_paterno} ${data.data.apellido_materno}`;
+                    nombresInput.value = data.data.nombres;
+                    apellidosInput.value = `${data.data.apellido_paterno} ${data.data.apellido_materno}`;
+                } else {
+                    nombresInput.value = '';
+                    apellidosInput.value = '';
+                    // Opcional: mostrar un toast de error si el DNI no es válido
+                    // showToast('No se encontraron datos para el DNI', 'error');
                 }
+            } else {
+                nombresInput.value = '';
+                apellidosInput.value = '';
+                // Opcional: mostrar un toast de error si la API falla
+                // showToast('Error al consultar DNI. Intente más tarde.', 'error');
             }
         } catch (error) {
             console.error("Error al consultar DNI:", error);
+            nombresInput.value = '';
+            apellidosInput.value = '';
+            // Opcional: mostrar un toast de error en caso de fallo de red
+            // showToast('Error de red al consultar DNI.', 'error');
         }
     }
+
+    // Helper para mostrar toasts (podrías añadirlo aquí si quieres feedback de DNI)
+    // function showToast(message, type) {
+    //     const toast = document.getElementById('toast');
+    //     toast.textContent = message;
+    //     toast.className = `toast show ${type}`;
+    //     setTimeout(() => toast.classList.remove('show'), 4000);
+    // }
 
     document.addEventListener('DOMContentLoaded', () => {
         const dniInput = document.querySelector('input[name="dni"]');
@@ -230,8 +508,11 @@
         const submitButton = document.getElementById('submitButton');
 
         form.addEventListener('submit', () => {
-            loadingMessage.style.display = 'block';
-            submitButton.disabled = true;
+            // Se muestra el mensaje de cargando y deshabilita el botón solo si el formulario es válido (HTML5 validation)
+            if (form.checkValidity()) {
+                loadingMessage.style.display = 'flex'; // Usar 'flex' para alinear spinner y texto
+                submitButton.disabled = true;
+            }
         });
 
         // Mostrar toast flotante si aplica
