@@ -58,15 +58,6 @@
                     </div>
                 </footer>
 
-                <!-- Chatbot Dialogflow Web Demo -->
-                <div style="position: fixed; bottom: 10px; right: 10px; z-index: 9999;">
-                    <iframe
-                            allow="microphone;"
-                            width="350"
-                            height="430"
-                            src="https://console.dialogflow.com/api-client/demo/embedded/86beb279-f2f8-4833-a2a5-62510565b625">
-                    </iframe>
-                </div>
             </div>
         </div>
 
@@ -83,5 +74,29 @@
                 }
             });
         </script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const nombreUsuario = /*[[${usuario.nombres}]]*/ 'usuario';
+            const dfMessenger = document.querySelector('df-messenger');
+            if (dfMessenger) {
+                dfMessenger.setAttribute('user-id', nombreUsuario);
+            }
+            /*]]>*/
+        </script>
+
+
+
+        <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+        <df-messenger
+                intent="WELCOME"
+                chat-title="ReservaSanMiguelBot"
+                agent-id="86beb279-f2f8-4833-a2a5-62510565b625"
+                language-code="es">
+        </df-messenger>
+
+
+
+
+
     </body>
 </html>

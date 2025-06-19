@@ -26,25 +26,44 @@ public class ChatbotController {
             @RequestBody Map<String, Object> payload,
             HttpSession session) {
 
+        System.out.println("📥 Payload recibido desde Dialogflow:");
+        System.out.println(payload);
+
         Map<String, Object> queryResult = (Map<String, Object>) payload.get("queryResult");
         String intent = (String) ((Map<String, Object>) queryResult.get("intent")).get("displayName");
         Map<String, Object> parametros = (Map<String, Object>) queryResult.get("parameters");
 
-        // Obtener nombre del usuario desde la sesión (por defecto "usuario")
+        System.out.println("🔎 Intent detectado: " + intent);
+
+        // 🧠 Detectar nombre desde user-id
         String nombreUsuario = "usuario";
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario != null && usuario.getNombres() != null && !usuario.getNombres().isBlank()) {
-            nombreUsuario = usuario.getNombres().split(" ")[0]; // Solo el primer nombre
+        try {
+            Map<String, Object> originalDetectIntentRequest = (Map<String, Object>) payload.get("originalDetectIntentRequest");
+            if (originalDetectIntentRequest != null) {
+                Map<String, Object> dfPayload = (Map<String, Object>) originalDetectIntentRequest.get("payload");
+                if (dfPayload != null && dfPayload.get("userId") != null) {
+                    nombreUsuario = dfPayload.get("userId").toString().split(" ")[0];
+                    System.out.println("👤 Nombre recibido por userId: " + nombreUsuario);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ No se pudo extraer el userId desde el payload: " + e.getMessage());
         }
 
-        // Detectar intent de saludo
+        // Fallback desde sesión
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario != null && usuario.getNombres() != null && !usuario.getNombres().isBlank()) {
+            nombreUsuario = usuario.getNombres().split(" ")[0];
+            System.out.println("👤 Nombre extraído desde sesión: " + nombreUsuario);
+        }
+
         if ("Saludo".equals(intent)) {
             return ResponseEntity.ok(Map.of(
                     "fulfillmentText", "¡Hola " + nombreUsuario + "! ¿En qué puedo ayudarte hoy?"
             ));
         }
 
-        // Extraer parámetros: sede y fecha
+        // 📍 Parámetros
         String sede = "";
         if (parametros.containsKey("sede")) {
             sede = (String) parametros.get("sede");
@@ -62,9 +81,11 @@ public class ChatbotController {
             fechaStr = (String) parametros.get("date");
         }
 
+        System.out.println("📍 Sede: " + sede);
+        System.out.println("📅 Fecha: " + fechaStr);
+
         String respuesta;
 
-        // Procesar intent de consulta de canchas
         if ("ConsultarCanchasLibres".equals(intent)) {
             if (fechaStr.isBlank() || sede.isBlank()) {
                 respuesta = "Por favor indica una sede y una fecha válidas para consultar disponibilidad.";
@@ -105,6 +126,7 @@ public class ChatbotController {
 
                 } catch (Exception e) {
                     respuesta = "La fecha ingresada no tiene el formato correcto (yyyy-MM-dd).";
+                    System.out.println("❌ Error al parsear la fecha: " + e.getMessage());
                 }
             }
         } else {
@@ -113,4 +135,5 @@ public class ChatbotController {
 
         return ResponseEntity.ok(Map.of("fulfillmentText", respuesta));
     }
+
 }

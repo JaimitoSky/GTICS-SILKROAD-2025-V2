@@ -94,10 +94,17 @@ public class VecinoController {
 
     // --- Vista principal ---
     @GetMapping
-    public String vecinoHome(Model model) {
+    public String vecinoHome(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("rol", "vecino");
+        model.addAttribute("usuario", usuario); // ✅ ahora Thymeleaf podrá usar ${usuario.nombres}
         return "vecino/vecino_home";
     }
+
 
     // --- Vista de perfil ---
     @GetMapping("/perfil")
