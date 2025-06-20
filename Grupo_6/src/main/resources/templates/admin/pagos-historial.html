@@ -1,209 +1,481 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Pagos - Admin</title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagos - Admin</title>
 
-        <!-- Estilos externos -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
-        <style>
-            body.sidebar-collapsed .sidebar {
-                display: none;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="wrapper">
-            <!-- Sidebar -->
-            <div class="sidebar" id="sidebar" th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+    <style>
+        /* Variables CSS Globales para consistencia */
+        :root {
+            --primary-color: #007bff; /* Azul principal */
+            --dark-primary-color: #0056b3; /* Azul oscuro para hover */
+            --secondary-color: #6c757d; /* Gris para textos secundarios/botones */
+            --success-color: #28a745; /* Verde para éxito */
+            --info-color: #17a2b8; /* Celeste para información */
+            --warning-color: #ffc107; /* Amarillo para advertencia */
+            --danger-color: #dc3545; /* Rojo para peligro/error */
+            --text-color: #333; /* Color de texto general */
+            --light-text-color: #666; /* Color de texto más claro */
+            --border-color: #e0e0e0; /* Color de bordes */
+            --background-light: #f8f9fa; /* Fondo claro para la aplicación */
+            --card-background: #ffffff; /* Fondo de tarjetas */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
+            --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
+            --border-radius-base: 0.5rem; /* Radio de borde base */
+            --border-radius-lg: 0.75rem; /* Radio de borde grande */
+        }
 
-            <!-- Main -->
-            <div class="main">
-                <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light); /* Fondo general de la aplicación */
+            color: var(--text-color);
+        }
 
-                <button class="btn btn-outline-secondary d-md-none m-2 js-sidebar-toggle">
-                    <i class="bi bi-list"></i>
-                </button>
+        /* Estilos para el main content (área de trabajo principal) */
+        .main {
+            min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+            background-color: var(--background-light);
+        }
 
-                <!-- Contenido principal -->
-                <main class="content">
-                    <div class="container-fluid p-0">
-                        <div class="text-center mb-3">
-                            <h1 class="h4"><strong>Gestión de Pagos</strong></h1>
+        .content {
+            padding: 1.5rem; /* Padding general para el contenido */
+        }
+
+        /* Título de la página */
+        h1.h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: 2rem; /* Más espacio debajo del título */
+            font-size: 1.6rem; /* Ajuste para h4 */
+        }
+
+        h1.h4 strong {
+            color: var(--primary-color);
+        }
+
+        /* Formulario de búsqueda */
+        .form-control-sm, .form-select-sm {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.8rem;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            background-color: var(--card-background);
+        }
+        .form-control-sm:focus, .form-select-sm:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        /* Botones */
+        .btn {
+            border-radius: var(--border-radius-base);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem; /* Padding más pequeño para botones pequeños */
+            font-size: 0.85rem;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        /* Tarjeta principal (contiene la tabla) */
+        .card {
+            border: 1px solid var(--border-color); /* Borde sutil */
+            border-radius: var(--border-radius-lg); /* Bordes más redondeados */
+            box-shadow: 0 3px 10px var(--shadow-light); /* Sombra más sutil */
+            overflow: hidden; /* Asegura que los bordes redondeados se apliquen al contenido */
+            background-color: var(--card-background); /* Fondo de tarjeta blanco */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px); /* Menos movimiento al hover */
+            box-shadow: 0 6px 15px var(--shadow-medium); /* Sombra un poco más visible al hover */
+        }
+
+        .card .card-header {
+            background-color: var(--background-light); /* Fondo claro como en la imagen de los cuadros de resumen */
+            color: var(--text-color); /* Texto oscuro */
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color); /* Borde inferior sutil */
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+            font-size: 1.1rem; /* Un poco más grande para títulos de tabla */
+        }
+
+        /* Estilos de tabla */
+        .table {
+            --bs-table-bg: var(--card-background); /* Fondo de tabla blanco */
+            --bs-table-color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .table-bordered th, .table-bordered td {
+            border-color: var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--background-light); /* Resaltado sutil al pasar el ratón */
+        }
+
+        .table thead.table-light {
+            background-color: var(--background-light) !important;
+            color: var(--dark-primary-color);
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            border-bottom-width: 2px; /* Borde inferior más grueso en thead */
+            border-color: var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 0.85rem 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Badges de estado */
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: var(--border-radius-base);
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .badge.bg-success { background-color: var(--success-color) !important; color: white !important;}
+        .badge.bg-warning { background-color: var(--warning-color) !important; color: var(--text-color) !important;}
+        .badge.bg-danger { background-color: var(--danger-color) !important; color: white !important;}
+
+        /* Paginación */
+        .pagination .page-item .page-link {
+            color: var(--primary-color);
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-base);
+            margin: 0 0.25rem;
+            transition: all 0.2s ease;
+        }
+        .pagination .page-item .page-link:hover {
+            background-color: var(--background-light);
+            border-color: var(--primary-color);
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+        }
+
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-background) !important;
+            border-top: 1px solid var(--border-color) !important;
+            padding: 1rem 0;
+            color: var(--light-text-color) !important;
+            font-size: 0.85rem;
+            margin-top: 2rem; /* Espacio superior para separar del contenido */
+        }
+
+        /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .mb-3 { margin-bottom: 1rem !important; }
+        .mb-2 { margin-bottom: 0.75rem !important; }
+        .p-0 { padding: 0 !important; }
+        .p-4 { padding: 1.5rem !important; }
+        .g-2 { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="sidebar" id="sidebar" th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+    <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+                <div class="text-center mb-3">
+                    <h1 class="h4"><strong>Gestión de Pagos</strong></h1>
+                </div>
+
+                <div class="d-flex justify-content-center mb-4">
+                    <form th:action="@{/admin/pagos/historial}" method="get" class="row g-2 justify-content-center align-items-center">
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" name="campo" id="campoSelectPago">
+                                <option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
+                                <option th:value="'dni'" th:selected="${campo == 'dni'}">DNI</option>
+                            </select>
                         </div>
-
-                        <div class="d-flex justify-content-center mb-3">
-                            <form th:action="@{/admin/pagos/historial}" method="get" class="row g-2 justify-content-center align-items-center">
-                                <div class="col-auto">
-                                    <select class="form-select form-select-sm" name="campo" id="campoSelectPago">
-                                        <option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
-                                        <option th:value="'dni'" th:selected="${campo == 'dni'}">DNI</option>
-                                    </select>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="text" name="filtro" class="form-control form-control-sm" placeholder="Buscar..." th:value="${filtro}" />
-                                </div>
-                                <div class="col-auto">
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-search"></i> Buscar
-                                    </button>
-                                </div>
-                                <div class="col-auto" th:if="${filtro != null and filtro != ''}">
-                                    <a th:href="@{/admin/pagos/historial}" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-x-lg"></i>
-                                    </a>
-                                </div>
-                            </form>
+                        <div class="col-auto">
+                            <input type="text" name="filtro" class="form-control form-control-sm" placeholder="Buscar..." th:value="${filtro}" />
                         </div>
-
-                        <div class="text-end mb-2">
-                            <button class="btn btn-outline-danger btn-sm" onclick="exportarTablaPDF()">
-                                <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-search"></i> Buscar
                             </button>
                         </div>
-
-                        <div class="card">
-                            <div class="card-body">
-                                <table class="table table-bordered table-hover align-middle" th:if="${listaPagos != null and !#lists.isEmpty(listaPagos)}">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Vecino</th>
-                                            <th>Servicio</th>
-                                            <th>Método de pago</th>
-                                            <th>Estado</th>
-                                            <th>Comprobante</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="pago : ${listaPagos}">
-                                            <td th:text="${pago.idpago}">1001</td>
-                                            <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}">Juan Pérez</td>
-                                            <td th:text="${pago.reserva != null ? pago.reserva.servicio.nombre : '—'}">—</td>
-                                            <td th:text="${pago.metodo}">Depósito</td>
-                                            <td>
-                        <span th:text="${pago.estado.nombre}"
-                              th:classappend="${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' : (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
-                          Pendiente
-                        </span>
-                                            </td>
-                                            <td>
-                                                <a th:if="${pago.comprobante != null}" th:href="@{'/uploads/' + ${pago.comprobante}}" target="_blank">Ver</a>
-                                                <span th:if="${pago.comprobante == null}">—</span>
-                                            </td>
-                                            <td>
-                                                <form th:action="@{/admin/pagos/historial/aprobar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
-                                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
-                                                </form>
-                                                <form th:action="@{/admin/pagos/historial/rechazar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
-                                                    <button type="submit" class="btn btn-sm btn-danger">Rechazar</button>
-                                                </form>
-                                                <form th:action="@{/admin/pagos/historial/pendiente/{id}(id=${pago.idpago})}" method="post" style="display:inline">
-                                                    <button type="submit" class="btn btn-sm btn-secondary">Pendiente</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <div th:if="${listaPagos == null or #lists.isEmpty(listaPagos)}" class="text-center">
-                                    <p class="text-muted">No se encontraron pagos.</p>
-                                </div>
-                                <nav aria-label="Paginación de pagos">
-                                    <ul class="pagination justify-content-center flex-wrap">
-                                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/pagos/historial(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
-                                        </li>
-                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
-                                            <a class="page-link" th:href="@{/admin/pagos/historial(page=${i}, size=10, campo=${campo}, filtro=${filtro})}" th:text="${i + 1}">1</a>
-                                        </li>
-                                        <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/pagos/historial(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
+                        <div class="col-auto" th:if="${filtro != null and filtro != ''}">
+                            <a th:href="@{/admin/pagos/historial}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
                         </div>
-                    </div>
-                </main>
+                    </form>
+                </div>
 
-                <!-- Footer -->
-                <footer class="footer mt-auto py-3 bg-light border-top">
-                    <div class="container text-center text-muted">
-                        Municipalidad de San Miguel © 2025
+                <div class="text-end mb-3">
+                    <button class="btn btn-outline-danger btn-sm" onclick="exportarTablaPDF()">
+                        <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover align-middle" th:if="${listaPagos != null and !#lists.isEmpty(listaPagos)}">
+                            <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Vecino</th>
+                                <th>Servicio</th>
+                                <th>Método de pago</th>
+                                <th>Estado</th>
+                                <th>Comprobante</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="pago : ${listaPagos}">
+                                <td th:text="${pago.idpago}">1001</td>
+                                <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}">Juan Pérez</td>
+                                <td th:text="${pago.reserva != null ? pago.reserva.servicio.nombre : '—'}">—</td>
+                                <td th:text="${pago.metodo}">Depósito</td>
+                                <td>
+                                                <span th:text="${pago.estado.nombre}"
+                                                      th:classappend="${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' : (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
+                                                  Pendiente
+                                                </span>
+                                </td>
+                                <td>
+                                    <a th:if="${pago.comprobante != null}" th:href="@{'/uploads/' + ${pago.comprobante}}" target="_blank" class="text-primary fw-semibold">Ver</a>
+                                    <span th:if="${pago.comprobante == null}" class="text-muted">—</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/pagos/historial/aprobar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                    </form>
+                                    <form th:action="@{/admin/pagos/historial/rechazar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-danger">Rechazar</button>
+                                    </form>
+                                    <form th:action="@{/admin/pagos/historial/pendiente/{id}(id=${pago.idpago})}" method="post" style="display:inline">
+                                        <button type="submit" class="btn btn-sm btn-secondary">Pendiente</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div th:if="${listaPagos == null or #lists.isEmpty(listaPagos)}" class="text-center p-4">
+                            <p class="text-muted mb-0">No se encontraron pagos con los criterios de búsqueda.</p>
+                        </div>
+                        <nav aria-label="Paginación de pagos" th:if="${totalPaginas > 1}">
+                            <ul class="pagination justify-content-center flex-wrap mt-3">
+                                <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/pagos/historial(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/pagos/historial(page=${i}, size=10, campo=${campo}, filtro=${filtro})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/pagos/historial(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
-                </footer>
+                </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-        <script>
-            function exportarTablaPDF() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
 
-                doc.setFontSize(14);
-                doc.text("Historial de Pagos", 14, 15);
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script>
+    function exportarTablaPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-                const tabla = document.querySelector("table");
-                if (!tabla) return;
+        doc.setFontSize(14);
+        doc.setTextColor(51, 51, 51); // --text-color
+        doc.text("Historial de Pagos", 14, 15);
 
-                const headers = Array.from(tabla.querySelectorAll("thead th")).map(th => th.innerText.trim());
-                const rows = Array.from(tabla.querySelectorAll("tbody tr")).map(tr =>
-                    Array.from(tr.querySelectorAll("td")).map(td => td.innerText.trim())
-                );
+        const tabla = document.querySelector("table");
+        if (!tabla) {
+            alert("No hay tabla para exportar.");
+            return;
+        }
 
-                doc.autoTable({
-                    head: [headers],
-                    body: rows,
-                    startY: 20,
-                    styles: { fontSize: 8 }
-                });
+        // Excluir la columna de Acciones si no se desea en el PDF
+        const headers = Array.from(tabla.querySelectorAll("thead th")).map(th => th.innerText.trim());
+        // Remover "Acciones" del array de headers si existe
+        const accionesIndex = headers.indexOf("Acciones");
+        if (accionesIndex > -1) {
+            headers.splice(accionesIndex, 1);
+        }
 
-                doc.save("pagos.pdf");
-            }
-        </script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const toggle = document.querySelector(".js-sidebar-toggle");
-                const sidebar = document.getElementById("sidebar");
-
-                if (toggle) {
-                    toggle.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        document.body.classList.toggle("sidebar-collapsed");
-                    });
+        const rows = Array.from(tabla.querySelectorAll("tbody tr")).map(tr => {
+            const rowData = Array.from(tr.querySelectorAll("td")).map((td, index) => {
+                // Si es la columna de estado, obtener el texto del span
+                if (headers[index] && headers[index].includes("Estado") && td.querySelector('.badge')) {
+                    return td.querySelector('.badge').innerText.trim();
                 }
-
-                document.addEventListener("click", function(event) {
-                    if (window.innerWidth <= 991.98) {
-                        const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
-                        const isClickOnToggle = event.target.closest(".js-sidebar-toggle");
-
-                        if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                            document.body.classList.add("sidebar-collapsed");
-                        }
-                    }
-                });
-
-                window.addEventListener("resize", function() {
-                    if (window.innerWidth > 991.98) {
-                        document.body.classList.remove("sidebar-collapsed");
-                    }
-                });
+                // Si es la columna de comprobante, obtener el texto del enlace o el span
+                if (headers[index] && headers[index].includes("Comprobante") && (td.querySelector('a') || td.querySelector('span'))) {
+                    return (td.querySelector('a') || td.querySelector('span')).innerText.trim();
+                }
+                return td.innerText.trim();
             });
-        </script>
-        <script src="https://unpkg.com/feather-icons"></script>
-        <script>
-            feather.replace();
-        </script>
-    </body>
+            // Remover el dato de la columna de Acciones
+            if (accionesIndex > -1) {
+                rowData.splice(accionesIndex, 1);
+            }
+            return rowData;
+        });
+
+        doc.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 25, // Ajustado para dejar espacio al título
+            styles: {
+                fontSize: 8,
+                textColor: [51, 51, 51], // Similar a --text-color
+                lineColor: [224, 224, 224], // Similar a --border-color
+                lineWidth: 0.1
+            },
+            headStyles: {
+                fillColor: [248, 249, 250], // Similar a --background-light
+                textColor: [0, 86, 179], // Similar a --dark-primary-color
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+                fillColor: [255, 255, 255] // Fondo blanco para filas alternas
+            },
+            margin: { top: 20, right: 10, bottom: 10, left: 10 }
+        });
+
+        doc.save("historial_pagos.pdf");
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById("sidebar");
+
+        // Corrección: El botón de toggle debe ser 'd-lg-none' para que se muestre solo en móviles
+        // y se oculte en pantallas de escritorio donde el sidebar es siempre visible.
+        // El CSS `body.sidebar-collapsed .sidebar { display: none; }` es para cuando el sidebar
+        // está explícitamente colapsado, no para control de responsividad.
+
+        if (toggle) {
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener("click", function(event) {
+            if (window.innerWidth <= 991.98) { // Ancho de Bootstrap para 'lg' breakpoint
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest(".js-sidebar-toggle");
+
+                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
+            }
+        });
+
+        // Adjust sidebar state on window resize for larger screens
+        window.addEventListener("resize", function() {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed"); // Ensure sidebar is visible on large screens
+            }
+        });
+    });
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+</body>
 </html>
