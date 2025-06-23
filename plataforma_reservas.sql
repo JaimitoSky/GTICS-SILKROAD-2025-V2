@@ -998,6 +998,30 @@ CREATE TABLE asistencia_coordinador (
     UNIQUE KEY uk_asistencia_por_sede_usuario (idusuario, idsede, fecha)
 );
 
+
+-- 1.  Salida de coordinador
+ALTER TABLE asistencia_coordinador
+  ADD COLUMN hora_salida      TIME                 NULL AFTER hora_entrada,
+  ADD COLUMN latitud_salida   DECIMAL(10,8)        NULL AFTER longitud,
+  ADD COLUMN longitud_salida  DECIMAL(11,8)        NULL AFTER latitud_salida;
+
+-- 2. Horario de atención que aplica
+ALTER TABLE asistencia_coordinador
+  ADD COLUMN idhorario_atencion INT               NULL AFTER idsede,
+  ADD INDEX idx_asist_horario (idhorario_atencion),
+  ADD CONSTRAINT fk_asist_horario
+    FOREIGN KEY (idhorario_atencion)
+    REFERENCES horario_atencion(idhorario_atencion)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL;
+
+-- 3. Estado de la marcación de entrada
+ALTER TABLE asistencia_coordinador
+  ADD COLUMN estado ENUM('presente','tarde','falta') 
+    NOT NULL DEFAULT 'falta' 
+    AFTER idhorario_atencion;
+
+
 SET FOREIGN_KEY_CHECKS=1;
 
 -- Para limpiar los datos de servicios + reservas  (opcional)

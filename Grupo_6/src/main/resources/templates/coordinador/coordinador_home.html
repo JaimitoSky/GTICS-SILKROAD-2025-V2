@@ -15,14 +15,16 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f8f9fa; /* Un fondo claro general */
             color: #333;
         }
 
+        /* Agregado para transiciones más suaves en elementos dinámicos */
         .fade-in {
             animation: fadeIn 0.4s ease-in-out;
         }
 
+        /* Transición general para todos los elementos */
         * {
             transition: all 0.2s ease-in-out;
         }
@@ -33,7 +35,7 @@
 
         .form-label {
             font-weight: 600;
-            color: #555;
+            color: #555; /* Un poco más oscuro para mejor legibilidad */
         }
 
         .form-select, .btn {
@@ -42,9 +44,9 @@
         }
 
         #map {
-            border-radius: 16px;
+            border-radius: 16px; /* Ajuste para que coincida con la tarjeta */
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1); /* Borde suave para el mapa */
         }
 
         .alert {
@@ -59,30 +61,32 @@
 
         footer.footer {
             background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            border-top: 1px solid #e9ecef; /* Separador sutil */
         }
 
+        /* Estilos para las nuevas tarjetas */
         .card {
             border-radius: 16px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: none;
+            border: none; /* Eliminar el borde predeterminado de la tarjeta */
             background-color: #ffffff;
         }
 
         .card-header {
-            background-color: #f1f3f5;
+            background-color: #f1f3f5; /* Un fondo suave para el encabezado de la tarjeta */
             border-bottom: 1px solid #e9ecef;
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
             font-weight: 600;
             color: #333;
-            padding: 1rem 1.5rem;
+            padding: 1rem 1.5rem; /* Ajuste de padding para encabezados */
         }
 
         .card-body {
-            padding: 1.5rem;
+            padding: 1.5rem; /* Ajuste de padding para el cuerpo de la tarjeta */
         }
 
+        /* Animación para fadeIn */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -94,17 +98,20 @@
             }
         }
 
+        /* Estilos para el spinner */
         .spinner-border {
             vertical-align: middle;
         }
 
+        /* Contenedor de Toasts */
         .toast-container {
-            z-index: 1080;
+            z-index: 1080; /* Asegura que esté por encima de otros elementos */
         }
 
+        /* Para el icono de usuario en el mapa */
         .my-div-icon {
             text-align: center;
-            line-height: 1;
+            line-height: 1; /* Para que el icono no tenga espacio extra */
         }
     </style>
 </head>
@@ -121,401 +128,441 @@
                     <i class="bi bi-geo-alt-fill me-2 text-primary"></i>Local asignado
                 </h3>
 
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="card h-100 fade-in">
-                            <div class="card-header">
-                                <i class="bi bi-building me-2"></i>Selecciona un local
-                            </div>
-                            <div class="card-body">
-                                <label for="sedeSelect" class="form-label visually-hidden">Selecciona un local</label>
-                                <select id="sedeSelect" class="form-select form-select-lg">
-                                    <option th:each="sede, iStat : ${sedesAsignadas}"
-                                            th:value="${sede.idsede}"
-                                            th:text="${sede.nombre}">
-                                    </option>
-                                </select>
-                                <div id="mensajeAsistencia" class="alert alert-info text-center mt-4 fade-in d-none" role="alert">
-                                    <i class="bi bi-info-circle-fill me-2"></i>Ya registraste asistencia hoy a las <strong id="horaAsistenciaTexto"></strong>
-                                </div>
+                <div class="row g-4"> <div class="col-md-6">
+                    <div class="card h-100 fade-in">
+                        <div class="card-header">
+                            <i class="bi bi-building me-2"></i>Selecciona un local
+                        </div>
+                        <div class="card-body">
+                            <label for="sedeSelect" class="form-label visually-hidden">Selecciona un local</label>
+                            <select id="sedeSelect" class="form-select form-select-lg">
+                                <option th:each="sede, iStat : ${sedesAsignadas}"
+                                        th:value="${sede.idsede}"
+                                        th:text="${sede.nombre}">
+                                </option>
+                            </select>
+                            <div id="mensajeAsistencia" class="alert alert-info text-center mt-4 fade-in d-none" role="alert">
+                                <i class="bi bi-info-circle-fill me-2"></i>Ya registraste asistencia hoy a las <strong id="horaAsistenciaTexto"></strong>
                             </div>
                         </div>
                     </div>
+                </div>
 
                     <div class="col-md-6">
                         <div class="card h-100 fade-in">
                             <div class="card-header">
                                 <i class="bi bi-map-fill me-2"></i>Ubicación del Local
                             </div>
-                            <div class="card-body p-0">
-                                <div id="map" style="height: 350px; width: 100%; border-radius: 0 0 16px 16px;"></div>
+                            <div class="card-body p-0"> <div id="map" style="height: 350px; width: 100%; border-radius: 0 0 16px 16px;">
+                            </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-12 mt-4">
                         <div class="card text-center fade-in" id="bloqueFormulario">
-                            <div class="card-header">
-                                <i class="bi bi-check-circle-fill me-2"></i>Registrar Asistencia
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text mb-4">Haz clic para registrar tu asistencia del día en el local seleccionado.</p>
-                                <form id="formAsistencia" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
-                                    <input type="hidden" id="latitudInput" name="latitud">
-                                    <input type="hidden" id="longitudInput" name="longitud">
-                                    <input type="hidden" id="idsedeInput" name="idsede">
-                                    <button type="button" class="btn btn-success btn-lg px-5" id="btnAbrirModal">
-                                        <i class="bi bi-check-circle"></i> Registrar asistencia del día
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <!-- <div class="card-header">
+                                 <i class="bi bi-check-circle-fill me-2"></i>Registrar Asistencia
+                             </div>-->
+                             <div class="card-body">
+                                 <p class="card-text mb-4">Haz clic para registrar tu asistencia del día en el local seleccionado.</p>
+                                 <form id="formAsistencia" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
+                                     <input type="hidden" id="latitudInput" name="latitud">
+                                     <input type="hidden" id="longitudInput" name="longitud">
+                                     <input type="hidden" id="idsedeInput" name="idsede">
+                                     <button type="button" class="btn btn-success btn-lg px-5" id="btnAbrirModal">
+                                         <i class="bi bi-check-circle"></i> Registrar asistencia del día
+                                     </button>
+                                 </form>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
 
-                <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
-                                <h5 class="modal-title" id="modalConfirmacionLabel"><i class="bi bi-question-circle-fill me-2"></i>Confirmar asistencia</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                ¿Deseas registrar tu asistencia?<br>
-                                <strong>Hora actual: <span id="horaActual"></span></strong><br>
-                                Esta acción no se puede modificar.
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="button" class="btn btn-primary" id="btnConfirmarAsistencia">
-                                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
-                                    Confirmar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                 <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
+                     <div class="modal-dialog modal-dialog-centered">
+                         <div class="modal-content">
+                             <div class="modal-header bg-info text-white">
+                                 <h5 class="modal-title" id="modalConfirmacionLabel"><i class="bi bi-question-circle-fill me-2"></i>Confirmar asistencia</h5>
+                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                             </div>
+                             <div class="modal-body text-center">
+                                 ¿Deseas registrar tu asistencia?<br>
+                                 <strong>Hora actual: <span id="horaActual"></span></strong><br>
+                                 Esta acción no se puede modificar.
+                             </div>
+                             <div class="modal-footer justify-content-center">
+                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                 <button type="button" class="btn btn-primary" id="btnConfirmarAsistencia">
+                                     <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                     Confirmar
+                                 </button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
 
-                <div class="modal fade" id="modalFueraDeRango" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-warning text-white">
-                                <h5 class="modal-title" id="modalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>¡Advertencia!</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                Estás fuera del rango permitido (500 metros) para registrar asistencia.<br>
-                                Acércate al local seleccionado.
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                 <div class="modal fade" id="modalFueraDeRango" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                     <div class="modal-dialog modal-dialog-centered">
+                         <div class="modal-content">
+                             <div class="modal-header bg-warning text-white">
+                                 <h5 class="modal-title" id="modalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>¡Advertencia!</h5>
+                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                             </div>
+                             <div class="modal-body text-center">
+                                 Estás fuera del rango permitido (500 metros) para registrar asistencia.<br>
+                                 Acércate al local seleccionado.
+                             </div>
+                             <div class="modal-footer justify-content-center">
+                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
 
-                <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                    <div id="successToast" class="toast text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="bi bi-check-circle-fill me-2"></i>Asistencia registrada exitosamente!
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>
-                    <div id="errorToast" class="toast text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="7000">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="bi bi-x-circle-fill me-2"></i>Ocurrió un error al registrar la asistencia.
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+                 <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                     <div id="successToast" class="toast text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                         <div class="d-flex">
+                             <div class="toast-body">
+                                 <i class="bi bi-check-circle-fill me-2"></i>Asistencia registrada exitosamente!
+                             </div>
+                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                         </div>
+                     </div>
+                     <div id="errorToast" class="toast text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="7000">
+                         <div class="d-flex">
+                             <div class="toast-body">
+                                 <i class="bi bi-x-circle-fill me-2"></i>Ocurrió un error al registrar la asistencia.
+                             </div>
+                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                         </div>
+                     </div>
+                 </div>
 
-        <div id="asistencias-data" th:data-json="${asistenciasPorSede}" style="display: none;"></div>
+             </div>
+         </main>
 
-        <footer class="footer mt-auto py-3">
-            <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo" height="60">
-            </div>
-            <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
-    </div>
-</div>
+         <div id="asistencias-data" th:data-json="${asistenciasPorSede}" style="display: none;"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    document.addEventListener("DOMContentLoaded", () => {
-        // Constantes
-        const GEOLOCATION_OPTIONS = {
-            enableHighAccuracy: true,
-            timeout: 10000, // 10 segundos de espera
-            maximumAge: 0 // No usar caché de ubicación
-        };
-        const DISTANCE_THRESHOLD_KM = 0.5; // 500 metros
+         <footer class="footer mt-auto py-3">
+             <div class="text-center mt-5 mb-3">
+                 <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo" height="60">
+             </div>
+             <div class="container text-center text-muted">
+                 Municipalidad de San Miguel © 2025
+             </div>
+         </footer>
+     </div>
+ </div>
 
-        // Selectores del DOM
-        const sedeSelect = document.getElementById("sedeSelect");
-        const idsedeInput = document.getElementById("idsedeInput");
-        const latitudInput = document.getElementById("latitudInput");
-        const longitudInput = document.getElementById("longitudInput");
-        const mensajeAsistencia = document.getElementById("mensajeAsistencia");
-        const horaAsistenciaTexto = document.getElementById("horaAsistenciaTexto");
-        const bloqueFormulario = document.getElementById("bloqueFormulario");
-        const mapContainer = document.getElementById("map");
-        const btnAbrirModal = document.getElementById("btnAbrirModal");
-        const btnConfirmarAsistencia = document.getElementById("btnConfirmarAsistencia");
-        const horaActualSpan = document.getElementById("horaActual");
-        const formAsistencia = document.getElementById("formAsistencia");
-        const asistenciasData = document.getElementById("asistencias-data");
-        const successToast = document.getElementById("successToast");
-        const errorToast = document.getElementById("errorToast");
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ <script th:inline="javascript">
+     /*<![CDATA[*/
+     document.addEventListener("DOMContentLoaded", () => {
+         // --- Constantes y Selectores del DOM ---
+         const Constants = {
+             GEOLOCATION_OPTIONS: { enableHighAccuracy: true },
+             DISTANCE_THRESHOLD_KM: 0.5 // 500 metros
+         };
 
-        // Datos de la aplicación
-        const sedesAsignadas = /*[[${sedesAsignadas}]]*/ [];
-        const asistenciasRegistradas = JSON.parse(asistenciasData.dataset.json);
+         const DOM = {
+             sedeSelect: document.getElementById("sedeSelect"),
+             idsedeInput: document.getElementById("idsedeInput"),
+             latitudInput: document.getElementById("latitudInput"),
+             longitudInput: document.getElementById("longitudInput"),
+             mensajeAsistencia: document.getElementById("mensajeAsistencia"),
+             horaAsistenciaTexto: document.getElementById("horaAsistenciaTexto"),
+             bloqueFormulario: document.getElementById("bloqueFormulario"),
+             mapContainer: document.getElementById("map"),
+             btnAbrirModal: document.getElementById("btnAbrirModal"),
+             btnConfirmarAsistencia: document.getElementById("btnConfirmarAsistencia"),
+             horaActualSpan: document.getElementById("horaActual"),
+             formAsistencia: document.getElementById("formAsistencia"),
+             asistenciasData: document.getElementById("asistencias-data"),
+             successToast: document.getElementById("successToast"),
+             errorToast: document.getElementById("errorToast")
+         };
 
-        if (!sedesAsignadas || sedesAsignadas.length === 0) {
-            console.warn("No hay sedes asignadas. La funcionalidad de asistencia no estará disponible.");
-            return;
-        }
+         // --- Datos de la aplicación ---
+         const sedesAsignadas = /*[[${sedesAsignadas}]]*/ [];
+         const asistenciasRegistradas = JSON.parse(DOM.asistenciasData.dataset.json);
 
-        // Variables de estado del mapa y geolocalización
-        let leafletMap = null;
-        let sedeMarker = null;
-        let userLocationCircle = null;
-        let userLocationMarker = null;
-        let attendanceRadiusCircle = null;
-        let currentUserCoordinates = { lat: null, lon: null };
+         if (!sedesAsignadas || sedesAsignadas.length === 0) {
+             console.warn("No hay sedes asignadas. La funcionalidad de asistencia no estará disponible.");
+             return;
+         }
 
-        // Funciones de utilidad
-        function showToast(toastElement, message, iconClass = '') {
-            const toastBody = toastElement.querySelector('.toast-body');
-            toastBody.innerHTML = `<i class="${iconClass} me-2"></i>${message}`;
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-        }
+         // --- Variables de estado del mapa y geolocalización ---
+         let leafletMap = null;
+         let sedeMarker = null;
+         let userLocationCircle = null; // Círculo de precisión
+         let userLocationMarker = null; // Marcador de ubicación del usuario
+         let attendanceRadiusCircle = null; // Círculo de radio de asistencia
+         let currentUserCoordinates = { lat: null, lon: null };
 
-        function initializeMap(initialSede) {
-            leafletMap = L.map(mapContainer).setView([initialSede.latitud, initialSede.longitud], 17);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(leafletMap);
+         // --- Funciones de Utilidad ---
 
-            // Marcador de la sede
-            sedeMarker = L.marker([initialSede.latitud, initialSede.longitud]).addTo(leafletMap)
-                .bindPopup(initialSede.nombre)
-                .openPopup();
+         /**
+          * Muestra un Toast de Bootstrap.
+          * @param {HTMLElement} toastElement - El elemento DOM del toast (ej. DOM.successToast).
+          * @param {string} message - El mensaje a mostrar en el toast.
+          * @param {string} [iconClass=''] - Clase de ícono de Bootstrap (ej. 'bi-check-circle-fill').
+          */
+         function showToast(toastElement, message, iconClass = '') {
+             const toastBody = toastElement.querySelector('.toast-body');
+             toastBody.innerHTML = `<i class="${iconClass} me-2"></i>${message}`;
+             const toast = new bootstrap.Toast(toastElement);
+             toast.show();
+         }
 
-            // Círculo de radio de asistencia
-            attendanceRadiusCircle = L.circle([initialSede.latitud, initialSede.longitud], {
-                radius: DISTANCE_THRESHOLD_KM * 1000,
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.1
-            }).addTo(leafletMap);
-        }
+         /**
+          * Inicializa y configura el mapa de Leaflet.
+          * @param {Object} initialSede - La sede inicial para centrar el mapa.
+          */
+         function initializeMap(initialSede) {
+             leafletMap = L.map(DOM.mapContainer).setView([initialSede.latitud, initialSede.longitud], 17);
+             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                 attribution: '&copy; OpenStreetMap contributors',
+                 maxZoom: 19
+             }).addTo(leafletMap);
+             sedeMarker = L.marker([initialSede.latitud, initialSede.longitud]).addTo(leafletMap).bindPopup(initialSede.nombre).openPopup();
 
-        function updateAttendanceUI() {
-            const selectedSedeId = parseInt(sedeSelect.value);
-            const registeredTime = asistenciasRegistradas[selectedSedeId];
+             // Dibuja el círculo de radio de asistencia
+             attendanceRadiusCircle = L.circle([initialSede.latitud, initialSede.longitud], {
+                 radius: Constants.DISTANCE_THRESHOLD_KM * 1000, // Convertir km a metros
+                 color: 'red',
+                 fillColor: '#f03',
+                 fillOpacity: 0.1
+             }).addTo(leafletMap);
+         }
 
-            if (registeredTime) {
-                mensajeAsistencia.classList.remove("d-none");
-                bloqueFormulario.classList.add("d-none");
-                horaAsistenciaTexto.textContent = registeredTime;
-            } else {
-                mensajeAsistencia.classList.add("d-none");
-                bloqueFormulario.classList.remove("d-none");
-            }
-        }
+         /**
+          * Actualiza la interfaz de usuario para mostrar si la asistencia ya fue registrada.
+          */
+         function updateAttendanceUI() {
+             const selectedSedeId = parseInt(DOM.sedeSelect.value);
+             const registeredTime = asistenciasRegistradas[selectedSedeId];
 
-        function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Radio de la Tierra en km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) ** 2 +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) ** 2;
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
+             if (registeredTime) {
+                 DOM.mensajeAsistencia.classList.remove("d-none");
+                 DOM.bloqueFormulario.classList.add("d-none");
+                 DOM.horaAsistenciaTexto.textContent = registeredTime;
+             } else {
+                 DOM.mensajeAsistencia.classList.add("d-none");
+                 DOM.bloqueFormulario.classList.remove("d-none");
+             }
+         }
 
-        // Manejo de geolocalización
-        function onGeolocationSuccess(position) {
-            currentUserCoordinates.lat = position.coords.latitude;
-            currentUserCoordinates.lon = position.coords.longitude;
-            const accuracy = position.coords.accuracy;
+         /**
+          * Calcula la distancia entre dos puntos geográficos en kilómetros.
+          * @param {number} lat1 - Latitud del punto 1.
+          * @param {number} lon1 - Longitud del punto 1.
+          * @param {number} lat2 - Latitud del punto 2.
+          * @param {number} lon2 - Longitud del punto 2.
+          * @returns {number} Distancia en kilómetros.
+          */
+         function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+             const R = 6371; // Radio de la Tierra en kilómetros
+             const dLat = (lat2 - lat1) * Math.PI / 180;
+             const dLon = (lon2 - lon1) * Math.PI / 180;
+             const a = Math.sin(dLat / 2) ** 2 +
+                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                 Math.sin(dLon / 2) ** 2;
+             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+             return R * c;
+         }
 
-            // Eliminar marcadores y círculos anteriores si existen
-            if (userLocationCircle) leafletMap.removeLayer(userLocationCircle);
-            if (userLocationMarker) leafletMap.removeLayer(userLocationMarker);
+         // --- Manejo de Geolocalización ---
 
-            // Círculo de precisión
-            userLocationCircle = L.circle([currentUserCoordinates.lat, currentUserCoordinates.lon], {
-                radius: accuracy,
-                color: 'blue',
-                fillColor: '#00f',
-                fillOpacity: 0.1
-            }).addTo(leafletMap);
+         /**
+          * Callback exitoso para obtener la posición del usuario.
+          * @param {Object} position - Objeto de posición de Geolocation API.
+          */
+         function onGeolocationSuccess(position) {
+             currentUserCoordinates.lat = position.coords.latitude;
+             currentUserCoordinates.lon = position.coords.longitude;
+             const accuracy = position.coords.accuracy; // Precisión en metros
 
-            // Marcador de ubicación del usuario
-            userLocationMarker = L.marker([currentUserCoordinates.lat, currentUserCoordinates.lon], {
-                icon: L.divIcon({
-                    className: 'my-div-icon',
-                    html: '<i class="bi bi-person-fill" style="font-size: 24px; color: #00f;"></i>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 24]
-                })
-            }).addTo(leafletMap).bindPopup("Tu ubicación actual").openPopup();
-        }
+             // Eliminar marcadores y círculos anteriores si existen
+             if (userLocationCircle) leafletMap.removeLayer(userLocationCircle);
+             if (userLocationMarker) leafletMap.removeLayer(userLocationMarker);
 
-        function onGeolocationError(error) {
-            let errorMessage = "No se pudo obtener tu ubicación.";
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = "Permiso de geolocalización denegado. Debes permitir acceso a la ubicación para registrar asistencia.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage = "La información de la ubicación no está disponible.";
-                    break;
-                case error.TIMEOUT:
-                    errorMessage = "Tiempo de espera agotado al intentar obtener la ubicación. Intenta de nuevo.";
-                    break;
-                default:
-                    break;
-            }
-            showToast(errorToast, errorMessage, "bi-exclamation-triangle-fill");
-            console.error("Error de geolocalización:", error);
-        }
+             // Muestra un círculo para la precisión
+             userLocationCircle = L.circle([currentUserCoordinates.lat, currentUserCoordinates.lon], {
+                 radius: accuracy,
+                 color: 'blue',
+                 fillColor: '#00f',
+                 fillOpacity: 0.1
+             }).addTo(leafletMap);
 
-        function startGeolocationWatch() {
-            if ("geolocation" in navigator) {
-                // Primero obtenemos la posición actual
-                navigator.geolocation.getCurrentPosition(
-                    onGeolocationSuccess,
-                    onGeolocationError,
-                    GEOLOCATION_OPTIONS
-                );
+             // Muestra un marcador para la ubicación exacta del usuario
+             userLocationMarker = L.marker([currentUserCoordinates.lat, currentUserCoordinates.lon], {
+                 icon: L.divIcon({
+                     className: 'my-div-icon',
+                     html: '<i class="bi bi-person-fill" style="font-size: 24px; color: #00f;"></i>',
+                     iconSize: [24, 24],
+                     iconAnchor: [12, 24] // Centra el ícono en la posición
+                 })
+             }).addTo(leafletMap).bindPopup("Tu ubicación actual").openPopup();
+         }
 
-                // Luego iniciamos el seguimiento de cambios
-                navigator.geolocation.watchPosition(
-                    onGeolocationSuccess,
-                    onGeolocationError,
-                    GEOLOCATION_OPTIONS
-                );
-            } else {
-                showToast(errorToast, "Tu navegador no soporta la geolocalización. No podrás registrar asistencia.", "bi-exclamation-triangle-fill");
-            }
-        }
+         /**
+          * Callback de error para la geolocalización.
+          * @param {Object} error - Objeto de error de Geolocation API.
+          */
+         function onGeolocationError(error) {
+             let errorMessage = "No se pudo obtener tu ubicación.";
+             switch(error.code) {
+                 case error.PERMISSION_DENIED:
+                     errorMessage = "Permiso de geolocalización denegado. Debes permitir acceso a la ubicación para registrar asistencia.";
+                     break;
+                 case error.POSITION_UNAVAILABLE:
+                     errorMessage = "La información de la ubicación no está disponible.";
+                     break;
+                 case error.TIMEOUT:
+                     errorMessage = "Tiempo de espera agotado al intentar obtener la ubicación. Intenta de nuevo.";
+                     break;
+                 default:
+                     break;
+             }
+             alert(errorMessage); // Se mantiene el alert por su importancia inicial.
+             console.error("Error de geolocalización:", error);
+         }
 
-        // Event listeners
-        sedeSelect.addEventListener("change", () => {
-            const selectedSedeId = parseInt(sedeSelect.value);
-            const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
+         /**
+          * Inicia la vigilancia de la posición del usuario.
+          */
+         function startGeolocationWatch() {
+             if ("geolocation" in navigator) {
+                 // Obtener la posición inicial y luego vigilar cambios
+                 navigator.geolocation.watchPosition(onGeolocationSuccess, onGeolocationError, Constants.GEOLOCATION_OPTIONS);
+             } else {
+                 alert("Tu navegador no soporta la geolocalización. No podrás registrar asistencia.");
+             }
+         }
 
-            if (selectedSede) {
-                idsedeInput.value = selectedSede.idsede;
-                sedeMarker.setLatLng([selectedSede.latitud, selectedSede.longitud])
-                    .setPopupContent(selectedSede.nombre)
-                    .openPopup();
-                leafletMap.setView([selectedSede.latitud, selectedSede.longitud], 17);
+         // --- Event Handlers ---
 
-                // Actualizar círculo de radio de asistencia
-                if (attendanceRadiusCircle) {
-                    leafletMap.removeLayer(attendanceRadiusCircle);
-                }
-                attendanceRadiusCircle = L.circle([selectedSede.latitud, selectedSede.longitud], {
-                    radius: DISTANCE_THRESHOLD_KM * 1000,
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.1
-                }).addTo(leafletMap);
-            }
-            updateAttendanceUI();
-        });
+         DOM.sedeSelect.addEventListener("change", () => {
+             const selectedSedeId = parseInt(DOM.sedeSelect.value);
+             const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
 
-        btnAbrirModal.addEventListener("click", () => {
-            const selectedSedeId = parseInt(sedeSelect.value);
-            const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
+             if (selectedSede) {
+                 DOM.idsedeInput.value = selectedSede.idsede;
+                 sedeMarker.setLatLng([selectedSede.latitud, selectedSede.longitud])
+                     .setPopupContent(selectedSede.nombre)
+                     .openPopup();
+                 leafletMap.setView([selectedSede.latitud, selectedSede.longitud], 17);
 
-            if (!currentUserCoordinates.lat || !currentUserCoordinates.lon) {
-                showToast(errorToast, "Ubicación aún no detectada. Por favor, espera unos segundos y asegúrate de haber permitido el acceso a tu ubicación.", "bi-exclamation-circle-fill");
-                return;
-            }
+                 // Actualiza el círculo de radio de asistencia para la nueva sede
+                 if (attendanceRadiusCircle) {
+                     leafletMap.removeLayer(attendanceRadiusCircle);
+                 }
+                 attendanceRadiusCircle = L.circle([selectedSede.latitud, selectedSede.longitud], {
+                     radius: Constants.DISTANCE_THRESHOLD_KM * 1000,
+                     color: 'red',
+                     fillColor: '#f03',
+                     fillOpacity: 0.1
+                 }).addTo(leafletMap);
+             }
+             updateAttendanceUI();
+         });
 
-            const distance = calculateDistanceKm(
-                currentUserCoordinates.lat, currentUserCoordinates.lon,
-                selectedSede.latitud, selectedSede.longitud
-            );
+         DOM.btnAbrirModal.addEventListener("click", () => {
+             const selectedSedeId = parseInt(DOM.sedeSelect.value);
+             const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
 
-            if (distance > DISTANCE_THRESHOLD_KM) {
-                const modalFueraDeRango = new bootstrap.Modal(document.getElementById('modalFueraDeRango'));
-                modalFueraDeRango.show();
-                return;
-            }
+             if (!currentUserCoordinates.lat || !currentUserCoordinates.lon) {
+                 showToast(DOM.errorToast, "Ubicación aún no detectada. Por favor, espera unos segundos y asegúrate de haber permitido el acceso a tu ubicación.", "bi-exclamation-circle-fill");
+                 return;
+             }
 
-            if (asistenciasRegistradas[selectedSedeId]) {
-                showToast(errorToast, `Ya registraste tu asistencia hoy a las ${asistenciasRegistradas[selectedSedeId]} en esta sede.`, "bi-info-circle-fill");
-                return;
-            }
+             const distance = calculateDistanceKm(
+                 currentUserCoordinates.lat, currentUserCoordinates.lon,
+                 selectedSede.latitud, selectedSede.longitud
+             );
 
-            // Mostrar hora actual en el modal
-            const now = new Date();
-            horaActualSpan.textContent = now.toLocaleTimeString('es-PE', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
+             if (distance > Constants.DISTANCE_THRESHOLD_KM) {
+                 const modalFueraDeRango = new bootstrap.Modal(document.getElementById('modalFueraDeRango'));
+                 modalFueraDeRango.show();
+                 return;
+             }
 
-            const modalConfirmacion = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
-            modalConfirmacion.show();
-        });
+             if (asistenciasRegistradas[selectedSedeId]) {
+                 showToast(DOM.errorToast, `Ya registraste tu asistencia hoy a las ${asistenciasRegistradas[selectedSedeId]} en esta sede.`, "bi-info-circle-fill");
+                 return;
+             }
 
-        btnConfirmarAsistencia.addEventListener("click", () => {
-            // Deshabilitar botón y mostrar spinner
-            btnConfirmarAsistencia.disabled = true;
-            btnConfirmarAsistencia.querySelector('.spinner-border').classList.remove('d-none');
+             const now = new Date();
+             DOM.horaActualSpan.textContent = now.toLocaleTimeString('es-PE', {
+                 hour: '2-digit', minute: '2-digit', second: '2-digit'
+             });
 
-            const selectedSedeId = parseInt(sedeSelect.value);
-            const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
+             const modalConfirmacion = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
+             modalConfirmacion.show();
+         });
 
-            // Formatear coordenadas con 6 decimales
-            latitudInput.value = currentUserCoordinates.lat.toFixed(6);
-            longitudInput.value = currentUserCoordinates.lon.toFixed(6);
-            idsedeInput.value = selectedSede.idsede;
+         DOM.btnConfirmarAsistencia.addEventListener("click", () => {
+             // Deshabilitar botón y mostrar spinner
+             DOM.btnConfirmarAsistencia.disabled = true;
+             DOM.btnConfirmarAsistencia.querySelector('.spinner-border').classList.remove('d-none');
 
-            // Enviar el formulario directamente (recargará la página)
-            formAsistencia.submit();
-        });
+             const selectedSedeId = parseInt(DOM.sedeSelect.value);
+             const selectedSede = sedesAsignadas.find(s => s.idsede === selectedSedeId);
 
-        // Inicialización
-        initializeMap(sedesAsignadas[0]);
-        idsedeInput.value = sedesAsignadas[0].idsede;
-        updateAttendanceUI();
-        startGeolocationWatch();
-    });
+             DOM.latitudInput.value = currentUserCoordinates.lat.toFixed(6);
+             DOM.longitudInput.value = currentUserCoordinates.lon.toFixed(6);
+             DOM.idsedeInput.value = selectedSede.idsede;
 
-    // Reloj en vivo
-    function updateClock() {
-        const clockElement = document.getElementById('reloj');
-        if (!clockElement) return;
-        const now = new Date();
-        const time = now.toLocaleTimeString('es-PE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        clockElement.textContent = time;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-    /*]]>*/
-</script>
-</body>
-</html>
+
+
+             // *** Mantenemos la simulación por ahora para que veas el efecto de los toasts y spinner ***
+             setTimeout(() => { // Simula un retraso de red
+                 // Simula éxito: actualiza el estado local y el UI
+                 const now = new Date();
+                 const horaRegistro = now.toLocaleTimeString('es-PE', {hour: '2-digit', minute:'2-digit'});
+                 asistenciasRegistradas[selectedSedeId] = horaRegistro;
+                 updateAttendanceUI();
+
+                 showToast(DOM.successToast, "Asistencia registrada exitosamente!", "bi-check-circle-fill"); // Muestra toast de éxito
+
+                 // Restablecer botón y ocultar spinner
+                 DOM.btnConfirmarAsistencia.disabled = false;
+                 DOM.btnConfirmarAsistencia.querySelector('.spinner-border').classList.add('d-none');
+
+                 // Ocultar modal de confirmación
+                 const modalConfirmacion = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
+                 if (modalConfirmacion) {
+                     modalConfirmacion.hide();
+                 }
+
+                 // Si de verdad usas el submit directo, descomenta la siguiente línea y borra la simulación:
+                 // DOM.formAsistencia.submit();
+             }, 1500); // 1.5 segundos de simulación de carga
+         });
+
+         // --- Inicialización al cargar la página ---
+         initializeMap(sedesAsignadas[0]); // Inicializa con la primera sede
+         DOM.idsedeInput.value = sedesAsignadas[0].idsede; // Establece el ID de la primera sede
+         updateAttendanceUI(); // Actualiza el UI con la primera sede
+         startGeolocationWatch(); // Inicia la vigilancia de la geolocalización
+     });
+
+     // --- Función para el reloj independiente (fuera del DOMContentLoaded) ---
+     function updateClock() {
+         const clockElement = document.getElementById('reloj'); // Asumo que tienes un elemento con id='reloj' en tu navbar o similar
+         if (!clockElement) return;
+         const now = new Date();
+         const time = now.toLocaleTimeString('es-PE', {
+             hour: '2-digit',
+             minute: '2-digit',
+             second: '2-digit'
+         });
+         clockElement.textContent = time;
+     }
+     setInterval(updateClock, 1000);
+     updateClock(); // Llama una vez para mostrar la hora inmediatamente al cargar
+     /*]]>*/
+ </script>
+ </body>
+ </html>

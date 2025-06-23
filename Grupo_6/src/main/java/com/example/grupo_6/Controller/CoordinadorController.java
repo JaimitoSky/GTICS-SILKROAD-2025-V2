@@ -30,8 +30,6 @@ import java.time.LocalDateTime;
 @RequestMapping("/coordinador")
 public class CoordinadorController {
 
-    @Autowired
-    private AsignacionSedeRepository asignacionSedeRepository;
 
     @Autowired
     private AsistenciaCoordinadorRepository asistenciaCoordinadorRepository;
