@@ -121,10 +121,11 @@
                         data.forEach(s => {
                             const opt = document.createElement("option");
                             opt.value = s.idSedeServicio;
-                            opt.textContent = s.nombre;
+                            opt.textContent = s.nombre;  // Ya viene con nombre personalizado si aplica
                             servicioSelect.appendChild(opt);
                         });
                     });
+
 
                 fetch(`/api/dias-activos?idsede=${sedeId}`)
                     .then(res => res.json())

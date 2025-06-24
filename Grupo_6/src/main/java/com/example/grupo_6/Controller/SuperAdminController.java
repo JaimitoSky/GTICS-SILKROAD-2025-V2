@@ -945,14 +945,19 @@ public class SuperAdminController {
     public String nuevaReserva(Model model) {
         model.addAttribute("reserva", new Reserva());
 
-        List<Sede> sedes = sedeRepository.findAll();
-        model.addAttribute("listaSedes", sedes);
+        // Filtrar sedes activas
+        List<Sede> sedesActivas = sedeRepository.findAll()
+                .stream()
+                .filter(s -> Boolean.TRUE.equals(s.getActivo()))
+                .collect(Collectors.toList());
+        model.addAttribute("listaSedes", sedesActivas);
 
         List<HorarioDisponible> listaHorarios = horarioDisponibleRepository.findByActivoTrue();
         model.addAttribute("listaHorarios", listaHorarios);
 
         return "superadmin/superadmin_reservas_formulario";
     }
+
 
 
 
