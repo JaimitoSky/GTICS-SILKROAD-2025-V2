@@ -18,7 +18,14 @@ public interface HorarioAtencionRepository extends JpaRepository<HorarioAtencion
 
     List<HorarioAtencion> findBySedeAndActivoTrue(Sede sede);
 
+    List<HorarioAtencion> findBySede_IdsedeOrderByDiaSemanaAsc(Integer idsede);
+    List<HorarioAtencion> findBySede_IdsedeAndDiaSemanaAndActivoTrue(Integer idsede, String diaSemana);
 
-
-
+    /**
+     * (Opcional) Si solo quieres los activos:
+     */
 }
+
+
+
+

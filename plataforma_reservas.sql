@@ -998,28 +998,209 @@ CREATE TABLE asistencia_coordinador (
     UNIQUE KEY uk_asistencia_por_sede_usuario (idusuario, idsede, fecha)
 );
 
+-- Elimina la tabla si ya existe
+DROP TABLE IF EXISTS asistencia_coordinador;
 
--- 1.  Salida de coordinador
-ALTER TABLE asistencia_coordinador
-  ADD COLUMN hora_salida      TIME                 NULL AFTER hora_entrada,
-  ADD COLUMN latitud_salida   DECIMAL(10,8)        NULL AFTER longitud,
-  ADD COLUMN longitud_salida  DECIMAL(11,8)        NULL AFTER latitud_salida;
+-- Crea la nueva tabla con el estado 'no_trabaja' ya incluido
+CREATE TABLE asistencia_coordinador (
+  idasistencia               INT AUTO_INCREMENT PRIMARY KEY,
+  idusuario                  INT         NOT NULL,
+  idsede                     INT         NOT NULL,
+  fecha                      DATE        NOT NULL,
 
--- 2. Horario de atención que aplica
-ALTER TABLE asistencia_coordinador
-  ADD COLUMN idhorario_atencion INT               NULL AFTER idsede,
-  ADD INDEX idx_asist_horario (idhorario_atencion),
-  ADD CONSTRAINT fk_asist_horario
-    FOREIGN KEY (idhorario_atencion)
-    REFERENCES horario_atencion(idhorario_atencion)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL;
+  id_coordinador_horario     INT         NULL,
 
--- 3. Estado de la marcación de entrada
-ALTER TABLE asistencia_coordinador
-  ADD COLUMN estado ENUM('presente','tarde','falta') 
-    NOT NULL DEFAULT 'falta' 
-    AFTER idhorario_atencion;
+  hora_marcacion_entrada     TIME        NOT NULL,
+  hora_marcacion_salida      TIME        NULL,
+
+  hora_programada_entrada    TIME        NULL,
+  hora_programada_salida     TIME        NULL,
+
+  latitud                    DECIMAL(10,8) NULL,
+  longitud                   DECIMAL(11,8) NULL,
+  latitud_salida             DECIMAL(10,8) NULL,
+  longitud_salida            DECIMAL(11,8) NULL,
+
+  estado ENUM('presente','tarde','falta','no_trabaja') NOT NULL,
+
+  UNIQUE KEY ux_asist (idusuario, fecha, idsede),
+  INDEX idx_us_fec (idusuario, fecha),
+
+  CONSTRAINT fk_asist_usuario FOREIGN KEY (idusuario)
+    REFERENCES usuario(idusuario)
+      ON UPDATE RESTRICT
+      ON DELETE RESTRICT,
+
+  CONSTRAINT fk_asist_sede FOREIGN KEY (idsede)
+    REFERENCES sede(idsede)
+      ON UPDATE RESTRICT
+      ON DELETE RESTRICT,
+
+  CONSTRAINT fk_asist_ch FOREIGN KEY (id_coordinador_horario)
+    REFERENCES coordinador_horario(id_coordinador_horario)
+      ON UPDATE RESTRICT
+      ON DELETE SET NULL
+);
+
+-- Trigger que asigna estado y horas programadas antes de INSERT
+DELIMITER $$
+CREATE TRIGGER trg_before_insert_asistencia_coord
+BEFORE INSERT ON asistencia_coordinador
+FOR EACH ROW
+BEGIN
+  DECLARE turno_id INT;
+  DECLARE h_prog_ini TIME;
+  DECLARE h_prog_fin TIME;
+
+  -- Busca un turno activo para ese coordinador en el día correspondiente
+  SELECT ch.id_coordinador_horario
+    INTO turno_id
+    FROM coordinador_horario ch
+    JOIN coordinador_sede cs
+      ON cs.id = ch.id_coordinador_sede
+   WHERE cs.idusuario = NEW.idusuario
+     AND cs.idsede    = NEW.idsede
+     AND ch.dia_semana = DAYNAME(NEW.fecha)
+     AND ch.activo    = 1
+   LIMIT 1;
+
+  IF turno_id IS NULL THEN
+    -- No estaba programado
+    SET NEW.id_coordinador_horario  = NULL;
+    SET NEW.hora_programada_entrada = NULL;
+    SET NEW.hora_programada_salida  = NULL;
+    SET NEW.estado                  = 'no_trabaja';
+  ELSE
+    -- Cargo el turno y las horas programadas
+    SET NEW.id_coordinador_horario = turno_id;
+
+    SELECT hora_entrada, hora_salida
+      INTO h_prog_ini, h_prog_fin
+      FROM coordinador_horario
+     WHERE id_coordinador_horario = turno_id
+     LIMIT 1;
+
+    SET NEW.hora_programada_entrada = h_prog_ini;
+    SET NEW.hora_programada_salida  = h_prog_fin;
+
+    -- Determina presente o tarde
+    IF NEW.hora_marcacion_entrada <= h_prog_ini THEN
+      SET NEW.estado = 'presente';
+    ELSE
+      SET NEW.estado = 'tarde';
+    END IF;
+  END IF;
+END$$
+DELIMITER ;
+
+--Configuracion en BD para asignar la falta o "no_trabaja" de forma automatica
+
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS ev_generar_asistencias_diarias
+ON SCHEDULE EVERY 1 DAY
+STARTS CONCAT(CURDATE(), ' 23:59:00')
+DO
+BEGIN
+  -- 1) Marcar faltas para turnos activos sin asistencia
+  INSERT IGNORE INTO asistencia_coordinador
+    (idusuario, idsede, fecha, id_coordinador_horario,
+     hora_programada_entrada, hora_programada_salida,
+     estado, hora_marcacion_entrada)
+  SELECT
+    cs.idusuario,
+    cs.idsede,
+    CURDATE(),
+    ch.id_coordinador_horario,
+    ch.hora_entrada,
+    ch.hora_salida,
+    'falta',
+    NULL
+  FROM coordinador_sede cs
+  JOIN coordinador_horario ch
+    ON ch.id_coordinador_sede = cs.id
+  WHERE
+    cs.activo = 1
+    AND ch.activo = 1
+    AND ch.dia_semana = CASE DAYOFWEEK(CURDATE())
+      WHEN 1 THEN 'Domingo'
+      WHEN 2 THEN 'Lunes'
+      WHEN 3 THEN 'Martes'
+      WHEN 4 THEN 'Miércoles'
+      WHEN 5 THEN 'Jueves'
+      WHEN 6 THEN 'Viernes'
+      WHEN 7 THEN 'Sábado'
+    END
+    AND NOT EXISTS (
+      SELECT 1
+        FROM asistencia_coordinador a
+       WHERE a.idusuario = cs.idusuario
+         AND a.idsede    = cs.idsede
+         AND a.fecha     = CURDATE()
+    );
+
+  -- 2) Marcar "no_trabaja" para turnos inactivos sin asistencia
+  INSERT IGNORE INTO asistencia_coordinador
+    (idusuario, idsede, fecha, id_coordinador_horario,
+     hora_programada_entrada, hora_programada_salida,
+     estado, hora_marcacion_entrada)
+  SELECT
+    cs.idusuario,
+    cs.idsede,
+    CURDATE(),
+    ch.id_coordinador_horario,
+    ch.hora_entrada,
+    ch.hora_salida,
+    'no_trabaja',
+    NULL
+  FROM coordinador_sede cs
+  JOIN coordinador_horario ch
+    ON ch.id_coordinador_sede = cs.id
+  WHERE
+    cs.activo = 1
+    AND ch.activo = 0
+    AND ch.dia_semana = CASE DAYOFWEEK(CURDATE())
+      WHEN 1 THEN 'Domingo'
+      WHEN 2 THEN 'Lunes'
+      WHEN 3 THEN 'Martes'
+      WHEN 4 THEN 'Miércoles'
+      WHEN 5 THEN 'Jueves'
+      WHEN 6 THEN 'Viernes'
+      WHEN 7 THEN 'Sábado'
+    END
+    AND NOT EXISTS (
+      SELECT 1
+        FROM asistencia_coordinador a
+       WHERE a.idusuario = cs.idusuario
+         AND a.idsede    = cs.idsede
+         AND a.fecha     = CURDATE()
+    );
+END;
+//
+DELIMITER ;
+
+
+
+CREATE TABLE coordinador_horario (
+  id_coordinador_horario INT AUTO_INCREMENT PRIMARY KEY,
+  id_coordinador_sede    INT NOT NULL,
+  dia_semana             ENUM('Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo') NOT NULL,
+  hora_entrada           TIME        NOT NULL,
+  hora_salida            TIME        NOT NULL,
+  activo                 TINYINT(1)  NOT NULL DEFAULT 1,
+  
+  CONSTRAINT fk_ch_cs
+    FOREIGN KEY (id_coordinador_sede)
+      REFERENCES coordinador_sede(id)
+      ON UPDATE CASCADE
+      ON DELETE CASCADE,
+
+  -- opcional si no permites dos turnos iguales para un mismo día
+  UNIQUE KEY ux_ch_sede_dia (id_coordinador_sede, dia_semana, hora_entrada, hora_salida)
+);
+
+
+
 
 
 SET FOREIGN_KEY_CHECKS=1;

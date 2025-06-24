@@ -3,36 +3,58 @@ package com.example.grupo_6.Entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.Time;
 import java.time.LocalTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
-@Table(name = "asistencia_coordinador") // ✅ sin uniqueConstraints aquí
+@Table(name = "asistencia_coordinador")
 public class AsistenciaCoordinador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idasistencia;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idusuario", nullable = false)
     @NotNull(message = "El usuario es obligatorio")
     private Usuario usuario;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idsede", nullable = false)
+    @NotNull(message = "La sede es obligatoria")
+    private Sede sede;
+
+    @ManyToOne
+    @JoinColumn(name = "id_coordinador_horario")
+    private CoordinadorHorario coordinadorHorario;
 
     @Column(nullable = false)
     @NotNull(message = "La fecha es obligatoria")
     private Date fecha;
 
-    @Column(name = "hora_entrada")
-    private Time horaEntrada;
+    /** Hora real en que marcó entrada **/
+    @Column(name = "hora_marcacion_entrada", nullable = false)
+    @NotNull(message = "La hora de marcación de entrada es obligatoria")
+    private LocalTime horaMarcacionEntrada;
 
+    /** Hora real en que marcó salida **/
+    @Column(name = "hora_marcacion_salida")
+    private LocalTime horaMarcacionSalida;
 
+    /** Hora programada de entrada según el turno **/
+    @Column(name = "hora_programada_entrada")
+    private LocalTime horaProgramadaEntrada;
+
+    /** Hora programada de salida según el turno **/
+    @Column(name = "hora_programada_salida")
+    private LocalTime horaProgramadaSalida;
 
     @Column(precision = 10, scale = 8)
     @Digits(integer = 10, fraction = 8, message = "Latitud no válida")
@@ -42,32 +64,23 @@ public class AsistenciaCoordinador {
     @Digits(integer = 11, fraction = 8, message = "Longitud no válida")
     private BigDecimal longitud;
 
-    @ManyToOne
-    @JoinColumn(name = "idsede", nullable = false)
-    private Sede sede;
-
-    public enum EstadoAsistencia {
-        PRESENTE,
-        TARDE,
-        FALTA
-    }
-    // 1) Salida (opcional)
-    @Column(name = "hora_salida")
-    private LocalTime horaSalida;
-
     @Column(name = "latitud_salida", precision = 10, scale = 8)
+    @Digits(integer = 10, fraction = 8, message = "Latitud de salida no válida")
     private BigDecimal latitudSalida;
 
     @Column(name = "longitud_salida", precision = 11, scale = 8)
+    @Digits(integer = 11, fraction = 8, message = "Longitud de salida no válida")
     private BigDecimal longitudSalida;
 
-    // 2) Relación al horario de atención usado para esta asistencia
-    @ManyToOne
-    @JoinColumn(name = "idhorario_atencion", foreignKey = @ForeignKey(name = "fk_asist_horario"))
-    private HorarioAtencion horarioAtencion;
+    /** Estado de la marcación de entrada/salida **/
+    public enum EstadoAsistencia {
+        presente,
+        tarde,
+        falta,
+        no_trabaja
+    }
 
-    // 3) Estado de la marcación de entrada
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, columnDefinition = "ENUM('presente','tarde','falta')")
-    private EstadoAsistencia estado = EstadoAsistencia.FALTA;
+    @Column(nullable = false, columnDefinition = "ENUM('presente','tarde','falta','no_trabaja')")
+    private EstadoAsistencia estado = EstadoAsistencia.no_trabaja;
 }

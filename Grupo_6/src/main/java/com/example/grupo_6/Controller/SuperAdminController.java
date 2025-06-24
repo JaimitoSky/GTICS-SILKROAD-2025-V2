@@ -1,4 +1,5 @@
 package com.example.grupo_6.Controller;
+import com.example.grupo_6.Entity.HorarioAtencion.DiaSemana;
 
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
@@ -33,7 +34,9 @@ import java.text.Normalizer;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Controller
 public class SuperAdminController {
@@ -51,6 +54,7 @@ public class SuperAdminController {
 
     @Autowired
     private ServicioRepository servicioRepository;
+
 
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
@@ -71,6 +75,9 @@ public class SuperAdminController {
 
     @Autowired
     private CoordinadorSedeRepository coordinadorSedeRepository;
+
+    @Autowired
+    private CoordinadorHorarioRepository coordinadorHorarioRepository;
 
     private void cargarEstadisticas(Model model, YearMonth mes, String rol) {
         if (mes == null) {
@@ -456,9 +463,7 @@ public class SuperAdminController {
             return "redirect:/superadmin/sedes";
         }
     }
-    public enum DiaSemana {
-        LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADO, DOMINGO
-    }
+
 
     public String normalizarDia(String input) {
         return Normalizer.normalize(input, Normalizer.Form.NFD)
@@ -582,70 +587,124 @@ public class SuperAdminController {
     }
 
     @GetMapping("/superadmin/sedes/asignar-coordinadores/{idsede}")
-    public String vistaAsignarCoordinadores(@PathVariable("idsede") Integer idsede, Model model) {
+    public String vistaAsignarCoordinadores(
+            @PathVariable Integer idsede,
+            Model model) {
+
         Sede sede = sedeRepository.findById(idsede).orElseThrow();
-
-        // Obtener coordinadores activos (rol = COORDINADOR, estado = 'activo')
-        List<Usuario> coordinadores = usuarioRepository.obtenerCoordinadoresActivos();
-
-        // Obtener asignaciones actuales en la sede
-        List<CoordinadorSede> asignaciones = coordinadorSedeRepository.findBySede_Idsede(idsede);
-
-        // Obtener IDs de los coordinadores activos en esta sede
-        List<Integer> coordinadoresActivos = asignaciones.stream()
+        List<Usuario> coordinadores    = usuarioRepository.obtenerCoordinadoresActivos();
+        List<CoordinadorSede> asignas   = coordinadorSedeRepository.findBySede_Idsede(idsede);
+        List<Integer> activosIds        = asignas.stream()
                 .filter(CoordinadorSede::isActivo)
                 .map(cs -> cs.getUsuario().getIdusuario())
                 .toList();
+        List<CoordinadorSede> asignados = asignas.stream()
+                .filter(CoordinadorSede::isActivo)
+                .toList();
 
-        // Agregar al modelo
+        // lista de horas 00:00–23:00
+        List<String> horas = IntStream.rangeClosed(0,23)
+                .mapToObj(i -> String.format("%02d:00", i))
+                .toList();
+
+        // grilla de atención de sede
+        List<HorarioAtencion> horariosAtencion =
+                horarioAtencionRepository.findBySede_IdsedeOrderByDiaSemanaAsc(idsede);
+
+        // **Nuevo**: map <idusuario → <DiaSemana → turno>>
+        Map<Integer, Map<HorarioAtencion.DiaSemana, CoordinadorHorario>> turnosPorCoord = new HashMap<>();
+        for (CoordinadorSede cs : asignados) {
+            List<CoordinadorHorario> turnos =
+                        coordinadorHorarioRepository.findAllByCoordinadorSede(cs);
+            Map<HorarioAtencion.DiaSemana, CoordinadorHorario> porDia = turnos.stream()
+                    .collect(Collectors.toMap(
+                            CoordinadorHorario::getDiaSemana,
+                            Function.identity()
+                    ));
+            turnosPorCoord.put(cs.getUsuario().getIdusuario(), porDia);
+        }
+
         model.addAttribute("sede", sede);
         model.addAttribute("coordinadores", coordinadores);
-        model.addAttribute("coordinadoresActivos", coordinadoresActivos);
-        model.addAttribute("coordinadoresAsignados", asignaciones.stream()
-                .filter(CoordinadorSede::isActivo)
-                .toList());
+        model.addAttribute("coordinadoresActivos", activosIds);
+        model.addAttribute("coordinadoresAsignados", asignados);
+        model.addAttribute("horas", horas);
+        model.addAttribute("horariosAtencion", horariosAtencion);
+        model.addAttribute("turnosPorCoord", turnosPorCoord);
 
         return "superadmin/superadmin_asignar_coordinadores";
     }
 
-    @PostMapping("/superadmin/sedes/coordinadores/desasignar")
-    public String desasignarCoordinador(@RequestParam("idCoordinadorSede") Integer id,
-                                        @RequestParam("idsede") Integer idsede) {
-        CoordinadorSede cs = coordinadorSedeRepository.findById(id).orElseThrow();
-        cs.setActivo(false);
-        coordinadorSedeRepository.save(cs);
-        return "redirect:/superadmin/sedes/asignar-coordinadores/" + idsede;
-    }
-
-
-
 
     @PostMapping("/superadmin/sedes/asignar-coordinadores")
-    public String asignarCoordinadores(@RequestParam("idsede") Integer idsede,
-                                       @RequestParam("coordinadores") List<Integer> idsUsuarios) {
-        Sede sede = sedeRepository.findById(idsede).orElseThrow();
+    public String asignarCoordinadores(
+            @RequestParam Integer idsede,
+            @RequestParam("coordinadores") List<Integer> idsUsuarios,
+            @RequestParam Map<String, String> allParams) {
 
-        List<CoordinadorSede> actuales = coordinadorSedeRepository.findBySede_Idsede(idsede);
+        // 1) Desactivar todas las asignaciones previas
+        List<CoordinadorSede> actuales =
+                coordinadorSedeRepository.findBySede_Idsede(idsede);
         actuales.forEach(cs -> cs.setActivo(false));
         coordinadorSedeRepository.saveAll(actuales);
 
-        for (Integer idusuario : idsUsuarios) {
-            Optional<CoordinadorSede> existente = coordinadorSedeRepository.findByUsuario_IdusuarioAndSede_Idsede(idusuario, idsede);
-            if (existente.isPresent()) {
-                CoordinadorSede cs = existente.get();
-                cs.setActivo(true);
-                coordinadorSedeRepository.save(cs);
-            } else {
-                CoordinadorSede nuevo = new CoordinadorSede();
-                nuevo.setUsuario(usuarioRepository.findById(idusuario).orElseThrow());
-                nuevo.setSede(sede);
-                nuevo.setActivo(true);
-                coordinadorSedeRepository.save(nuevo);
+        // 2) Reactivar o crear nuevas asignaciones
+        for (Integer uid : idsUsuarios) {
+            CoordinadorSede cs = coordinadorSedeRepository
+                    .findByUsuario_IdusuarioAndSede_Idsede(uid, idsede)
+                    .orElseGet(() -> {
+                        CoordinadorSede nuevo = new CoordinadorSede();
+                        nuevo.setUsuario(usuarioRepository.findById(uid).orElseThrow());
+                        nuevo.setSede(sedeRepository.findById(idsede).orElseThrow());
+                        return nuevo;
+                    });
+            cs.setActivo(true);
+            coordinadorSedeRepository.save(cs);
+
+            // 3) Para cada día de la semana, configurar el turno
+            String prefix = "turnos[" + uid + "]";
+            for (HorarioAtencion ha : horarioAtencionRepository.findBySede_IdsedeOrderByDiaSemanaAsc(idsede)) {
+                DiaSemana dia = ha.getDiaSemana();            // ya es un enum
+                String base   = "turnos[" + uid + "][" + dia.name() + "]";
+
+                String he = allParams.get(base + ".horaEntrada");
+                String hs = allParams.get(base + ".horaSalida");
+                boolean activo = allParams.containsKey(base + ".activo");
+
+                // desactivar previos
+                coordinadorHorarioRepository
+                        .findByCoordinadorSedeAndDiaSemana(cs, dia)
+                        .ifPresent(ch -> ch.setActivo(false));
+
+// crear o actualizar
+                CoordinadorHorario ch = coordinadorHorarioRepository
+                        .findByCoordinadorSedeAndDiaSemana(cs, dia)
+                        .orElse(new CoordinadorHorario(cs, dia));  // ahora el constructor recibe el enum
+
+                ch.setHoraEntrada(LocalTime.parse(he));
+                ch.setHoraSalida(LocalTime.parse(hs));
+                ch.setActivo(activo);
+                coordinadorHorarioRepository.save(ch);
+
             }
         }
 
         return "redirect:/superadmin/sedes/asignar-coordinadores/" + idsede;
     }
+
+    @PostMapping("/superadmin/sedes/coordinadores/desasignar")
+    public String desasignarCoordinador(
+            @RequestParam("idCoordinadorSede") Integer id,
+            @RequestParam("idsede") Integer idsede) {
+
+        CoordinadorSede cs = coordinadorSedeRepository.findById(id).orElseThrow();
+        cs.setActivo(false);
+        coordinadorSedeRepository.save(cs);
+
+        return "redirect:/superadmin/sedes/asignar-coordinadores/" + idsede;
+    }
+
+
 
 
 
