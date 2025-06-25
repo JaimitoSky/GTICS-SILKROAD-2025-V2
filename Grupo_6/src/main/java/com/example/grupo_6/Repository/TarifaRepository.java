@@ -1,6 +1,8 @@
 package com.example.grupo_6.Repository;
 
 import com.example.grupo_6.Entity.Tarifa;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,7 @@ public interface TarifaRepository extends JpaRepository<Tarifa, Integer> {
             "JOIN FETCH ss.sede se")
     List<Tarifa> findAllWithSedeYTipo();
 
+    Page<Tarifa> findByDescripcionContainingIgnoreCase(String descripcion, Pageable pageable);
 
 
 

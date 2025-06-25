@@ -20,9 +20,9 @@ public class Pago {
     @JoinColumn(name = "idusuario", nullable = false)
     private Usuario usuario;
 
-    @OneToOne
-    @JoinColumn(name = "idreserva", unique = true) // FK directa a reserva
+    @OneToOne(mappedBy = "pago", fetch = FetchType.LAZY)
     private Reserva reserva;
+
 
     private BigDecimal monto;
 
@@ -30,8 +30,8 @@ public class Pago {
     @Column(nullable = false)
     private Metodo metodo; // 'online' o 'banco'
 
-    @Lob
-    private byte[] comprobante;
+    @Column(name = "comprobante_url")
+    private String comprobanteUrl;
 
     @ManyToOne
     @JoinColumn(name = "idestado", nullable = false)
@@ -43,4 +43,6 @@ public class Pago {
     public enum Metodo {
         online, banco
     }
+
+
 }

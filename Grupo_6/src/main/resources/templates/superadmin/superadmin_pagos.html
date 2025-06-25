@@ -10,8 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Estilos internos -->
+    <!-- Estilos para solucionar el problema de los modales -->
 
 </head>
 <body>
@@ -22,12 +23,6 @@
     <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
-
-
-
-
-
-
 
         <main class="content">
             <div class="container-fluid p-0">
@@ -57,7 +52,7 @@
                         <table class="table table-bordered table-hover align-middle">
                             <thead class="table-light">
                             <tr>
-                                <th>#</th>
+                                <th>Código</th>
                                 <th>Vecino</th>
                                 <th>DNI</th>
                                 <th>Estado</th>
@@ -66,70 +61,108 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="pago : ${listaPagos}">
-                                <td th:text="${pago.idpago}">1001</td>
-                                <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}">Juan Pérez</td>
+                            <tr th:each="pago : ${listaPagos}"
+                                th:classappend="${pago.idpago == idPagoDestacado} ? 'table-warning border border-primary border-2 rounded-2 shadow-sm'"
+                                th:id="'pago-' + ${pago.idpago}">
 
+                                <td th:text="${pago.idpago}"></td>
+                                <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}"></td>
+                                <td th:text="${pago.usuario.dni}"></td>
 
-                                <td th:text="${pago.usuario.dni}">12345678</td>
                                 <td>
-                            <span th:text="${pago.estado.nombre}"
-                                  th:classappend="
-                                    ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
-                                    (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
-                                Pendiente
-                            </span>
+        <span th:text="${pago.estado.nombre}"
+              th:classappend="
+                ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
+                (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
+            Pendiente
+        </span>
                                 </td>
-                                <td>
-                                    <a th:if="${pago.comprobante != null}" th:href="@{'/uploads/' + ${pago.idpago}}" target="_blank">Ver</a>
-                                    <span th:if="${pago.comprobante == null}">—</span>
+
+                                <!-- Comprobante -->
+                                <td class="text-center">
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#modalComprobante' + ${pago.idpago}"
+                                            th:if="${pago.comprobanteUrl != null}">
+                                        <i class="bi bi-eye-fill"></i> Ver
+                                    </button>
+
+                                    <span th:if="${pago.comprobanteUrl == null}" class="text-muted fst-italic">No disponible</span>
                                 </td>
+
+                                <!-- Acciones -->
                                 <td>
-                                    <form th:action="@{/superadmin/pagos/aprobar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
-                                        <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
-                                    </form>
-                                    <form th:action="@{/superadmin/pagos/rechazar/{id}(id=${pago.idpago})}" method="post" style="display:inline">
-                                        <button type="submit" class="btn btn-sm btn-danger">Rechazar</button>
-                                    </form>
-                                    <form th:action="@{/superadmin/pagos/pendiente/{id}(id=${pago.idpago})}" method="post" style="display:inline">
-                                        <button type="submit" class="btn btn-sm btn-secondary">Volver a Pendiente</button>
-                                    </form>
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+
+                                        <!-- Estado de pago -->
+                                        <span th:class="'badge px-3 py-2 fw-semibold ' +
+                            (${pago.estado.nombre == 'confirmado'} ? 'bg-success' :
+                            (${pago.estado.nombre == 'rechazado'} ? 'bg-danger' : 'bg-warning text-dark'))"
+                                              th:text="${pago.estado.nombre == 'confirmado' ? 'Aprobado' :
+                            (pago.estado.nombre == 'rechazado' ? 'Rechazado' : 'Pendiente')}">
+            </span>
+
+                                        <!-- Botones de acción (si es pendiente) -->
+                                        <div class="d-flex gap-1"
+                                             th:if="${pago.estado.nombre != 'confirmado' and pago.estado.nombre != 'rechazado'}">
+                                            <button class="btn btn-outline-success btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    th:data-bs-target="'#modalAprobar' + ${pago.idpago}">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    th:data-bs-target="'#modalRechazar' + ${pago.idpago}">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Botón Ir a Reserva (siempre visible) -->
+                                        <a th:if="${pago.reserva != null}"
+                                           th:href="@{/superadmin/reservas/redirigir(idReserva=${pago.reserva.idreserva})}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-box-arrow-up-right"></i> Ir a Reserva
+                                        </a>
+
+                                    </div>
                                 </td>
                             </tr>
+
                             </tbody>
                         </table>
 
                         <!-- Paginación -->
                         <div class="d-flex justify-content-center mt-4">
-                            <nav>
-                                <ul class="pagination mb-0">
+                            <!-- Paginación -->
+                            <nav aria-label="Paginación de pagos">
+                                <ul class="pagination justify-content-center flex-wrap">
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                         <a class="page-link"
-                                           th:href="@{/superadmin/pagos(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, filtroDni=${filtroDni}, page=${currentPage - 1})}">
-                                            Anterior
-                                        </a>
+                                           th:href="@{/superadmin/pagos(page=${currentPage - 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Anterior</a>
                                     </li>
-                                    <li class="page-item active">
-                                        <span class="page-link" th:text="${currentPage + 1}">1</span>
-                                    </li>
-                                    <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+
+                                    <li class="page-item"
+                                        th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
+                                        th:classappend="${i == currentPage} ? 'active'">
                                         <a class="page-link"
-                                           th:href="@{/superadmin/pagos(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, filtroDni=${filtroDni}, page=${currentPage + 1})}">
-                                            Siguiente
-                                        </a>
+                                           th:href="@{/superadmin/pagos(page=${i}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}"
+                                           th:text="${i + 1}">1</a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/superadmin/pagos(page=${currentPage + 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Siguiente</a>
                                     </li>
                                 </ul>
                             </nav>
+
+
                         </div>
 
                     </div>
                 </div>
             </div>
         </main>
-
-
-
-
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">
@@ -139,6 +172,108 @@
         </footer>
     </div>
 </div>
+
+<!-- Modals - Colocados al final del body para evitar problemas de z-index -->
+<div th:each="pago : ${listaPagos}">
+    <!-- Modal Aprobar -->
+    <div class="modal fade" th:id="'modalAprobar' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form th:action="@{/superadmin/reservas/aprobar-pago/{id}(id=${pago.idpago})}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmar Aprobación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Estás seguro de aprobar este pago?</p>
+                        <p class="text-warning">Una vez aprobado, no se podrá cambiar el estado.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Rechazar -->
+    <div class="modal fade" th:id="'modalRechazar' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form th:action="@{/superadmin/pagos/rechazar/{id}(id=${pago.idpago})}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmar Rechazo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Estás seguro de rechazar este pago?</p>
+                        <p class="text-danger">Una vez rechazado, no se podrá cambiar el estado.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal de visualización del comprobante -->
+    <div class="modal fade"
+         th:id="'modalComprobante' + ${pago.idpago}"
+         tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Comprobante de Pago #<span th:text="${pago.idpago}"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <!-- Mostrar solo si existe comprobante y pesa menos de 10 MB -->
+                    <div th:if="${pago.comprobante != null and pago.comprobante.length < 10485760}">
+
+                        <!-- Mostrar imagen (jpg, jpeg, png, webp) -->
+                        <div th:if="${#arrays.asList('jpg','jpeg','png','webp').contains(#strings.substringAfterLast(pago.comprobanteUrl, '.').toLowerCase())}">
+                            <img th:src="@{${pago.comprobanteUrl}}" class="img-fluid rounded border" alt="Comprobante" />
+                        </div>
+
+                        <!-- Mostrar PDF -->
+                        <div th:if="${#strings.substringAfterLast(pago.comprobanteUrl, '.').toLowerCase() == 'pdf'}">
+                            <embed th:src="@{${pago.comprobanteUrl}}" type="application/pdf" width="100%" height="500px" />
+                        </div>
+
+                    </div>
+
+                    <!-- Si no hay comprobante o es muy pesado -->
+                    <div th:if="${pago.comprobante == null or pago.comprobante.length >= 10485760}">
+                        <p class="text-muted">No hay comprobante disponible o el archivo es muy pesado (&gt;10MB).</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const idDestacado = /*[[${idPagoDestacado}]]*/ 0;
+        if (idDestacado && idDestacado !== 0) {
+            const fila = document.getElementById("pago-" + idDestacado);
+            if (fila) {
+                fila.scrollIntoView({ behavior: "smooth", block: "center" });
+                fila.classList.add("shadow", "border", "border-primary", "border-3");
+            }
+        }
+    });
+</script>
+
+
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -174,7 +309,10 @@
         });
     });
 
-
+    // Solución adicional para problemas con modales
+    document.addEventListener('shown.bs.modal', function () {
+        document.body.style.paddingRight = '0px';
+    });
 </script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>

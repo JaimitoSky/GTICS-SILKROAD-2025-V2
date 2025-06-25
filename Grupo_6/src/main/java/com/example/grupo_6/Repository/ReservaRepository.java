@@ -38,26 +38,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     }
     long countByHorarioDisponibleAndEstado(HorarioDisponible h, Estado estado);
 
-    @Query("""
-    SELECT s.nombre AS nombreServicio,
-           se.nombre AS nombreSede,
-           se.direccion AS direccion,
-           s.idservicio AS idServicio
-    FROM SedeServicio ss
-    JOIN ss.servicio s
-    JOIN ss.sede se
-    WHERE s.tipoServicio.idtipo = ?1 AND s.estado.idestado = 4
-    """)
-    List<ServicioSimplificado> listarServiciosSimplificadosPorTipo(int idtipo);
 
 
 
 
     long countByHorarioDisponibleAndEstadoAndFechaReserva(HorarioDisponible horario, Estado estado, LocalDate fechaReserva);
-    boolean existsByUsuarioAndHorarioDisponibleAndFechaReserva(Usuario usuario, HorarioDisponible horario, LocalDate fechaReserva);
 
-    @Query("SELECT r.sedeServicio.servicio.nombre, COUNT(r) FROM Reserva r GROUP BY r.sedeServicio.servicio.nombre")
-    List<Object[]> countReservasPorServicio();
 
 
     @Query("SELECT r.estado.nombre, COUNT(r) FROM Reserva r GROUP BY r.estado.nombre")
@@ -82,19 +68,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
     List<Reserva> findByUsuario_Idusuario(Integer idusuario);
 
-    @Query("""
-    SELECT r FROM Reserva r 
-    WHERE r.sedeServicio.sede.idsede = :idSede 
-      AND r.fechaReserva = :fecha
-""")
-    List<Reserva> buscarReservasPorSedeYFecha(@Param("idSede") Integer idSede, @Param("fecha") LocalDate fecha);
 
-    @Query("""
-    SELECT r FROM Reserva r 
-    WHERE r.sedeServicio.sede.idsede = :idSede 
-    ORDER BY r.fechaReserva DESC
-""")
-    List<Reserva> buscarHistorialReservasPorSede(@Param("idSede") Integer idSede);
+
 
 
     // ReservaRepository.java
@@ -104,28 +79,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     long countUsuariosPorNombreRol(@Param("nombre") String nombre);
 
 
-    @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede = :idSede")
-    List<Reserva> buscarReservasPorIdSede(@Param("idSede") Integer idSede);
 
-//reservas con filtro
-
-    @Query("""
-SELECT r FROM Reserva r
-JOIN r.usuario u
-JOIN r.sedeServicio ss
-JOIN ss.sede s
-WHERE (:estado = '' OR LOWER(r.estado.nombre) = LOWER(:estado))
-AND (:vecino = '' OR LOWER(CONCAT(u.nombres, ' ', u.apellidos)) LIKE LOWER(CONCAT('%', :vecino, '%')))
-AND (:sede IS NULL OR s.idsede = :sede)
-AND (:fechaInicio IS NULL OR r.fechaReserva >= :fechaInicio)
-AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
-""")
-    Page<Reserva> buscarConFiltros(@Param("estado") String estado,
-                                   @Param("fechaInicio") LocalDate fechaInicio,
-                                   @Param("fechaFin") LocalDate fechaFin,
-                                   @Param("vecino") String vecino,
-                                   @Param("sede") Integer sede,
-                                   Pageable pageable);
 
 
     @Query("SELECT r FROM Reserva r WHERE LOWER(CONCAT(r.usuario.nombres, ' ', r.usuario.apellidos)) LIKE %:valor%")
@@ -140,8 +94,7 @@ AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
     @Query("SELECT r FROM Reserva r WHERE DATE(r.fechaReserva) = :valor")
     Page<Reserva> filtrarPorFecha(@Param("valor") LocalDate valor, Pageable pageable);
 
-    @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede IN :ids")
-    List<Reserva> buscarReservasPorIdsSede(@Param("ids") List<Integer> ids);
+
 
     @Query("SELECT r FROM Reserva r WHERE r.sedeServicio.sede.idsede IN :idsSede ORDER BY r.fechaCreacion DESC")
     Page<Reserva> buscarReservasPorIdsSedePaginado(@Param("idsSede") List<Integer> idsSede, Pageable pageable);
@@ -161,6 +114,27 @@ AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
             LocalDate fechaReserva,
             Estado estado
     );
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.idreserva < :id")
+    long contarAntesDeId(@Param("id") Integer idreserva);
+
+
+    @Query("SELECT r FROM Reserva r WHERE LOWER(CONCAT(r.usuario.nombres, ' ', r.usuario.apellidos)) LIKE LOWER(CONCAT('%', :nombre, '%'))")
+    Page<Reserva> filtrarPorNombre(@Param("nombre") String nombre, Pageable pageable);
+
+    @Query("SELECT r FROM Reserva r WHERE r.usuario.dni LIKE %:dni%")
+    Page<Reserva> filtrarPorDni(@Param("dni") String dni, Pageable pageable);
+
+    @Query("SELECT r FROM Reserva r WHERE r.idreserva = :id")
+    Page<Reserva> buscarPorIdExacto(@Param("id") Integer id, Pageable pageable);
+
+
+    @Query("SELECT r FROM Reserva r WHERE r.fechaReserva = :fecha")
+    Page<Reserva> filtrarPorFecha2(@Param("fecha") LocalDate fecha, Pageable pageable);
+
+    @Query("SELECT r FROM Reserva r WHERE LOWER(r.estado.nombre) LIKE LOWER(CONCAT('%', :estado, '%'))")
+    Page<Reserva> filtrarPorEstado2(@Param("estado") String estado, Pageable pageable);
+
+
 
 }
 

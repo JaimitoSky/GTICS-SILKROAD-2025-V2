@@ -107,27 +107,28 @@
                             </tbody>
                         </table>
                         <div class="d-flex justify-content-center mt-4">
-                            <nav>
-                                <ul class="pagination mb-0">
+                            <nav aria-label="Paginación de sedes">
+                                <ul class="pagination justify-content-center flex-wrap">
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                         <a class="page-link"
-                                           th:href="@{/superadmin/sedes(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, page=${currentPage - 1})}">
-                                            Anterior
-                                        </a>
+                                           th:href="@{/superadmin/sedes(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, page=${currentPage - 1})}">Anterior</a>
                                     </li>
 
-                                    <li class="page-item active">
-                                        <span class="page-link" th:text="${currentPage + 1}">1</span>
-                                    </li>
-
-                                    <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                                    <li class="page-item"
+                                        th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
+                                        th:classappend="${i == currentPage} ? 'active'">
                                         <a class="page-link"
-                                           th:href="@{/superadmin/sedes(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, page=${currentPage + 1})}">
-                                            Siguiente
-                                        </a>
+                                           th:href="@{/superadmin/sedes(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, page=${i})}"
+                                           th:text="${i + 1}">1</a>
+                                    </li>
+
+                                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/superadmin/sedes(filtroNombre=${filtroNombre}, filtroServicio=${filtroServicio}, page=${currentPage + 1})}">Siguiente</a>
                                     </li>
                                 </ul>
                             </nav>
+
                         </div>
 
 

@@ -40,6 +40,19 @@
                     </a>
                 </div>
 
+                <!-- Filtro -->
+                <form class="row g-2 mb-3" method="get" th:action="@{/superadmin/tarifas}">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="filtroNombre" placeholder="Buscar por nombre"
+                               th:value="${filtroNombre}">
+                    </div>
+                    <div class="col-auto d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary">Buscar</button>
+                        <a th:href="@{/superadmin/tarifas}" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                </form>
+
+                <!-- Tabla -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Tarifas de Servicios Deportivos</h5>
@@ -51,8 +64,7 @@
                                 <th>#</th>
                                 <th>Descripción</th>
                                 <th>Precio por hora</th>
-                                <th>Última actualización</th>
-                                <th>Acciones</th>
+                                <th>Fecha de creación</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -61,21 +73,35 @@
                                 <td th:text="${tarifa.descripcion}">Descripción</td>
                                 <td th:text="|S/ ${#numbers.formatDecimal(tarifa.monto, 2, 2)}|">S/ 0.00</td>
                                 <td th:text="${#temporals.format(tarifa.fechaActualizacion, 'dd/MM/yyyy')}">15/04/2025</td>
-                                <td>
-                                    <a th:href="@{/superadmin/tarifas/editar/{id}(id=${tarifa.idtarifa})}" class="btn btn-sm btn-warning me-1">
-                                        <i data-feather="edit"></i> Editar
-                                    </a>
-                                    <!--<a th:href="@{/superadmin/tarifas/eliminar/{id}(id=${tarifa.idtarifa})}"
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('¿Está seguro de eliminar esta tarifa?');">
-                                        <i data-feather="trash-2"></i> Eliminar
-                                    </a>-->
-                                </td>
                             </tr>
                             </tbody>
                         </table>
+
+                        <!-- Paginación -->
+                        <nav aria-label="Paginación de tarifas">
+                            <ul class="pagination justify-content-center flex-wrap">
+                                <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/tarifas(page=${paginaActual - 1}, filtroNombre=${filtroNombre})}">Anterior</a>
+                                </li>
+
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
+                                    th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/tarifas(page=${i}, filtroNombre=${filtroNombre})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/tarifas(page=${paginaActual + 1}, filtroNombre=${filtroNombre})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
+
             </div>
         </main>
 

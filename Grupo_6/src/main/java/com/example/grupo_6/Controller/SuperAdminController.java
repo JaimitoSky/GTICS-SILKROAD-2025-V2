@@ -33,6 +33,7 @@ import java.time.*;
 import java.text.Normalizer;
 
 import java.sql.Timestamp;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,8 +71,7 @@ public class SuperAdminController {
     private HorarioDisponibleRepository horarioDisponibleRepository;
     @Autowired
     private HorarioAtencionRepository horarioAtencionRepository;
-    @Autowired
-    private TipoServicioRepository tipoServicioRepository;
+
 
     @Autowired
     private CoordinadorSedeRepository coordinadorSedeRepository;
@@ -907,36 +907,59 @@ public class SuperAdminController {
 
     @GetMapping("/superadmin/reservas")
     public String listarReservas(
-            @RequestParam(required = false) String filtro,
-            @RequestParam(required = false, defaultValue = "vecino") String campo,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            Model model) {
+            @RequestParam(required = false) String campo,
+            @RequestParam(required = false) String filtro,
+            @RequestParam(required = false) Integer idReservaDestacado,
+            Model model
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("idreserva").ascending());
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaReserva").descending());
+
+
+
         Page<Reserva> paginaReservas;
 
-        if (filtro != null && !filtro.trim().isEmpty()) {
-            String valor = filtro.trim().toLowerCase();
-            paginaReservas = switch (campo) {
-                case "estado" -> reservaRepository.filtrarPorEstado(valor, pageable);
-                case "sede" -> reservaRepository.filtrarPorSede(valor, pageable);
-                case "fecha" -> reservaRepository.filtrarPorFecha(LocalDate.parse(valor), pageable);
-                default -> reservaRepository.filtrarPorVecino(valor, pageable);
-            };
+        if (campo != null && filtro != null && !filtro.trim().isEmpty()) {
+            switch (campo) {
+                case "nombre" -> paginaReservas = reservaRepository.filtrarPorNombre(filtro, pageable);
+                case "dni" -> paginaReservas = reservaRepository.filtrarPorDni(filtro, pageable);
+                case "codigo" -> {
+                    try {
+                        Integer id = Integer.parseInt(filtro.trim());
+                        paginaReservas = reservaRepository.buscarPorIdExacto(id, pageable);
+                    } catch (NumberFormatException e) {
+                        paginaReservas = Page.empty(pageable); // evita error si ingresan letras
+                    }
+                }
+                case "fecha" -> {
+                    LocalDate fechaParseada = null;
+                    try {
+                        fechaParseada = LocalDate.parse(filtro);
+                    } catch (DateTimeParseException ignored) {}
+                    paginaReservas = reservaRepository.filtrarPorFecha2(fechaParseada, pageable);
+                }
+                case "estado" -> paginaReservas = reservaRepository.filtrarPorEstado2(filtro, pageable);
+                default -> paginaReservas = reservaRepository.findAll(pageable);
+            }
         } else {
             paginaReservas = reservaRepository.findAll(pageable);
         }
 
         model.addAttribute("reservas", paginaReservas.getContent());
-        model.addAttribute("pagina", paginaReservas);
         model.addAttribute("paginaActual", page);
         model.addAttribute("totalPaginas", paginaReservas.getTotalPages());
-        model.addAttribute("campo", campo);
-        model.addAttribute("filtro", filtro);
+        model.addAttribute("campo", campo);              // 🔍 necesario para que el selector muestre bien
+        model.addAttribute("filtro", filtro);            // 🔍 necesario para mantener el input
+        model.addAttribute("idReservaDestacado", idReservaDestacado);
 
         return "superadmin/superadmin_reservas";
     }
+
+
+
+
 
 
 
@@ -1126,59 +1149,29 @@ public class SuperAdminController {
     }
 
 
-    @PostMapping("/superadmin/reservas/desaprobar-pago/{id}")
-    public String desaprobarPago(@PathVariable("id") Integer id) {
-        Reserva reserva = reservaRepository.findById(id).orElse(null);
-        if (reserva != null && reserva.getPago() != null) {
-            Estado pendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
-            Estado pendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
-
-            reserva.setEstado(pendienteReserva);
-            reservaRepository.save(reserva);
-
-            Pago pago = reserva.getPago();
-            pago.setEstado(pendientePago);
-            pagoRepository.save(pago);
-        }
-        return "redirect:/superadmin/reservas";
-    }
-
-    @PostMapping("/superadmin/reservas/cancelar/{id}")
-    public String cancelarReserva(@PathVariable("id") Integer id) {
-        Reserva reserva = reservaRepository.findById(id).orElse(null);
-        if (reserva != null) {
-            Estado cancelada = estadoRepository.findByNombreAndTipoAplicacion("cancelada", Estado.TipoAplicacion.reserva);
-            reserva.setEstado(cancelada);
-            reservaRepository.save(reserva);
-        }
-        return "redirect:/superadmin/reservas";
-    }
 
 
-    @PostMapping("/superadmin/reservas/habilitar/{id}")
-    public String habilitarReserva(@PathVariable("id") Integer id) {
-        Reserva reserva = reservaRepository.findById(id).orElse(null);
-        if (reserva != null) {
-            Estado pendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
-            reserva.setEstado(pendienteReserva);
-            reservaRepository.save(reserva);
 
-            if (reserva.getPago() != null) {
-                Estado pendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
-                reserva.getPago().setEstado(pendientePago);
-                pagoRepository.save(reserva.getPago());
-            }
-        }
-        return "redirect:/superadmin/reservas";
-    }
+
 
 
     @GetMapping("/superadmin/tarifas")
-    public String listarTarifas(Model model) {
-        List<Tarifa> tarifas = tarifaRepository.findAll();
-        model.addAttribute("listaTarifas", tarifas);
+    public String listarTarifas(
+            @RequestParam(defaultValue = "") String filtroNombre,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("descripcion").ascending());
+        Page<Tarifa> paginaTarifas = tarifaRepository.findByDescripcionContainingIgnoreCase(filtroNombre, pageable);
+
+        model.addAttribute("listaTarifas", paginaTarifas.getContent());
+        model.addAttribute("filtroNombre", filtroNombre);
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", paginaTarifas.getTotalPages());
         return "superadmin/superadmin_tarifas";
     }
+
 
     @GetMapping("/superadmin/tarifas/nueva")
     public String nuevaTarifa(Model model) {
@@ -1252,14 +1245,37 @@ public class SuperAdminController {
     public String verRegistros() {
         return "superadmin/superadmin_registros";
     }
+
+    public int calcularPaginaDePago(Integer idPago, int size) {
+        long posicion = pagoRepository.contarAntesDeId(idPago); // debes implementarlo
+        return (int) (posicion / size);
+    }
+    @GetMapping("/superadmin/pagos/redirigir")
+    public String redirigirAPago(@RequestParam("idPago") Integer idPago) {
+        int size = 10; // debe coincidir con la paginación en tu vista
+        int page = calcularPaginaDePago(idPago, size);
+        return "redirect:/superadmin/pagos?page=" + page + "&idPagoDestacado=" + idPago;
+    }
+
+    @GetMapping("/superadmin/reservas/redirigir")
+    public String redirigirAReserva(@RequestParam("idReserva") Integer idReserva) {
+        int size = 10;
+        long posicion = reservaRepository.contarAntesDeId(idReserva);
+        int page = (int) (posicion / size);
+
+        return "redirect:/superadmin/reservas?page=" + page + "&idReservaDestacado=" + idReserva;
+    }
+
+
     @GetMapping("/superadmin/pagos")
     public String listarPagos(
             Model model,
             @RequestParam(defaultValue = "") String filtroNombre,
             @RequestParam(defaultValue = "") String filtroDni,
-            @RequestParam(defaultValue = "0") int page
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(value = "idPagoDestacado", required = false) Integer idPagoDestacado
     ) {
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("id").ascending());
         Page<Pago> pagosFiltrados = pagoRepository.buscarPagosFiltrados(filtroNombre, filtroDni, pageable);
 
         model.addAttribute("listaPagos", pagosFiltrados.getContent());
@@ -1267,9 +1283,11 @@ public class SuperAdminController {
         model.addAttribute("currentPage", page);
         model.addAttribute("filtroNombre", filtroNombre);
         model.addAttribute("filtroDni", filtroDni);
+        model.addAttribute("idPagoDestacado", idPagoDestacado);
 
         return "superadmin/superadmin_pagos";
     }
+
 
 
 
@@ -1351,26 +1369,7 @@ public class SuperAdminController {
     }
 
 
-    @PostMapping("/superadmin/pagos/pendiente/{id}")
-    public String volverPagoAPendiente(@PathVariable("id") Integer id) {
-        Pago pago = pagoRepository.findById(id).orElse(null);
-        if (pago == null) return "redirect:/superadmin/pagos";
 
-        Estado estadoPendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
-        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
-        if (estadoPendientePago == null || estadoPendienteReserva == null) return "redirect:/superadmin/pagos";
-
-        pago.setEstado(estadoPendientePago);
-        pagoRepository.save(pago);
-
-        Reserva reserva = reservaRepository.findByPago(pago);
-        if (reserva != null) {
-            reserva.setEstado(estadoPendienteReserva);
-            reservaRepository.save(reserva);
-        }
-
-        return "redirect:/superadmin/pagos";
-    }
 
 
 

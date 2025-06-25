@@ -22,6 +22,8 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
                                     Pageable pageable);
 
 
+    @Query("SELECT COUNT(p) FROM Pago p WHERE p.idpago < :idPago")
+    long contarAntesDeId(@Param("idPago") Integer idPago);
 
 
 

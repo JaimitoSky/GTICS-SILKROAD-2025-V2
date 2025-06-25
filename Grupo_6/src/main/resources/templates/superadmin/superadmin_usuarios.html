@@ -167,7 +167,8 @@
 									   th:href="@{/superadmin/usuarios(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
 								</li>
 
-								<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+								<li class="page-item"
+									th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
 									th:classappend="${i == paginaActual} ? 'active'">
 									<a class="page-link"
 									   th:href="@{/superadmin/usuarios(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
@@ -179,6 +180,7 @@
 									   th:href="@{/superadmin/usuarios(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
 								</li>
 							</ul>
+
 						</nav>
 
 					</div>

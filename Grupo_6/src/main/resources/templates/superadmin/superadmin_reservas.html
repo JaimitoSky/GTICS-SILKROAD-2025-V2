@@ -41,34 +41,43 @@
                 </div>
 
                 <!-- Filtros -->
-                <form th:action="@{/superadmin/reservas}" method="get" class="row g-2 mb-3 align-items-center justify-content-end">
+                <form method="get" class="row g-2 mb-3 align-items-center justify-content-end">
+
+                    <!-- Selector del campo -->
                     <div class="col-12 col-sm-auto">
                         <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
-                            <option th:value="'vecino'" th:selected="${campo == 'vecino'}">Vecino</option>
-                            <!-- <option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
-                             <option th:value="'sede'" th:selected="${campo == 'sede'}">Sede</option>-->
-                             <option th:value="'fecha'" th:selected="${campo == 'fecha'}">Fecha</option>
-                         </select>
-                     </div>
+                            <option th:value="'codigo'" th:selected="${campo == 'codigo'}">Código</option>
+                            <option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
+                            <option th:value="'dni'" th:selected="${campo == 'dni'}">DNI</option>
+                            <option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
+                            <option th:value="'fecha'" th:selected="${campo == 'fecha'}">Fecha</option>
+                        </select>
+                    </div>
 
-                     <div class="col-12 col-sm" id="filtroContainer">
-                         <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
-                     </div>
+                    <!-- Campo de filtro dinámico -->
+                    <div class="col-12 col-sm" id="filtroContainer">
+                        <!-- Este input será reemplazado dinámicamente por JS -->
+                        <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
+                    </div>
 
-                     <div class="col-auto">
-                         <button type="submit" class="btn btn-outline-primary">
-                             <i class="bi bi-search"></i> Buscar
-                         </button>
-                     </div>
+                    <!-- Botón Buscar -->
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
 
-                     <div class="col-auto" th:if="${filtro != null and filtro != ''}">
-                         <a th:href="@{/superadmin/reservas}" class="btn btn-outline-secondary">
-                             <i class="bi bi-arrow-left"></i> Volver
-                         </a>
-                     </div>
-                 </form>
+                    <!-- Botón Limpiar -->
+                    <div class="col-auto" th:if="${campo != null and campo != '' or filtro != null and filtro != ''}">
+                        <a th:href="@{/superadmin/reservas}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Limpiar
+                        </a>
+                    </div>
 
-                 <!-- Tabla de reservas -->
+                </form>
+
+
+                <!-- Tabla de reservas -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Reservas Registradas</h5>
@@ -77,9 +86,9 @@
                         <table class="table table-hover table-bordered align-middle">
                             <thead class="table-light">
                             <tr>
-                                <th>#</th>
+                                <th>Código</th>
                                 <th>Vecino</th>
-                                <th>Servicio</th>
+                                <th>DNI</th>
                                 <th>Sede</th>
                                 <th>Fecha</th>
                                 <th>Hora</th>
@@ -88,13 +97,15 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="reserva : ${reservas}">
+                            <tr th:each="reserva : ${reservas}"
+                                th:classappend="${reserva.idreserva == idReservaDestacado} ? 'table-info border border-primary border-2 rounded-2 shadow-sm'"
+                                th:id="'reserva-' + ${reserva.idreserva}">
                                 <td th:text="${reserva.idreserva}">1</td>
-                                <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}">Vecino</td>
-                                <td th:text="${reserva.sedeServicio.servicio.nombre}">Servicio</td>
-                                <td th:text="${reserva.sedeServicio.sede.nombre}">Sede</td>
-                                <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}">2025-06-01</td>
-                                <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">10:00</td>
+                                <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></td>
+                                <td th:text="${reserva.usuario.dni}"></td>
+                                <td th:text="${reserva.sedeServicio.sede.nombre}"></td>
+                                <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></td>
                                 <td>
                             <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
                                              (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
@@ -103,21 +114,11 @@
                                 </td>
                                 <td>
                                     <a th:href="@{/superadmin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">Ver</a>
-
-                                    <form th:action="@{/superadmin/reservas/aprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-success me-1"
-                                                th:if="${reserva.estado.nombre.equals('pendiente')}">Aprobar Pago</button>
-                                    </form>
-
-                                    <form th:action="@{/superadmin/reservas/desaprobar-pago/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-warning me-1"
-                                                th:if="${reserva.estado.nombre.equals('confirmada')}">Desaprobar</button>
-                                    </form>
-
-                                    <form th:action="@{/superadmin/reservas/habilitar/{id}(id=${reserva.idreserva})}" method="post" style="display:inline;"
-                                          th:if="${reserva.estado.nombre.equals('cancelada')}">
-                                        <button type="submit" class="btn btn-sm btn-secondary">Habilitar</button>
-                                    </form>
+                                    <a th:if="${reserva.pago != null}"
+                                       th:href="@{/superadmin/pagos/redirigir(idPago=${reserva.pago.idpago})}"
+                                       class="btn btn-sm btn-outline-info">
+                                        Ir al Pago
+                                    </a>
                                 </td>
                             </tr>
                             </tbody>
@@ -128,22 +129,41 @@
                     <nav aria-label="Paginación de reservas">
                         <ul class="pagination justify-content-center flex-wrap">
                             <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-                                <a class="page-link" th:href="@{/superadmin/reservas(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+                                <a class="page-link"
+                                   th:href="@{/superadmin/reservas(page=${paginaActual - 1}, size=5, nombre=${nombre}, dni=${dni}, codigo=${codigo}, fecha=${fecha})}">Anterior</a>
                             </li>
 
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
                                 th:classappend="${i == paginaActual} ? 'active'">
-                                <a class="page-link" th:href="@{/superadmin/reservas(page=${i}, size=10, campo=${campo}, filtro=${filtro})}" th:text="${i + 1}">1</a>
+                                <a class="page-link"
+                                   th:href="@{/superadmin/reservas(page=${i}, size=5, nombre=${nombre}, dni=${dni}, codigo=${codigo}, fecha=${fecha})}"
+                                   th:text="${i + 1}">1</a>
                             </li>
 
                             <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
-                                <a class="page-link" th:href="@{/superadmin/reservas(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+                                <a class="page-link"
+                                   th:href="@{/superadmin/reservas(page=${paginaActual + 1}, size=5, nombre=${nombre}, dni=${dni}, codigo=${codigo}, fecha=${fecha})}">Siguiente</a>
                             </li>
                         </ul>
                     </nav>
+
                 </div>
             </div>
         </main>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const idDestacado = /*[[${idReservaDestacado}]]*/ 0;
+                if (idDestacado && idDestacado !== 0) {
+                    const fila = document.getElementById("reserva-" + idDestacado);
+                    if (fila) {
+                        fila.scrollIntoView({ behavior: "smooth", block: "center" });
+                        fila.classList.add("shadow", "border", "border-primary", "border-3");
+                    }
+                }
+            });
+        </script>
 
         <script>
             function actualizarInputFiltro() {
@@ -151,26 +171,31 @@
                 const contenedor = document.getElementById("filtroContainer");
 
                 let nuevoInput = '';
+
                 if (campo === 'estado') {
                     nuevoInput = `
-        <select class="form-select" name="filtro">
-          <option value="">Seleccionar estado</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="confirmada">Confirmada</option>
-          <option value="cancelada">Cancelada</option>
-        </select>`;
+                <select name="filtro" class="form-select">
+                    <option value="">Seleccionar estado</option>
+                    <option value="aprobada">Confirmada</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="rechazada">Rechazada</option>
+                </select>
+            `;
                 } else if (campo === 'fecha') {
                     nuevoInput = `<input type="date" name="filtro" class="form-control" />`;
+                } else if (campo === 'dni') {
+                    nuevoInput = `<input type="text" name="filtro" class="form-control" maxlength="8" minlength="8" pattern="\\d{8}" title="Ingrese 8 dígitos numéricos" placeholder="DNI (8 dígitos)" />`;
+                } else if (campo === 'codigo') {
+                    nuevoInput = `<input type="number" name="filtro" class="form-control" min="1" placeholder="ID exacto de la reserva" />`;
                 } else {
                     nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
                 }
+
                 contenedor.innerHTML = nuevoInput;
             }
+
             document.addEventListener("DOMContentLoaded", () => actualizarInputFiltro());
         </script>
-
-
-
 
 
 
