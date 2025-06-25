@@ -79,11 +79,18 @@
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
-            <scope>provided</scope>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.25.23</version> <!-- ✅ ESPECIFICA LA VERSIÓN -->
         </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>auth</artifactId>
+            <version>2.25.23</version> <!-- ✅ MISMA VERSIÓN -->
+        </dependency>
+
+
 
         <!-- Conector MySQL actualizado -->
         <dependency>

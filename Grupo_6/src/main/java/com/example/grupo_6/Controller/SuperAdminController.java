@@ -4,6 +4,7 @@ import com.example.grupo_6.Entity.HorarioAtencion.DiaSemana;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
+import com.example.grupo_6.Service.FileUploadService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,7 +56,8 @@ public class SuperAdminController {
 
     @Autowired
     private ServicioRepository servicioRepository;
-
+    @Autowired
+    private FileUploadService fileUploadService;
 
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
@@ -1295,28 +1297,7 @@ public class SuperAdminController {
     public ResponseEntity<byte[]> mostrarComprobante(@PathVariable("idpago") Integer idpago) {
         Optional<Pago> optPago = pagoRepository.findById(idpago);
 
-        if (optPago.isPresent()) {
-            byte[] data = optPago.get().getComprobante();
-            if (data == null || data.length < 4) {
-                return ResponseEntity.notFound().build();
-            }
 
-            // Detectar formato básico por cabecera (magic numbers)
-            MediaType tipo;
-            if (data[0] == (byte) 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47) {
-                tipo = MediaType.IMAGE_PNG;
-            } else if (data[0] == (byte) 0xFF && data[1] == (byte) 0xD8) {
-                tipo = MediaType.IMAGE_JPEG;
-            } else if (data[0] == 'G' && data[1] == 'I' && data[2] == 'F') {
-                tipo = MediaType.IMAGE_GIF;
-            } else {
-                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
-            }
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(tipo);
-            return new ResponseEntity<>(data, headers, HttpStatus.OK);
-        }
 
         return ResponseEntity.notFound().build();
     }

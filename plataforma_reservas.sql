@@ -1200,12 +1200,6 @@ CREATE TABLE coordinador_horario (
 );
 
 
--- CONFIG FOTOS CON S3
-
-ALTER TABLE pago
-DROP COLUMN comprobante,
-ADD COLUMN comprobante_url VARCHAR(500);
-
 
 
 SET FOREIGN_KEY_CHECKS=1;
