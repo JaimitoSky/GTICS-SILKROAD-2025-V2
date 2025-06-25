@@ -19,6 +19,8 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     SELECT ss.idSedeServicio AS idSedeServicio,
            s.nombre AS nombre,
            s.descripcion AS descripcion,
+        ss.activo AS estadoServicio,
+                              ss.nombrePersonalizado,
            t.monto AS monto
     FROM SedeServicio ss
     JOIN ss.servicio s
@@ -26,7 +28,6 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     WHERE ss.sede.idsede = :idSede
 """)
     List<ServicioPorSedeDTO> obtenerServiciosPorSede(@Param("idSede") Integer idSede);
-    Optional<SedeServicio> findBySede_IdsedeAndServicio_Idservicio(Integer idsede, Integer idservicio);
 
     @Query("""
     SELECT 

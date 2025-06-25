@@ -22,18 +22,23 @@ public class SedeServicioRestController {
 
     @GetMapping("/servicios-por-sede/{idSede}")
     public List<Map<String, Object>> obtenerServiciosPorSedeDTO(@PathVariable("idSede") Integer idSede) {
+        System.out.println("Consultando servicios para sede: " + idSede); // Debug
         List<ServicioPorSedeDTO> lista = sedeServicioRepository.obtenerServiciosPorSede(idSede);
+
+        lista.forEach(dto -> System.out.println(
+                "Servicio: " + dto.getNombre() +
+                        ", Estado: " + dto.getEstadoServicio()
+        )); // Verifica si el servicio activado aparece aquí
+
         return lista.stream()
-                .filter(dto -> dto.getEstadoServicio() != null && dto.getEstadoServicio() == 1)  // solo activos
+                .filter(dto -> Boolean.TRUE.equals(dto.getEstadoServicio()))  // Filtra solo activos (true)
                 .map(dto -> {
                     Map<String, Object> m = new HashMap<>();
                     m.put("idSedeServicio", dto.getIdSedeServicio());
-
                     String nombreMostrado = (dto.getNombrePersonalizado() != null && !dto.getNombrePersonalizado().isEmpty())
                             ? dto.getNombrePersonalizado()
                             : dto.getNombre();
-
-                    m.put("nombre", nombreMostrado); // reusar la misma clave "nombre"
+                    m.put("nombre", nombreMostrado);
                     return m;
                 }).collect(Collectors.toList());
     }

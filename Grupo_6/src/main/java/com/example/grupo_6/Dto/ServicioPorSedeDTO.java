@@ -7,5 +7,5 @@ public interface ServicioPorSedeDTO {
     Double getMonto();
 
     String getNombrePersonalizado(); // Puede ser null
-    Integer getEstadoServicio();     // 1 = activo, 0 = inactivo
+    Boolean getEstadoServicio();  // Cambiado de Integer a Boolean
 }

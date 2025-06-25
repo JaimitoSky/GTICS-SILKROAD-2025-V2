@@ -103,39 +103,51 @@
             let mapaAforo = {};
 
             function mostrarAlerta(mensaje, tipo = 'danger') {
-                alertasDiv.innerHTML = `<div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
-            ${mensaje}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>`;
+                alertasDiv.innerHTML = `
+            <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
             }
 
+            // Cuando cambias de sede, recargas la lista de servicios y los días permitidos
             sedeSelect.addEventListener("change", function () {
                 const sedeId = this.value;
                 servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
                 horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
+                alertasDiv.innerHTML = '';
 
-                fetch(`/api/servicios-por-sede/${sedeId}`)
+                // Usa un timestamp único para evitar caché
+                fetch(`/api/servicios-por-sede/${sedeId}?timestamp=${new Date().getTime()}`)
                     .then(res => res.json())
                     .then(data => {
+                        console.log("Servicios recibidos:", data); // Debug
                         servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
                         data.forEach(s => {
                             const opt = document.createElement("option");
                             opt.value = s.idSedeServicio;
-                            opt.textContent = s.nombre;  // Ya viene con nombre personalizado si aplica
+                            opt.textContent = s.nombre;
                             servicioSelect.appendChild(opt);
                         });
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar servicios:", error);
+                        servicioSelect.innerHTML = '<option value="">Error al cargar servicios</option>';
                     });
 
-
+                // Traer días permitidos para esa sede
                 fetch(`/api/dias-activos?idsede=${sedeId}`)
                     .then(res => res.json())
                     .then(data => {
                         diasPermitidos = data.map(d =>
-                            d.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '')
+                            d.toUpperCase()
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, '')
                         );
                     });
             });
 
+            // Carga los horarios según servicio y fecha, deshabilitando los que ya pasaron o se llenaron
             function cargarHorariosDisponibles() {
                 const sedeServicioId = servicioSelect.value;
                 const fechaStr = fechaInput.value;
@@ -160,8 +172,11 @@
                     return;
                 }
 
-                let diaSemana = fechaReserva.toLocaleDateString('es-PE', { weekday: 'long' });
-                diaSemana = diaSemana.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+                let diaSemana = fechaReserva
+                    .toLocaleDateString('es-PE', { weekday: 'long' })
+                    .toUpperCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, '');
 
                 if (!diasPermitidos.includes(diaSemana)) {
                     mostrarAlerta(`No se permiten reservas el día ${diaSemana.toLowerCase()}.`);
@@ -177,23 +192,37 @@
                             return;
                         }
 
-                        const opt = document.createElement("option");
-                        opt.value = "";
-                        opt.textContent = "Seleccione un horario";
-                        opt.disabled = true;
-                        opt.selected = true;
-                        horarioSelect.appendChild(opt);
+                        // Opción placeholder
+                        const placeholder = document.createElement("option");
+                        placeholder.value = "";
+                        placeholder.textContent = "Seleccione un horario";
+                        placeholder.disabled = true;
+                        placeholder.selected = true;
+                        horarioSelect.appendChild(placeholder);
+
+                        const ahora = new Date();
 
                         data.forEach(h => {
-                            const aforoMaximo = parseInt(h.aforoMaximo);
-                            const aforoDisponible = parseInt(h.aforoDisponible);
+                            const aforoMaximo = parseInt(h.aforoMaximo, 10);
+                            const aforoDisponible = parseInt(h.aforoDisponible, 10);
                             mapaAforo[h.idhorario] = aforoDisponible;
+
+                            // Construir Date de inicio
+                            const [hInicioHoras, hInicioMinutos] = h.horaInicio.split(":").map(Number);
+                            const horaInicioDate = new Date(fechaReserva);
+                            horaInicioDate.setHours(hInicioHoras, hInicioMinutos, 0, 0);
 
                             const opt = document.createElement("option");
                             opt.value = h.idhorario;
                             opt.textContent = `${h.horaInicio} - ${h.horaFin} (max: ${aforoMaximo}, libres: ${aforoDisponible})`;
 
-                            if (aforoDisponible <= 0) {
+                            // Si es el mismo día y ya pasó la hora de inicio
+                            if (fechaReserva.getTime() === hoy.getTime() && horaInicioDate <= ahora) {
+                                opt.disabled = true;
+                                opt.textContent += " - HORA PASADA";
+                            }
+                            // Si no hay cupos
+                            else if (aforoDisponible <= 0) {
                                 opt.disabled = true;
                                 opt.textContent += " - SIN CUPOS";
                             }
@@ -207,25 +236,24 @@
                     });
             }
 
-
+            // Validación final antes de enviar el formulario
             function validarFormulario() {
                 const horarioId = horarioSelect.value;
                 if (!horarioId) {
                     mostrarAlerta("Debe seleccionar un horario válido.");
                     return false;
                 }
-
                 if (mapaAforo[horarioId] <= 0) {
                     mostrarAlerta("El horario seleccionado ya no tiene cupos disponibles.");
                     return false;
                 }
-
                 return true;
             }
 
             servicioSelect.addEventListener("change", cargarHorariosDisponibles);
             fechaInput.addEventListener("change", cargarHorariosDisponibles);
         </script>
+
 
 
 
