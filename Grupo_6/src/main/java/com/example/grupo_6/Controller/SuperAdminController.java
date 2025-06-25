@@ -1037,11 +1037,16 @@ public class SuperAdminController {
         }
 
         // Validar si el usuario ya tiene una reserva en ese horario y fecha
-        boolean yaReservado = reservaRepository.existsByUsuarioAndHorarioDisponibleAndFechaReserva(usuario, horario, fecha);
-        if (yaReservado) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Ya tienes una reserva para ese horario en esa fecha.");
+        Estado estadoRechazada = estadoRepository.findByNombreAndTipoAplicacion("rechazada", Estado.TipoAplicacion.reserva);
+        boolean yaTieneReservaActiva = reservaRepository.existsByUsuarioAndHorarioDisponibleAndFechaReservaAndEstadoNot(
+                usuario, horario, fecha, estadoRechazada
+        );
+        if (yaTieneReservaActiva) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Ya tienes una reserva activa para ese horario en esa fecha.");
             return "redirect:/superadmin/reservas/nueva";
         }
+
+
 
         // Crear y guardar pago + reserva
         Pago pago = new Pago();

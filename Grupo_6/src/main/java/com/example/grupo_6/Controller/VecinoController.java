@@ -368,11 +368,7 @@ public class VecinoController {
             reserva.setHorarioDisponible(horario);
             reserva.setEstado(estadoPendienteReserva); // siempre será pendiente
 
-            Integer aforoActual = horario.getAforoDisponible();
-            if (aforoActual != null && aforoActual > 0) {
-                horario.setAforoDisponible(aforoActual - 1);
-                horarioDisponibleRepository.save(horario);
-            }
+
 
             reservaRepository.save(reserva);
 

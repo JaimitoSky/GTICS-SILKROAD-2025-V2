@@ -19,29 +19,37 @@ public class SedeServicioRestController {
 
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
-
     @GetMapping("/servicios-por-sede/{idSede}")
     public List<Map<String, Object>> obtenerServiciosPorSedeDTO(@PathVariable("idSede") Integer idSede) {
-        System.out.println("Consultando servicios para sede: " + idSede); // Debug
+        System.out.println("===> Consultando servicios para sede: " + idSede);
+
         List<ServicioPorSedeDTO> lista = sedeServicioRepository.obtenerServiciosPorSede(idSede);
 
-        lista.forEach(dto -> System.out.println(
-                "Servicio: " + dto.getNombre() +
-                        ", Estado: " + dto.getEstadoServicio()
-        )); // Verifica si el servicio activado aparece aquí
+        System.out.println("===> Servicios recibidos:");
+        lista.forEach(dto -> {
+            System.out.println("ID: " + dto.getIdSedeServicio());
+            System.out.println("Nombre Servicio: " + dto.getNombre());
+            System.out.println("Nombre Personalizado: " + dto.getNombrePersonalizado());
+            System.out.println("Estado: " + dto.getEstadoServicio());
+            System.out.println("Monto: " + dto.getMonto());
+            System.out.println("---------------------------");
+        });
 
         return lista.stream()
-                .filter(dto -> Boolean.TRUE.equals(dto.getEstadoServicio()))  // Filtra solo activos (true)
+                .filter(dto -> Boolean.TRUE.equals(dto.getEstadoServicio()))
                 .map(dto -> {
                     Map<String, Object> m = new HashMap<>();
                     m.put("idSedeServicio", dto.getIdSedeServicio());
+
                     String nombreMostrado = (dto.getNombrePersonalizado() != null && !dto.getNombrePersonalizado().isEmpty())
-                            ? dto.getNombrePersonalizado()
+                            ? dto.getNombrePersonalizado() + " - " + dto.getNombre()
                             : dto.getNombre();
+
                     m.put("nombre", nombreMostrado);
                     return m;
                 }).collect(Collectors.toList());
     }
+
 
 
 }

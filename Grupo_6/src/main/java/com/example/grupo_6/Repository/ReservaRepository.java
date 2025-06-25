@@ -154,5 +154,13 @@ AND (:fechaFin IS NULL OR r.fechaReserva <= :fechaFin)
     List<Reserva> findByUsuario_IdusuarioAndSedeServicio_IdSedeServicio(Integer idUsuario, Integer idSedeServicio);
     List<Reserva> findByEstado(Estado estado);
 
+
+    boolean existsByUsuarioAndHorarioDisponibleAndFechaReservaAndEstadoNot(
+            Usuario usuario,
+            HorarioDisponible horario,
+            LocalDate fechaReserva,
+            Estado estado
+    );
+
 }
 

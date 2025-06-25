@@ -121,12 +121,16 @@
                 fetch(`/api/servicios-por-sede/${sedeId}?timestamp=${new Date().getTime()}`)
                     .then(res => res.json())
                     .then(data => {
-                        console.log("Servicios recibidos:", data); // Debug
+                        console.log("Servicios recibidos:", data);
                         servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
                         data.forEach(s => {
                             const opt = document.createElement("option");
                             opt.value = s.idSedeServicio;
-                            opt.textContent = s.nombre;
+                            // Usa el nombre personalizado si existe, sino el nombre normal
+                            const displayName = s.nombrePersonalizado
+                                ? `${s.nombrePersonalizado} - ${s.nombre}`
+                                : s.nombre;
+                            opt.textContent = displayName;
                             servicioSelect.appendChild(opt);
                         });
                     })
@@ -134,6 +138,7 @@
                         console.error("Error al cargar servicios:", error);
                         servicioSelect.innerHTML = '<option value="">Error al cargar servicios</option>';
                     });
+
 
                 // Traer días permitidos para esa sede
                 fetch(`/api/dias-activos?idsede=${sedeId}`)
