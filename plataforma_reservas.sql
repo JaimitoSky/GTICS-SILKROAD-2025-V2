@@ -1199,7 +1199,11 @@ CREATE TABLE coordinador_horario (
   UNIQUE KEY ux_ch_sede_dia (id_coordinador_sede, dia_semana, hora_entrada, hora_salida)
 );
 
+ALTER TABLE sede
+ADD COLUMN imagen LONGBLOB;
 
+ALTER TABLE sede_servicio
+ADD COLUMN imagen LONGBLOB;
 
 
 SET FOREIGN_KEY_CHECKS=1;

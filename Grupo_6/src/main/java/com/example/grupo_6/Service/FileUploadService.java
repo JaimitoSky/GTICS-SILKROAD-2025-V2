@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.UUID;
 
-@Service
+//@Service
 public class FileUploadService {
 
     @Value("${aws.s3.bucket}")

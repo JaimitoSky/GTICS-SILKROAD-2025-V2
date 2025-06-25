@@ -56,8 +56,8 @@ public class SuperAdminController {
 
     @Autowired
     private ServicioRepository servicioRepository;
-    @Autowired
-    private FileUploadService fileUploadService;
+    //@Autowired
+    //private FileUploadService fileUploadService;
 
     @Autowired
     private SedeServicioRepository sedeServicioRepository;

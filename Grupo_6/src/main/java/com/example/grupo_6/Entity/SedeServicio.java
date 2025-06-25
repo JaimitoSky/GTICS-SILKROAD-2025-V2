@@ -38,5 +38,8 @@ public class SedeServicio {
 
     @Column(name = "nombre_personalizado", nullable = false)
     private String nombrePersonalizado;
+    @Lob
+    @Column(name = "imagen")
+    private byte[] imagen;
 
 }
