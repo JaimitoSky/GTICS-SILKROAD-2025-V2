@@ -1,4 +1,5 @@
 package com.example.grupo_6.Repository;
+import com.example.grupo_6.Dto.ServicioComplejoDTO;
 import com.example.grupo_6.Dto.ServicioSimplificado;
 import com.example.grupo_6.Repository.SedeServicioRepository;
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
@@ -14,7 +15,9 @@ import java.util.Optional;
 @Repository
 public interface SedeServicioRepository extends JpaRepository<SedeServicio, Integer> {
     List<SedeServicio> findBySedeIdsede(Integer idsede);
+
     List<SedeServicio> findBySede_Idsede(Integer idsede);
+
     @Query("""
     SELECT ss.idSedeServicio AS idSedeServicio,
            s.nombre AS nombre,
@@ -44,7 +47,6 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     List<ServicioSimplificado> listarServiciosSimplificadosPorTipo(int idtipo);
 
 
-
     @Query("""
         SELECT ss
         FROM SedeServicio ss
@@ -55,5 +57,18 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     Optional<SedeServicio> obtenerDetalleComplejoPorId(@Param("id") Integer id);
 
 
-
+    @Query("""
+    SELECT 
+        s.idservicio AS idServicio,
+        s.nombre AS nombreServicio,
+        se.nombre AS nombreSede,
+        se.direccion AS direccion,
+        ss.idSedeServicio AS idSedeServicio,
+        ss.nombrePersonalizado AS nombrePersonalizado
+    FROM SedeServicio ss
+    JOIN ss.servicio s
+    JOIN ss.sede se
+    WHERE s.tipoServicio.idtipo = :idtipo AND s.estado.idestado = 4
+""")
+    List<ServicioComplejoDTO> listarServiciosPorTipoConNombre(@Param("idtipo") int idtipo);
 }

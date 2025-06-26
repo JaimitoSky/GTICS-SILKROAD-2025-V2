@@ -41,22 +41,32 @@
                                     <div class="mb-4">
                                         <label class="form-label fw-semibold">Sede</label>
                                         <input type="text" class="form-control form-control-lg bg-light" readonly
-                                               th:value="${reserva.sedeServicio.sede.nombre}">
+                                               th:value="${reserva?.sedeServicio?.sede?.nombre}">
                                         <input type="hidden" name="sede.idsede" th:value="${reserva.sedeServicio.sede.idsede}" />
                                     </div>
 
-                                    <!-- SERVICIO -->
+                                    <!-- NOMBRE PERSONALIZADO -->
                                     <div class="mb-4">
-                                        <label class="form-label fw-semibold">Servicio</label>
+                                        <label class="form-label fw-semibold">Nombre servicio</label>
                                         <input type="text" class="form-control form-control-lg bg-light" readonly
-                                               th:value="${reserva.sedeServicio.servicio.nombre}">
-                                        <input type="hidden" name="sedeServicio.idSedeServicio" th:value="${reserva.sedeServicio.idSedeServicio}" />
+                                               th:value="${reserva.sedeServicio.nombrePersonalizado}">
                                     </div>
+
+                                    <!-- TIPO DE SERVICIO -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">Tipo de servicio</label>
+                                        <input type="text" class="form-control form-control-lg bg-light" readonly
+                                               th:value="${reserva.sedeServicio.servicio.tipoServicio.nombre}">
+                                    </div>
+
+                                    <!-- ID SEDE SERVICIO (oculto) -->
+                                    <input type="hidden" name="sedeServicio.idSedeServicio" th:value="${reserva.sedeServicio.idSedeServicio}" />
+
 
                                     <!-- FECHA -->
                                     <div class="mb-4">
                                         <label class="form-label fw-semibold">Fecha de Reserva</label>
-                                        <input type="date" class="form-control form-control-lg" id="fechaReserva" name="fechaReserva" required>
+                                        <input type="date" class="form-control form-control-lg" id="fechaReserva" name="fechaReserva" required min="">
                                     </div>
 
                                     <!-- HORARIO DISPONIBLE -->
@@ -66,6 +76,8 @@
                                             <option value="">Seleccione servicio y fecha</option>
                                         </select>
                                     </div>
+
+
 
                                     <!-- Botones -->
                                     <div class="text-center mt-5">
@@ -81,12 +93,12 @@
                                 </form>
 
                                 <script>
+                                    const fechaInput = document.getElementById("fechaReserva");
+                                    const horarioSelect = document.getElementById("horarioDisponible");
+                                    const sedeServicioId = document.querySelector("input[name='sedeServicio.idSedeServicio']").value;
+
                                     function cargarHorariosDisponibles() {
-                                        const fecha = document.getElementById("fechaReserva").value;
-                                        const sedeServicioId = document.querySelector("input[name='sedeServicio.idSedeServicio']").value;
-
-                                        const horarioSelect = document.getElementById("horarioDisponible");
-
+                                        const fecha = fechaInput.value;
                                         if (!sedeServicioId || !fecha) {
                                             horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
                                             return;
@@ -97,23 +109,48 @@
                                             .then(data => {
                                                 horarioSelect.innerHTML = '';
 
-                                                if (data.length === 0) {
+                                                if (!Array.isArray(data) || data.length === 0) {
                                                     horarioSelect.innerHTML = '<option>No hay horarios disponibles</option>';
-                                                } else {
-                                                    const opt = document.createElement("option");
-                                                    opt.value = "";
-                                                    opt.textContent = "Seleccione un horario";
-                                                    opt.disabled = true;
-                                                    opt.selected = true;
-                                                    horarioSelect.appendChild(opt);
-
-                                                    data.forEach(horario => {
-                                                        const opt = document.createElement("option");
-                                                        opt.value = horario.idhorario;
-                                                        opt.textContent = `${horario.horaInicio} - ${horario.horaFin}`;
-                                                        horarioSelect.appendChild(opt);
-                                                    });
+                                                    return;
                                                 }
+
+                                                // Opción placeholder
+                                                const placeholder = document.createElement("option");
+                                                placeholder.value = "";
+                                                placeholder.textContent = "Seleccione un horario";
+                                                placeholder.disabled = true;
+                                                placeholder.selected = true;
+                                                horarioSelect.appendChild(placeholder);
+
+                                                const hoy = new Date();
+                                                const [year, month, day] = fecha.split("-");
+                                                const fechaSeleccionada = new Date(year, month - 1, day);
+
+                                                data.forEach(h => {
+                                                    const aforoMaximo = parseInt(h.aforoMaximo, 10);
+                                                    const aforoDisponible = parseInt(h.aforoDisponible, 10);
+
+                                                    const [hInicioHoras, hInicioMinutos] = h.horaInicio.split(":").map(Number);
+                                                    const horaInicioDate = new Date(fechaSeleccionada);
+                                                    horaInicioDate.setHours(hInicioHoras, hInicioMinutos, 0, 0);
+
+                                                    const opt = document.createElement("option");
+                                                    opt.value = h.idhorario;
+                                                    opt.textContent = `${h.horaInicio} - ${h.horaFin} (max: ${aforoMaximo}, libres: ${aforoDisponible})`;
+
+                                                    // Si es hoy y la hora ya pasó, deshabilitar
+                                                    if (fechaSeleccionada.toDateString() === hoy.toDateString() && horaInicioDate <= hoy) {
+                                                        opt.disabled = true;
+                                                        opt.textContent += " - HORA PASADA";
+                                                    }
+                                                    // Si ya no hay cupos, deshabilitar
+                                                    else if (aforoDisponible <= 0) {
+                                                        opt.disabled = true;
+                                                        opt.textContent += " - SIN CUPOS";
+                                                    }
+
+                                                    horarioSelect.appendChild(opt);
+                                                });
                                             })
                                             .catch(error => {
                                                 console.error("Error al cargar horarios:", error);
@@ -121,10 +158,8 @@
                                             });
                                     }
 
-                                    // Ejecutar solo cuando cambia la fecha
-                                    document.getElementById("fechaReserva").addEventListener("change", cargarHorariosDisponibles);
+                                    fechaInput.addEventListener("change", cargarHorariosDisponibles);
                                 </script>
-
 
                             </div>
                         </div>
@@ -161,36 +196,53 @@
                 }
             });
         </script>
+
         <div class="modal fade" id="bloqueoReservaModal" tabindex="-1" aria-labelledby="bloqueoReservaModalLabel" aria-hidden="true"
              data-bs-backdrop="static" data-bs-keyboard="false">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
+                    <!-- CABECERA DEL MODAL -->
                     <div class="modal-header text-white" th:class="'modal-header bg-' + ${modalColor} + ' text-white'">
-                        <h5 class="modal-title">Reserva no permitida</h5>
+                        <h5 class="modal-title" id="bloqueoReservaModalLabel">Reserva no permitida</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
 
-
+                    <!-- CUERPO DEL MODAL -->
                     <div class="modal-body">
                         <p th:text="${mensajeBloqueoPrincipal}">Mensaje principal</p>
                         <p th:if="${mensajeBloqueoSecundario != null}" th:text="${mensajeBloqueoSecundario}">Mensaje secundario</p>
-                    </div>
-
-                    <div class="modal-footer justify-content-center">
-                        <a href="/vecino" class="btn btn-primary">Volver al inicio</a>
                     </div>
                 </div>
             </div>
         </div>
 
+
         <!-- Mostrar modal si está bloqueado -->
         <script th:inline="javascript">
             /*<![CDATA[*/
-            var reservaBloqueada = /*[[${reservaBloqueada}]]*/ false;
-            if (reservaBloqueada === true) {
-                var modal = new bootstrap.Modal(document.getElementById('bloqueoReservaModal'));
+            var reservaBloqueada = [[${reservaBloqueada}]];
+            if (reservaBloqueada) {
+                const modal = new bootstrap.Modal(document.getElementById('bloqueoReservaModal'));
                 modal.show();
             }
             /*]]>*/
+        </script>
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const fechaInput = document.getElementById("fechaReserva");
+                const hoy = new Date().toISOString().split("T")[0]; // Formato YYYY-MM-DD
+                fechaInput.min = hoy; // Establece fecha mínima como hoy
+            });
+            document.querySelector("form").addEventListener("submit", function (e) {
+                const selected = horarioSelect.options[horarioSelect.selectedIndex];
+                if (selected && selected.disabled) {
+                    e.preventDefault();
+                    alert("El horario seleccionado ya no está disponible. Por favor, elige otro.");
+                }
+            });
+
         </script>
 
 

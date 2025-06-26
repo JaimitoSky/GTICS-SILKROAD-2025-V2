@@ -135,6 +135,17 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     Page<Reserva> filtrarPorEstado2(@Param("estado") String estado, Pageable pageable);
 
 
+    boolean existsByUsuario_IdusuarioAndFechaReservaAndHorarioDisponible_IdhorarioAndEstado_NombreIgnoreCase(
+            Integer idusuario,
+            LocalDate fechaReserva,
+            Integer idhorario,
+            String estado
+    );
+    List<Reserva> findByUsuario_IdusuarioAndFechaReservaAndHorarioDisponible_Idhorario(
+            Integer idUsuario,
+            LocalDate fechaReserva,
+            Integer idHorario
+    );
 
 }
 

@@ -48,9 +48,15 @@
                                              class="card-img-top" style="height: 300px; object-fit: cover;"
                                              alt="Imagen del complejo">
                                         <div class="card-body">
-                                            <h5 class="card-title" th:text="${complejo.nombreServicio}">Nombre Servicio</h5>
+                                            <h2 class="card-title fw-bold mb-3 text-primary"
+                                                th:title="${complejo.nombrePersonalizado != null ? complejo.nombrePersonalizado : complejo.nombreServicio}"
+                                                th:text="${complejo.nombrePersonalizado != null && !#strings.isEmpty(complejo.nombrePersonalizado) ? complejo.nombrePersonalizado : complejo.nombreServicio}"
+                                                >
+                                                Nombre Servicio
+                                            </h2>
+
                                             <p class="card-text" th:text="|${complejo.nombreSede} - ${complejo.direccion}|">Sede - Dirección</p>
-                                            <a th:href="@{'/vecino/complejo/detalle/' + ${complejo.idServicio}}" class="btn btn-primary">Más detalles</a>
+                                            <a th:href="@{'/vecino/complejo/detalle/' + ${complejo.idSedeServicio}}" class="btn btn-primary">Más detalles</a>
                                         </div>
                                     </div>
                                 </div>

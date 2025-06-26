@@ -52,7 +52,6 @@
 
 
                         <div class="row g-0 align-items-stretch">
-                                <!-- Imagen grande con overlay -->
                                 <div class="col-md-6 position-relative">
                                     <img th:src="@{'/vecino/imagen/' + ${sedeServicio.servicio.idservicio}}"
                                          class="img-fluid rounded-start"
@@ -63,9 +62,11 @@
 
                                 <div class="col-md-6 d-flex align-items-center">
                                     <div class="card-body p-4">
-                                        <h2 class="card-title fw-bold mb-3 text-primary" th:text="${sedeServicio.servicio.nombre}">
+                                        <h2 class="card-title fw-bold mb-3 text-primary"
+                                            th:text="${sedeServicio.nombrePersonalizado != null and !#strings.isEmpty(sedeServicio.nombrePersonalizado) ? sedeServicio.nombrePersonalizado : sedeServicio.servicio.nombre}">
                                             Nombre del Servicio
                                         </h2>
+
 
                                         <p class="text-muted fst-italic mb-3">
                                             <i class="bi bi-info-circle-fill me-2"></i>
@@ -92,26 +93,11 @@
                                             <span class="badge bg-success fs-6">S/ <span th:text="${sedeServicio.tarifa.monto}">0.00</span></span>
                                         </div>
 
-                                        <div class="mb-4">
-                                            <i class="bi bi-people-fill me-2 text-secondary"></i>
-                                            <strong>Aforo disponible:</strong>
-                                            <span th:if="${horarios != null and !horarios.isEmpty() and horarios.get(0).aforoDisponible > 0}"
-                                                  class="badge bg-warning text-dark fs-6 ms-1"
-                                                  th:text="${horarios.get(0).aforoDisponible}">0</span>
-                                            <span th:if="${horarios != null and !horarios.isEmpty() and horarios.get(0).aforoDisponible == 0}"
-                                                  class="badge bg-danger text-light fs-6 ms-1">Aforo no disponible</span>
-                                            <span th:if="${horarios == null or horarios.isEmpty()}"
-                                                  class="text-muted ms-2">No establecido</span>
-                                        </div>
-
-
                                         <a th:href="@{'/vecino/reservas/nueva'(idSedeServicio=${sedeServicio.idSedeServicio})}"
                                            class="btn btn-outline-primary btn-lg w-100 btn-animated"
-                                           th:classappend="${horarios != null and !horarios.isEmpty() and horarios.get(0).aforoDisponible == 0} ? 'disabled'">
+                                           th:classappend="${horarios != null and !horarios.isEmpty() and horarios[0].aforoMaximo == 0} ? 'disabled'">
                                             <i class="bi bi-calendar-check me-2"></i> Reservar ahora
                                         </a>
-
-
 
                                     </div>
                                 </div>

@@ -152,8 +152,7 @@
                             </div>
                         </div>
 
-                        <!-- Subir comprobante -->
-                        <!-- Subir comprobante -->
+
                         <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
 
@@ -169,10 +168,10 @@
                                 <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label>
                                 <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
                             </div>
-                            <div class="form-group mt-3">
+                            <div class="form-group mt-3 text-center">
                                 <button type="button" class="btn btn-primary" id="btnComprobante">Reservar</button>
-
                             </div>
+
 
                         </form>
 

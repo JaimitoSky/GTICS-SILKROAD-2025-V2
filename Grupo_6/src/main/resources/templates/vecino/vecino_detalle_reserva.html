@@ -50,6 +50,14 @@
                     <p><strong>Instalación:</strong>
                         <span th:text="${reserva.sedeServicio.sede.nombre}"></span>
                     </p>
+                    <p><strong>Tipo de Servicio:</strong>
+                        <span th:text="${reserva.sedeServicio.servicio.tipoServicio.nombre}"></span>
+                    </p>
+
+                    <p><strong>Servicio:</strong>
+                        <span th:text="${reserva.sedeServicio.nombrePersonalizado}"></span>
+                    </p>
+
                     <p><strong>Dirección:</strong>
                         <span th:text="${reserva.sedeServicio.sede.direccion}"></span>
                     </p>
@@ -197,7 +205,7 @@
         const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic', 'image/jpg'];
 
         if (!file) {
-            mostrarModalError("Debes seleccionar un comprobante de pago.", true);
+            mostrarModalError("Debes seleccionar un comprobante de pago.");
             return;
         }
 
@@ -222,17 +230,13 @@
         };
     });
 
-    function mostrarModalError(mensaje, redirigir) {
+    function mostrarModalError(mensaje) {
         document.getElementById("mensajeModalError").innerText = mensaje;
 
         const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
         modalError.show();
 
-        if (redirigir) {
-            modalError._element.addEventListener("hidden.bs.modal", function () {
-                window.location.href = "/vecino/reservas";
-            }, { once: true });
-        }
+
     }
 </script>
 <!-- Modal de advertencia sin comprobante -->

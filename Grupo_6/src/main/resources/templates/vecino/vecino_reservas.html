@@ -74,7 +74,10 @@
                         <tr th:each="reserva : ${listaReservas}" class="text-center">
                             <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}" class="fw-semibold"></td>
                             <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm') + ' - ' + #temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></td>
-                            <td th:text="${reserva.sedeServicio.sede.nombre}"></td>
+                            <td>
+                                <span th:text="${reserva.sedeServicio.sede.nombre}"></span><br>
+                                <small class="text-muted fst-italic" th:text="${reserva.sedeServicio.nombrePersonalizado}"></small>
+                            </td>
                             <td th:text="${reserva.sedeServicio.sede.direccion}"></td>
                             <td>
                     <span th:switch="${reserva.estado.nombre.toLowerCase()}">
@@ -121,27 +124,7 @@
 
 <script th:src="@{/datatables/datatables.min.js}"></script>
 
-<script>
-    $(document).ready(function () {
-        const table = $('#tablaReservas').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
-            responsive: true,
-            pageLength: 5
-        });
 
-        $('#filtroEstado').on('change', function () {
-            table.column(4).search(this.value).draw();  // ahora sí funciona
-        });
-    });
-
-    function limpiarFiltros() {
-        $('#filtroEstado').val('');
-        $('#tablaReservas').DataTable().search('').columns().search('').draw();
-    }
-
-</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
@@ -155,6 +138,47 @@
     });
 </script>
 <div th:replace="~{fragments/chatbot.html}"></div>
+<script>
+    $(document).ready(function () {
+        const table = $('#tablaReservas').DataTable({
+            language: {
+                decimal: "",
+                emptyTable: "No hay datos disponibles en la tabla",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ reservas",
+                infoEmpty: "Mostrando 0 a 0 de 0 reservas",
+                infoFiltered: "(filtrado de _MAX_ total de reservas)",
+                infoPostFix: "",
+                thousands: ",",
+                lengthMenu: "Mostrar _MENU_ reservas",
+                loadingRecords: "Cargando...",
+                processing: "Procesando...",
+                search: "Buscar:",
+                zeroRecords: "No se encontraron resultados",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                },
+                aria: {
+                    sortAscending: ": activar para ordenar de manera ascendente",
+                    sortDescending: ": activar para ordenar de manera descendente"
+                }
+            },
+            responsive: true,
+            pageLength: 5
+        });
+
+        $('#filtroEstado').on('change', function () {
+            table.column(4).search(this.value).draw();  // filtra por estado
+        });
+    });
+
+    function limpiarFiltros() {
+        $('#filtroEstado').val('');
+        $('#tablaReservas').DataTable().search('').columns().search('').draw();
+    }
+</script>
 
 </body>
 </html>
