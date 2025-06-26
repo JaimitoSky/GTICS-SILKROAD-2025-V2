@@ -1,5 +1,5 @@
 package com.example.grupo_6.Controller;
-import com.example.grupo_6.Dto.CoordinadorResumenDTO;
+import com.example.grupo_6.Dto.DetalleCoordinadorDTO;
 import com.example.grupo_6.Entity.HorarioAtencion.DiaSemana;
 
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
@@ -578,17 +578,63 @@ public class SuperAdminController {
 
 
     @GetMapping("/superadmin/coordinadores")
-    public String vistaDashboardCoordinadores(@RequestParam(required = false) String mes, Model model) {
+    public String vistaDashboardCoordinadores(
+            @RequestParam(required = false) String mes,
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) String filtro,
+            Model model) {
+
         if (mes == null || mes.isBlank()) {
             mes = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
         }
 
-        List<CoordinadorResumenDTO> resumenes = asistenciaCoordinadorRepository.obtenerResumenCoordinadoresPorMes(mes);
+        List<DetalleCoordinadorDTO> coordinadores = asistenciaCoordinadorRepository.obtenerResumenCoordinadoresPorMes(mes);
+        List<Map<String, Object>> coordinadoresConPct = new ArrayList<>();
+        Map<String, Object> coordinadorSeleccionado = null;
 
-        model.addAttribute("resumenes", resumenes);
+        for (DetalleCoordinadorDTO dto : coordinadores) {
+            long total = dto.getPresente() + dto.getTarde() + dto.getFalta();
+            double puntualidadPct = total > 0 ? (dto.getPresente() * 100.0) / total : 0;
+            double tardanzaPct = total > 0 ? (dto.getTarde() * 100.0) / total : 0;
+            double faltaPct = total > 0 ? (dto.getFalta() * 100.0) / total : 0;
+
+            Map<String, Object> mapa = new HashMap<>();
+            mapa.put("idusuario", dto.getIdusuario());
+            mapa.put("nombres", dto.getNombres());
+            mapa.put("apellidos", dto.getApellidos());
+            mapa.put("dni", dto.getDni());
+            mapa.put("presente", dto.getPresente());
+            mapa.put("tarde", dto.getTarde());
+            mapa.put("falta", dto.getFalta());
+            mapa.put("puntualidadPct", Math.round(puntualidadPct));
+            mapa.put("tardanzaPct", Math.round(tardanzaPct));
+            mapa.put("faltasPct", Math.round(faltaPct));
+            mapa.put("incidencias", dto.getIncidencias());
+
+            coordinadoresConPct.add(mapa);
+
+            boolean coincideId = (id != null && Objects.equals(dto.getIdusuario(), id));
+            boolean coincideDni = (filtro != null && filtro.equals(dto.getDni()));
+
+            if (coincideId || coincideDni) {
+                coordinadorSeleccionado = mapa;
+            }
+        }
+
+        List<Usuario> todosCoordinadores = usuarioRepository.findByRolNombre("COORDINADOR");
+        model.addAttribute("todosCoordinadores", todosCoordinadores);
+        model.addAttribute("coordinador", coordinadorSeleccionado);
         model.addAttribute("mes", mes);
+        model.addAttribute("id", id);
+        model.addAttribute("filtro", filtro);
+
         return "superadmin/superadmin_coordinadores";
     }
+
+
+
+
+
 
 
 

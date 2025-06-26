@@ -1,6 +1,6 @@
 package com.example.grupo_6.Repository;
 
-import com.example.grupo_6.Dto.CoordinadorResumenDTO;
+import com.example.grupo_6.Dto.DetalleCoordinadorDTO;
 import com.example.grupo_6.Entity.AsistenciaCoordinador;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +50,11 @@ public interface AsistenciaCoordinadorRepository extends JpaRepository<Asistenci
                                                  @Param("mes") String mes,
                                                  Pageable pageable);
 
-    @Query(value = """
+
+
+
+
+    @Query("""
     SELECT 
         u.idusuario AS idusuario,
         u.nombres AS nombres,
@@ -60,19 +64,16 @@ public interface AsistenciaCoordinadorRepository extends JpaRepository<Asistenci
         SUM(CASE WHEN a.estado = 'tarde' THEN 1 ELSE 0 END) AS tarde,
         SUM(CASE WHEN a.estado = 'falta' THEN 1 ELSE 0 END) AS falta,
         COUNT(DISTINCT i.idincidencia) AS incidencias
-    FROM usuario u
-    LEFT JOIN asistencia_coordinador a ON a.idusuario = u.idusuario 
-        AND DATE_FORMAT(a.fecha, '%Y-%m') = :mes
+    FROM Usuario u
+    LEFT JOIN AsistenciaCoordinador a ON a.usuario = u 
+        AND FUNCTION('DATE_FORMAT', a.fecha, '%Y-%m') = :mes
         AND a.estado != 'no_trabaja'
-    LEFT JOIN incidencia i ON i.idusuario = u.idusuario 
-        AND DATE_FORMAT(i.fecha, '%Y-%m') = :mes
-    WHERE u.idrol = (
-        SELECT idrol FROM rol WHERE nombre = 'COORDINADOR' LIMIT 1
-    )
+            LEFT JOIN Incidencia i ON i.coordinador = u\s
+                                                    AND FUNCTION('DATE_FORMAT', i.fecha, '%Y-%m') = :mes
+    WHERE u.rol.nombre = 'COORDINADOR'
     GROUP BY u.idusuario, u.nombres, u.apellidos, u.dni
-    """,
-            nativeQuery = true)
-    List<CoordinadorResumenDTO> obtenerResumenCoordinadoresPorMes(@Param("mes") String mes);
+""")
+    List<DetalleCoordinadorDTO> obtenerResumenCoordinadoresPorMes(@Param("mes") String mes);
 
 
 

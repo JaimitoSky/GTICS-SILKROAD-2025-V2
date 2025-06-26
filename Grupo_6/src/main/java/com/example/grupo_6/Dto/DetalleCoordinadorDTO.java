@@ -1,6 +1,6 @@
 package com.example.grupo_6.Dto;
 
-public interface CoordinadorResumenDTO {
+public interface DetalleCoordinadorDTO {
     Integer getIdusuario();
     String getNombres();
     String getApellidos();
@@ -9,6 +9,5 @@ public interface CoordinadorResumenDTO {
     Long getTarde();
     Long getFalta();
     Long getIncidencias();
-
-
 }
+

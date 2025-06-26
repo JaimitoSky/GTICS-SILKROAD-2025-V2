@@ -110,6 +110,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     List<Usuario> findByRol_Nombre(String nombre);
 
+    List<Usuario> findByRolNombre(String nombre);
 
 }
 
