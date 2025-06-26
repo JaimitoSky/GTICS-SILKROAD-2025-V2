@@ -9,6 +9,81 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        h4 {
+            font-weight: 700;
+            color: #333;
+            animation: fadeIn 0.4s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .notification-card h5 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-card p {
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-card small {
+            color: #6c757d;
+        }
+
+        .notification-card.unread h5 {
+            color: #17b5c0;
+        }
+
+        .btn-outline-danger {
+            border-radius: 10px;
+        }
+
+        .alert {
+            border-radius: 12px;
+        }
+
+        main.content {
+            padding: 2.5rem;
+        }
+
+        footer.footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        footer.footer img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         ::-webkit-scrollbar {
             display: none;
         }
@@ -16,21 +91,18 @@
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
 
-    <!-- Main -->
     <div class="main">
-        <!-- Navbar -->
         <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
 
-        <!-- Contenido principal -->
         <main class="content">
-            <div class="container-fluid p-4">
+            <div class="container mt-4">
+                <h4 class="mb-4">
+                    <i class="bi bi-bell-fill text-primary"></i> Mis Notificaciones
+                </h4>
 
-                <h2 class="mb-4">Mis Notificaciones</h2>
                 <div id="mensajeAlerta" class="mt-3"></div>
-
 
                 <div th:if="${notificaciones.isEmpty()}">
                     <div class="alert alert-info text-center">
@@ -38,43 +110,36 @@
                     </div>
                 </div>
 
-                <div class="list-group" th:if="${notificaciones}">
-                    <div th:each="noti : ${notificaciones}" class="list-group-item flex-column align-items-start mb-2 rounded shadow-sm d-flex justify-content-between">
-                        <div class="flex-grow-1">
-                            <div th:classappend="${noti.leido} ? 'text-muted' : ''">
-                                <a th:href="@{'/vecino/notificaciones/' + ${noti.idnotificacion} + '/ver'}"
-                                   th:classappend="${!noti.leido} ? 'fw-bold text-primary' : 'text-muted'"
-                                   class="mb-1 d-block text-decoration-none">
-                                    <h5 th:text="${noti.titulo}"></h5>
-                                </a>
-                                <small th:text="${#dates.format(noti.fechaEnvio, 'dd/MM/yyyy HH:mm')}">Fecha</small>
-                                <p class="mb-1" th:text="${noti.mensaje}">Contenido...</p>
-                            </div>
-
+                <div th:if="${notificaciones}">
+                    <div th:each="noti : ${notificaciones}" th:class="'notification-card ' + (${noti.leido} ? 'text-muted' : 'unread')">
+                        <div class="flex-grow-1 me-3">
+                            <a th:href="@{'/vecino/notificaciones/' + ${noti.idnotificacion} + '/ver'}"
+                               class="text-decoration-none">
+                                <h5 th:text="${noti.titulo}"></h5>
+                            </a>
+                            <small th:text="${#dates.format(noti.fechaEnvio, 'dd/MM/yyyy HH:mm')}">Fecha</small>
+                            <p class="mb-0" th:text="${noti.mensaje}">Contenido...</p>
                         </div>
+
                         <form th:action="@{'/vecino/notificaciones/' + ${noti.idnotificacion} + '/eliminar'}"
                               method="post"
                               class="form-eliminar-noti">
                             <button type="button"
-                                    class="btn btn-sm btn-outline-danger ms-3 btn-eliminar"
+                                    class="btn btn-sm btn-outline-danger btn-eliminar"
                                     th:attr="data-id=${noti.idnotificacion}">
                                 <i class="bi bi-trash"></i>
                             </button>
-
                         </form>
-
                     </div>
                 </div>
             </div>
         </main>
 
-
-        <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo" height="60">
+                <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" height="60">
             </div>
-            <div class="container text-center text-muted">
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
@@ -95,6 +160,7 @@
     });
 </script>
 
+<!-- Modal de Confirmación -->
 <div class="modal fade" id="modalEliminarNoti" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-warning">
@@ -133,6 +199,7 @@
         });
     });
 </script>
+
 <div th:replace="~{fragments/chatbot.html}"></div>
 
 </body>

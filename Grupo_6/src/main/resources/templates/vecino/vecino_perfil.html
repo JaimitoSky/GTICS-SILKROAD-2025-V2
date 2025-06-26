@@ -10,65 +10,176 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        h4 {
+            font-weight: 700;
+            color: #333;
+            animation: fadeIn 0.4s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #dee2e6;
+            padding: 0.85rem 1.25rem;
+            transition: all 0.3s ease-in-out;
+            background-color: #ffffff;
+        }
+
+        .form-control:focus {
+            border-color: #17b5c0;
+            box-shadow: 0 0 0 0.25rem rgba(23, 181, 192, 0.25);
+            outline: none;
+        }
+
+        .form-control[disabled],
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            opacity: 0.9;
+            box-shadow: none;
+        }
+
+        .profile-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-action-group .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.85rem 2.5rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-action-group .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background-color: #17b5c0;
+            border-color: #17b5c0;
+        }
+
+        .btn-primary:hover {
+            background-color: #1399a3;
+            border-color: #128c94;
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            background-color: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        main.content {
+            padding: 2.5rem;
+        }
+
+        footer.footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        footer.footer img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
 
     <div class="main">
-        <!-- Navbar -->
         <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
 
-        <!-- Contenido principal -->
         <main class="content">
-            <div class="container-fluid p-4">
-                <h2 class="mb-4">Mi Perfil</h2>
-                <form method="post" th:action="@{/vecino/perfil/actualizar}">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+            <div class="container mt-4">
+                <h4 class="mb-4">
+                    <i class="bi bi-person-circle text-primary"></i> Mi Perfil
+                </h4>
+
+                <div class="profile-card">
+                    <form method="post" th:action="@{/vecino/perfil/actualizar}">
+                        <div class="mb-4">
                             <label for="nombres" class="form-label">Nombres</label>
                             <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-4">
                             <label for="apellidos" class="form-label">Apellidos</label>
                             <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-4">
                             <label for="correo" class="form-label">Correo electrónico</label>
                             <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.correo}"
-                                   required
-                                   pattern="^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$"
+                                   required pattern="^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$"
                                    title="Dominio de correo inválido">
-
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-4">
                             <label for="telefono" class="form-label">Celular</label>
                             <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}"
-                                   pattern="^\d{9}$" maxlength="9" title="El celular debe tener 9 dígitos" required>
+                                   required pattern="^\d{9}$" maxlength="9"
+                                   title="El celular debe tener 9 dígitos">
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
-                    </div>
+                        <div class="mb-5">
+                            <label for="direccion" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
+                        </div>
 
-                    <div class="d-flex justify-content-between mt-4">
-                        <a th:href="@{/vecino/cambiar-contrasena}" class="btn btn-outline-secondary">Cambiar contraseña</a>
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                    </div>
-                </form>
+                        <div class="d-flex justify-content-between btn-action-group">
+                            <a th:href="@{/vecino/cambiar-contrasena}" class="btn btn-outline-secondary">
+                                <i class="bi bi-lock-fill me-2"></i> Cambiar contraseña
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i> Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo" height="60">
+                <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" height="60">
             </div>
-            <div class="container text-center text-muted">
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
