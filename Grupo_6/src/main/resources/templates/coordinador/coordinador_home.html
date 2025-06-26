@@ -412,7 +412,7 @@
             /*<![CDATA[*/
             document.addEventListener("DOMContentLoaded", () => {
                 const MAX_LATE_MIN = 30;
-                const EARLY_MIN = 10;
+                const EARLY_MIN = 50;
 
                 // Variables para el mapa
                 let map;
@@ -577,8 +577,8 @@
                     turnoIdInputSalida.value = turno?.id       || "";
 
                     // — set the "programmed" times, so they get sent to the backend too —
-                    document.getElementById("programadaEntradaInput").value = turno?.horaEntrada  || "";
-                    document.getElementById("programadaSalidaInput").value  = turno?.horaSalida   || "";
+                    document.getElementById("programadaEntradaInput").value = turno?.horaEntrada || "";
+                    document.getElementById("programadaSalidaInput").value = turno?.horaSalida || "";
 
                     // initial estado for entrada is always 'presente'
                     document.getElementById("estadoEntradaInput").value = "presente";

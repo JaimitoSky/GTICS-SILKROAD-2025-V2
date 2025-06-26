@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -148,132 +149,216 @@ public class CoordinadorController {
         return "coordinador/coordinador_home";
     }
 
-
-    // — POST /coordinador/asistencia-dia/registrar —
+    @Transactional
     @PostMapping("/asistencia-dia/registrar")
     public String registrarAsistencia(
             @RequestParam BigDecimal latitud,
             @RequestParam BigDecimal longitud,
             @RequestParam Integer idsede,
             @RequestParam String accion,
-            @RequestParam("id_coordinador_horario") Integer idCoordHorario,  // ← nuevo
+            @RequestParam("id_coordinador_horario") Integer idCoordHorario,
             HttpSession session,
             RedirectAttributes flash
     ) {
         Usuario u = (Usuario) session.getAttribute("usuario");
         if (u == null) {
+            System.out.println("[AUTH] Intento de acceso no autenticado");
             return "redirect:/login";
         }
 
         LocalDate ld = LocalDate.now();
         Date hoy = Date.valueOf(ld);
+        LocalDateTime ahora = LocalDateTime.now();
 
-        // 1) Validar parámetros
-        if (idsede == null || (!"entrada".equals(accion) && !"salida".equals(accion))) {
+        System.out.printf("[DEBUG] Usuario: %s - Acción: %s - Fecha: %s - IDsede: %d - IDHorario: %d - Lat: %s - Lon: %s%n",
+                u.getEmail(), accion, hoy, idsede, idCoordHorario, latitud, longitud);
+
+        // Validación de parámetros mejorada
+        if (idsede == null || idCoordHorario == null || latitud == null || longitud == null ||
+                (!"entrada".equals(accion) && !"salida".equals(accion))) {
+            System.out.println("[VALIDATION] Parámetros inválidos recibidos");
             flash.addFlashAttribute("errorAsistencia", "Parámetros inválidos.");
             return "redirect:/coordinador/home";
         }
 
-        // 2) Verificar sede y distancia ≤ 0.5 km
+        // Verificación de sede con logs mejorados
         var sedeOpt = sedeRepository.findById(idsede);
-        if (sedeOpt.isEmpty()
-                || sedeOpt.get().getLatitud() == null
-                || sedeOpt.get().getLongitud() == null
-        ) {
+        if (sedeOpt.isEmpty()) {
+            System.out.printf("[SEDE] No se encontró sede con ID: %d%n", idsede);
             flash.addFlashAttribute("errorAsistencia", "Sede inválida.");
             return "redirect:/coordinador/home";
         }
+
         Sede sede = sedeOpt.get();
+        if (sede.getLatitud() == null || sede.getLongitud() == null) {
+            System.out.printf("[SEDE] Sede %d no tiene coordenadas definidas%n", idsede);
+            flash.addFlashAttribute("errorAsistencia", "Sede no tiene ubicación definida.");
+            return "redirect:/coordinador/home";
+        }
+
+        // Cálculo de distancia con precisión mejorada
         double dist = calcularDistancia(
                 latitud.doubleValue(), longitud.doubleValue(),
                 sede.getLatitud().doubleValue(), sede.getLongitud().doubleValue()
         );
+        System.out.printf("[DISTANCE] Sede: %s - Distancia calculada: %.3f km%n", sede.getNombre(), dist);
+
         if (dist > 0.5) {
+            System.out.printf("[DISTANCE] Usuario %s a %.3f km de la sede (límite 0.5 km)%n", u.getEmail(), dist);
             flash.addFlashAttribute("errorAsistencia", "Debes estar a menos de 500 m del local.");
             return "redirect:/coordinador/home";
         }
 
-        // 3) Recuperar el turno seleccionado por su ID
-        CoordinadorHorario turno = coordinadorHorarioRepository
-                .findById(idCoordHorario)
-                .orElseThrow(() -> new IllegalArgumentException("Turno inválido"));
+        // Obtención de turno con manejo mejorado de errores
+        CoordinadorHorario turno;
+        try {
+            turno = coordinadorHorarioRepository.findById(idCoordHorario)
+                    .orElseThrow(() -> new IllegalArgumentException("Turno no encontrado"));
+            System.out.printf("[TURNO] Encontrado: ID=%d, Entrada=%s, Salida=%s, Activo=%s%n",
+                    turno.getIdCoordinadorHorario(), turno.getHoraEntrada(), turno.getHoraSalida(), turno.isActivo());
+        } catch (Exception e) {
+            System.out.printf("[TURNO] Error al buscar turno ID %d: %s%n", idCoordHorario, e.getMessage());
+            flash.addFlashAttribute("errorAsistencia", "Error al validar el turno.");
+            return "redirect:/coordinador/home";
+        }
 
-        // 4) Buscar o inicializar el registro de asistencia hoy
-        var existeOpt = asistenciaCoordinadorRepository
+        if (!turno.isActivo()) {
+            System.out.printf("[TURNO] Turno ID %d no está activo%n", idCoordHorario);
+            flash.addFlashAttribute("errorAsistencia", "Este día no tienes turno activo.");
+            return "redirect:/coordinador/home";
+        }
+
+        // Búsqueda de asistencia existente
+        var asistenciaOpt = asistenciaCoordinadorRepository
                 .findByUsuario_IdusuarioAndFechaAndSede_Idsede(u.getIdusuario(), hoy, idsede);
+        AsistenciaCoordinador asistencia = asistenciaOpt.orElse(null);
 
-        LocalTime ahora = LocalTime.now();
+        if (asistencia != null) {
+            System.out.printf("[ASISTENCIA] Asistencia existente encontrada: ID=%d%n", asistencia.getIdasistencia());
+        }
+
         try {
             if ("entrada".equals(accion)) {
-                // — ENTRADA —
-                if (existeOpt.isPresent()) {
-                    flash.addFlashAttribute("errorAsistencia","Ya registraste entrada.");
-                } else {
-                    LocalTime inicioVentana = turno.getHoraEntrada().minusMinutes(10);
-                    LocalTime finVentana    = turno.getHoraEntrada().plusMinutes(30);
-                    if (ahora.isBefore(inicioVentana)) {
-                        flash.addFlashAttribute("errorAsistencia","Aún no puedes registrar entrada.");
-                    }
-                    else if (ahora.isAfter(finVentana)) {
-                        flash.addFlashAttribute("errorAsistencia","Ventana de entrada cerrada.");
-                    }
-                    else {
-                        AsistenciaCoordinador a = new AsistenciaCoordinador();
-                        a.setUsuario(u);
-                        a.setSede(sede);
-                        a.setCoordinadorHorario(turno);
-                        a.setFecha(hoy);
-
-                        // marcación + programada entrada
-                        a.setHoraMarcacionEntrada(ahora);
-                        a.setHoraProgramadaEntrada(turno.getHoraEntrada());
-                        a.setLatitud(latitud);
-                        a.setLongitud(longitud);
-                        a.setEstado(AsistenciaCoordinador.EstadoAsistencia.presente);
-
-                        asistenciaCoordinadorRepository.save(a);
-                        flash.addFlashAttribute("mensajeAsistencia","Entrada registrada con éxito.");
-                    }
-                }
-
-            } else {
-                // — SALIDA —
-                if (existeOpt.isEmpty()) {
-                    flash.addFlashAttribute("errorAsistencia","No hay entrada previa para hoy.");
-                } else {
-                    AsistenciaCoordinador a = existeOpt.get();
-                    if (a.getHoraMarcacionSalida() != null) {
-                        flash.addFlashAttribute("errorAsistencia","Ya registraste salida.");
-                    } else {
-                        LocalTime finTurno = turno.getHoraSalida();
-                        // permitimos hasta 24 h después del fin de turno
-                        if (ahora.isAfter(finTurno.plusHours(24))) {
-                            flash.addFlashAttribute("errorAsistencia","Ventana de salida expirada.");
-                        } else {
-                            // marcación + programada salida
-                            a.setHoraMarcacionSalida(ahora);
-                            a.setHoraProgramadaSalida(turno.getHoraSalida());
-                            a.setLatitudSalida(latitud);
-                            a.setLongitudSalida(longitud);
-
-                            // si se salió +30 min tarde de la entrada, marcar tarde
-                            if (ahora.isAfter(turno.getHoraEntrada().plusMinutes(30))) {
-                                a.setEstado(AsistenciaCoordinador.EstadoAsistencia.tarde);
-                            }
-
-                            asistenciaCoordinadorRepository.save(a);
-                            flash.addFlashAttribute("mensajeAsistencia","Salida registrada con éxito.");
-                        }
-                    }
-                }
+                asistencia = procesarEntrada(u, sede, hoy, ahora, turno, asistencia, latitud, longitud, flash);
+            } else if ("salida".equals(accion)) {
+                procesarSalida(u, ld, ahora, turno, asistencia, latitud, longitud, flash);
             }
         } catch (Exception e) {
+            System.out.printf("[ERROR] Excepción inesperada: %s%n", e.getMessage());
             e.printStackTrace();
-            flash.addFlashAttribute("errorAsistencia","Error interno procesando la asistencia.");
+            flash.addFlashAttribute("errorAsistencia", "Error interno procesando la asistencia.");
         }
 
         return "redirect:/coordinador/home";
     }
+
+    private AsistenciaCoordinador procesarEntrada(Usuario u, Sede sede, Date hoy, LocalDateTime ahora,
+                                                  CoordinadorHorario turno, AsistenciaCoordinador asistencia,
+                                                  BigDecimal latitud, BigDecimal longitud, RedirectAttributes flash) {
+        if (asistencia != null && asistencia.getHoraMarcacionEntrada() != null) {
+            System.out.println("[ENTRADA] Ya existe entrada registrada");
+            flash.addFlashAttribute("errorAsistencia", "Ya registraste entrada.");
+            return asistencia;
+        }
+
+        LocalTime inicioVentana = turno.getHoraEntrada().minusMinutes(50);
+        LocalTime finVentana = turno.getHoraEntrada().plusMinutes(30);
+        LocalTime horaActual = ahora.toLocalTime();
+
+        System.out.printf("[VENTANA] Entrada permitida entre %s y %s | Hora actual: %s%n",
+                inicioVentana, finVentana, horaActual);
+
+        if (horaActual.isBefore(inicioVentana)) {
+            System.out.println("[ENTRADA] Intento demasiado temprano");
+            flash.addFlashAttribute("errorAsistencia", "Aún no puedes registrar entrada.");
+            return asistencia;
+        }
+
+        if (horaActual.isAfter(finVentana)) {
+            System.out.println("[ENTRADA] Intento demasiado tarde");
+            flash.addFlashAttribute("errorAsistencia", "Ventana de entrada cerrada.");
+            return asistencia;
+        }
+
+        if (asistencia == null) {
+            asistencia = new AsistenciaCoordinador();
+            asistencia.setUsuario(u);
+            asistencia.setSede(sede);
+            asistencia.setFecha(hoy);
+            asistencia.setCoordinadorHorario(turno);
+            System.out.println("[ENTRADA] Nueva asistencia creada");
+        }
+
+        asistencia.setHoraMarcacionEntrada(horaActual);
+        asistencia.setHoraProgramadaEntrada(turno.getHoraEntrada());
+        asistencia.setHoraProgramadaSalida(turno.getHoraSalida());
+        asistencia.setLatitud(latitud);
+        asistencia.setLongitud(longitud);
+
+        if (horaActual.isAfter(turno.getHoraEntrada())) {
+            asistencia.setEstado(AsistenciaCoordinador.EstadoAsistencia.tarde);
+            System.out.println("[ENTRADA] Registrada como tarde");
+        } else {
+            asistencia.setEstado(AsistenciaCoordinador.EstadoAsistencia.presente);
+            System.out.println("[ENTRADA] Registrada como presente");
+        }
+
+        System.out.println("[ENTRADA] Detalles antes de guardar:");
+        System.out.printf(" - ID Horario: %d%n", turno.getIdCoordinadorHorario());
+        System.out.printf(" - Hora programada: %s%n", turno.getHoraEntrada());
+        System.out.printf(" - Estado: %s%n", asistencia.getEstado());
+
+        AsistenciaCoordinador saved = asistenciaCoordinadorRepository.save(asistencia);
+        System.out.println("[ENTRADA] Guardada exitosamente. ID: " + saved.getIdasistencia());
+        flash.addFlashAttribute("mensajeAsistencia", "Entrada registrada con éxito.");
+
+        return saved;
+    }
+
+
+    private void procesarSalida(Usuario u, LocalDate ld, LocalDateTime ahora,
+                                CoordinadorHorario turno, AsistenciaCoordinador asistencia,
+                                BigDecimal latitud, BigDecimal longitud, RedirectAttributes flash) {
+        if (asistencia == null || asistencia.getHoraMarcacionEntrada() == null) {
+            System.out.println("[SALIDA] No hay entrada previa registrada");
+            flash.addFlashAttribute("errorAsistencia", "No hay entrada previa para hoy.");
+            return;
+        }
+
+        if (asistencia.getHoraMarcacionSalida() != null) {
+            System.out.println("[SALIDA] Ya existe salida registrada");
+            flash.addFlashAttribute("errorAsistencia", "Ya registraste salida.");
+            return;
+        }
+
+        LocalDateTime finTurno = LocalDateTime.of(ld, turno.getHoraSalida());
+        System.out.printf("[SALIDA] Hora programada: %s | Hora actual: %s%n", finTurno, ahora);
+
+        if (ahora.isAfter(finTurno.plusHours(24))) {
+            System.out.println("[SALIDA] Fuera de ventana permitida (24h después)");
+            flash.addFlashAttribute("errorAsistencia", "Ventana de salida expirada.");
+            return;
+        }
+
+        asistencia.setHoraMarcacionSalida(ahora.toLocalTime());
+        asistencia.setHoraProgramadaSalida(turno.getHoraSalida());
+        asistencia.setLatitudSalida(latitud);
+        asistencia.setLongitudSalida(longitud);
+
+        AsistenciaCoordinador saved = asistenciaCoordinadorRepository.save(asistencia);
+        System.out.println("[SALIDA] Guardada exitosamente. ID: " + saved.getIdasistencia());
+        flash.addFlashAttribute("mensajeAsistencia", "Salida registrada con éxito.");
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 // tu método calcularDistancia(...) permanece igual

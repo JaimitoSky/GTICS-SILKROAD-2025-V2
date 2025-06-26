@@ -21,13 +21,9 @@ public interface CoordinadorHorarioRepository
     // Listado de todos los turnos activos para un CoordinadorSede
     List<CoordinadorHorario> findByCoordinadorSedeAndActivoTrue(CoordinadorSede cs);
 
-    // Turno específico (día de la semana) activo
-    Optional<CoordinadorHorario> findByCoordinadorSedeAndDiaSemanaAndActivoTrue(
-            CoordinadorSede cs,
-            HorarioAtencion.DiaSemana diaSemana
-    );
 
     List<CoordinadorHorario> findAllByCoordinadorSede(CoordinadorSede cs);
+    Optional<CoordinadorHorario> findByCoordinadorSede_IdAndDiaSemanaAndActivoTrue(Integer idCoordinadorSede, HorarioAtencion.DiaSemana diaSemana);
 
 }
 

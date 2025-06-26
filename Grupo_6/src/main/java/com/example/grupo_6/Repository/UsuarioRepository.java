@@ -108,6 +108,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Query("SELECT u FROM Usuario u WHERE u.rol.nombre = 'COORDINADOR' AND u.estado = 'activo'")
     List<Usuario> obtenerCoordinadoresActivos();
 
+    List<Usuario> findByRol_Nombre(String nombre);
 
 
 }

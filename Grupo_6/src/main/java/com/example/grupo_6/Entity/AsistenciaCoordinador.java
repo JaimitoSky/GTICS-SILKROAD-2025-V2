@@ -39,40 +39,34 @@ public class AsistenciaCoordinador {
     @NotNull(message = "La fecha es obligatoria")
     private Date fecha;
 
-    /** Hora real en que marcó entrada **/
-    @Column(name = "hora_marcacion_entrada", nullable = false)
-    @NotNull(message = "La hora de marcación de entrada es obligatoria")
+    @Column(name = "hora_marcacion_entrada")
     private LocalTime horaMarcacionEntrada;
 
-    /** Hora real en que marcó salida **/
     @Column(name = "hora_marcacion_salida")
     private LocalTime horaMarcacionSalida;
 
-    /** Hora programada de entrada según el turno **/
     @Column(name = "hora_programada_entrada")
     private LocalTime horaProgramadaEntrada;
 
-    /** Hora programada de salida según el turno **/
     @Column(name = "hora_programada_salida")
     private LocalTime horaProgramadaSalida;
 
-    @Column(precision = 10, scale = 8)
+    @Column(precision = 18, scale = 8)
     @Digits(integer = 10, fraction = 8, message = "Latitud no válida")
     private BigDecimal latitud;
 
-    @Column(precision = 11, scale = 8)
+    @Column(precision = 19, scale = 8)
     @Digits(integer = 11, fraction = 8, message = "Longitud no válida")
     private BigDecimal longitud;
 
-    @Column(name = "latitud_salida", precision = 10, scale = 8)
+    @Column(name = "latitud_salida", precision = 18, scale = 8)
     @Digits(integer = 10, fraction = 8, message = "Latitud de salida no válida")
     private BigDecimal latitudSalida;
 
-    @Column(name = "longitud_salida", precision = 11, scale = 8)
+    @Column(name = "longitud_salida", precision = 19, scale = 8)
     @Digits(integer = 11, fraction = 8, message = "Longitud de salida no válida")
     private BigDecimal longitudSalida;
 
-    /** Estado de la marcación de entrada/salida **/
     public enum EstadoAsistencia {
         presente,
         tarde,
@@ -83,4 +77,9 @@ public class AsistenciaCoordinador {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('presente','tarde','falta','no_trabaja')")
     private EstadoAsistencia estado = EstadoAsistencia.no_trabaja;
+
+    // Getters y Setters ...
+
+
 }
+
