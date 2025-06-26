@@ -78,21 +78,29 @@ public class ChatbotController {
             ));
         }
         if ("OpcionesBot".equals(intent)) {
-            String respuesta = """
-🤖 *¡Hola!* Aquí tienes lo que puedo hacer por ti:
+            Map<String, Object> mensaje1 = Map.of(
+                    "text", Map.of("text", List.of("🤖 ¡Hola! Aquí tienes lo que puedo hacer por ti:"))
+            );
 
-1️⃣ *Ver los servicios deportivos disponibles*  
-2️⃣ *Consultar tus reservas* (hoy, mañana o todas)  
-3️⃣ *Ver canchas disponibles* por sede y fecha  
+            Map<String, Object> mensaje2 = Map.of(
+                    "text", Map.of("text", List.of(
+                            "1️⃣ Ver los servicios deportivos disponibles\n" +
+                                    "2️⃣ Consultar tus reservas (hoy, mañana o todas)\n" +
+                                    "3️⃣ Ver canchas disponibles por sede y fecha"))
+            );
 
-💬 *Ejemplos que puedes decirme:*  
-• ¿Qué servicios hay?  
-• ¿Cuáles son mis reservas?  
-• ¿Qué canchas hay libres mañana en Magdalena?
-""";
+            Map<String, Object> mensaje3 = Map.of(
+                    "text", Map.of("text", List.of(
+                            "💬 Ejemplos que puedes decirme:\n" +
+                                    "• ¿Qué servicios hay?\n" +
+                                    "• ¿Cuáles son mis reservas?\n" +
+                                    "• ¿Qué canchas hay libres mañana en Magdalena?"))
+            );
 
-            return ResponseEntity.ok(Map.of("fulfillmentText", respuesta));
+            return ResponseEntity.ok(Map.of("fulfillmentMessages", List.of(mensaje1, mensaje2, mensaje3)));
         }
+
+
 
 
 
