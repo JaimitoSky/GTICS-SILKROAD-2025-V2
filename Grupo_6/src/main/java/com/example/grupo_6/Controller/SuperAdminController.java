@@ -1,4 +1,5 @@
 package com.example.grupo_6.Controller;
+import com.example.grupo_6.Dto.CoordinadorResumenDTO;
 import com.example.grupo_6.Entity.HorarioAtencion.DiaSemana;
 
 import com.example.grupo_6.Dto.ServicioPorSedeDTO;
@@ -34,6 +35,7 @@ import java.time.*;
 import java.text.Normalizer;
 
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
@@ -58,7 +60,8 @@ public class SuperAdminController {
     private ServicioRepository servicioRepository;
     //@Autowired
     //private FileUploadService fileUploadService;
-
+    @Autowired
+    private AsistenciaCoordinadorRepository asistenciaCoordinadorRepository;
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
     @Autowired
@@ -404,6 +407,112 @@ public class SuperAdminController {
         return "redirect:/superadmin/usuarios";
     }
 
+    @GetMapping("/superadmin/asistencias")
+    public String listarAsistencias(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "coordinador") String campo,
+                                    @RequestParam(required = false) String filtro,
+                                    @RequestParam(required = false) String mes,
+                                    Model model) {
+
+        System.out.printf("[DEBUG] Página solicitada: %d - Campo: %s - Filtro: %s - Mes: %s%n", page, campo, filtro, mes);
+
+        // Sanear entradas antes de usarlas
+        if (filtro != null && filtro.isBlank()) filtro = null;
+        if (mes != null && mes.isBlank()) mes = null;
+
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<AsistenciaCoordinador> asistencias;
+
+        boolean hayFiltro = filtro != null;
+        boolean hayMes = mes != null;
+
+        if (!hayFiltro && !hayMes) {
+            System.out.println("[DEBUG] No se aplicaron filtros. Listando todos.");
+            asistencias = asistenciaCoordinadorRepository.findAll(pageable);
+        } else {
+            asistencias = switch (campo) {
+                case "sede" -> {
+                    System.out.println("[DEBUG] Filtro por sede");
+                    yield asistenciaCoordinadorRepository.buscarPorSedeYMes(filtro != null ? filtro : "", mes, pageable);
+                }
+                case "estado" -> {
+                    System.out.println("[DEBUG] Filtro por estado");
+                    if (filtro == null) {
+                        System.out.println("[ERROR] Estado nulo");
+                        yield Page.empty(pageable);
+                    }
+                    try {
+                        var estado = AsistenciaCoordinador.EstadoAsistencia.valueOf(filtro.toLowerCase());
+                        yield asistenciaCoordinadorRepository.buscarPorEstadoYMes(estado, mes, pageable);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("[ERROR] Estado inválido: " + filtro);
+                        yield Page.empty(pageable);
+                    }
+                }
+                case "dni" -> {
+                    System.out.println("[DEBUG] Filtro por DNI");
+                    yield asistenciaCoordinadorRepository.buscarPorDniYMes(filtro != null ? filtro : "", mes, pageable);
+                }
+                default -> {
+                    System.out.println("[DEBUG] Filtro por nombre de coordinador");
+                    yield asistenciaCoordinadorRepository.buscarPorNombreYMes(filtro != null ? filtro : "", mes, pageable);
+                }
+            };
+
+        }
+
+        int ultimaPagina = Math.max(0, asistencias.getTotalPages() - 1);
+        System.out.printf("[DEBUG] Total páginas: %d - Última página válida: %d%n", asistencias.getTotalPages(), ultimaPagina);
+
+        if (page > ultimaPagina) {
+            System.out.println("[DEBUG] Página fuera de rango. Redireccionando...");
+            return "redirect:/superadmin/asistencias?page=" + ultimaPagina +
+                    "&campo=" + campo +
+                    "&filtro=" + (filtro != null ? filtro : "") +
+                    (mes != null ? "&mes=" + mes : "");
+        }
+
+        model.addAttribute("asistencias", asistencias.getContent());
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", asistencias.getTotalPages());
+        model.addAttribute("campo", campo);
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("mes", mes);
+        return "superadmin/superadmin_asistencias";
+    }
+
+
+
+
+    @PostMapping("/superadmin/asistencias/estado")
+    public String actualizarEstado(@RequestParam("idasistencia") Integer idasistencia,
+                                   @RequestParam("estado") String estadoNuevo,
+                                   RedirectAttributes attr) {
+        Optional<AsistenciaCoordinador> opt = asistenciaCoordinadorRepository.findById(idasistencia);
+        if (opt.isPresent()) {
+            try {
+                AsistenciaCoordinador ac = opt.get();
+                ac.setEstado(AsistenciaCoordinador.EstadoAsistencia.valueOf(estadoNuevo));
+                asistenciaCoordinadorRepository.save(ac);
+                attr.addFlashAttribute("msg", "Estado actualizado correctamente");
+            } catch (Exception e) {
+                attr.addFlashAttribute("error", "Estado inválido");
+            }
+        } else {
+            attr.addFlashAttribute("error", "Asistencia no encontrada");
+        }
+        return "redirect:/superadmin/asistencias";
+    }
+
+    @GetMapping("/superadmin/asistencias/{id}")
+    public String verDetalleAsistencia(@PathVariable("id") Integer id, Model model) {
+        Optional<AsistenciaCoordinador> opt = asistenciaCoordinadorRepository.findById(id);
+        if (opt.isPresent()) {
+            model.addAttribute("asistencia", opt.get());
+            return "superadmin/detalle_asistencia";
+        }
+        return "redirect:/superadmin/asistencias";
+    }
 
 
     @GetMapping("/superadmin/sedes")
@@ -413,6 +522,7 @@ public class SuperAdminController {
             @RequestParam(defaultValue = "") String filtroServicio,
             @RequestParam(defaultValue = "0") int page
     ) {
+        page = Math.max(0, page);
         Pageable pageable = PageRequest.of(page, 10);
         Page<Sede> sedesFiltradas = sedeRepository.buscarPorNombreYServicio(filtroNombre, filtroServicio, pageable);
 
@@ -467,11 +577,19 @@ public class SuperAdminController {
     }
 
 
-    public String normalizarDia(String input) {
-        return Normalizer.normalize(input, Normalizer.Form.NFD)
-                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "") // elimina tildes
-                .toUpperCase(Locale.ROOT); // asegura mayúsculas en inglés
+    @GetMapping("/superadmin/coordinadores")
+    public String vistaDashboardCoordinadores(@RequestParam(required = false) String mes, Model model) {
+        if (mes == null || mes.isBlank()) {
+            mes = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        }
+
+        List<CoordinadorResumenDTO> resumenes = asistenciaCoordinadorRepository.obtenerResumenCoordinadoresPorMes(mes);
+
+        model.addAttribute("resumenes", resumenes);
+        model.addAttribute("mes", mes);
+        return "superadmin/superadmin_coordinadores";
     }
+
 
 
 

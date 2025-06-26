@@ -242,9 +242,32 @@
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
 		const toggle = document.querySelector(".js-sidebar-toggle");
-		toggle.addEventListener("click", function (e) {
-			e.preventDefault();
-			document.body.classList.toggle("sidebar-collapsed");
+		const sidebar = document.getElementById('sidebar');
+
+		if (toggle) {
+			toggle.addEventListener("click", function (e) {
+				e.preventDefault();
+				document.body.classList.toggle("sidebar-collapsed");
+			});
+		}
+
+		// Close sidebar when clicking outside on mobile
+		document.addEventListener('click', function(event) {
+			if (window.innerWidth <= 991.98) {
+				const isClickInsideSidebar = sidebar.contains(event.target);
+				const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+				if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+					document.body.classList.add("sidebar-collapsed");
+				}
+			}
+		});
+
+		// Ajustar al redimensionar
+		window.addEventListener('resize', function() {
+			if (window.innerWidth > 991.98) {
+				document.body.classList.remove("sidebar-collapsed");
+			}
 		});
 	});
 </script>

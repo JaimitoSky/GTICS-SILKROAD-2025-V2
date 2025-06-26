@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio - Superadmin</title>
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Estilos internos -->
+    <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
+
+    <!-- Main -->
+    <div class="main">
+        <div th:replace="fragments/navbar-superadmin :: navbar"></div>
+
+
+
+
+
+
+
+        <main class="content pt-5">
+            <div class="container">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Detalle de Asistencia - Código #[[${asistencia.idasistencia}]]</h5>
+                        <a th:href="@{/superadmin/asistencias}" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label><strong>Coordinador:</strong></label>
+                                <p th:text="${asistencia.usuario?.nombres + ' ' + asistencia.usuario?.apellidos} ?: 'No definido'"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <label><strong>Sede:</strong></label>
+                                <p th:text="${asistencia.sede?.nombre} ?: 'No definida'"></p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label><strong>Fecha:</strong></label>
+                                <p th:text="${asistencia.fecha} ?: 'Sin fecha'"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <label><strong>Estado:</strong></label>
+                                <p class="text-uppercase" th:text="${asistencia.estado} ?: 'No registrado'"></p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label><strong>Hora Programada de Entrada:</strong></label>
+                                <p th:text="${asistencia.horaProgramadaEntrada} ?: 'No asignada'"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <label><strong>Hora Programada de Salida:</strong></label>
+                                <p th:text="${asistencia.horaProgramadaSalida} ?: 'No asignada'"></p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label><strong>Hora Marcada de Entrada:</strong></label>
+                                <p th:text="${asistencia.horaMarcacionEntrada} ?: 'No registrada'"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <label><strong>Hora Marcada de Salida:</strong></label>
+                                <p th:text="${asistencia.horaMarcacionSalida} ?: 'No registrada'"></p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label><strong>Ubicación de Entrada y Salida:</strong></label>
+                                <div id="mapaAsistencia" style="height: 400px; border: 1px solid #ccc;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+
+
+
+
+
+
+
+
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Leaflet CSS & JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const latEntrada  = [[${asistencia.latitud}]];
+    const lonEntrada  = [[${asistencia.longitud}]];
+    const latSalida   = [[${asistencia.latitudSalida}]];
+    const lonSalida   = [[${asistencia.longitudSalida}]];
+
+    const mapa = L.map("mapaAsistencia").setView([latEntrada || -12.06, lonEntrada || -77.05], 16);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(mapa);
+
+    if (latEntrada && lonEntrada) {
+        L.marker([latEntrada, lonEntrada], {
+            icon: L.icon({
+                iconUrl: "https://cdn-icons-png.flaticon.com/512/535/535137.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+            })
+        }).addTo(mapa).bindPopup("Marcación de Entrada").openPopup();
+    }
+
+    if (latSalida && lonSalida) {
+        L.marker([latSalida, lonSalida], {
+            icon: L.icon({
+                iconUrl: "https://cdn-icons-png.flaticon.com/512/535/535130.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+            })
+        }).addTo(mapa).bindPopup("Marcación de Salida");
+    }
+    /*]]>*/
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggle) {
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 991.98) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
+            }
+        });
+
+        // Ajustar al redimensionar
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed");
+            }
+        });
+    });
+</script>
+
+
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+
+</body>
+</html>

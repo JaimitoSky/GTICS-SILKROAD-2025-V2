@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio - Superadmin</title>
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Estilos internos -->
+    <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
+
+    <!-- Main -->
+    <div class="main">
+        <div th:replace="fragments/navbar-superadmin :: navbar"></div>
+
+
+
+
+
+
+
+        <main class="content pt-5">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card flex-fill">
+                        <form th:action="@{/superadmin/asistencias}" method="get" class="row g-2 mb-3 align-items-center justify-content-end">
+                            <!-- Campo de filtro -->
+                            <div class="col-12 col-sm-auto">
+                                <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
+                                    <option value="coordinador" th:selected="${campo == 'coordinador'}">Coordinador</option>
+                                    <option value="sede" th:selected="${campo == 'sede'}">Sede</option>
+                                    <option value="estado" th:selected="${campo == 'estado'}">Estado</option>
+                                    <option value="dni" th:selected="${campo == 'dni'}">DNI</option>
+                                </select>
+                            </div>
+
+                            <!-- Input dinámico -->
+                            <div class="col-12 col-sm" id="filtroContainer">
+                                <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
+                            </div>
+
+                            <!-- Filtro por mes -->
+                            <div class="col-12 col-sm-auto">
+                                <input type="month" name="mes" class="form-control"
+                                       th:value="${mes != null ? mes : #temporals.format(#temporals.createNow(), 'yyyy-MM')}"
+                                />
+                            </div>
+
+
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-search"></i> Buscar
+                                </button>
+                            </div>
+
+                            <div class="col-auto" th:if="${filtro != null or mes != null}">
+                                <a th:href="@{/superadmin/asistencias}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Limpiar
+                                </a>
+                            </div>
+                        </form>
+
+
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="card-title mb-0">Lista de Asistencias</h5>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>DNI</th>
+                                    <th>Coordinador</th>
+                                    <th>Sede</th>
+                                    <th>Hora Prog. Entrada</th>
+                                    <th>Hora Marcada</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="asistencia : ${asistencias}">
+                                    <td th:text="${asistencia.usuario?.dni ?: 'Sin DNI'}">12345678</td>
+                                    <td th:text="${asistencia.usuario?.nombres + ' ' + asistencia.usuario?.apellidos}">Juan Pérez</td>
+                                    <td th:text="${asistencia.sede?.nombre != null ? asistencia.sede.nombre : 'No definido'}">Sede Central</td>
+                                    <td th:text="${asistencia.horaProgramadaEntrada != null ? asistencia.horaProgramadaEntrada : 'No definido'}">08:00</td>
+                                    <td th:text="${asistencia.horaMarcacionEntrada != null ? asistencia.horaMarcacionEntrada : 'No registrada'}">08:05</td>
+                                    <td>
+                                        <form th:action="@{/superadmin/asistencias/estado}" method="post">
+                                            <input type="hidden" name="idasistencia" th:value="${asistencia.idasistencia}" />
+                                            <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                                                <option value="presente" th:selected="${asistencia.estado.toString() == 'presente'}">Presente</option>
+                                                <option value="tarde" th:selected="${asistencia.estado.toString() == 'tarde'}">Tarde</option>
+                                                <option value="falta" th:selected="${asistencia.estado.toString() == 'falta'}">Falta</option>
+                                                <option value="no_trabaja" th:selected="${asistencia.estado.toString() == 'no_trabaja'}">No asignado</option>
+                                            </select>
+                                        </form>
+
+                                    </td>
+                                    <td class="text-center">
+                                        <a th:href="@{'/superadmin/asistencias/' + ${asistencia.idasistencia}}" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye-fill"></i> Ver detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav aria-label="Paginación de asistencias">
+                            <ul class="pagination justify-content-center flex-wrap">
+                                <li class="page-item" th:if="${paginaActual > 0}">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/asistencias(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+                                </li>
+                                <li class="page-item disabled" th:if="${paginaActual == 0}">
+                                    <span class="page-link">Anterior</span>
+                                </li>
+
+
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
+                                    th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/asistencias(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/asistencias(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script>
+            function actualizarInputFiltro() {
+                const campo = document.getElementById("campoSelect").value;
+                const contenedor = document.getElementById("filtroContainer");
+                let nuevoInput = '';
+
+                if (campo === 'estado') {
+                    nuevoInput = `
+        <select class="form-select" name="filtro">
+            <option value="">Seleccionar estado</option>
+            <option value="presente">Presente</option>
+            <option value="tarde">Tarde</option>
+            <option value="falta">Falta</option>
+            <option value="no_trabaja">No asignado</option>
+        </select>`;
+                } else {
+                    nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
+                }
+
+                contenedor.innerHTML = nuevoInput;
+            }
+
+            document.addEventListener("DOMContentLoaded", actualizarInputFiltro);
+        </script>
+
+
+
+
+
+
+
+
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggle) {
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 991.98) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
+            }
+        });
+
+        // Ajustar al redimensionar
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed");
+            }
+        });
+    });
+</script>
+
+
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+
+</body>
+</html>
