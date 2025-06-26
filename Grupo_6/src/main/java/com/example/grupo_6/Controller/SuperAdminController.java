@@ -1423,6 +1423,27 @@ public class SuperAdminController {
         return "redirect:/superadmin/pagos?page=" + page + "&idPagoDestacado=" + idPago;
     }
 
+    @GetMapping("superadmin/pago/{id}/comprobante")
+    @ResponseBody
+    public ResponseEntity<byte[]> mostrarComprobante(@PathVariable Integer id) {
+        Pago pago = pagoRepository.findById(id).orElse(null);
+        if (pago == null || pago.getComprobante() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Detecta tipo (si es que guardas el tipo MIME en otro campo, úsalo ahí)
+        String tipoMime = "image/jpeg"; // por defecto
+
+        // Opcional: puedes usar algún campo tipo `pago.getMimeType()` si lo tienes
+        // o intentar deducirlo con Apache Tika si deseas precisión
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, tipoMime)
+                .body(pago.getComprobante());
+    }
+
+
+
     @GetMapping("/superadmin/reservas/redirigir")
     public String redirigirAReserva(@RequestParam("idReserva") Integer idReserva) {
         int size = 10;
@@ -1457,14 +1478,7 @@ public class SuperAdminController {
 
 
 
-    @GetMapping("/uploads/{idpago}")
-    public ResponseEntity<byte[]> mostrarComprobante(@PathVariable("idpago") Integer idpago) {
-        Optional<Pago> optPago = pagoRepository.findById(idpago);
 
-
-
-        return ResponseEntity.notFound().build();
-    }
 
 
 
