@@ -41,8 +41,7 @@ public class Sede {
     @OneToMany(mappedBy = "sede")
     private List<SedeServicio> sedeServicios;
 
-    @Lob
     @Column(name = "imagen")
-    private byte[] imagen;
+    private String imagen;
 
 }

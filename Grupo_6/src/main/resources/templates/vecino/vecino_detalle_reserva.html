@@ -73,12 +73,16 @@
                     </p>
                     <!-- Mostrar comprobante si existe -->
                     <p><strong>Comprobante de pago:</strong></p>
-
-                    <img th:if="${reserva.pago?.comprobante != null}"
-                         th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
-                         alt="Comprobante de pago"
-                         class="img-thumbnail border"
-                         style="max-width: 500px; height: auto;" />
+                    <div th:if="${reserva.pago.comprobante != null and !reserva.pago.comprobante.isEmpty()}">
+                        <img th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
+                             alt="Comprobante de pago"
+                             class="img-thumbnail border"
+                             style="max-width: 500px; height: auto;"
+                             onerror="this.onerror=null;this.src='/img/no-image.png';this.alt='Comprobante no disponible';"/>
+                    </div>
+                    <div th:unless="${reserva.pago.comprobante != null and !reserva.pago.comprobante.isEmpty()}">
+                        <p>No hay comprobante disponible</p>
+                    </div>
 
                     <!-- Mostrar mensaje de tiempo expirado -->
                     <div th:if="${reserva.pago?.comprobante == null and ahora.isAfter(reserva.fechaLimitePago)}">

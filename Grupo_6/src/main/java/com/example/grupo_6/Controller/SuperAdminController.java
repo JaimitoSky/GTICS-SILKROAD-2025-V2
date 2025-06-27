@@ -27,9 +27,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLConnection;
 import java.time.*;
 
 import java.text.Normalizer;
@@ -58,8 +64,8 @@ public class SuperAdminController {
 
     @Autowired
     private ServicioRepository servicioRepository;
-    //@Autowired
-    //private FileUploadService fileUploadService;
+    @Autowired
+    private FileUploadService fileUploadService;
     @Autowired
     private AsistenciaCoordinadorRepository asistenciaCoordinadorRepository;
     @Autowired
@@ -200,21 +206,6 @@ public class SuperAdminController {
         return "superadmin/superadmin_servicios_update";
     }
 
-    @PostMapping("/superadmin/servicios/actualizar")
-    public String actualizarImagenServicio(@ModelAttribute Servicio servicio,
-                                           @RequestParam("imagen") MultipartFile imagen) throws IOException {
-
-        Servicio servicioExistente = servicioRepository.findById(servicio.getIdservicio())
-                .orElseThrow();
-
-        // Solo actualiza imagen si se subió una nueva
-        if (!imagen.isEmpty()) {
-            servicioExistente.setImagenComplejo(imagen.getBytes());
-        }
-
-        servicioRepository.save(servicioExistente);
-        return "redirect:/superadmin/servicios";
-    }
 
 
 
@@ -1425,22 +1416,33 @@ public class SuperAdminController {
 
     @GetMapping("superadmin/pago/{id}/comprobante")
     @ResponseBody
-    public ResponseEntity<byte[]> mostrarComprobante(@PathVariable Integer id) {
-        Pago pago = pagoRepository.findById(id).orElse(null);
-        if (pago == null || pago.getComprobante() == null) {
+    public ResponseEntity<byte[]> verComprobante(@PathVariable Integer id) {
+        Optional<Pago> opt = pagoRepository.findById(id);
+
+        if (opt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        // Detecta tipo (si es que guardas el tipo MIME en otro campo, úsalo ahí)
-        String tipoMime = "image/jpeg"; // por defecto
+        Pago pago = opt.get();
+        String keyS3 = pago.getComprobante();
 
-        // Opcional: puedes usar algún campo tipo `pago.getMimeType()` si lo tienes
-        // o intentar deducirlo con Apache Tika si deseas precisión
+        if (keyS3 == null || keyS3.isBlank()) {
+            return ResponseEntity.noContent().build();
+        }
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, tipoMime)
-                .body(pago.getComprobante());
+        try {
+            byte[] archivo = fileUploadService.descargarArchivo(keyS3);
+            String mimeType = fileUploadService.obtenerMimeDesdeKey(keyS3);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mimeType))
+                    .body(archivo);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
+
 
 
 

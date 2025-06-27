@@ -36,23 +36,5 @@ public class Servicio {
     @Column(name = "horario_fin")
     private LocalTime horarioFin;
 
-    @Lob
-    @Column(name = "imagen_complejo", columnDefinition = "LONGBLOB")
-    private byte[] imagenComplejo;
-
-    public byte[] getImagenComplejo() {
-        return imagenComplejo;
-    }
-
-    public void setImagenComplejo(byte[] imagenComplejo) {
-        this.imagenComplejo = imagenComplejo;
-    }
-
-    @Transient
-    public String getImagenBase64() {
-        return (imagenComplejo != null)
-                ? Base64.getEncoder().encodeToString(imagenComplejo)
-                : "";
-    }
 
 }

@@ -5,6 +5,7 @@ import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.UsuarioRepository;
 import com.example.grupo_6.Repository.ServicioRepository;
+import com.example.grupo_6.Service.FileUploadService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -65,7 +66,7 @@ public class VecinoController {
     @Autowired
     private EstadoRepository estadoRepository;
     @Autowired
-    private ServicioRepository servicioRepository;
+    private FileUploadService fileUploadService;
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
 
@@ -202,39 +203,7 @@ public class VecinoController {
     }
 
 
-    @GetMapping("/imagen/{id}")
-    @ResponseBody
-    public ResponseEntity<byte[]> mostrarImagen(@PathVariable("id") Integer id) {
-        Optional<Servicio> servicioOpt = servicioRepository.findById(id);
 
-        if (servicioOpt.isPresent()) {
-            Servicio servicio = servicioOpt.get();
-            System.out.println("Servicio encontrado: " + servicio.getNombre());
-
-            byte[] imagen = servicio.getImagenComplejo();
-            if (imagen != null && imagen.length > 0) {
-                System.out.println("Imagen encontrada, tamaño: " + imagen.length);
-
-                MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
-                try {
-                    String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(imagen));
-                    if (mimeType != null) {
-                        mediaType = MediaType.parseMediaType(mimeType);
-                    }
-                } catch (IOException ignored) {}
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(mediaType);
-                return new ResponseEntity<>(imagen, headers, HttpStatus.OK);
-            } else {
-                System.out.println("Servicio con ID " + id + " no tiene imagen.");
-            }
-        } else {
-            System.out.println("Servicio no encontrado con ID: " + id);
-        }
-
-        return ResponseEntity.notFound().build();
-    }
 
     @GetMapping("/complejo/detalle/{id}")
     public String descripcionComplejo(@PathVariable("id") Integer id, Model model) {
@@ -487,20 +456,24 @@ public class VecinoController {
                 return "redirect:/vecino/reservas";
             }
 
-            // Hasta aquí, el archivo es válido
-            pago.setComprobante(file.getBytes());
+            // ✅ Subida a S3 y obtención de la key
+            String keyS3 = fileUploadService.subirArchivo(file, "comprobantes"); // solo retorna la key, no la URL completa
+
+            // ✅ Guardar key en DB
+            pago.setComprobante(keyS3);
             pago.setFechaPago(LocalDateTime.now());
             pagoRepository.save(pago);
 
             redirectAttributes.addFlashAttribute("mensajeExito", "Comprobante enviado con éxito.");
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar el archivo.");
             e.printStackTrace();
         }
 
         return "redirect:/vecino/reservas";
     }
+
 
     @GetMapping("/api/horarios-disponibles-por-fecha")
     public ResponseEntity<List<Map<String, Object>>> obtenerHorariosDisponibles(
@@ -607,6 +580,14 @@ public class VecinoController {
         }
 
         Reserva reserva = opt.get();
+
+        Pago pago = reserva.getPago();
+        if (pago != null) {
+            System.out.println("[LOG] Pago ID: " + pago.getIdpago());
+            System.out.println("[LOG] Comprobante: " + pago.getComprobante());
+        } else {
+            System.out.println("[LOG] La reserva no tiene pago asociado.");
+        }
         model.addAttribute("reserva", reserva);
         model.addAttribute("rol", "vecino");
 
@@ -618,29 +599,53 @@ public class VecinoController {
     }
 
 
-    @GetMapping("/comprobante/{idPago}")
+    @GetMapping("/comprobante/{id}")
     @ResponseBody
-    public ResponseEntity<byte[]> mostrarComprobante(@PathVariable("idPago") Integer idPago) {
-        Optional<Pago> pagoOpt = pagoRepository.findById(idPago);
+    public ResponseEntity<byte[]> verComprobanteVecino(@PathVariable Integer id) {
+        System.out.println("[LOG] Solicitando comprobante para pago ID: " + id);
 
-        if (pagoOpt.isPresent() && pagoOpt.get().getComprobante() != null) {
-            byte[] comprobante = pagoOpt.get().getComprobante();
+        Optional<Pago> opt = pagoRepository.findById(id);
 
-            MediaType mediaType = MediaType.IMAGE_JPEG;
-            try {
-                String mimeType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(comprobante));
-                if (mimeType != null) {
-                    mediaType = MediaType.parseMediaType(mimeType);
-                }
-            } catch (IOException ignored) {}
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(mediaType);
-            return new ResponseEntity<>(comprobante, headers, HttpStatus.OK);
+        if (opt.isEmpty()) {
+            System.out.println("[LOG] No se encontró pago con ID: " + id);
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        Pago pago = opt.get();
+        String keyS3 = pago.getComprobante();
+
+        System.out.println("[LOG] Key S3 del comprobante: " + keyS3);
+
+        if (keyS3 == null || keyS3.isBlank()) {
+            System.out.println("[LOG] El comprobante está vacío o es nulo");
+            return ResponseEntity.noContent().build();
+        }
+
+        try {
+            byte[] archivo = fileUploadService.descargarArchivo(keyS3);
+            String mimeType = fileUploadService.obtenerMimeDesdeKey(keyS3);
+
+            System.out.println("[LOG] Tamaño del archivo descargado: " + (archivo != null ? archivo.length : 0) + " bytes");
+            System.out.println("[LOG] MimeType detectado: " + mimeType);
+
+            if (archivo == null || archivo.length == 0) {
+                System.out.println("[ERROR] El archivo descargado está vacío");
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mimeType))
+                    .header("Cache-Control", "max-age=3600")
+                    .body(archivo);
+        } catch (RuntimeException ex) {
+            System.out.println("[ERROR] Falló la descarga del comprobante: " + ex.getMessage());
+            ex.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
+
+
 
     // 🔔 Ver detalle y marcar como leída
     @GetMapping("/notificaciones/{id}/leer")

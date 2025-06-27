@@ -1044,11 +1044,20 @@ CREATE TABLE coordinador_horario (
   UNIQUE KEY ux_ch_sede_dia (id_coordinador_sede, dia_semana, hora_entrada, hora_salida)
 );
 
+ALTER TABLE pago
+MODIFY COLUMN comprobante VARCHAR(500);
+
 ALTER TABLE sede
-ADD COLUMN imagen LONGBLOB;
+ADD COLUMN imagen VARCHAR(500);
 
 ALTER TABLE sede_servicio
-ADD COLUMN imagen LONGBLOB;
+ADD COLUMN imagen VARCHAR(500);
+
+ALTER TABLE usuario
+ADD COLUMN imagen VARCHAR(500);
+
+ALTER TABLE servicio
+DROP COLUMN imagen_complejo;
 
 
 SET FOREIGN_KEY_CHECKS=1;

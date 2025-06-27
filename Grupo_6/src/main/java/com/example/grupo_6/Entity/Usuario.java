@@ -87,4 +87,7 @@ public class Usuario implements Serializable {
     }
 
     public void setRol(Rol r) {}
+
+    @Column(name = "imagen")
+    private String imagen;
 }

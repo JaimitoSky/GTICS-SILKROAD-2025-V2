@@ -30,9 +30,8 @@ public class Pago {
     @Column(nullable = false)
     private Metodo metodo; // 'online' o 'banco'
 
-    @Lob
-    @Column(name = "comprobante", columnDefinition = "LONGBLOB")
-    private byte[] comprobante;
+    @Column(name = "comprobante")
+    private String comprobante;
 
     @ManyToOne
     @JoinColumn(name = "idestado", nullable = false)
