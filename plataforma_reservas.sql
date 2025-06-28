@@ -1060,6 +1060,22 @@ ALTER TABLE servicio
 DROP COLUMN imagen_complejo;
 
 
+CREATE TABLE tarjeta_virtual (
+    idtarjeta INT AUTO_INCREMENT PRIMARY KEY,
+    numero_tarjeta VARCHAR(16) NOT NULL,
+    vencimiento DATE NOT NULL,
+    cvv VARCHAR(4) NOT NULL,
+    titular VARCHAR(100),
+    saldo DECIMAL(10, 2) NOT NULL
+);
+
+
+INSERT INTO tarjeta_virtual (numero_tarjeta, vencimiento, cvv, titular, saldo) VALUES
+('1234567812345678', '2025-12-01', '123', 'Ana Ramos', 100.00),
+('9999222233334444', '2026-05-01', '456', 'Juan Pérez', 0.00),
+('1111222233334444', '2025-10-01', '789', 'Carlos Gómez', 45.50);
+
+
 SET FOREIGN_KEY_CHECKS=1;
 
 -- Para limpiar los datos de servicios + reservas  (opcional)

@@ -67,6 +67,9 @@ public class VecinoController {
     private EstadoRepository estadoRepository;
     @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private TarjetaVirtualRepository tarjetaVirtualRepository;
     @Autowired
     private SedeServicioRepository sedeServicioRepository;
 
@@ -266,6 +269,55 @@ public class VecinoController {
 
         return "vecino/vecino_FormularioReservas";
     }
+
+    @GetMapping("/reservas/pago-tarjeta")
+    public String vistaPagoTarjeta(@RequestParam("idreserva") Integer idreserva, Model model, HttpSession session) {
+        Reserva reserva = reservaRepository.findById(idreserva).orElseThrow();
+        model.addAttribute("reserva", reserva);
+        return "vecino/vecino_pagar_tarjeta";
+    }
+
+    @PostMapping("/reservas/procesar-pago-tarjeta")
+    public String procesarPagoTarjeta(@RequestParam String numero,
+                                      @RequestParam String vencimiento,
+                                      @RequestParam String cvv,
+                                      @RequestParam Integer idreserva,
+                                      RedirectAttributes attr) {
+
+        Optional<TarjetaVirtual> opt = tarjetaVirtualRepository.findByNumeroTarjetaAndVencimientoAndCvv(
+                numero, LocalDate.parse(vencimiento + "-01"), cvv);
+
+        if (opt.isEmpty()) {
+            attr.addFlashAttribute("msg", "Tarjeta inválida");
+            return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
+        }
+
+        TarjetaVirtual tarjeta = opt.get();
+        Reserva reserva = reservaRepository.findById(idreserva).orElseThrow();
+        BigDecimal monto = reserva.getPago().getMonto();
+
+        if (tarjeta.getSaldo().compareTo(monto) < 0) {
+            attr.addFlashAttribute("msg", "Saldo insuficiente");
+            return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
+        }
+
+        // Descontar saldo y guardar tarjeta
+        tarjeta.setSaldo(tarjeta.getSaldo().subtract(monto));
+        tarjetaVirtualRepository.save(tarjeta);
+
+        reserva.setEstado(estadoRepository.findByNombre("aprobada").orElseThrow());
+        reserva.getPago().setMetodo(Pago.Metodo.online); // ← Usar enum correctamente
+        pagoRepository.save(reserva.getPago());
+        reservaRepository.save(reserva);
+
+
+        reservaRepository.save(reserva);
+
+        attr.addFlashAttribute("msg", "Pago exitoso con tarjeta. ¡Reserva aprobada!");
+        return "redirect:/vecino/reservas";
+    }
+
+
 
     @PostMapping("/reservas/guardar")
     public String guardarReserva(@ModelAttribute("reserva") Reserva reserva,

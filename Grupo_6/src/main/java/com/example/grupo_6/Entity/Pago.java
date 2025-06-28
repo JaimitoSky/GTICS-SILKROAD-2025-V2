@@ -40,6 +40,7 @@ public class Pago {
     @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
 
+
     public enum Metodo {
         online, banco
     }

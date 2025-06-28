@@ -80,9 +80,19 @@
                              style="max-width: 500px; height: auto;"
                              onerror="this.onerror=null;this.src='/img/no-image.png';this.alt='Comprobante no disponible';"/>
                     </div>
-                    <div th:unless="${reserva.pago.comprobante != null and !reserva.pago.comprobante.isEmpty()}">
-                        <p>No hay comprobante disponible</p>
+
+                    <!-- Opción alternativa: Pago con tarjeta (solo si no hay comprobante, aún está a tiempo y la reserva está pendiente) -->
+                    <div class="form-group mt-4 text-center"
+                         th:if="${reserva.pago?.comprobante == null
+             and ahora.isBefore(reserva.fechaLimitePago)
+             and reserva.estado.nombre == 'pendiente'}">
+                        <p class="fw-bold mb-2">¿Prefieres pagar con tarjeta?</p>
+                        <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}" class="btn btn-success">
+                            Pagar con tarjeta
+                        </a>
                     </div>
+
+
 
                     <!-- Mostrar mensaje de tiempo expirado -->
                     <div th:if="${reserva.pago?.comprobante == null and ahora.isAfter(reserva.fechaLimitePago)}">

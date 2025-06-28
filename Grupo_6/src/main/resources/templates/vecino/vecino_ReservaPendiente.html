@@ -163,6 +163,15 @@
 
                             </div>
 
+                            <!-- Botón adicional para pago por tarjeta -->
+                            <div class="form-group mt-3 text-center">
+                                <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}"
+                                   class="btn btn-outline-success">
+                                    Pagar con Tarjeta Virtual
+                                </a>
+                            </div>
+
+
                             <!-- Aquí va la imagen QR -->
                             <div class="form-group mt-4 text-center">
                                 <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label>
