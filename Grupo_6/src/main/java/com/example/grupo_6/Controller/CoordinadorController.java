@@ -4,6 +4,7 @@ import com.example.grupo_6.Entity.AsistenciaCoordinador.EstadoAsistencia;
 import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
+import com.example.grupo_6.Service.FileUploadService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
@@ -12,10 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -45,7 +49,8 @@ public class CoordinadorController {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private SedeRepository sedeRepository;
-
+    @Autowired
+    private FileUploadService fileUploadService;
     @Autowired
     private NotificacionRepository notificacionRepository;
     @Autowired
@@ -442,20 +447,37 @@ public class CoordinadorController {
 
 
     @GetMapping("/reserva-detalle/{idreserva}")
-    public String detalleReserva(@PathVariable("idreserva") Integer idreserva, Model model) {
-        Optional<Reserva> optReserva = reservaRepository.findById(idreserva);
-        if (optReserva.isEmpty()) return "redirect:/coordinador/reservas-hoy";
+    public String detalleReserva(@PathVariable Integer idreserva, Model model) {
+        // 1) Obtener reserva o 404
+        Reserva reserva = reservaRepository.findById(idreserva)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Reserva reserva = optReserva.get();
+        // 2) Incidencias asociadas
+        List<Incidencia> listaIncidencias =
+                incidenciaRepository.findAllByReserva_Idreserva(idreserva);
 
-        // Manejo con Optional para evitar NullPointer
-        List<Incidencia> listaIncidencias = incidenciaRepository.findAllByReserva_Idreserva(idreserva);
+        // 3) DESCARGAR la imagen desde S3 y construir Data-URI
+        String fotoKey = reserva.getUsuario().getImagen(); // campo "imagen" en tu entidad
+        if (fotoKey != null && !fotoKey.isBlank()) {
+            try {
+                byte[] bytes = fileUploadService.descargarArchivo(fotoKey);
+                String mime = fileUploadService.obtenerMimeDesdeKey(fotoKey);
+                String base64 = Base64.getEncoder().encodeToString(bytes);
+                String fotoDataUrl = "data:" + mime + ";base64," + base64;
+                model.addAttribute("fotoDataUrl", fotoDataUrl);
+            } catch (RuntimeException e) {
+                // Opcional: loguear o dejar fotoDataUrl ausente si falla la descarga
+                System.err.println("No se pudo descargar foto: " + e.getMessage());
+            }
+        }
 
+        // 4) Inyectar resto de atributos
         model.addAttribute("reserva", reserva);
-        model.addAttribute("incidencias", listaIncidencias); // usa el mismo nombre que en el HTML
+        model.addAttribute("incidencias", listaIncidencias);
 
         return "coordinador/coordinador_reservas_detalle";
     }
+
 
 
 
@@ -506,14 +528,28 @@ public class CoordinadorController {
         return "redirect:/coordinador/reservas-hoy";
     }
 
-    @GetMapping("/reservas-hoy")
-    public String verReservasDeSede(@RequestParam(value = "asistenciaRegistrada", required = false) String asistenciaRegistrada,
-                                    @RequestParam(defaultValue = "0") int page,
-                                    Model model, HttpSession session) {
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        if (usuario == null) return "redirect:/login";
+    // CoordinadorController.java
 
-        List<CoordinadorSede> asignaciones = coordinadorSedeRepository.findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
+    @GetMapping("/reservas-hoy")
+    public String verReservasDeSede(
+            @RequestParam(required = false) Integer sedeId,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fecha,                            // null = todas las fechas
+            @RequestParam(defaultValue = "0") int page,
+            Model model,
+            HttpSession session) {
+
+        // 1. Autenticación
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+
+        // 2. Obtener sedes asignadas al coordinador
+        List<CoordinadorSede> asignaciones =
+                coordinadorSedeRepository
+                        .findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
 
         if (asignaciones.isEmpty()) {
             model.addAttribute("mensaje", "No estás asignado a ninguna sede.");
@@ -526,32 +562,35 @@ public class CoordinadorController {
                 .map(CoordinadorSede::getSede)
                 .toList();
 
-        List<Integer> idsSede = sedesAsignadas.stream()
+        // 3. Determinar lista de IDs de sede según filtro (o todas si sedeId == null)
+        List<Integer> idsSede = (sedeId != null)
+                ? List.of(sedeId)
+                : sedesAsignadas.stream()
                 .map(Sede::getIdsede)
                 .toList();
 
+        // 4. Paginación
         Pageable pageable = PageRequest.of(page, 10);
 
-        Page<Reserva> reservasPaginadas = reservaRepository.buscarReservasPorIdsSedePaginado(idsSede, pageable);
+        // 5. Búsqueda de reservas: estado=2 (aprobado), fecha opcional
+        Page<Reserva> reservas = reservaRepository.buscarReservasAprobadas(
+                idsSede,
+                fecha,       // si es null → todas las fechas
+                2,           // ID de estado “aprobado”
+                pageable
+        );
 
-        // Filtrar solo reservas válidas
-        List<Reserva> filtradas = reservasPaginadas.getContent().stream()
-                .filter(r -> r.getUsuario() != null
-                        && r.getSedeServicio() != null
-                        && r.getHorarioDisponible() != null
-                        && r.getEstado() != null)
-                .toList();
-
-        Page<Reserva> reservasFiltradas = new PageImpl<>(filtradas, pageable, filtradas.size());
-
-
-        model.addAttribute("reservas", reservasFiltradas);
+        // 6. Inyectar atributos al modelo para Thymeleaf
+        model.addAttribute("reservas", reservas);
         model.addAttribute("sedesAsignadas", sedesAsignadas);
-        model.addAttribute("rol", "coordinador");
-
+        model.addAttribute("filtroSedeId", sedeId);
+        model.addAttribute("filtroFecha", fecha);
 
         return "coordinador/coordinador_reservas_hoy";
     }
+
+
+
 
 
 

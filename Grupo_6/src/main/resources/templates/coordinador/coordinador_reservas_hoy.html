@@ -225,30 +225,43 @@
                     <i class="bi bi-calendar-event-fill text-primary"></i> Reservas de Sedes Asignadas
                 </h2>
 
-                <div class="card p-4 mb-4 shadow-sm" style="border-radius: 16px;"> <div class="row g-3 align-items-end"> <div class="col-md-5 col-lg-4">
-                    <label for="sedeFiltro" class="form-label">Filtrar por sede</label>
-                    <select id="sedeFiltro" class="form-select">
-                        <option value="todas">Todas las sedes</option>
-                        <option th:each="sede : ${sedesAsignadas}"
-                                th:value="${sede.idsede}"
-                                th:text="${sede.nombre}">
-                        </option>
-                    </select>
-                </div>
-                    <div class="col-md-7 col-lg-8">
-                        <div class="d-flex align-items-center gap-2">
-                            <label class="form-label me-2 mb-0">Filtrar por fecha:</label>
-                            <div class="btn-group btn-filter-group" role="group" aria-label="Filtro de fecha">
-                                <button id="btnHoy" class="btn btn-outline-primary">
-                                    <i class="bi bi-calendar-day me-1"></i> Hoy
-                                </button>
-                                <button id="btnTodas" class="btn btn-outline-secondary">
-                                    <i class="bi bi-calendar-week me-1"></i> Todas
-                                </button>
+                <div class="card p-4 mb-4 shadow-sm" style="border-radius: 16px;">
+                    <div class="row g-3 align-items-end">
+                        <!-- FILTRO DE SEDE -->
+                        <div class="col-md-5 col-lg-4">
+                            <label for="sedeFiltro" class="form-label">Filtrar por sede</label>
+                            <select id="sedeFiltro" class="form-select">
+                                <option th:value="todas"
+                                        th:selected="${filtroSedeId == null}">Todas las sedes</option>
+                                <option th:each="sede : ${sedesAsignadas}"
+                                        th:value="${sede.idsede}"
+                                        th:text="${sede.nombre}"
+                                        th:selected="${sede.idsede == filtroSedeId}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- FILTRO DE FECHA Y BUSCADOR -->
+                        <div class="col-md-7 col-lg-8">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label me-2 mb-0">Filtrar por fecha:</label>
+                                <div class="btn-group btn-filter-group" role="group">
+                                    <button id="btnHoy" class="btn btn-outline-primary">
+                                        <i class="bi bi-calendar-day me-1"></i> Hoy
+                                    </button>
+                                    <button id="btnCalendario" class="btn btn-outline-secondary">
+                                        <i class="bi bi-calendar-date me-1"></i> Calendario
+                                    </button>
+                                    <button id="btnTodas" class="btn btn-outline-secondary">
+                                        <i class="bi bi-calendar-week me-1"></i> Todas
+                                    </button>
+                                </div>
+                                <div class="ms-3">
+                                    <input type="text" id="buscador" class="form-control" placeholder="Buscar..." />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
 
 
@@ -268,23 +281,28 @@
                             <th>Usuario</th>
                             <th>Servicio</th>
                             <th>Horario</th>
-                            <th>Fecha Registro</th>
+                            <th>Fecha de Reserva</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody id="tablaReservas">
                         <tr th:each="reserva : ${reservas.content}"
-                            th:data-sede-id="${reserva.sedeServicio.sede.idsede}"
-                            th:data-fecha="${#temporals.format(reserva.fechaCreacion, 'yyyy-MM-dd')}"
-                            th:data-hora-inicio="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"
-                            th:data-hora-fin="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">
+                            th:attr="data-sede-id=${reserva.sedeServicio.sede.idsede},
+             data-fecha=${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')},
+             data-hora-inicio=${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')},
+             data-hora-fin=${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">
+
                             <td th:text="${reserva.usuario != null ? reserva.usuario.nombres + ' ' + reserva.usuario.apellidos : 'Sin usuario'}"></td>
+
                             <td th:text="${reserva.sedeServicio.servicio.nombre}"></td>
+
                             <td>
                                 <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
                                 <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
                             </td>
-                            <td th:text="${#temporals.format(reserva.fechaCreacion, 'dd/MM/yyyy')}"></td>
+
+                            <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></td>
+
                             <td>
                                 <a th:href="@{'/coordinador/incidencia/' + ${reserva.idreserva}}" class="btn btn-warning btn-sm me-2">
                                     <i class="bi bi-exclamation-triangle-fill"></i> Incidencia
@@ -298,22 +316,60 @@
                     </table>
                 </div>
 
-
                 <div class="d-flex justify-content-center mt-4" th:if="${!reservas.isEmpty()}">
+                    <!-- Paginación -->
                     <nav>
                         <ul class="pagination">
                             <li class="page-item" th:classappend="${reservas.first} ? 'disabled'">
-                                <a class="page-link" th:href="@{|/coordinador/reservas-hoy?page=${reservas.number - 1}|}">Anterior</a>
+                                <a class="page-link"
+                                   th:href="@{/coordinador/reservas-hoy(page=${reservas.number - 1},
+                                              sedeId=${filtroSedeId},
+                                              fecha=${filtroFecha})}">
+                                    Anterior
+                                </a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, reservas.totalPages - 1)}"
                                 th:classappend="${reservas.number == i} ? 'active'">
-                                <a class="page-link" th:href="@{|/coordinador/reservas-hoy?page=${i}|}" th:text="${i + 1}"></a>
+                                <a class="page-link"
+                                   th:href="@{/coordinador/reservas-hoy(page=${i},
+                                              sedeId=${filtroSedeId},
+                                              fecha=${filtroFecha})}"
+                                   th:text="${i + 1}">1</a>
                             </li>
                             <li class="page-item" th:classappend="${reservas.last} ? 'disabled'">
-                                <a class="page-link" th:href="@{|/coordinador/reservas-hoy?page=${reservas.number + 1}|}">Siguiente</a>
+                                <a class="page-link"
+                                   th:href="@{/coordinador/reservas-hoy(page=${reservas.number + 1},
+                                              sedeId=${filtroSedeId},
+                                              fecha=${filtroFecha})}">
+                                    Siguiente
+                                </a>
                             </li>
                         </ul>
                     </nav>
+                </div>
+            </div>
+            <!-- Modal Calendario -->
+            <div class="modal fade" id="modalCalendario" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">Seleccionar fecha de reserva</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="selectorFecha" class="form-label">Fecha:</label>
+                            <input type="date" id="selectorFecha" class="form-control"
+                                   th:value="${filtroFecha}" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </button>
+                            <button type="button" id="btnAplicarFecha" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i> Aplicar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -330,6 +386,70 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function () {
+        const basePath = /*[[ @{/coordinador/reservas-hoy} ]]*/ '';
+        const sedeFiltro = document.getElementById("sedeFiltro");
+        const btnHoy = document.getElementById("btnHoy");
+        const btnCalendario = document.getElementById("btnCalendario");
+        const btnTodas = document.getElementById("btnTodas");
+        const modal = new bootstrap.Modal(document.getElementById("modalCalendario"));
+        const selectorFecha = document.getElementById("selectorFecha");
+        const btnAplicarFecha = document.getElementById("btnAplicarFecha");
+
+        // Estado actual de la fecha seleccionada
+        let fechaSeleccionada = /*[[${filtroFecha} ?: '']]*/ '';
+
+        // Reconstruye y navega a la URL con filtros (y opcionalmente página)
+        function navegar(page) {
+            const params = new URLSearchParams();
+            if (sedeFiltro.value !== "todas") params.set("sedeId", sedeFiltro.value);
+            if (fechaSeleccionada) params.set("fecha", fechaSeleccionada);
+            if (page != null) params.set("page", page);
+            window.location.href = `${basePath}?${params.toString()}`;
+        }
+
+        // Listeners
+        sedeFiltro.addEventListener("change", () => navegar());
+        btnHoy.addEventListener("click", () => {
+            fechaSeleccionada = new Date().toISOString().split("T")[0];
+            navegar();
+        });
+        btnTodas.addEventListener("click", () => {
+            fechaSeleccionada = "";
+            navegar();
+        });
+        btnCalendario.addEventListener("click", () => modal.show());
+        btnAplicarFecha.addEventListener("click", () => {
+            if (selectorFecha.value) {
+                fechaSeleccionada = selectorFecha.value;
+                modal.hide();
+                navegar();
+            }
+        });
+    });
+
+
+    // 1. Capturamos el input y las filas
+    const buscador = document.getElementById("buscador");
+    const filas = Array.from(document.querySelectorAll("#tablaReservas tr"));
+
+    // 2. Listener para filtrar a medida que escribe
+    buscador.addEventListener("input", function () {
+        const termino = this.value.toLowerCase().trim();
+
+        filas.forEach(fila => {
+            // todo el texto de la fila
+            const textoFila = fila.textContent.toLowerCase();
+            // si incluye el término, la mostramos; si no, la ocultamos
+            fila.style.display = textoFila.includes(termino) ? "" : "none";
+        });
+    });
+    /*]]>*/
+</script>
+
 
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -382,84 +502,10 @@
                 document.body.classList.add('sidebar-collapsed');
             }
         }
-
-        // --- Lógica de Filtros (optimizada y mejorada) ---
-        const sedeFiltro = document.getElementById("sedeFiltro");
-        const btnHoy = document.getElementById("btnHoy");
-        const btnTodas = document.getElementById("btnTodas");
-        const tablaReservasBody = document.getElementById("tablaReservas"); // Obtener el tbody
-        const filas = tablaReservasBody ? tablaReservasBody.querySelectorAll("tr") : []; // Obtener las filas del tbody
-        const noReservasAlert = document.querySelector('.alert-info.text-center'); // El alert de no reservas
-
-        // Función para obtener la fecha de hoy en formato 'yyyy-MM-dd'
-        function getHoyISO() {
-            const hoy = new Date();
-            const year = hoy.getFullYear();
-            const month = String(hoy.getMonth() + 1).padStart(2, '0');
-            const day = String(hoy.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        let filtroFechaActual = "todas"; // Estado inicial del filtro de fecha
-
-        function aplicarFiltros() {
-            const sedeSeleccionada = sedeFiltro.value;
-            const hoy = getHoyISO();
-            let reservasVisibles = 0;
-
-            filas.forEach(fila => {
-                const sedeIdFila = fila.getAttribute("data-sede-id");
-                const fechaFila = fila.getAttribute("data-fecha"); // Fecha de registro de la reserva
-
-                const coincideSede = sedeSeleccionada === "todas" || sedeSeleccionada === sedeIdFila;
-
-                // La fecha de la reserva es la fecha de CREACIÓN, no la fecha de la cita.
-                // Si quieres filtrar por la fecha de la cita, necesitarías un atributo th:data-fecha-cita
-                // o un campo oculto que contenga esa fecha.
-                // Por ahora, el filtro 'Hoy' buscará reservas creadas HOY.
-                const coincideFecha = (filtroFechaActual === "todas" || fechaFila === hoy);
-
-                if (coincideSede && coincideFecha) {
-                    fila.style.display = "";
-                    reservasVisibles++;
-                } else {
-                    fila.style.display = "none";
-                }
-            });
-
-            // Muestra u oculta el mensaje de "No hay reservas"
-            if (noReservasAlert) {
-                if (reservasVisibles === 0) {
-                    noReservasAlert.style.display = 'block';
-                } else {
-                    noReservasAlert.style.display = 'none';
-                }
-            }
-        }
-
-        // Event Listeners para los filtros
-        if (sedeFiltro) {
-            sedeFiltro.addEventListener("change", aplicarFiltros);
-        }
-        if (btnHoy) {
-            btnHoy.addEventListener("click", () => {
-                filtroFechaActual = "hoy";
-                aplicarFiltros();
-            });
-        }
-        if (btnTodas) {
-            btnTodas.addEventListener("click", () => {
-                filtroFechaActual = "todas";
-                aplicarFiltros();
-            });
-        }
-
-        // Aplicar filtros al cargar la página (por si hay parámetros iniciales o para mostrar todo)
-        aplicarFiltros();
-
-        // Se eliminó la lógica de geolocalización y el modal de "fuera de zona"
-        // ya que no son relevantes para la vista de reservas.
     });
+
+    // Se eliminó la lógica de geolocalización y el modal de "fuera de zona"
+    // ya que no son relevantes para la vista de perfil.
     /*]]>*/
 </script>
 </body>

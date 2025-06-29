@@ -9,16 +9,14 @@ import com.example.grupo_6.Service.FileUploadService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import com.example.grupo_6.Repository.SedeServicioRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import com.example.grupo_6.Entity.Reserva;
 import com.example.grupo_6.Repository.ReservaRepository;
 
@@ -28,6 +26,7 @@ import java.math.BigDecimal;
 import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.example.grupo_6.Repository.PagoRepository;
@@ -58,6 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import static com.example.grupo_6.Entity.Estado.TipoAplicacion.pago;
 
 
 @Controller
@@ -116,10 +116,25 @@ public class VecinoController {
         if (usuarioSesion == null) {
             return "redirect:/login";
         }
-        System.out.println("🟢 ID del usuario en sesión: " + usuarioSesion.getIdusuario());
-        VecinoPerfilDTO perfil = usuarioRepository.obtenerPerfilVecinoPorId(usuarioSesion.getIdusuario());
+
+        // Traemos sólo los campos definidos en VecinoPerfilDTO
+        VecinoPerfilDTO perfil = usuarioRepository
+                .obtenerPerfilVecinoPorId(usuarioSesion.getIdusuario());
+
+        // Lógica para permitir cambio de foto sólo una vez por día
+        LocalDate today = LocalDate.now(ZoneId.of("America/Lima"));
+        LocalDate lastUpdate =
+                perfil.getPhotoUpdatedAt() == null
+                        ? LocalDate.MIN
+                        : perfil.getPhotoUpdatedAt().toLocalDate();
+        boolean canChangePhoto = lastUpdate.isBefore(today);
+
+
         model.addAttribute("perfil", perfil);
+        model.addAttribute("canChangePhoto", canChangePhoto);
         model.addAttribute("rol", "vecino");
+        System.out.println("Teléfono obtenido de BD: " + perfil.getTelefono()); // Debug
+        System.out.println("Longitud teléfono: " + (perfil.getTelefono() != null ? perfil.getTelefono().length() : "null")); // Debug
         return "vecino/vecino_perfil";
     }
 
@@ -128,39 +143,123 @@ public class VecinoController {
     // --- Actualizar información del perfil ---
     @PostMapping("/perfil/actualizar")
     @Transactional
-    public String actualizarPerfil(@RequestParam("correo") String correo,
-                                   @RequestParam("telefono") String telefono,
-                                   @RequestParam("direccion") String direccion,
-                                   RedirectAttributes attr,
-                                   HttpSession session) {
-
+    public String actualizarPerfil(
+            @RequestParam("correo")    String correo,
+            @RequestParam("telefono")  String telefono,
+            @RequestParam("direccion") String direccion,
+            @RequestParam("foto")      MultipartFile foto,
+            RedirectAttributes attr,
+            HttpSession session
+    ) throws IOException {
         Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
         if (usuarioSesion == null) {
             return "redirect:/login";
         }
 
-        // Validación manual de correo
+        Usuario usuario = usuarioRepository
+                .findById(usuarioSesion.getIdusuario())
+                .orElseThrow();
+        // Validación de teléfono más robusta
+        telefono = telefono.replaceAll("\\D", ""); // Elimina
+        if (telefono.length() != 9) {
+            attr.addFlashAttribute("error", "El celular debe tener exactamente 9 dígitos");
+            attr.addFlashAttribute("telefono", telefono); // Mantener valor ingresado
+            return "redirect:/vecino/perfil";
+        }
+        // Validaciones de correo y teléfono
         if (!correo.matches("^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$")) {
-            attr.addFlashAttribute("error", "Solo se permiten correos @gmail.com, @outlook.com, @hotmail.com o @pucp.edu.pe.");
+            attr.addFlashAttribute("error", "Dominio de correo inválido.");
             return "redirect:/vecino/perfil";
         }
-
-        // Validación de teléfono (9 dígitos)
         if (!telefono.matches("^\\d{9}$")) {
-            attr.addFlashAttribute("error", "El número de celular debe tener 9 dígitos.");
+            attr.addFlashAttribute("error", "El celular debe tener 9 dígitos.");
             return "redirect:/vecino/perfil";
         }
 
-        Usuario usuario = usuarioRepository.findById(usuarioSesion.getIdusuario()).orElse(null);
-        if (usuario != null) {
-            usuario.setEmail(correo);
-            usuario.setTelefono(telefono);
-            usuario.setDireccion(direccion);
-            usuarioRepository.save(usuario);
+        // Foto: sólo si llega archivo y no cambió hoy
+        if (!foto.isEmpty()) {
+            LocalDate hoy = LocalDate.now(ZoneId.of("America/Lima"));
+            LocalDate last = usuario.getPhotoUpdatedAt() == null
+                    ? LocalDate.MIN
+                    : usuario.getPhotoUpdatedAt().toLocalDate();
+            if (!last.isBefore(hoy)) {
+                attr.addFlashAttribute("error", "Solo puedes cambiar tu foto una vez al día.");
+                return "redirect:/vecino/perfil";
+            }
+            // Nombre det.: "{idusuario}.{ext}"
+            String ext = StringUtils.getFilenameExtension(foto.getOriginalFilename());
+            String fileName = usuario.getIdusuario() + "." + ext;
+            fileUploadService.subirArchivoSobrescribible(foto, "usuarios", fileName);
+            usuario.setImagen(fileName);
+            usuario.setPhotoUpdatedAt(LocalDateTime.now(ZoneId.of("America/Lima")));
         }
+
+        // Guardar datos básicos
+        usuario.setEmail(correo);
+        usuario.setTelefono(telefono);
+        usuario.setDireccion(direccion);
+        usuarioRepository.save(usuario);
+
+        // Actualizar la sesión
+        session.setAttribute("usuario", usuario);
 
         attr.addFlashAttribute("success", "Perfil actualizado correctamente.");
         return "redirect:/vecino/perfil";
+    }
+
+    // --- Servir la foto de perfil desde S3 ---
+
+    @GetMapping("/perfil/photo")
+    public ResponseEntity<byte[]> verFoto(HttpSession session) {
+        System.out.println(">> verFoto: inicio");
+
+        // 1) comprueba sesión
+        Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+        if (usuarioSesion == null) {
+            System.out.println("[WARN] verFoto: no hay usuario en sesión");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        System.out.printf("verFoto: usuario en sesión id=%d%n", usuarioSesion.getIdusuario());
+
+        // 2) carga entidad desde BD
+        Usuario usuario = usuarioRepository.findById(usuarioSesion.getIdusuario())
+                .orElse(null);
+        if (usuario == null) {
+            System.out.printf("[WARN] verFoto: no existe Usuario id=%d%n", usuarioSesion.getIdusuario());
+            return ResponseEntity.notFound().build();
+        }
+        if (usuario.getImagen() == null) {
+            System.out.printf("[WARN] verFoto: usuario %d sin imagen asignada%n", usuario.getIdusuario());
+            return ResponseEntity.notFound().build();
+        }
+        System.out.printf("verFoto: imagen encontrada para usuario %d => key='%s'%n",
+                usuario.getIdusuario(), usuario.getImagen());
+
+        // 3) descarga bytes desde S3
+        byte[] data;
+        try {
+            data = fileUploadService
+                    .descargarArchivoSobrescribible("usuarios", usuario.getImagen());
+            System.out.printf("verFoto: bytes descargados = %d%n", data != null ? data.length : 0);
+        } catch (Exception e) {
+            System.out.printf("[ERROR] verFoto: error al descargar de S3: %s%n", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        // 4) detecta MIME y prepara headers
+        String mime = URLConnection.guessContentTypeFromName(usuario.getImagen());
+        if (mime == null) {
+            mime = "application/octet-stream";
+        }
+        System.out.printf("verFoto: MIME detectado = %s%n", mime);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(mime));
+        headers.setCacheControl(CacheControl.noStore());
+        System.out.println("<< verFoto: devolviendo respuesta OK");
+
+        // 5) responde
+        return new ResponseEntity<>(data, headers, HttpStatus.OK);
     }
 
 
@@ -284,38 +383,55 @@ public class VecinoController {
                                       @RequestParam Integer idreserva,
                                       RedirectAttributes attr) {
 
-        Optional<TarjetaVirtual> opt = tarjetaVirtualRepository.findByNumeroTarjetaAndVencimientoAndCvv(
-                numero, LocalDate.parse(vencimiento + "-01"), cvv);
-
+        // 1) Validar existencia de tarjeta virtual
+        Optional<TarjetaVirtual> opt = tarjetaVirtualRepository
+                .findByNumeroTarjetaAndVencimientoAndCvv(
+                        numero,
+                        LocalDate.parse(vencimiento + "-01"),
+                        cvv
+                );
         if (opt.isEmpty()) {
             attr.addFlashAttribute("msg", "Tarjeta inválida");
             return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
         }
-
         TarjetaVirtual tarjeta = opt.get();
-        Reserva reserva = reservaRepository.findById(idreserva).orElseThrow();
+
+        // 2) Obtener reserva y monto
+        Reserva reserva = reservaRepository.findById(idreserva)
+                .orElseThrow();
         BigDecimal monto = reserva.getPago().getMonto();
 
+        // 3) Chequear saldo suficiente
         if (tarjeta.getSaldo().compareTo(monto) < 0) {
             attr.addFlashAttribute("msg", "Saldo insuficiente");
             return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
         }
 
-        // Descontar saldo y guardar tarjeta
+        // 4) Descontar saldo y persistir
         tarjeta.setSaldo(tarjeta.getSaldo().subtract(monto));
         tarjetaVirtualRepository.save(tarjeta);
 
-        reserva.setEstado(estadoRepository.findByNombre("aprobada").orElseThrow());
-        reserva.getPago().setMetodo(Pago.Metodo.online); // ← Usar enum correctamente
-        pagoRepository.save(reserva.getPago());
+        // 5) Marcar reserva como aprobada
+        reserva.setEstado(
+                estadoRepository.findByNombre("aprobada")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'aprobada' no existe"))
+        );
+
+        // 6) Actualizar el pago asociado
+        Pago pago = reserva.getPago();
+        pago.setMetodo(Pago.Metodo.online);
+        pago.setFechaPago(LocalDateTime.now(ZoneId.of("America/Lima")));
+        pago.setTarjeta(tarjeta);             // ← Aquí vinculamos la tarjeta usada
+        pagoRepository.save(pago);
+
+        // 7) Guardar reserva (ya contiene referencia al pago)
         reservaRepository.save(reserva);
 
 
-        reservaRepository.save(reserva);
-
-        attr.addFlashAttribute("msg", "Pago exitoso con tarjeta. ¡Reserva aprobada!");
-        return "redirect:/vecino/reservas";
+        // 8) Redirigir al detalle
+        return "redirect:/vecino/reservas/" + idreserva;
     }
+
 
 
 
@@ -329,7 +445,7 @@ public class VecinoController {
         Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
 
         Estado estadoPendienteReserva = estadoRepository.findById(1).orElse(null); // ID 1 = pendiente
-        Estado estadoPendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.pago);
+        Estado estadoPendientePago = estadoRepository.findByNombreAndTipoAplicacion("pendiente", pago);
 
         Integer idSedeServicio = reserva.getSedeServicio().getIdSedeServicio();
         Integer idHorario = reserva.getHorarioDisponible().getIdhorario();
@@ -622,33 +738,67 @@ public class VecinoController {
 
 
     @GetMapping("/reservas/{id}")
-    public String verDetalleReserva(@PathVariable("id") Integer id, Model model, HttpSession session) {
+    public String verDetalleReserva(@PathVariable("id") Integer id,
+                                    Model model,
+                                    HttpSession session) {
+        // 1) Validar sesión
         Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
-        if (usuarioSesion == null) return "redirect:/login";
+        if (usuarioSesion == null) {
+            return "redirect:/login";
+        }
 
+        // 2) Cargar reserva y validar propiedad
         Optional<Reserva> opt = reservaRepository.findById(id);
-        if (opt.isEmpty() || !opt.get().getUsuario().getIdusuario().equals(usuarioSesion.getIdusuario())) {
+        if (opt.isEmpty() ||
+                !opt.get().getUsuario().getIdusuario().equals(usuarioSesion.getIdusuario())) {
             return "redirect:/vecino/reservas";
         }
-
         Reserva reserva = opt.get();
-
-        Pago pago = reserva.getPago();
-        if (pago != null) {
-            System.out.println("[LOG] Pago ID: " + pago.getIdpago());
-            System.out.println("[LOG] Comprobante: " + pago.getComprobante());
-        } else {
-            System.out.println("[LOG] La reserva no tiene pago asociado.");
-        }
         model.addAttribute("reserva", reserva);
         model.addAttribute("rol", "vecino");
 
-        ZonedDateTime ahoraZonificado = ZonedDateTime.now(ZoneId.of("America/Lima"));
-        model.addAttribute("ahora", ahoraZonificado.toLocalDateTime());
+        // 3) Si existe pago, añadimos el enum y los datos específicos
+        Pago pago = reserva.getPago();
+        if (pago != null) {
+            // agregamos el enum al modelo para que Thymeleaf lo consulte
+            model.addAttribute("pagoMetodo", pago.getMetodo());
 
+            // caso online → simulación de voucher
+            if (Pago.Metodo.online.equals(pago.getMetodo())) {
+                model.addAttribute("voucherId",     pago.getIdpago());
+                model.addAttribute("voucherFecha",  pago.getFechaPago());
+                model.addAttribute("voucherMonto",  pago.getMonto());
+                model.addAttribute("voucherMetodo", "con tarjeta");
+
+                TarjetaVirtual tv = pago.getTarjeta();
+                if (tv != null) {
+                    model.addAttribute("voucherTitular",   tv.getTitular());
+                    String num = tv.getNumeroTarjeta();
+                    String ult4 = (num != null && num.length() >= 4)
+                            ? num.substring(num.length() - 4)
+                            : num;
+                    model.addAttribute("voucherUltimos4",  ult4);
+                    model.addAttribute("voucherVencimiento",
+                            tv.getVencimiento()
+                                    .format(DateTimeFormatter.ofPattern("MM/yyyy")));
+                }
+
+                // caso banco → comprobante real en S3
+            } else if (Pago.Metodo.banco.equals(pago.getMetodo())) {
+                // 'comprobante' guarda la key S3
+                model.addAttribute("comprobanteKey", pago.getComprobante());
+                // si tienes URL presignada:
+                // model.addAttribute("comprobanteUrl", s3Service.generarUrlPresignada(pago.getComprobante()));
+            }
+        }
+
+        // 4) Fecha “ahora” para lógica de UI
+        ZonedDateTime zdt = ZonedDateTime.now(ZoneId.of("America/Lima"));
+        model.addAttribute("ahora", zdt.toLocalDateTime());
 
         return "vecino/vecino_detalle_reserva";
     }
+
 
 
     @GetMapping("/comprobante/{id}")

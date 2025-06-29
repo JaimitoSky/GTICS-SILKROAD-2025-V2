@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuario")
@@ -90,4 +91,8 @@ public class Usuario implements Serializable {
 
     @Column(name = "imagen")
     private String imagen;
+
+
+    @Column(name="photo_updated_at")
+    private LocalDateTime photoUpdatedAt;
 }

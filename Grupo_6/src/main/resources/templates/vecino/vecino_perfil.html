@@ -10,7 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
-
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"/>
+    <link
+            href="https://unpkg.com/cropperjs/dist/cropper.min.css"
+            rel="stylesheet"/>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -136,34 +141,115 @@
                 </h4>
 
                 <div class="profile-card">
-                    <form method="post" th:action="@{/vecino/perfil/actualizar}">
+                    <form method="post"
+                          th:action="@{/vecino/perfil/actualizar}"
+                          enctype="multipart/form-data">
+
+                        <!-- FOTO DE PERFIL + BOTÓN -->
+                        <div class="mb-4 d-flex align-items-center"
+                             th:with="ts=${perfil.photoUpdatedAt != null
+                    ? #temporals.format(perfil.photoUpdatedAt,'yyyyMMddHHmmss')
+                    : '0'}">
+
+                            <div class="profile-image-wrapper rounded-circle border me-3"
+                                 style="width:100px; height:100px; overflow:hidden;">
+
+                                <!-- placeholder si no hay imagen -->
+                                <img th:if="${perfil.imagen == null}"
+                                     class="profile-image-preview w-100 h-100"
+                                     th:src="@{/img/avatar-placeholder.png}"
+                                     alt="Foto de perfil"
+                                     style="object-fit:cover; cursor:pointer;"
+                                     onclick="document.getElementById('foto').click()" />
+
+                                <!-- imagen real desde S3 si existe -->
+                                <img th:if="${perfil.imagen != null}"
+                                     class="profile-image-preview w-100 h-100"
+                                     th:src="@{/vecino/perfil/photo(ts=${ts})}"
+                                     alt="Foto de perfil"
+                                     style="object-fit:cover; cursor:pointer;"
+                                     onclick="document.getElementById('foto').click()" />
+
+                            </div>
+
+                            <div class="ms-3">
+                                <button type="button"
+                                        class="btn btn-outline-primary"
+                                        th:disabled="${!canChangePhoto}"
+                                        onclick="document.getElementById('foto').click()">
+                                    <i class="bi bi-camera-fill me-1"></i> Cambiar foto
+                                </button>
+                                <input type="file"
+                                       id="foto"
+                                       name="foto"
+                                       accept="image/*"
+                                       hidden
+                                       th:disabled="${!canChangePhoto}"
+                                       onchange="handleFileSelect(this)" />
+                                <div th:if="${!canChangePhoto}" class="form-text text-danger">
+                                    Solo puedes cambiar tu foto una vez al día.
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+                        <!-- Datos de perfil -->
                         <div class="mb-4">
                             <label for="nombres" class="form-label">Nombres</label>
-                            <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
+                            <input type="text"
+                                   class="form-control"
+                                   id="nombres"
+                                   th:value="${perfil.nombres}"
+                                   disabled />
                         </div>
                         <div class="mb-4">
                             <label for="apellidos" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
+                            <input type="text"
+                                   class="form-control"
+                                   id="apellidos"
+                                   th:value="${perfil.apellidos}"
+                                   disabled />
                         </div>
                         <div class="mb-4">
                             <label for="correo" class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.correo}"
-                                   required pattern="^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$"
-                                   title="Dominio de correo inválido">
+                            <input type="email"
+                                   class="form-control"
+                                   id="correo"
+                                   name="correo"
+                                   th:value="${perfil.correo}"
+                                   required
+                                   pattern="^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$"
+                                   title="Dominio de correo inválido" />
                         </div>
-                        <div class="mb-4">
-                            <label for="telefono" class="form-label">Celular</label>
-                            <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}"
-                                   required pattern="^\d{9}$" maxlength="9"
-                                   title="El celular debe tener 9 dígitos">
+                        <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="text"
+                                   id="telefono"
+                                   name="telefono"
+                                   class="form-control"
+                                   maxlength="9"
+                                   required
+                                   th:value="${telefono != null ? telefono : perfil.telefono}" />
                         </div>
+
+                        <!-- Mensaje de error flash (global) -->
+                        <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
                         <div class="mb-5">
                             <label for="direccion" class="form-label">Dirección</label>
-                            <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
+                            <input type="text"
+                                   class="form-control"
+                                   id="direccion"
+                                   name="direccion"
+                                   th:value="${perfil.direccion}" />
                         </div>
 
                         <div class="d-flex justify-content-between btn-action-group">
-                            <a th:href="@{/vecino/cambiar-contrasena}" class="btn btn-outline-secondary">
+                            <a th:href="@{/vecino/cambiar-contrasena}"
+                               class="btn btn-outline-secondary">
                                 <i class="bi bi-lock-fill me-2"></i> Cambiar contraseña
                             </a>
                             <button type="submit" class="btn btn-primary">
@@ -174,6 +260,7 @@
                 </div>
             </div>
         </main>
+
 
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
@@ -221,6 +308,70 @@
         feather.replace();
     });
 </script>
+
+<script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+<script>
+    let cropper;
+
+    function handleFileSelect(input) {
+        if (!input.files?.length) return;
+        const file = input.files[0];
+        const url  = URL.createObjectURL(file);
+        // ahora buscamos por clase, no por id
+        const img  = document.querySelector('.profile-image-preview');
+        const wrapper = document.querySelector('.profile-image-wrapper');
+
+        img.removeAttribute('width');
+        img.removeAttribute('height');
+        img.src = url;
+
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(img, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 1,
+            background: false,
+            responsive: true,
+            cropBoxResizable: false,
+            movable: true,
+            zoomable: true,
+            ready() {
+                const { width, height } = wrapper.getBoundingClientRect();
+                this.cropper.setCropBoxData({ left: 0, top: 0, width, height });
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!cropper) return;
+            e.preventDefault();
+
+            const wrapper = document.querySelector('.profile-image-wrapper');
+            const { width, height } = wrapper.getBoundingClientRect();
+
+            cropper.getCroppedCanvas({ width, height })
+                .toBlob(blob => {
+                    const originalInput = document.getElementById('foto');
+                    const originalFile  = originalInput.files[0];
+                    const croppedFile   = new File([blob], originalFile.name, { type: blob.type });
+
+                    const dt = new DataTransfer();
+                    dt.items.add(croppedFile);
+                    originalInput.files = dt.files;
+
+                    form.submit();
+                }, 'image/jpeg', 0.9);
+        });
+    });
+</script>
+
+
+Preguntar a ChatGPT
+
 <div th:replace="~{fragments/chatbot.html}"></div>
 
 </body>

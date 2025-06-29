@@ -725,6 +725,64 @@
             });
             /*]]>*/
         </script>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            // Función para actualizar la hora y la fecha en la navbar
+            function updateDateTime() {
+                const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
+                const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
+
+                if (relojElement || fechaElement) {
+                    const now = new Date();
+                    // Formato de hora (ej: 01:19:03 a. m.)
+                    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                    const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
+
+                    // Formato de fecha (ej: 12/06/2025)
+                    const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                    const dateString = now.toLocaleDateString('es-PE', dateOptions);
+
+                    if (relojElement) {
+                        relojElement.textContent = timeString;
+                    }
+                    if (fechaElement) {
+                        fechaElement.textContent = dateString;
+                    }
+                }
+            }
+
+            // Actualizar cada segundo
+            setInterval(updateDateTime, 1000);
+            // Llamar al inicio para mostrar la hora inmediatamente
+            updateDateTime();
+
+            // Lógica para el toggle de la sidebar
+            document.addEventListener("DOMContentLoaded", function () {
+                const sidebarToggle = document.querySelector(".js-sidebar-toggle");
+                const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
+                const mainContent = document.querySelector('.main');
+
+                if (sidebarToggle && sidebar && mainContent) {
+                    sidebarToggle.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        document.body.classList.toggle("sidebar-collapsed");
+                        // Guarda el estado en localStorage
+                        localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
+                    });
+
+                    // Recupera el estado guardado al cargar la página
+                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                    if (isCollapsed) {
+                        document.body.classList.add('sidebar-collapsed');
+                    }
+                }
+            });
+
+            // Se eliminó la lógica de geolocalización y el modal de "fuera de zona"
+            // ya que no son relevantes para la vista de perfil.
+            /*]]>*/
+        </script>
     </div>
 </div>
 </body>

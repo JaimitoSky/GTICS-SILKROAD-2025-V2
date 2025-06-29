@@ -71,14 +71,27 @@
                     <p><strong>Método de pago:</strong>
                         <span th:text="${reserva.pago?.metodo}"></span>
                     </p>
-                    <!-- Mostrar comprobante si existe -->
+
                     <p><strong>Comprobante de pago:</strong></p>
-                    <div th:if="${reserva.pago.comprobante != null and !reserva.pago.comprobante.isEmpty()}">
+
+                    <!-- Caso BANCO: muestro la imagen subida a S3 -->
+                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name() == 'banco'}">
                         <img th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
                              alt="Comprobante de pago"
                              class="img-thumbnail border"
                              style="max-width: 500px; height: auto;"
                              onerror="this.onerror=null;this.src='/img/no-image.png';this.alt='Comprobante no disponible';"/>
+                    </div>
+
+                    <!-- Caso ONLINE: botón que abre el modal del voucher -->
+                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name() == 'online'}"
+                         class="text-center mt-4">
+                        <button type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#voucherModal">
+                            Ver comprobante de tarjeta
+                        </button>
                     </div>
 
                     <!-- Opción alternativa: Pago con tarjeta (solo si no hay comprobante, aún está a tiempo y la reserva está pendiente) -->
@@ -179,7 +192,43 @@
                 </div>
             </div>
         </div>
+        <!-- Modal para el voucher de pago con tarjeta -->
+        <div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
 
+                    <div class="modal-header">
+                        <!-- Logo y título -->
+                        <img th:src="@{/img/logo.png}" alt="Logo" style="height: 40px; margin-right: 8px;">
+                        <h5 class="modal-title" id="voucherModalLabel">Comprobante de Pago</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p><strong>Voucher #:</strong>
+                            <span th:text="${voucherId}">0000</span>
+                        </p>
+                        <p><strong>Fecha y hora de pago:</strong>
+                            <span th:text="${#temporals.format(voucherFecha,'dd/MM/yyyy HH:mm')}"></span>
+                        </p>
+                        <p><strong>Método:</strong>
+                            <span th:text="${voucherMetodo}">con tarjeta</span>
+                        </p>
+                        <p><strong>Titular:</strong>
+                            <span th:text="${voucherTitular}">Nombre Titular</span>
+                        </p>
+                        <p><strong>Tarjeta:</strong>
+                            **** **** **** <span th:text="${voucherUltimos4}">1234</span>
+                        </p>
+                        <p><strong>Monto:</strong>
+                            S/. <span th:text="${#numbers.formatDecimal(voucherMonto,1,'COMMA',2,'POINT')}">0.00</span>
+                        </p>
+                        <p class="text-muted"><em>Este es un comprobante simulado.</em></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
 
     </div>

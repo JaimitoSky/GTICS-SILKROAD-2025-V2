@@ -32,7 +32,7 @@ public class FileUploadService {
                 .credentialsProvider(ProfileCredentialsProvider.create())
                 .build();
     }
-
+// PARA COMPROBANTES UNICAMENTE, ES CONSIDERANDO UUID
     public String subirArchivo(MultipartFile file, String carpetaDestino) {
         String nombreFinal = carpetaDestino + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
 
@@ -74,6 +74,28 @@ public class FileUploadService {
         return mime != null ? mime : "application/octet-stream";
     }
 
+
+    //PARA OTROS TIPOS DE IMAGENES
+
+    public String subirArchivoSobrescribible(MultipartFile file, String carpetaDestino, String nombreArchivo) {
+        String key = carpetaDestino + "/" + nombreArchivo;
+        try {
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+            return key;
+        } catch (IOException e) {
+            throw new RuntimeException("Error al subir archivo a S3", e);
+        }
+    }
+
+    public byte[] descargarArchivoSobrescribible(String carpetaDestino, String nombreArchivo) {
+        String key = carpetaDestino + "/" + nombreArchivo;
+        return descargarArchivo(key);
+    }
 
 
 }

@@ -894,8 +894,7 @@ CREATE TABLE coordinador_sede (
   UNIQUE (idusuario, idsede)
 );
 
-INSERT INTO coordinador_sede (idusuario, idsede, activo)
-VALUES (5, 1, 1);
+
 
 CREATE TABLE incidencia (
     idincidencia INT AUTO_INCREMENT PRIMARY KEY,
@@ -1074,6 +1073,17 @@ INSERT INTO tarjeta_virtual (numero_tarjeta, vencimiento, cvv, titular, saldo) V
 ('1234567812345678', '2025-12-01', '123', 'Ana Ramos', 100.00),
 ('9999222233334444', '2026-05-01', '456', 'Juan Pérez', 0.00),
 ('1111222233334444', '2025-10-01', '789', 'Carlos Gómez', 45.50);
+
+-- Relacionar tarjetas con pago, de esta forma se simula un voucher
+
+ALTER TABLE pago
+  ADD COLUMN idtarjeta INT NULL,
+  ADD CONSTRAINT fk_pago_tarjeta
+    FOREIGN KEY (idtarjeta)
+    REFERENCES tarjeta_virtual(idtarjeta);
+
+ALTER TABLE usuario
+  ADD COLUMN photo_updated_at DATETIME NULL;
 
 
 SET FOREIGN_KEY_CHECKS=1;

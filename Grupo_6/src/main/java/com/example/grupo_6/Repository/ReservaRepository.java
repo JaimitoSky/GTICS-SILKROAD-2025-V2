@@ -51,16 +51,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
     List<Reserva> findByEstadoAndFechaLimitePagoBefore(Estado estado, LocalDateTime fechaLimite);
 
-    @Query("""
-    SELECT COUNT(r) FROM Reserva r
-    WHERE r.horarioDisponible.idhorario = :idHorario
-      AND r.fechaReserva = :fecha
-      AND r.estado.nombre != 'cancelada'
-    """)
-    int contarReservasEnHorario(
-            @Param("idHorario") Integer idHorario,
-            @Param("fecha") LocalDate fecha
-    );
+
     boolean existsByHorarioDisponibleAndFechaReserva(HorarioDisponible horario, LocalDate fechaReserva);
 
 
@@ -104,9 +95,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
             List<Estado> estados,
             LocalDate fecha
     );
-    List<Reserva> findByUsuario_IdusuarioAndSedeServicio_IdSedeServicio(Integer idUsuario, Integer idSedeServicio);
-    List<Reserva> findByEstado(Estado estado);
-
 
     boolean existsByUsuarioAndHorarioDisponibleAndFechaReservaAndEstadoNot(
             Usuario usuario,
@@ -135,16 +123,31 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     Page<Reserva> filtrarPorEstado2(@Param("estado") String estado, Pageable pageable);
 
 
-    boolean existsByUsuario_IdusuarioAndFechaReservaAndHorarioDisponible_IdhorarioAndEstado_NombreIgnoreCase(
-            Integer idusuario,
-            LocalDate fechaReserva,
-            Integer idhorario,
-            String estado
-    );
+
     List<Reserva> findByUsuario_IdusuarioAndFechaReservaAndHorarioDisponible_Idhorario(
             Integer idUsuario,
             LocalDate fechaReserva,
             Integer idHorario
+    );
+
+
+    // ReservaRepository.java
+
+    @Query("""
+  SELECT r
+    FROM Reserva r
+    JOIN r.sedeServicio ss
+    JOIN ss.sede s
+   WHERE s.idsede       IN :idsSede
+     AND (:fecha IS NULL OR r.fechaReserva = :fecha)
+     AND r.estado.idestado = :idEstado
+   ORDER BY r.fechaReserva, r.horarioDisponible.horaInicio
+""")
+    Page<Reserva> buscarReservasAprobadas(
+            @Param("idsSede")   List<Integer> idsSede,
+            @Param("fecha")     LocalDate     fecha,     // null = todas las fechas
+            @Param("idEstado")  Integer       idEstado,  // siempre 2 = aprobado
+            Pageable                     pageable
     );
 
 }

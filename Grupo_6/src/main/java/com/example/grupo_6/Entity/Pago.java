@@ -45,5 +45,8 @@ public class Pago {
         online, banco
     }
 
-
+    // — NUEVO CAMPO para idtarjeta —
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idtarjeta", nullable = true)
+    private TarjetaVirtual tarjeta;
 }
