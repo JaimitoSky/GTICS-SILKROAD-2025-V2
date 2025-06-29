@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.example.grupo_6.Repository.PagoRepository;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import com.example.grupo_6.Repository.SedeRepository;
@@ -205,6 +206,72 @@ public class VecinoController {
 
         attr.addFlashAttribute("success", "Perfil actualizado correctamente.");
         return "redirect:/vecino/perfil";
+    }
+    @GetMapping("/imagen/{id}")
+    public ResponseEntity<byte[]> verImagenSede(
+            @PathVariable("id") Integer idSedeServicio) {
+
+        // 1) Buscamos el SedeServicio
+        SedeServicio ss = sedeServicioRepository.findById(idSedeServicio)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // 2) Obtenemos la ENTIDAD Sede y su nombre de imagen
+        Sede sede = ss.getSede();
+        String nombreArchivo = sede.getImagen();
+        if (nombreArchivo == null) {
+            // Sin foto asignada
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        // 3) Descargamos los bytes desde la carpeta "sedes"
+        byte[] data;
+        try {
+            data = fileUploadService
+                    .descargarArchivoSobrescribible("sedes", nombreArchivo);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo leer la imagen", e);
+        }
+
+        // 4) Detectamos MIME y deshabilitamos cache
+        String mime = URLConnection.guessContentTypeFromName(nombreArchivo);
+        if (mime == null) mime = "application/octet-stream";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mime))
+                .cacheControl(CacheControl.noStore())
+                .body(data);
+    }
+
+    @GetMapping("/imagen-servicio-sede/{id}")
+    public ResponseEntity<byte[]> verImagenServicioSede(
+            @PathVariable("id") Integer idSedeServicio) {
+
+        SedeServicio ss = sedeServicioRepository.findById(idSedeServicio)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        String nombreArchivo = ss.getImagen();
+        if (nombreArchivo == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        byte[] data;
+        try {
+            data = fileUploadService
+                    .descargarArchivoSobrescribible("servicio-sede", nombreArchivo);
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al leer la imagen", e);
+        }
+
+        String mime = URLConnection.guessContentTypeFromName(nombreArchivo);
+        if (mime == null) mime = "application/octet-stream";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mime))
+                .cacheControl(CacheControl.noStore())
+                .body(data);
     }
 
     // --- Servir la foto de perfil desde S3 ---

@@ -7,4 +7,6 @@ public interface ServicioComplejoDTO {
     String getDireccion();
     Integer getIdSedeServicio();
     String getNombrePersonalizado();
+    String  getImagen();
+
 }

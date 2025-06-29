@@ -84,8 +84,9 @@
                         <hr/>
                         <h5 class="mt-4">Servicios Asignados</h5>
                         <ul class="list-unstyled">
-                            <li th:each="ss : ${sede.sedeServicios}">
+                            <li th:each="ss : ${sede.sedeServicios}" class="mb-4">
                                 <div class="d-flex align-items-center mb-2">
+                                    <!-- Nombre y edición de tarifa/estado -->
                                     <!-- Nombre del servicio -->
                                     <strong th:text="${ss.nombrePersonalizado != null ? ss.nombrePersonalizado : ss.servicio.nombre}"></strong>
 
@@ -120,6 +121,43 @@
                                     </form>
 
                                 </div>
+
+                                <form th:action="@{/superadmin/sedes/configurar/servicios/actualizar-foto}"
+                                      method="post"
+                                      enctype="multipart/form-data"
+                                      class="d-flex align-items-center mb-4">
+
+                                    <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
+
+                                    <!-- wrapper clickeable para disparar el file input -->
+                                    <div class="rounded border me-3"
+                                         style="width:80px; height:80px; overflow:hidden; cursor:pointer;"
+                                         th:onclick="|document.getElementById('fotoServicio-${ss.idSedeServicio}').click()|">
+
+                                        <!-- imagen REAL si ya hay una subida -->
+                                        <img th:if="${ss.imagen != null}"
+                                             th:src="@{/superadmin/sedes/configurar/servicios/photo(idsedeServicio=${ss.idSedeServicio})}"
+                                             class="img-fluid w-100 h-100"
+                                             style="object-fit:cover;" />
+
+                                        <!-- placeholder si no hay imagen -->
+                                        <img th:if="${ss.imagen == null}"
+                                             th:src="@{/img/servicio-placeholder.png}"
+                                             class="img-fluid w-100 h-100"
+                                             style="object-fit:cover;" />
+
+                                    </div>
+
+                                    <!-- input file oculto -->
+                                    <input type="file"
+                                           th:id="'fotoServicio-' + ${ss.idSedeServicio}"
+                                           name="foto"
+                                           accept="image/*"
+                                           hidden
+                                           onchange="previewServicio(this, [[${ss.idSedeServicio}]])" />
+
+                                    <button type="submit" class="btn btn-primary btn-sm">Guardar Foto</button>
+                                </form>
                             </li>
                         </ul>
                         <div class="card-header">
@@ -491,6 +529,16 @@
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
     feather.replace();
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function previewServicio(input, id) {
+        if (!input.files || !input.files.length) return;
+        const url = URL.createObjectURL(input.files[0]);
+        document.getElementById('previewServicio-' + id).src = url;
+    }
+    /*]]>*/
 </script>
 
 </body>

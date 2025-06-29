@@ -40,6 +40,26 @@
 
                 <div class="card">
                     <div class="card-body">
+
+                        <!-- Foto de la Sede -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <!-- Si existe imagen en S3  NOTA PARA EL FRONTEND: ASEGURARSE QUE ESTE BIEN ESCALADO CON TODAS LAS FOTOS-->
+                                <img th:if="${sede.imagen != null}"
+                                     th:src="@{/superadmin/sedes/photo(nombre=${sede.imagen})}"
+                                     class="img-fluid rounded mb-3"
+                                     alt="Foto de la sede"
+                                     style="width:100%; max-height:300px; object-fit:cover;" />
+
+                                <!-- Placeholder si no hay imagen -->
+                                <img th:if="${sede.imagen == null}"
+                                     src="/img/sede-placeholder.png"
+                                     class="img-fluid rounded mb-3"
+                                     alt="Sin foto de la sede"
+                                     style="width:100%; max-height:300px; object-fit:cover;" />
+                            </div>
+                        </div>
+
                         <!-- Info básica -->
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -86,13 +106,13 @@
                                 <p class="form-control-plaintext" th:text="${sede.longitud}">-77.0</p>
                             </div>
                         </div>
+
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label class="form-label fw-bold">Ubicación en el Mapa:</label>
                                 <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
                             </div>
                         </div>
-
 
                         <!-- Servicios asociados -->
                         <div class="row mb-3">
@@ -101,7 +121,11 @@
                                 <ul>
                                     <li th:each="ss : ${sede.sedeServicios}">
                                         <span th:text="${ss.servicio.nombre}">Nombre Servicio</span>
-                                        <span class="text-muted" th:if="${ss.tarifa != null}" th:text="' - S/ ' + ${ss.tarifa.monto}">S/ 00.00</span>
+                                        <span class="text-muted"
+                                              th:if="${ss.tarifa != null}"
+                                              th:text="' - S/ ' + ${ss.tarifa.monto}">
+                  S/ 00.00
+                </span>
                                     </li>
                                 </ul>
                             </div>
@@ -114,13 +138,13 @@
                 </div>
             </div>
         </main>
+
         <script th:inline="javascript">
             /*<![CDATA[*/
             const lat = [[${sede.latitud}]];
             const lng = [[${sede.longitud}]];
 
             const map = L.map('map').setView([lat, lng], 16);
-
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
@@ -130,6 +154,7 @@
                 .openPopup();
             /*]]>*/
         </script>
+
 
         <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">

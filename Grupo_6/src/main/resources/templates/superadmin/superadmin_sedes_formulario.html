@@ -37,10 +37,18 @@
         <main class="content">
             <div class="container-fluid p-0">
                 <div class="mb-3">
-                    <h1 class="h3 d-inline align-middle" th:text="${sede.idsede == null} ? 'Registrar Nueva Sede' : 'Editar Sede'"></h1>
+                    <h1 class="h3 d-inline align-middle"
+                        th:text="${sede.idsede == null}
+                    ? 'Registrar Nueva Sede'
+                    : 'Editar Sede'"></h1>
                 </div>
 
-                <form th:action="@{/superadmin/sedes/guardar}" method="post" th:object="${sede}">
+                <!-- Agregamos enctype para multipart -->
+                <form th:action="@{/superadmin/sedes/guardar}"
+                      method="post"
+                      th:object="${sede}"
+                      enctype="multipart/form-data">
+
                     <div class="row">
                         <div class="col-12 col-lg-6">
                             <div class="card mb-3">
@@ -48,6 +56,7 @@
                                     <h5 class="card-title mb-0">Datos de la Sede</h5>
                                 </div>
                                 <div class="card-body">
+                                    <!-- Campos existentes -->
                                     <div class="mb-3">
                                         <label class="form-label">Nombre</label>
                                         <input type="text" th:field="*{nombre}" class="form-control" required />
@@ -56,12 +65,40 @@
                                         <label class="form-label">Dirección</label>
                                         <input type="text" th:field="*{direccion}" class="form-control" required />
                                     </div>
-                                    <!-- Campo eliminado: Distrito -->
                                     <input type="hidden" name="distrito" value="San Miguel" />
                                     <div class="mb-3">
                                         <label class="form-label">Referencia</label>
                                         <input type="text" th:field="*{referencia}" class="form-control" />
                                     </div>
+
+                                    <!-- NUEVO: Subida de foto  NOTA PARA EL FRONT: SE DEBE INCLUIR UNA FOTO COMO PLACEHOLDER-->
+                                    <div class="mb-3">
+                                        <label class="form-label">Foto de la Sede</label>
+                                        <div class="d-flex align-items-center">
+                                            <!-- Wrapper para previsualizar -->
+                                            <div class="rounded border me-3"
+                                                 style="width:100px; height:100px; overflow:hidden;">
+                                                <img id="previewSede"
+                                                     src="/img/sede-placeholder.png"
+                                                     alt="Previsualización de foto"
+                                                     class="w-100 h-100"
+                                                     style="object-fit:cover; cursor:pointer;"
+                                                     onclick="document.getElementById('fotoSede').click()" />
+                                            </div>
+                                            <button type="button"
+                                                    class="btn btn-outline-primary"
+                                                    onclick="document.getElementById('fotoSede').click()">
+                                                <i class="bi bi-camera-fill me-1"></i> Seleccionar foto
+                                            </button>
+                                            <input type="file"
+                                                   id="fotoSede"
+                                                   name="foto"
+                                                   accept="image/*"
+                                                   hidden
+                                                   onchange="previewSedeImage(this)" />
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -99,10 +136,24 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </form>
             </div>
         </main>
+
+        <script>
+            function previewSedeImage(input) {
+                if (!input.files || !input.files.length) return;
+                const file = input.files[0];
+                const url  = URL.createObjectURL(file);
+                const img  = document.getElementById('previewSede');
+                img.removeAttribute('width');
+                img.removeAttribute('height');
+                img.src = url;
+            }
+        </script>
+
 
         <!-- Leaflet -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />

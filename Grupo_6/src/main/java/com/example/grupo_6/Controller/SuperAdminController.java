@@ -16,14 +16,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -567,6 +565,28 @@ public class SuperAdminController {
         }
     }
 
+    @GetMapping("/superadmin/sedes/photo")
+    public ResponseEntity<byte[]> verFotoSede(@RequestParam("nombre") String nombreArchivo) {
+        // Descarga los bytes desde S3 (carpeta “sedes”)
+        byte[] data;
+        try {
+            data = fileUploadService
+                    .descargarArchivoSobrescribible("sedes", nombreArchivo);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Detecta el MIME
+        String mime = URLConnection.guessContentTypeFromName(nombreArchivo);
+        if (mime == null) mime = "application/octet-stream";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(mime));
+        headers.setCacheControl(CacheControl.noStore());
+
+        return new ResponseEntity<>(data, headers, HttpStatus.OK);
+    }
+
 
     @GetMapping("/superadmin/coordinadores")
     public String vistaDashboardCoordinadores(
@@ -625,7 +645,37 @@ public class SuperAdminController {
 
 
 
+    @PostMapping("/superadmin/sedes/actualizar")
+    public String actualizarSede(
+            @ModelAttribute("sede") Sede sede,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+            RedirectAttributes attr) {
 
+        // Si subieron foto, la guardamos en S3 bajo "sedes/<idsede>.<ext>"
+        if (foto != null && !foto.isEmpty()) {
+            // Asegurarnos de limpiar el nombre original
+            String original = StringUtils.cleanPath(foto.getOriginalFilename());
+            String ext = "";
+            int dot = original.lastIndexOf('.');
+            if (dot >= 0) {
+                ext = original.substring(dot + 1);
+            }
+            // Usamos el ID de la sede para el nombre (evita colisiones)
+            String nombreArchivo = sede.getIdsede()
+                    + (ext.isEmpty() ? "" : "." + ext);
+
+            // Sube (o reemplaza) en S3: key = "sedes/" + nombreArchivo
+            fileUploadService.subirArchivoSobrescribible(foto, "sedes", nombreArchivo);
+
+            // Guardamos sólo el nombre del archivo en la entidad
+            sede.setImagen(nombreArchivo);
+        }
+
+        // Guardar la sede (con o sin nueva foto)
+        sedeRepository.save(sede);
+        attr.addFlashAttribute("mensajeExito", "Sede actualizada correctamente.");
+        return "redirect:/superadmin/sedes";
+    }
 
 
 
@@ -725,7 +775,64 @@ public class SuperAdminController {
 
         return "redirect:/superadmin/sedes/configurar/" + idsede;
     }
+    @PostMapping("/superadmin/sedes/configurar/servicios/actualizar-foto")
+    public String actualizarFotoServicio(
+            @RequestParam("idsedeServicio") Integer idsedeServicio,
+            @RequestParam("foto") MultipartFile foto,
+            RedirectAttributes attr) {
 
+        Optional<SedeServicio> opt = sedeServicioRepository.findById(idsedeServicio);
+        if (opt.isPresent() && foto != null && !foto.isEmpty()) {
+            SedeServicio ss = opt.get();
+
+            // Derivar extensión y nombre constante para poder sobreescribir
+            String original = StringUtils.cleanPath(foto.getOriginalFilename());
+            String ext = "";
+            int dot = original.lastIndexOf('.');
+            if (dot >= 0) ext = original.substring(dot + 1);
+
+            String nombreArchivo = idsedeServicio + (ext.isEmpty() ? "" : "." + ext);
+
+            // Subida sobrescribible en S3
+            fileUploadService.subirArchivoSobrescribible(foto, "servicio-sede", nombreArchivo);
+
+            // Guardar en BD sólo el nombre del archivo
+            ss.setImagen(nombreArchivo);
+            sedeServicioRepository.save(ss);
+
+            attr.addFlashAttribute("mensajeExito", "Foto actualizada correctamente.");
+            return "redirect:/superadmin/sedes/configurar/" + ss.getSede().getIdsede();
+        }
+
+        attr.addFlashAttribute("mensajeError", "No se pudo actualizar la foto.");
+        return "redirect:/superadmin/sedes/configurar/" + idsedeServicio;
+    }
+
+    /**
+     * GET: Sirve la foto de un servicio‐sede desde S3
+     */
+    @GetMapping("/superadmin/sedes/configurar/servicios/photo")
+    public ResponseEntity<byte[]> verFotoServicio(
+            @RequestParam("idsedeServicio") Integer idsedeServicio) {
+
+        Optional<SedeServicio> opt = sedeServicioRepository.findById(idsedeServicio);
+        if (opt.isEmpty() || opt.get().getImagen() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String nombreArchivo = opt.get().getImagen();
+        byte[] data = fileUploadService
+                .descargarArchivoSobrescribible("servicio-sede", nombreArchivo);
+
+        String mime = URLConnection.guessContentTypeFromName(nombreArchivo);
+        if (mime == null) mime = "application/octet-stream";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(mime));
+        headers.setCacheControl(CacheControl.noStore());
+
+        return new ResponseEntity<>(data, headers, HttpStatus.OK);
+    }
 
     @PostMapping("/superadmin/sedes/configurar/intervalos/toggle")
     public String toggleEstadoHorario(@RequestParam("idhorario") Integer idhorario,
@@ -1021,22 +1128,32 @@ public class SuperAdminController {
         }
     }
 
-    @PostMapping("/superadmin/sedes/actualizar")
-    public String actualizarSede(@ModelAttribute("sede") Sede sede, RedirectAttributes attr) {
-        sedeRepository.save(sede);
-        attr.addFlashAttribute("mensajeExito", "Sede actualizada correctamente.");
-        return "redirect:/superadmin/sedes";
-    }
+
 
 
 
     @PostMapping("/superadmin/sedes/guardar")
-    public String guardarSede(@ModelAttribute("sede") Sede sede) {
+    public String guardarSede(
+            @ModelAttribute("sede") Sede sede,
+            @RequestParam("foto") MultipartFile foto,
+            RedirectAttributes attr) {
+
         // Establece el distrito fijo
         sede.setDistrito("San Miguel");
 
+        // Si subieron una foto, la subimos sobrescribible y guardamos solo el nombre
+        if (foto != null && !foto.isEmpty()) {
+            String nombreArchivo = foto.getOriginalFilename();
+            // esto crea o reemplaza sedes/nombreArchivo en S3
+            fileUploadService.subirArchivoSobrescribible(foto, "sedes", nombreArchivo);
+            // en la BD solo guardamos el nombre, para luego descargar con descargarArchivoSobrescribible
+            sede.setImagen(nombreArchivo);
+        }
+
+        // Guardamos la sede (ya incluye imagen si se subió)
         sedeRepository.save(sede);
 
+        // Creamos los horarios si aún no existen
         if (sede.getIdsede() != null && horarioAtencionRepository.countBySede(sede) == 0) {
             for (HorarioAtencion.DiaSemana dia : HorarioAtencion.DiaSemana.values()) {
                 HorarioAtencion ha = new HorarioAtencion();
@@ -1055,8 +1172,10 @@ public class SuperAdminController {
             }
         }
 
+        attr.addFlashAttribute("mensajeExito", "Sede guardada correctamente.");
         return "redirect:/superadmin/sedes";
     }
+
 
 
 

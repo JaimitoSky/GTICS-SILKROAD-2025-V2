@@ -45,13 +45,19 @@
                     <h1 class="h3 d-inline align-middle">Editar Sede</h1>
                 </div>
 
-                <form th:action="@{/superadmin/sedes/actualizar}" method="post" th:object="${sede}">
+                <form th:action="@{/superadmin/sedes/actualizar}"
+                      method="post"
+                      th:object="${sede}"
+                      enctype="multipart/form-data">
                     <input type="hidden" th:field="*{idsede}" />
 
                     <div class="row">
+                        <!-- Datos de la Sede -->
                         <div class="col-12 col-lg-6">
                             <div class="card mb-3">
-                                <div class="card-header"><h5 class="card-title mb-0">Datos de la Sede</h5></div>
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Datos de la Sede</h5>
+                                </div>
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label class="form-label">Nombre</label>
@@ -69,13 +75,52 @@
                                         <label class="form-label">Referencia</label>
                                         <input type="text" th:field="*{referencia}" class="form-control" />
                                     </div>
+
+                                    <!-- Foto existente y subida -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Foto de la Sede</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded border me-3" style="width:120px; height:120px; overflow:hidden;">
+                                                <!-- imagen ya subida -->
+                                                <img th:if="${sede.imagen != null}"
+                                                     th:src="@{/superadmin/sedes/photo(nombre=${sede.imagen})}"
+                                                     alt="Foto de la sede"
+                                                     class="img-fluid w-100 h-100"
+                                                     style="object-fit:cover; cursor:pointer;"
+                                                     onclick="document.getElementById('fotoSede').click()" />
+                                                <!-- placeholder -->
+                                                <img th:if="${sede.imagen == null}"
+                                                     src="/img/sede-placeholder.png"
+                                                     alt="Sin foto"
+                                                     class="img-fluid w-100 h-100"
+                                                     style="object-fit:cover; cursor:pointer;"
+                                                     onclick="document.getElementById('fotoSede').click()" />
+                                            </div>
+                                            <div>
+                                                <button type="button"
+                                                        class="btn btn-outline-primary"
+                                                        onclick="document.getElementById('fotoSede').click()">
+                                                    <i class="bi bi-camera-fill me-1"></i>Cambiar foto
+                                                </button>
+                                                <input type="file"
+                                                       id="fotoSede"
+                                                       name="foto"
+                                                       accept="image/*"
+                                                       hidden
+                                                       onchange="previewSedeImage(this)" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Ubicación y Estado -->
                         <div class="col-12 col-lg-6">
                             <div class="card mb-3">
-                                <div class="card-header"><h5 class="card-title mb-0">Ubicación y Estado</h5></div>
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Ubicación y Estado</h5>
+                                </div>
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label class="form-label">Latitud</label>
@@ -89,14 +134,10 @@
                                         <input type="checkbox" th:field="*{activo}" class="form-check-input" id="activoCheck" />
                                         <label class="form-check-label" for="activoCheck">¿Sede activa?</label>
                                     </div>
-
                                     <div class="mb-3">
                                         <label class="form-label">Ubicación en el mapa</label>
                                         <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
                                     </div>
-
-
-
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-primary">Actualizar Sede</button>
                                         <a th:href="@{/superadmin/sedes}" class="btn btn-secondary">Cancelar</a>
@@ -104,10 +145,38 @@
                                 </div>
                             </div>
                         </div>
-                    </div> <!-
+                    </div>
                 </form>
             </div>
         </main>
+
+        <script th:inline="javascript">
+            function previewSedeImage(input) {
+                if (!input.files?.length) return;
+                const url = URL.createObjectURL(input.files[0]);
+                const img = document.querySelector('#fotoSedePreview');
+                if (img) {
+                    img.src = url;
+                } else {
+                    // si no existe, actualizamos la img dentro del mismo wrapper
+                    document.querySelector('.rounded.border img').src = url;
+                }
+            }
+
+            /* Inicialización del mapa */
+            /*<![CDATA[*/
+            const lat = [[${sede.latitud}]];
+            const lng = [[${sede.longitud}]];
+            const map = L.map('map').setView([lat, lng], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('Ubicación de la sede')
+                .openPopup();
+            /*]]>*/
+        </script>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

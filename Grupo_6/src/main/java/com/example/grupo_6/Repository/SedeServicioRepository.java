@@ -63,6 +63,8 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
         s.nombre AS nombreServicio,
         se.nombre AS nombreSede,
         se.direccion AS direccion,
+        se.imagen AS imagen,               
+        
         ss.idSedeServicio AS idSedeServicio,
         ss.nombrePersonalizado AS nombrePersonalizado
     FROM SedeServicio ss
