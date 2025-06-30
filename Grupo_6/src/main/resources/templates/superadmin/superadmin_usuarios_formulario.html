@@ -35,7 +35,7 @@
 					<h1 class="h3 d-inline align-middle">Registrar Nuevo Usuario</h1>
 				</div>
 
-				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}">
+				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}" enctype="multipart/form-data">
 					<div class="row">
 						<!-- Columna Izquierda -->
 						<div class="col-12 col-lg-6">
@@ -59,6 +59,11 @@
 									<div class="mb-3">
 										<label class="form-label">Email</label>
 										<input type="email" th:field="*{email}" class="form-control" required />
+									</div>
+
+									<div class="mb-3">
+										<label class="form-label">Foto de perfil</label>
+										<input type="file" name="foto" class="form-control" accept="image/*" />
 									</div>
 								</div>
 							</div>
@@ -92,14 +97,7 @@
 										</select>
 									</div>
 
-									<div class="mb-3 form-check">
-										<input type="checkbox" th:field="*{notificarRecordatorio}" class="form-check-input" id="recordatorio" />
-										<label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
-									</div>
-									<div class="mb-3 form-check">
-										<input type="checkbox" th:field="*{notificarDisponibilidad}" class="form-check-input" id="disponibilidad" />
-										<label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
-									</div>
+
 									<button type="submit" class="btn btn-success">Registrar Usuario</button>
 								</div>
 							</div>

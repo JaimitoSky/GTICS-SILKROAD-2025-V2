@@ -155,12 +155,22 @@
                 <div class="profile-card">
                     <!-- Bloque de imagen del coordinador -->
                     <div class="mb-4 d-flex align-items-center gap-3">
-                        <img th:src="@{${perfil.imagen != null
-                                ? '/coordinador/usuario/imagen/' + perfil.idusuario
-                                : '/img/avatar-placeholder.png'}}"
-                             alt="Foto del coordinador"
-                             class="rounded-circle border"
-                             style="width: 100px; height: 100px; object-fit: cover;" />
+                        <!-- Si tiene imagen, llama al endpoint con el ID -->
+                        <img
+                                th:if="${perfil.imagen != null}"
+                                th:src="@{/coordinador/usuario/imagen/{id}(id=${perfil.idUsuario})}"
+                                alt="Foto del coordinador"
+                                class="rounded-circle border"
+                                style="width: 100px; height: 100px; object-fit: cover;" />
+
+                        <!-- Si no tiene, muestra el placeholder -->
+                        <img
+                                th:if="${perfil.imagen == null}"
+                                src="/img/avatar-placeholder.png"
+                                alt="Avatar por defecto"
+                                class="rounded-circle border"
+                                style="width: 100px; height: 100px; object-fit: cover;" />
+
                         <div>
                             <p class="mb-0 fw-bold">Foto de perfil</p>
                         </div>

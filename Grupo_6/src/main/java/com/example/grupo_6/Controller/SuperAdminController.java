@@ -24,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.exception.SdkException;
@@ -205,7 +206,31 @@ public class SuperAdminController {
     }
 
 
+    @PostMapping("/superadmin/usuarios/imagen")
+    public String subirImagenUsuario(@RequestParam("idusuario") Integer idUsuario,
+                                     @RequestParam("foto") MultipartFile foto,
+                                     RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        if (foto != null && !foto.isEmpty()) {
+            String nombreArchivo = "usuario-" + idUsuario + getExtension(foto.getOriginalFilename());
+            String key = fileUploadService.subirArchivoSobrescribible(foto, "usuarios", nombreArchivo);
+            usuario.setImagen(nombreArchivo);
+            usuarioRepository.save(usuario);
+            redirectAttributes.addFlashAttribute("mensaje", "Foto actualizada correctamente");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "No se seleccionó ningún archivo");
+        }
+
+        return "redirect:/superadmin/usuarios"; // ajusta a la vista correspondiente
+    }
+
+    private String getExtension(String filename) {
+        return filename != null && filename.contains(".")
+                ? filename.substring(filename.lastIndexOf("."))
+                : "";
+    }
 
 
     @GetMapping("/superadmin/usuarios")
@@ -341,29 +366,91 @@ public class SuperAdminController {
     }
 
 
-    /* === 3. NUEVO POST PARA GUARDAR CAMBIOS === */
     @PostMapping("/superadmin/usuarios/actualizar")
-    public String actualizarUsuario(@ModelAttribute("usuario") Usuario usuarioForm,
-                                    @RequestParam(value = "rawPassword", required = false) String rawPassword) {
-        Usuario existente = usuarioRepository.findById(usuarioForm.getIdusuario()).orElse(null);
-        if (existente == null) return "redirect:/superadmin/usuarios";
+    public String actualizarUsuario(
+            @ModelAttribute("usuario") Usuario usuarioForm,
+            @RequestParam(value = "rawPassword", required = false) String rawPassword,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+            RedirectAttributes attr) {
 
+        // 1) Cargar existente
+        Usuario existente = usuarioRepository.findById(usuarioForm.getIdusuario())
+                .orElse(null);
+        if (existente == null) {
+            attr.addFlashAttribute("mensajeError", "Usuario no encontrado.");
+            return "redirect:/superadmin/usuarios";
+        }
+
+        // 2) Validaciones (DNI, email, teléfono)
+        String dni = usuarioForm.getDni();
+        if (dni == null || !dni.matches("\\d{8}")) {
+            attr.addFlashAttribute("mensajeError", "El DNI debe tener 8 dígitos numéricos.");
+            return "redirect:/superadmin/usuarios/editar/" + usuarioForm.getIdusuario();
+        }
+        if (!dni.equals(existente.getDni()) && usuarioRepository.existsByDni(dni)) {
+            attr.addFlashAttribute("mensajeError", "Otro usuario ya usa ese DNI.");
+            return "redirect:/superadmin/usuarios/editar/" + usuarioForm.getIdusuario();
+        }
+
+        String email = usuarioForm.getEmail();
+        if (!email.equals(existente.getEmail()) && usuarioRepository.existsByEmail(email)) {
+            attr.addFlashAttribute("mensajeError", "Otro usuario ya usa ese correo.");
+            return "redirect:/superadmin/usuarios/editar/" + usuarioForm.getIdusuario();
+        }
+
+        String telefono = usuarioForm.getTelefono();
+        if (telefono == null || !telefono.matches("\\d{9}")) {
+            attr.addFlashAttribute("mensajeError", "El teléfono debe tener 9 dígitos numéricos.");
+            return "redirect:/superadmin/usuarios/editar/" + usuarioForm.getIdusuario();
+        }
+
+        // 3) Actualizar campos
+        existente.setDni(dni);
         existente.setNombres(usuarioForm.getNombres());
         existente.setApellidos(usuarioForm.getApellidos());
-        existente.setEmail(usuarioForm.getEmail());
-        existente.setTelefono(usuarioForm.getTelefono());
+        existente.setEmail(email);
+        existente.setTelefono(telefono);
         existente.setDireccion(usuarioForm.getDireccion());
         existente.setIdrol(usuarioForm.getIdrol());
         existente.setNotificarRecordatorio(usuarioForm.getNotificarRecordatorio());
         existente.setNotificarDisponibilidad(usuarioForm.getNotificarDisponibilidad());
 
-
+        // 4) Contraseña si se ingresó nueva
         if (rawPassword != null && !rawPassword.trim().isEmpty()) {
-            existente.setPasswordHash(new BCryptPasswordEncoder().encode(rawPassword));
+            existente.setPasswordHash(BCrypt.hashpw(rawPassword, BCrypt.gensalt()));
+            System.out.println(" Contraseña actualizada para usuario " + existente.getIdusuario());
+        } else {
+            System.out.println(" Se mantiene la contraseña previa para usuario " + existente.getIdusuario());
         }
 
+        // 5) Foto si se subió nueva
+        if (foto != null && !foto.isEmpty()) {
+            String ext = getExtension(foto.getOriginalFilename());
+            String nombreArchivo = "usuario-" + existente.getIdusuario() + ext;
+            fileUploadService.subirArchivoSobrescribible(foto, "usuarios", nombreArchivo);
+            existente.setImagen(nombreArchivo);
+            System.out.println("📸 Foto actualizada para usuario " + existente.getIdusuario() + ": " + nombreArchivo);
+        }
+
+        // 6) Persistir
         usuarioRepository.save(existente);
+        attr.addFlashAttribute("mensajeExito", "Usuario actualizado con éxito.");
         return "redirect:/superadmin/usuarios";
+    }
+
+    @GetMapping("/superadmin/usuarios/imagen/{id}")
+    @ResponseBody
+    public ResponseEntity<byte[]> verImagenUsuario(@PathVariable Integer id) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (u.getImagen() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        byte[] data = fileUploadService.descargarArchivoSobrescribible("usuarios", u.getImagen());
+        String mime = fileUploadService.obtenerMimeDesdeKey(u.getImagen());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mime))
+                .body(data);
     }
 
 
@@ -374,27 +461,72 @@ public class SuperAdminController {
         return "error";       // Asegúrate de tener un error.html
     }
     @PostMapping("/superadmin/usuarios/guardar")
-    public String guardarUsuario(@ModelAttribute Usuario usuario,
-                                 @RequestParam("rawPassword") String rawPassword,
-                                 RedirectAttributes attr) {
+    public String guardarUsuario(
+            @ModelAttribute Usuario usuario,
+            @RequestParam("rawPassword") String rawPassword,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+            RedirectAttributes attr) {
 
-        // Validar que el rol no sea Superadmin
+        // ——————————————————————————
+        // 1) Forzar siempre INSERT (nunca update)
+        usuario.setIdusuario(null);
+
+        // 2) Validar rol y campos
         if (usuario.getIdrol() != null && usuario.getIdrol() == 1) {
             attr.addFlashAttribute("mensajeError", "No está permitido crear usuarios con rol Superadmin.");
             return "redirect:/superadmin/usuarios/nuevo";
         }
 
+        String dni = usuario.getDni();
+        if (dni == null || !dni.matches("\\d{8}")) {
+            attr.addFlashAttribute("mensajeError", "El DNI debe tener exactamente 8 dígitos numéricos.");
+            return "redirect:/superadmin/usuarios/nuevo";
+        }
+        if (usuarioRepository.existsByDni(dni)) {
+            attr.addFlashAttribute("mensajeError", "Ya existe un usuario registrado con ese DNI.");
+            return "redirect:/superadmin/usuarios/nuevo";
+        }
+
+        String email = usuario.getEmail();
+        if (email == null || usuarioRepository.existsByEmail(email)) {
+            attr.addFlashAttribute("mensajeError", "Ya existe un usuario registrado con ese correo.");
+            return "redirect:/superadmin/usuarios/nuevo";
+        }
+
+        String telefono = usuario.getTelefono();
+        if (telefono == null || !telefono.matches("\\d{9}")) {
+            attr.addFlashAttribute("mensajeError", "El teléfono debe tener exactamente 9 dígitos numéricos.");
+            return "redirect:/superadmin/usuarios/nuevo";
+        }
+
+        // ——————————————————————————
+        // 3) Setear estado, timestamp y hash de la contraseña
         usuario.setEstado("activo");
         usuario.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        usuario.setPasswordHash(BCrypt.hashpw(rawPassword, BCrypt.gensalt()));
 
-        // Hashear contraseña
-        String passwordHash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
-        usuario.setPasswordHash(passwordHash);
+        // ——————————————————————————
+        // 4) Guardar nuevo usuario
+        Usuario saved = usuarioRepository.save(usuario);
+        System.out.println("✅ Nuevo usuario INSERTADO con ID " + saved.getIdusuario());
 
-        usuarioRepository.save(usuario);
+        // ——————————————————————————
+        // 5) Subir foto si viene archivo
+        if (foto != null && !foto.isEmpty()) {
+            String ext = getExtension(foto.getOriginalFilename());
+            String nombreArchivo = "usuario-" + saved.getIdusuario() + ext;
+            fileUploadService.subirArchivoSobrescribible(foto, "usuarios", nombreArchivo);
+            saved.setImagen(nombreArchivo);
+            usuarioRepository.save(saved);
+            System.out.println("   📸 Foto subida y asociada como: " + nombreArchivo);
+        }
+
         attr.addFlashAttribute("mensajeExito", "Usuario registrado exitosamente.");
         return "redirect:/superadmin/usuarios";
     }
+
+
+
 
     @GetMapping("/superadmin/asistencias")
     public String listarAsistencias(@RequestParam(defaultValue = "0") int page,

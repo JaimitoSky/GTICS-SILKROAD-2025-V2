@@ -533,19 +533,33 @@ public class CoordinadorController {
     @GetMapping("/usuario/imagen/{id}")
     @ResponseBody
     public ResponseEntity<byte[]> verImagenUsuario(@PathVariable("id") Integer idUsuario) {
-        Usuario usuario = usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        System.out.println("▶️ verImagenUsuario() invocado con idUsuario=" + idUsuario);
 
-        if (usuario.getImagen() == null)
+        Optional<Usuario> opt = usuarioRepository.findById(idUsuario);
+        if (opt.isEmpty()) {
+            System.out.println("❌ Usuario con id=" + idUsuario + " no encontrado");
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        Usuario usuario = opt.get();
 
-        byte[] imagen = fileUploadService.descargarArchivoSobrescribible("usuarios", usuario.getImagen());
-        String mime = fileUploadService.obtenerMimeDesdeKey(usuario.getImagen());
+        if (usuario.getImagen() == null) {
+            System.out.println("ℹ️ Usuario id=" + idUsuario + " no tiene imagen asociada");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        String key = usuario.getImagen();
+        System.out.println("📥 Descargando archivo S3 con key: usuarios/" + key);
+        byte[] imagen = fileUploadService.descargarArchivoSobrescribible("usuarios", key);
+
+        String mime = fileUploadService.obtenerMimeDesdeKey(key);
+        System.out.println("🖼️ Tipo de contenido detectado: " + mime);
+        System.out.println("✅ Imagen para usuario " + idUsuario + " recuperada correctamente (" + imagen.length + " bytes)");
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(mime))
                 .body(imagen);
     }
+
     @GetMapping("/reservas-hoy")
     public String verReservasDeSede(
             @RequestParam(required = false) Integer sedeId,

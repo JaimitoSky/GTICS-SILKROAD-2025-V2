@@ -35,7 +35,11 @@
                     <h1 class="h3 d-inline align-middle">Editar Usuario</h1>
                 </div>
 
-                <form th:action="@{/superadmin/usuarios/actualizar}" method="post" th:object="${usuario}">
+                <form
+                        th:action="@{/superadmin/usuarios/actualizar}"
+                        method="post"
+                        th:object="${usuario}"
+                        enctype="multipart/form-data">
                     <input type="hidden" th:field="*{idusuario}" />
                     <div class="row">
                         <!-- Columna Izquierda -->
@@ -61,6 +65,36 @@
                                         <label class="form-label">Email</label>
                                         <input type="email" th:field="*{email}" class="form-control" required />
                                     </div>
+
+
+                                    <!-- Preview de foto actual -->
+                                    <div class="mb-3 text-center">
+                                        <img
+                                                th:if="${usuario.imagen != null}"
+                                                th:src="@{/superadmin/usuarios/imagen/{id}(id=${usuario.idusuario})}"
+                                                alt="Foto actual"
+                                                class="rounded-circle border"
+                                                style="width:120px;height:120px;object-fit:cover;" />
+
+                                        <img
+                                                th:if="${usuario.imagen == null}"
+                                                src="/img/avatar-placeholder.png"
+                                                alt="Sin foto"
+                                                class="rounded-circle border"
+                                                style="width:120px;height:120px;object-fit:cover;" />
+                                    </div>
+
+                                    <!-- Input para nueva foto -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Cambiar foto de perfil</label>
+                                        <input
+                                                type="file"
+                                                name="foto"
+                                                class="form-control"
+                                                accept="image/*" />
+                                        <small class="text-muted">Dejar en blanco para mantener la actual.</small>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -72,10 +106,14 @@
                                     <h5 class="card-title mb-0">Credenciales y Contacto</h5>
                                 </div>
                                 <div class="card-body">
+                                    <!-- Cambio de contraseña opcional -->
                                     <div class="mb-3">
                                         <label class="form-label">Nueva Contraseña</label>
                                         <input type="password" name="rawPassword" class="form-control" />
-                                        <small class="text-muted">Dejar en blanco para mantener la contraseña actual</small>
+                                        <small class="text-muted">
+                                            Dejar en blanco para mantener la contraseña actual.<br/>
+                                            <strong>La contraseña actual no se puede mostrar</strong> (está segura con BCrypt).
+                                        </small>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Teléfono</label>
@@ -94,14 +132,6 @@
                                         </select>
                                     </div>
 
-                                    <div class="mb-3 form-check">
-                                        <input type="checkbox" th:field="*{notificarRecordatorio}" class="form-check-input" id="recordatorio" />
-                                        <label class="form-check-label" for="recordatorio">Recibir recordatorios</label>
-                                    </div>
-                                    <div class="mb-3 form-check">
-                                        <input type="checkbox" th:field="*{notificarDisponibilidad}" class="form-check-input" id="disponibilidad" />
-                                        <label class="form-check-label" for="disponibilidad">Notificar disponibilidad</label>
-                                    </div>
                                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                                     <a th:href="@{/superadmin/usuarios}" class="btn btn-secondary">Cancelar</a>
                                 </div>

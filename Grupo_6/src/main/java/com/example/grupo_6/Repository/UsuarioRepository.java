@@ -46,11 +46,21 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     Usuario findByEmail(String email);
 
-    @Query("SELECT u.email AS email, u.nombres AS nombres, u.apellidos AS apellidos, u.telefono AS telefono, u.direccion AS direccion FROM Usuario u WHERE u.idusuario = ?1")
+    @Query("""
+        SELECT 
+          u.email      AS email,
+          u.nombres    AS nombres,
+          u.apellidos  AS apellidos,
+          u.telefono   AS telefono,
+          u.direccion  AS direccion,
+          u.imagen     AS imagen,
+          u.idusuario  AS idUsuario
+        FROM Usuario u
+        WHERE u.idusuario = ?1
+        """)
     CoordinadorPerfilDTO obtenerPerfilCoordinadorPorId(Integer id);
 
     Usuario findByIdusuario(Integer idusuario);
-
 
     //
 
@@ -108,6 +118,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Query("SELECT u FROM Usuario u WHERE CAST(u.idrol AS string) LIKE %:valor%")
     List<Usuario> buscarPorRol(@Param("valor") String valor);
     Usuario findByDni(String dni);
+
+    boolean existsByDni(String dni);
+    boolean existsByEmail(String email);
+
 }
 
 
