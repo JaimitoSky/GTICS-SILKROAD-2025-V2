@@ -6,4 +6,5 @@ public interface CoordinadorPerfilDTO {
     String getApellidos();
     String getTelefono();
     String getDireccion();
+    String getImagen();
 }

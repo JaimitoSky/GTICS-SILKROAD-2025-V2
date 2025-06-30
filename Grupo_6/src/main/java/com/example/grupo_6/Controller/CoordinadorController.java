@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -528,8 +530,22 @@ public class CoordinadorController {
         return "redirect:/coordinador/reservas-hoy";
     }
 
-    // CoordinadorController.java
+    @GetMapping("/usuario/imagen/{id}")
+    @ResponseBody
+    public ResponseEntity<byte[]> verImagenUsuario(@PathVariable("id") Integer idUsuario) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        if (usuario.getImagen() == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+        byte[] imagen = fileUploadService.descargarArchivoSobrescribible("usuarios", usuario.getImagen());
+        String mime = fileUploadService.obtenerMimeDesdeKey(usuario.getImagen());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mime))
+                .body(imagen);
+    }
     @GetMapping("/reservas-hoy")
     public String verReservasDeSede(
             @RequestParam(required = false) Integer sedeId,

@@ -152,7 +152,20 @@
                     <i class="bi bi-person-circle text-primary"></i> Mi Perfil
                 </h4>
 
-                <div class="profile-card"> <form th:action="@{/coordinador/perfil/actualizar}" method="post">
+                <div class="profile-card">
+                    <!-- Bloque de imagen del coordinador -->
+                    <div class="mb-4 d-flex align-items-center gap-3">
+                        <img th:src="@{${perfil.imagen != null
+                                ? '/coordinador/usuario/imagen/' + perfil.idusuario
+                                : '/img/avatar-placeholder.png'}}"
+                             alt="Foto del coordinador"
+                             class="rounded-circle border"
+                             style="width: 100px; height: 100px; object-fit: cover;" />
+                        <div>
+                            <p class="mb-0 fw-bold">Foto de perfil</p>
+                        </div>
+                    </div> <form th:action="@{/coordinador/perfil/actualizar}" method="post">
+
                     <div class="mb-4"> <label class="form-label">Nombres</label>
                         <input type="text" class="form-control" th:value="${perfil.nombres}" readonly>
                     </div>

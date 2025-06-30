@@ -153,11 +153,44 @@
                     <i class="bi bi-calendar-check-fill text-success"></i> Detalle de Reserva
                 </h2>
 
-                <div class="reservation-detail-card"> <p><strong>Usuario:</strong> <span th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></span></p>
-                    <p><strong>Fecha de reserva:</strong> <span th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy HH:mm')}"></span></p>
-                    <p><strong>Servicio:</strong> <span th:text="${reserva.sedeServicio.servicio.nombre}"></span></p>
-                    <p><strong>Sede:</strong> <span th:text="${reserva.sedeServicio.sede.nombre}"></span></p>
-                    <p><strong>Estado:</strong> <span th:text="${reserva.estado.nombre}"></span></p>
+                <div class="reservation-detail-card">
+                    <!-- Imagen del usuario -->
+                    <div class="mb-3 d-flex align-items-center gap-3">
+                        <img th:src="@{${reserva.usuario.imagen != null
+                                ? '/coordinador/usuario/imagen/' + reserva.usuario.idusuario
+                                : '/img/avatar-placeholder.png'}}"
+                             alt="Foto del usuario"
+                             class="rounded-circle border"
+                             style="width: 80px; height: 80px; object-fit: cover;" />
+                        <p class="mb-0">
+                            <strong>Usuario:</strong>
+                            <span th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></span>
+                        </p>
+                    </div>
+
+                    <!-- Fecha de reserva -->
+                    <p>
+                        <strong>Fecha de reserva:</strong>
+                        <span th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}"></span>
+                    </p>
+
+                    <!-- Horario registrado -->
+                    <p>
+                        <strong>Horario registrado:</strong>
+                        <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'hh:mm a')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'hh:mm a')}"></span>
+                    </p>
+
+                    <!-- Servicio -->
+                    <p>
+                        <strong>Servicio:</strong>
+                        <span th:text="${reserva.sedeServicio.nombrePersonalizado + ' - ' + reserva.sedeServicio.servicio.nombre}"></span>
+                    </p>
+
+                    <!-- Sede -->
+                    <p>
+                        <strong>Sede:</strong>
+                        <span th:text="${reserva.sedeServicio.sede.nombre}"></span>
+                    </p>
                 </div>
 
                 <hr class="my-4">
@@ -171,83 +204,86 @@
                     </div>
                     <ul class="incidencia-list" th:if="${!#lists.isEmpty(incidencias)}">
                         <li th:each="inc : ${incidencias}">
-                            <strong>Fecha:</strong> <span th:text="${#temporals.format(inc.fechaLocal, 'dd/MM/yyyy HH:mm')}"></span><br>
-                            <strong>Descripción:</strong> <span th:text="${inc.descripcion}"></span>
+                            <strong>Fecha:</strong>
+                            <span th:text="${#temporals.format(inc.fechaLocal, 'dd/MM/yyyy HH:mm')}"></span><br>
+                            <strong>Descripción:</strong>
+                            <span th:text="${inc.descripcion}"></span>
                         </li>
                     </ul>
                 </div>
             </div>
         </main>
 
+
         <footer class="footer mt-auto py-3">
-            <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
-            </div>
-            <div class="container text-center text-muted small">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
+                <div class="text-center mt-5 mb-3">
+                    <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+                </div>
+                <div class="container text-center text-muted small">
+                    Municipalidad de San Miguel © 2025
+                </div>
+            </footer>
+        </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // Función para actualizar la hora y la fecha en la navbar
-    function updateDateTime() {
-        const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
-        const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Función para actualizar la hora y la fecha en la navbar
+        function updateDateTime() {
+            const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
+            const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
 
-        if (relojElement || fechaElement) {
-            const now = new Date();
-            // Formato de hora (ej: 01:19:03 a. m.)
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-            const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
+            if (relojElement || fechaElement) {
+                const now = new Date();
+                // Formato de hora (ej: 01:19:03 a. m.)
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
 
-            // Formato de fecha (ej: 12/06/2025)
-            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-            const dateString = now.toLocaleDateString('es-PE', dateOptions);
+                // Formato de fecha (ej: 12/06/2025)
+                const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const dateString = now.toLocaleDateString('es-PE', dateOptions);
 
-            if (relojElement) {
-                relojElement.textContent = timeString;
-            }
-            if (fechaElement) {
-                fechaElement.textContent = dateString;
-            }
-        }
-    }
-
-    // Actualizar cada segundo
-    setInterval(updateDateTime, 1000);
-    // Llamar al inicio para mostrar la hora inmediatamente
-    updateDateTime();
-
-    // Lógica para el toggle de la sidebar
-    document.addEventListener("DOMContentLoaded", function () {
-        const sidebarToggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
-        const mainContent = document.querySelector('.main');
-
-        if (sidebarToggle && sidebar && mainContent) {
-            sidebarToggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-                // Guarda el estado en localStorage
-                localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
-            });
-
-            // Recupera el estado guardado al cargar la página
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
-                document.body.classList.add('sidebar-collapsed');
+                if (relojElement) {
+                    relojElement.textContent = timeString;
+                }
+                if (fechaElement) {
+                    fechaElement.textContent = dateString;
+                }
             }
         }
-    });
 
-    // Se eliminó la lógica de geolocalización, el modal de "fuera de zona"
-    // y el filtro de tabla ya que no son relevantes para la vista de detalle de reserva.
-    /*]]>*/
-</script>
-</body>
-</html>
+        // Actualizar cada segundo
+        setInterval(updateDateTime, 1000);
+        // Llamar al inicio para mostrar la hora inmediatamente
+        updateDateTime();
+
+        // Lógica para el toggle de la sidebar
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarToggle = document.querySelector(".js-sidebar-toggle");
+            const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
+            const mainContent = document.querySelector('.main');
+
+            if (sidebarToggle && sidebar && mainContent) {
+                sidebarToggle.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.body.classList.toggle("sidebar-collapsed");
+                    // Guarda el estado en localStorage
+                    localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
+                });
+
+                // Recupera el estado guardado al cargar la página
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    document.body.classList.add('sidebar-collapsed');
+                }
+            }
+        });
+
+        // Se eliminó la lógica de geolocalización, el modal de "fuera de zona"
+        // y el filtro de tabla ya que no son relevantes para la vista de detalle de reserva.
+        /*]]>*/
+    </script>
+    </body>
+    </html>
