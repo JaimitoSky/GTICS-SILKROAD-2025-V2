@@ -240,23 +240,57 @@
                                     <option value="">Seleccione un servicio</option>
                                     <option th:each="ss : ${sede.sedeServicios}"
                                             th:value="${ss.idSedeServicio}"
+
+
                                             th:text="${ss.nombrePersonalizado != null ? ss.nombrePersonalizado : ss.servicio.nombre}">
                                     </option>
                                 </select>
                             </div>
 
-                            <!-- Botón y campo de aforo máximo -->
+                            <!-- Formulario de aforo: ahora con id en el input -->
                             <div class="col-md-6">
                                 <form onsubmit="return actualizarAforoMasivo(event)" class="d-flex gap-2">
-                                    <input type="number" name="aforoMaximo" min="1" required class="form-control" placeholder="Nuevo aforo" />
+                                    <input id="aforo-input"
+                                           type="number"
+                                           name="aforoMaximo"
+                                           min="1"
+                                           required
+                                           class="form-control"
+                                           placeholder="Aforo"
+                                    />
                                     <button class="btn btn-outline-dark">Actualizar Aforo</button>
                                 </form>
                             </div>
                         </div>
 
 
-                        <h5 class="mt-4">Horarios Disponibles Registrados</h5>
-                        <div id="tabla-horarios"></div>
+
+
+                        <ul id="dias-pills" class="nav nav-pills mb-3">
+                            <li th:each="dia, iterStat : ${listaHorariosAtencion}"
+                                th:if="${dia.activo}"
+                                class="nav-item">
+                                <button class="nav-link disabled"
+                                        type="button"
+                                        th:classappend="${iterStat.index == 0} ? ' active'"
+                                        th:attr="data-dia=${dia.diaSemana}">
+                                    <span th:text="${dia.diaSemana}">Lunes</span>
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Mostrar/ocultar horarios -->
+                        <div class="mb-3">
+                            <button type="button" id="btn-toggle-lista" class="btn btn-outline-secondary">
+                                Mostrar horarios
+                            </button>
+                        </div>
+                        <!-- Lista de horarios para el día seleccionado -->
+                        <div id="lista-horarios-dia">
+                            <p class="text-center text-muted">Seleccione servicio y día para ver horarios</p>
+                        </div>
+
+
                     </div>
                 </div>
 
@@ -273,6 +307,8 @@
                 const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
                 const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
+
+
                 if (!token || !header) {
                     console.error("CSRF token o header no encontrados en el HTML");
                     return {};
@@ -281,151 +317,153 @@
                 return { [header]: token };
             }
 
-            function generarSelectHora(name, desde, hasta) {
-                let html = `<select class='form-select' name='${name}' required>`;
-                for (let h = desde; h <= hasta; h++) {
-                    const valor = (h < 10 ? '0' + h : h) + ':00';
-                    html += `<option value='${valor}'>${valor}</option>`;
-                }
-                html += '</select>';
-                return html;
-            }
-
-            function agregarHorario(event, sedeServicioId, diaSemana) {
-                event.preventDefault();
-                const form = event.target;
-                const inicio = form.querySelector("select[name=inicio]").value;
-                const fin = form.querySelector("select[name=fin]").value;
-                const aforo = form.querySelector("input[name=aforoMaximo]").value;
-
-                if (inicio >= fin) {
-                    alert("La hora de inicio debe ser menor que la hora de fin.");
-                    return false;
-                }
-
-                const formData = new URLSearchParams();
-                formData.append("sedeServicioId", sedeServicioId);
-                formData.append("horaInicio", inicio);
-                formData.append("horaFin", fin);
-                formData.append("diaSemana", diaSemana);
-                formData.append("aforoMaximo", aforo);
-
-                fetch("/api/horarios-disponibles", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        ...getCsrfHeaders()
-                    },
-                    body: formData
-                }).then(async res => {
-                    const msg = await res.text();
-                    if (res.ok) {
-                        document.getElementById("servicio-select").dispatchEvent(new Event("change"));
-                    } else {
-                        alert("Error: " + msg);
-                    }
-                }).catch(err => {
-                    console.error("Error en el fetch:", err);
-                    alert("Ocurrió un error al enviar los datos.");
-                });
-
-                return false;
-            }
-
-            function toggleHorario(idhorario, sedeServicioId, esActivo) {
-                const accion = esActivo ? "desactivar" : "activar";
-                if (confirm(`¿Seguro que deseas ${accion} este horario?`)) {
-                    fetch(`/api/horarios-disponibles/${idhorario}/toggle`, {
-                        method: "POST",
-                        headers: getCsrfHeaders()
-                    }).then(res => {
+            // 2) Función para activar/desactivar
+            function toggleHorario(idHorario, idSedeServicio, esActivo) {
+                const accion = esActivo ? 'desactivar' : 'activar';
+                if (!confirm(`¿Seguro que deseas ${accion} este horario?`)) return;
+                fetch(`/api/horarios-disponibles/${idHorario}/toggle`, {
+                    method: 'POST',
+                    headers: getCsrfHeaders()
+                })
+                    .then(res => {
                         if (res.ok) {
-                            document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                            // refrescamos el día activo volviendo a "clickear" la pestaña activa
+                            const activo = document.querySelector('#dias-pills .nav-link.active');
+                            if (activo) activo.click();
                         } else {
-                            alert(`Error al ${accion} horario.`);
+                            res.text().then(msg => alert(`Error al ${accion}: ${msg}`));
                         }
-                    }).catch(err => {
-                        console.error("Error en la petición:", err);
-                        alert("Ocurrió un error al cambiar el estado del horario.");
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error en la petición al servidor');
                     });
-                }
             }
 
-            document.addEventListener("DOMContentLoaded", function () {
-                const selectServicio = document.getElementById("servicio-select");
-                const tablaHorarios = document.getElementById("tabla-horarios");
-                const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-                selectServicio.addEventListener("change", function () {
-                    const sedeServicioId = this.value;
-                    tablaHorarios.innerHTML = `<p class="text-center">Cargando...</p>`;
+            document.addEventListener("DOMContentLoaded", () => {
+                const servicioSelect     = document.getElementById("servicio-select");
+                const diasPills          = document.querySelectorAll("#dias-pills .nav-link");
+                const contenedorHorarios = document.getElementById("lista-horarios-dia");
 
-                    if (!sedeServicioId) return;
+                const aforoInput = document.getElementById("aforo-input");
 
-                    fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            const porDia = {};
-                            diasSemana.forEach(d => porDia[d] = []);
-                            data.forEach(h => {
-                                if (porDia[h.diaSemana]) {
-                                    porDia[h.diaSemana].push(h);
-                                }
-                            });
-
-                            tablaHorarios.innerHTML = '';
-                            diasSemana.forEach(dia => {
-                                const cont = document.createElement("div");
-                                cont.classList.add("mb-4");
-
-                                let html = `<h6 class="fw-bold">${dia}</h6>
-                        <table class="table table-bordered">
-                            <thead>
-                              <tr>
-                                <th>Inicio</th>
-                                <th>Fin</th>
-                                <th>Aforo Máximo</th>
-                                <th>Acciones</th>
-                              </tr>
-                            </thead>
-                            <tbody>`;
-
-                                if (porDia[dia].length > 0) {
-                                    porDia[dia].filter(h => h.editable === true || h.editable === 'true').forEach(h => {
-                                        // ⛔️ Si no es editable, no lo mostramos
-                                        if (!h.editable) return;
-
-                                        const esActivo = h.activo === true || h.activo === 'true';
-                                        html += `
-<tr>
-  <td>${h.horaInicio}</td>
-  <td>${h.horaFin}</td>
-  <td>${h.aforoMaximo}</td>
-  <td>
-    <button type="button"
-            class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}"
-            onclick="toggleHorario(${h.idhorario}, '${sedeServicioId}', ${esActivo})">
-      ${esActivo ? 'Desactivar' : 'Activar'}
-    </button>
-  </td>
-</tr>`;
-                                    });
-                                } else {
-                                    html += `<tr><td colspan="4" class="text-center text-muted">Sin horarios registrados</td></tr>`;
-                                }
-
-
-
-                                cont.innerHTML = html;
-                                tablaHorarios.appendChild(cont);
-                            });
-                        })
-                        .catch(err => {
-                            tablaHorarios.innerHTML = `<p class="text-danger text-center">Error al cargar horarios</p>`;
-                            console.error("Error:", err);
-                        });
+                servicioSelect.addEventListener("change", () => {
+                    // …tu código existente para habilitar días…
+                    // ahora actualizamos el input de aforo:
+                    const opt = servicioSelect.selectedOptions[0];
+                    if (opt && opt.dataset.aforo) {
+                        aforoInput.value = opt.dataset.aforo;
+                    } else {
+                        aforoInput.value = "";
+                    }
+                    // opcional: si quieres que el placeholder cambie
+                    // aforoInput.placeholder = opt && opt.dataset.aforo ? "" : "Aforo";
                 });
+
+
+                // botón para expandir/ocultar la lista
+                const btnToggle   = document.getElementById("btn-toggle-lista");
+                const listaDia    = document.getElementById("lista-horarios-dia");
+
+                btnToggle.addEventListener("click", () => {
+                    const isHidden = listaDia.style.display === "none";
+                    listaDia.style.display = isHidden ? "block" : "none";
+                    btnToggle.textContent  = isHidden ? "Ocultar horarios" : "Mostrar horarios";
+                });
+
+
+
+                // Al cambiar servicio: habilita/deshabilita días y auto-clic en el primero
+                servicioSelect.addEventListener("change", () => {
+                    const tieneServicio = !!servicioSelect.value;
+                    diasPills.forEach(btn => {
+                        btn.classList.toggle("disabled", !tieneServicio);
+                    });
+                    contenedorHorarios.innerHTML = `<p class="text-center text-muted">
+        ${tieneServicio
+                        ? "Seleccione un día para ver horarios"
+                        : "Seleccione servicio y día para ver horarios"}
+      </p>`;
+
+                    if (tieneServicio) {
+                        // auto-clic primer día activo
+                        const primero = Array.from(diasPills).find(b => !b.classList.contains("disabled"));
+                        if (primero) primero.click();
+                    }
+                });
+
+                // Al hacer clic en un día:
+                diasPills.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        if (btn.classList.contains("disabled")) return;
+                        // pinta la pestaña activa
+                        diasPills.forEach(b => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        // carga horarios de ese día
+                        loadHorariosDia(btn.getAttribute("data-dia"));
+                    });
+                });
+
+                // Función que llama al endpoint y muestra la lista
+                async function loadHorariosDia(diaSemana) {
+                    const idSS = servicioSelect.value;
+                    contenedorHorarios.innerHTML = `<p class="text-center">Cargando…</p>`;
+
+                    try {
+                        const res  = await fetch(`/api/horarios-disponibles?sedeServicioId=${idSS}`, {
+                            headers: getCsrfHeaders()
+                        });
+                        const data = await res.json();
+
+                        // Filtra solo el día y editables
+                        const lista = data.filter(h =>
+                            h.diaSemana === diaSemana &&
+                            (h.editable === true || h.editable === 'true')
+                        );
+
+                        if (lista.length === 0) {
+                            contenedorHorarios.innerHTML = `<p class="text-center text-muted">
+            No hay horarios en ${diaSemana}
+          </p>`;
+                            return;
+                        }
+
+                        // *** AQUÍ *** asignamos el aforo del primer horario
+                        aforoInput.value = lista[0].aforoMaximo;
+
+                        // Construye un <ul> con cada horario y su botón
+                        const ul = document.createElement("ul");
+                        ul.className = "list-group";
+                        lista.forEach(h => {
+                            const esActivo = h.activo === true || h.activo === 'true';
+                            const li = document.createElement("li");
+                            li.className = "list-group-item d-flex justify-content-between align-items-center";
+                            li.innerHTML = `
+            <span>${h.horaInicio} - ${h.horaFin} |
+                  Estado: <strong>${esActivo ? 'Activo' : 'Inactivo'}</strong>
+            </span>
+            <button class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}">
+              ${esActivo ? 'Desactivar' : 'Activar'}
+            </button>
+          `;
+                            li.querySelector("button").onclick = () =>
+                                toggleHorario(h.idhorario, idSS, esActivo);
+                            ul.append(li);
+                        });
+
+                        contenedorHorarios.innerHTML = "";
+                        contenedorHorarios.append(ul);
+
+                    } catch (err) {
+                        console.error(err);
+                        contenedorHorarios.innerHTML = `<p class="text-danger text-center">
+          Error al cargar horarios
+        </p>`;
+                    }
+                }
             });
+
 
 
 
@@ -472,6 +510,8 @@
             }
 
         </script>
+
+
 
 
 

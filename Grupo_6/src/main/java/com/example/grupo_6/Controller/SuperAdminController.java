@@ -1105,7 +1105,6 @@ public class SuperAdminController {
 
 
 
-
     @PostMapping("/superadmin/sedes/configurar/servicios/toggle-estado")
     public String toggleEstado(@RequestParam("idsedeServicio") Integer idsedeServicio,
                                RedirectAttributes attr) {
