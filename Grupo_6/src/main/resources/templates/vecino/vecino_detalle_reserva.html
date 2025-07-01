@@ -75,7 +75,7 @@
                     <p><strong>Comprobante de pago:</strong></p>
 
                     <!-- Caso BANCO: muestro la imagen subida a S3 -->
-                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name() == 'banco'}">
+                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name().toLowerCase() == 'banco'}">
                         <img th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
                              alt="Comprobante de pago"
                              class="img-thumbnail border"
@@ -84,9 +84,10 @@
                     </div>
 
                     <!-- Caso ONLINE: botón que abre el modal del voucher -->
-                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name() == 'online'}"
+                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name().toLowerCase() == 'online'}"
                          class="text-center mt-4">
-                        <button type="button"
+
+                    <button type="button"
                                 class="btn btn-primary"
                                 data-bs-toggle="modal"
                                 data-bs-target="#voucherModal">
@@ -97,9 +98,11 @@
                     <!-- Opción alternativa: Pago con tarjeta (solo si no hay comprobante, aún está a tiempo y la reserva está pendiente) -->
                     <div class="form-group mt-4 text-center"
                          th:if="${reserva.pago?.comprobante == null
+             and reserva.fechaLimitePago != null
              and ahora.isBefore(reserva.fechaLimitePago)
              and reserva.estado.nombre == 'pendiente'}">
-                        <p class="fw-bold mb-2">¿Prefieres pagar con tarjeta?</p>
+
+                    <p class="fw-bold mb-2">¿Prefieres pagar con tarjeta?</p>
                         <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}" class="btn btn-success">
                             Pagar con tarjeta
                         </a>
@@ -108,14 +111,14 @@
 
 
                     <!-- Mostrar mensaje de tiempo expirado -->
-                    <div th:if="${reserva.pago?.comprobante == null and ahora.isAfter(reserva.fechaLimitePago)}">
+                    <div th:if="${reserva.pago?.comprobante == null and reserva.fechaLimitePago != null and ahora.isAfter(reserva.fechaLimitePago)}">
                         <div class="alert alert-danger text-center fw-bold">
                             Tiempo de pago expirado. Ya no puedes subir un comprobante.
                         </div>
                     </div>
 
                     <!-- Mostrar formulario si el tiempo de pago aún está vigente -->
-                    <div th:if="${reserva.pago?.comprobante == null and ahora.isBefore(reserva.fechaLimitePago)}">
+                    <div th:if="${reserva.pago?.comprobante == null and reserva.fechaLimitePago != null and ahora.isBefore(reserva.fechaLimitePago)}">
                         <p>No se ha subido ningún comprobante.</p>
 
                         <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">

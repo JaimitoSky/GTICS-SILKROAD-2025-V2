@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="chatbot">
+    <!-- Guardar ID del usuario en localStorage -->
+    <script th:inline="javascript">
+        const idUsuario = /*[[${session.usuario.idusuario}]]*/ '0';
+        localStorage.setItem("idUsuario", idUsuario);
+    </script>
+
+    <!-- Incrustar el chatbot en iframe -->
+    <iframe id="chatbot-frame"
+            src="/chatbot-container.html"
+            style="position: fixed; bottom: 10px; right: 10px; width: 370px; height: 500px; border: none; z-index: 9999;">
+    </iframe>
+</div>
+</body>
+</html>

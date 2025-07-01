@@ -1,22 +1,13 @@
-<!-- Script para setear user-id como idusuario -->
+<!-- Guardar el ID del usuario en localStorage -->
 <script th:inline="javascript">
     /*<![CDATA[*/
     const idUsuario = /*[[${session.usuario.idusuario}]]*/ '0';
-    console.log("🧪 ID de usuario desde sesión:", idUsuario);
-
-    window.addEventListener('dfMessengerLoaded', function () {
-        const dfMessengerEl = document.querySelector('df-messenger');
-        if (dfMessengerEl) {
-            dfMessengerEl.setAttribute('user-id', idUsuario);
-            console.log("✅ user-id seteado en chatbot:", idUsuario);
-        }
-    });
+    localStorage.setItem("idUsuario", idUsuario);
+    console.log("🧪 ID usuario guardado en localStorage:", idUsuario);
     /*]]>*/
 </script>
 
-
-
-<!-- Chatbot Dialogflow con user-id personalizado -->
+<!-- Dialogflow Messenger -->
 <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 <df-messenger
         id="chatbot"
@@ -25,3 +16,15 @@
         agent-id="86beb279-f2f8-4833-a2a5-62510565b625"
         language-code="es">
 </df-messenger>
+
+<!-- Setear el user-id después de cargar el componente -->
+<script>
+    window.addEventListener('dfMessengerLoaded', function () {
+        const idUsuario = localStorage.getItem("idUsuario") || "0";
+        const dfMessengerEl = document.querySelector('df-messenger');
+        if (dfMessengerEl) {
+            dfMessengerEl.setAttribute('user-id', idUsuario);
+            console.log("✅ user-id seteado desde localStorage:", idUsuario);
+        }
+    });
+</script>

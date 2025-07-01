@@ -7,16 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.math.BigDecimal;
+import java.time.*;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/chatbot")
 @CrossOrigin(origins = "*")
 public class ChatbotController {
+
+    @Autowired
+    private PagoRepository pagoRepository;
+
 
     @Autowired
     private SedeRepository sedeRepository;
@@ -87,26 +89,21 @@ public class ChatbotController {
         }
         if ("OpcionesBot".equals(intent)) {
             Map<String, Object> mensaje1 = Map.of(
-                    "text", Map.of("text", List.of("🤖 ¡Hola! Aquí tienes lo que puedo hacer por ti:"))
+                    "text", Map.of("text", List.of("🤖 ¡Hola! Soy tu asistente de reservas deportivas. Puedo ayudarte con lo siguiente:"))
             );
 
             Map<String, Object> mensaje2 = Map.of(
                     "text", Map.of("text", List.of(
-                            "1️⃣ Ver los servicios deportivos disponibles\n" +
-                                    "2️⃣ Consultar tus reservas (hoy, mañana o todas)\n" +
-                                    "3️⃣ Ver canchas disponibles por sede y fecha"))
+                            "🔎 *Consultar servicios disponibles* – Pregunta: \"¿Qué servicios hay?\"\n" +
+                                    "📅 *Ver tus reservas* – Pregunta: \"¿Cuáles son mis reservas?\"\n" +
+                                    "📝 *Hacer una reserva* – Ejemplo: \"Quiero reservar en Magdalena el viernes a las 6pm\"\n"
+                    ))
             );
 
-            Map<String, Object> mensaje3 = Map.of(
-                    "text", Map.of("text", List.of(
-                            "💬 Ejemplos que puedes decirme:\n" +
-                                    "• ¿Qué servicios hay?\n" +
-                                    "• ¿Cuáles son mis reservas?\n" +
-                                    "• ¿Qué canchas hay libres mañana en Magdalena?"))
-            );
 
-            return ResponseEntity.ok(Map.of("fulfillmentMessages", List.of(mensaje1, mensaje2, mensaje3)));
+            return ResponseEntity.ok(Map.of("fulfillmentMessages", List.of(mensaje1, mensaje2)));
         }
+
 
 
 
@@ -138,23 +135,28 @@ public class ChatbotController {
             List<Reserva> reservasUsuario = reservaRepository.findByUsuarioIdusuario(usuario.getIdusuario());
 
             if (reservasUsuario.isEmpty()) {
-                return ResponseEntity.ok(Map.of(
-                        "fulfillmentText", "No tienes reservas registradas por el momento."
-                ));
+                return ResponseEntity.ok(Map.of("fulfillmentText", "No tienes reservas registradas por el momento."));
             }
 
-            StringBuilder respuestaReservas = new StringBuilder("🗓 Estas son tus reservas:\n");
+            List<Map<String, Object>> mensajes = new ArrayList<>();
+
+            mensajes.add(Map.of("text", Map.of("text", List.of("🗓 Estas son tus reservas recientes:"))));
+
             for (Reserva r : reservasUsuario) {
                 String nombreServicio = r.getSedeServicio().getServicio().getNombre();
+                String nombreSede = r.getSedeServicio().getSede().getNombre();
                 String fecha = r.getFechaReserva().toString();
                 String hora = r.getHorarioDisponible().getHoraInicio().toString();
-                respuestaReservas.append("• ").append(nombreServicio)
-                        .append(" el ").append(fecha)
-                        .append(" a las ").append(hora).append("\n");
+                String estado = r.getEstado().getNombre();
+
+                String texto = String.format("📌 %s en %s\n📅 %s a las %s\n📍 Estado: %s",
+                        nombreServicio, nombreSede, fecha, hora, estado);
+                mensajes.add(Map.of("text", Map.of("text", List.of(texto))));
             }
 
-            return ResponseEntity.ok(Map.of("fulfillmentText", respuestaReservas.toString()));
+            return ResponseEntity.ok(Map.of("fulfillmentMessages", mensajes));
         }
+
 
         // Parámetros comunes
         String sede = "";
@@ -289,21 +291,56 @@ public class ChatbotController {
                     return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró la relación entre la sede y el servicio."));
                 }
 
+                // 📥 Leer el método de pago enviado por Dialogflow (default = banco)
+                String metodoPagoStr = parametros.get("metodo_pago") != null ? parametros.get("metodo_pago").toString() : "banco";
+                Pago.Metodo metodoPago = metodoPagoStr.equalsIgnoreCase("online") ? Pago.Metodo.online : Pago.Metodo.banco;
+
+                // 1. Crear el objeto Pago
+                Pago pago = new Pago();
+                pago.setUsuario(usuario);
+                pago.setMetodo(metodoPago);
+                pago.setMonto(BigDecimal.valueOf(sedeServicioOpt.get().getTarifa().getMonto()));
+                pago.setEstado(estado);
+
+                // 2. Guardar el pago antes de asignarlo a la reserva
+                pagoRepository.save(pago);
+
+                // 3. Crear y guardar la reserva
                 Reserva nuevaReserva = new Reserva();
                 nuevaReserva.setUsuario(usuario);
                 nuevaReserva.setHorarioDisponible(horario);
                 nuevaReserva.setFechaReserva(fecha);
                 nuevaReserva.setEstado(estado);
                 nuevaReserva.setSedeServicio(sedeServicioOpt.get());
+                nuevaReserva.setPago(pago); // asignar el pago guardado
+
+// ⚠️ Agregar las siguientes dos líneas:
+                LocalDateTime fechaCreacion = LocalDateTime.now();
+                nuevaReserva.setFechaCreacion(fechaCreacion);
+                nuevaReserva.setFechaLimitePago(fechaCreacion.plusHours(2));
 
                 reservaRepository.save(nuevaReserva);
 
-                return ResponseEntity.ok(Map.of("fulfillmentText", "✅ ¡Reserva registrada con éxito para el " + fecha + " a las " + hora + "!"));
+
+                reservaRepository.save(nuevaReserva);
+
+                // 4. Mensaje personalizado según método de pago
+                String mensaje;
+                if (metodoPago == Pago.Metodo.banco) {
+                    mensaje = "✅ ¡Reserva registrada para el " + fecha + " a las " + hora + "!\n" +
+                            "Recuerda subir tu comprobante de pago para completar el proceso.";
+                } else {
+                    mensaje = "✅ ¡Reserva registrada para el " + fecha + " a las " + hora + "!\n" +
+                            "En breve recibirás un enlace para pagar con tarjeta online.";
+                }
+
+                return ResponseEntity.ok(Map.of("fulfillmentText", mensaje));
             } catch (Exception e) {
                 e.printStackTrace();
                 return ResponseEntity.ok(Map.of("fulfillmentText", "❌ Error al crear la reserva: " + e.getMessage()));
             }
         }
+
 
 
 
