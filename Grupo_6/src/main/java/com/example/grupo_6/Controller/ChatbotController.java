@@ -1,10 +1,7 @@
 package com.example.grupo_6.Controller;
 
 import com.example.grupo_6.Entity.*;
-import com.example.grupo_6.Repository.HorarioDisponibleRepository;
-import com.example.grupo_6.Repository.ReservaRepository;
-import com.example.grupo_6.Repository.ServicioRepository;
-import com.example.grupo_6.Repository.UsuarioRepository;
+import com.example.grupo_6.Repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +9,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/chatbot")
 @CrossOrigin(origins = "*")
 public class ChatbotController {
+
+    @Autowired
+    private SedeRepository sedeRepository;
+
+    @Autowired
+    private SedeServicioRepository sedeServicioRepository;
+
+    @Autowired
+    private EstadoRepository estadoRepository;
 
     @Autowired
     private ServicioRepository servicioRepository;
@@ -150,9 +158,12 @@ public class ChatbotController {
 
         // Parámetros comunes
         String sede = "";
-        if (parametros.containsKey("sede")) {
-            sede = (String) parametros.get("sede");
-        } else if (parametros.containsKey("location")) {
+        if (parametros.get("sede") instanceof Map sedeMap) {
+            sede = sedeMap.getOrDefault("business-name", "").toString();
+        } else if (parametros.get("sede") instanceof String) {
+            sede = parametros.get("sede").toString();
+        }
+        else if (parametros.containsKey("location")) {
             Map<String, Object> locationMap = (Map<String, Object>) parametros.get("location");
             if (locationMap != null) {
                 sede = (String) locationMap.getOrDefault("city", "");
@@ -166,8 +177,11 @@ public class ChatbotController {
             fechaStr = (String) parametros.get("date");
         }
 
-        System.out.println("📍 Sede: " + sede);
-        System.out.println("📅 Fecha: " + fechaStr);
+        System.out.println("📦 Parámetros recibidos:");
+        System.out.println("→ Sede: " + parametros.get("sede"));
+        System.out.println("→ Fecha: " + parametros.get("fecha"));
+        System.out.println("→ Hora: " + parametros.get("hora"));
+        System.out.println("→ Servicio: " + parametros.get("servicio"));
 
         String respuesta;
 
@@ -218,6 +232,81 @@ public class ChatbotController {
 
             return ResponseEntity.ok(Map.of("fulfillmentText", respuesta));
         }
+
+// ----- INTENT: CrearReserva -----
+        if ("CrearReserva".equals(intent)) {
+            if (usuario == null) {
+                return ResponseEntity.ok(Map.of("fulfillmentText", "Debes iniciar sesión antes de crear una reserva."));
+            }
+
+            String horaStr = parametros.get("hora") != null ? parametros.get("hora").toString() : "";
+            if (sede.isBlank() || fechaStr.isBlank() || horaStr.isBlank()) {
+                return ResponseEntity.ok(Map.of("fulfillmentText", "Faltan datos para crear la reserva. Asegúrate de indicar la sede, fecha y hora."));
+            }
+
+            try {
+                OffsetDateTime fechaOffset = OffsetDateTime.parse(fechaStr);
+                OffsetDateTime horaOffset = OffsetDateTime.parse(horaStr);
+
+                LocalDate fecha = fechaOffset.toLocalDate();
+                LocalTime hora = horaOffset.toLocalTime();
+
+                System.out.println("✅ Fecha normalizada: " + fecha);
+                System.out.println("✅ Hora normalizada: " + hora);
+                System.out.println("✅ Sede corregida: " + sede);
+
+                HorarioAtencion.DiaSemana diaSemana = switch (fecha.getDayOfWeek()) {
+                    case MONDAY    -> HorarioAtencion.DiaSemana.Lunes;
+                    case TUESDAY   -> HorarioAtencion.DiaSemana.Martes;
+                    case WEDNESDAY -> HorarioAtencion.DiaSemana.Miércoles;
+                    case THURSDAY  -> HorarioAtencion.DiaSemana.Jueves;
+                    case FRIDAY    -> HorarioAtencion.DiaSemana.Viernes;
+                    case SATURDAY  -> HorarioAtencion.DiaSemana.Sábado;
+                    case SUNDAY    -> HorarioAtencion.DiaSemana.Domingo;
+                };
+
+                Optional<HorarioDisponible> horarioOpt = horarioDisponibleRepository
+                        .buscarHorarioDisponible(sede, hora, diaSemana);
+
+                if (horarioOpt.isEmpty()) {
+                    return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró un horario disponible para la hora indicada."));
+                }
+
+                HorarioDisponible horario = horarioOpt.get();
+                Estado estado = estadoRepository.findById(1).orElseThrow(); // Estado PENDIENTE
+
+                // Obtener sede y servicio a partir del horario
+                Optional<Sede> sedeOpt = sedeRepository.findByNombre(sede);
+                if (sedeOpt.isEmpty()) {
+                    return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró la sede con el nombre proporcionado."));
+                }
+                Sede sedeEntity = sedeOpt.get();
+
+                Servicio servicio = horario.getServicio();
+
+                Optional<SedeServicio> sedeServicioOpt = sedeServicioRepository.findBySedeAndServicio(sedeEntity, servicio);
+                if (sedeServicioOpt.isEmpty()) {
+                    return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró la relación entre la sede y el servicio."));
+                }
+
+                Reserva nuevaReserva = new Reserva();
+                nuevaReserva.setUsuario(usuario);
+                nuevaReserva.setHorarioDisponible(horario);
+                nuevaReserva.setFechaReserva(fecha);
+                nuevaReserva.setEstado(estado);
+                nuevaReserva.setSedeServicio(sedeServicioOpt.get());
+
+                reservaRepository.save(nuevaReserva);
+
+                return ResponseEntity.ok(Map.of("fulfillmentText", "✅ ¡Reserva registrada con éxito para el " + fecha + " a las " + hora + "!"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.ok(Map.of("fulfillmentText", "❌ Error al crear la reserva: " + e.getMessage()));
+            }
+        }
+
+
+
 
         // ----- INTENT desconocido -----
         return ResponseEntity.ok(Map.of("fulfillmentText", "No entendí tu solicitud. Puedes preguntarme por servicios, canchas disponibles o tus reservas."));

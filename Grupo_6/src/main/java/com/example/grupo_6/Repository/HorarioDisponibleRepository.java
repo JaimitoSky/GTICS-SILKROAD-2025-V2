@@ -12,9 +12,21 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HorarioDisponibleRepository extends JpaRepository<HorarioDisponible, Integer> {
+
+    @Query("SELECT h FROM HorarioDisponible h " +
+            "WHERE h.servicio IN (SELECT ss.servicio FROM SedeServicio ss WHERE ss.sede.nombre = :sede) " +
+            "AND h.horaInicio = :hora AND h.horarioAtencion.diaSemana = :diaSemana")
+    Optional<HorarioDisponible> buscarHorarioDisponible(
+            @Param("sede") String sede,
+            @Param("hora") LocalTime hora,
+            @Param("diaSemana") HorarioAtencion.DiaSemana diaSemana);
+
+
+
 
     @Query("""
     SELECT h FROM HorarioDisponible h
@@ -99,6 +111,7 @@ public interface HorarioDisponibleRepository extends JpaRepository<HorarioDispon
 """)
     List<HorarioDisponible> listarHorariosDisponiblesPorSedeYDiaSemana(@Param("nombreSede") String nombreSede,
                                                                        @Param("diaSemana") HorarioAtencion.DiaSemana diaSemana);
+
 
 
 }

@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
     Reserva findByPago(Pago pago);
 
+
+
     @Query("SELECT r.fechaReserva, COUNT(r) FROM Reserva r GROUP BY r.fechaReserva")
     List<Object[]> countReservasPorDia();
     default List<Map<String, Object>> countReservasPorDiaFormatted() {
@@ -149,6 +151,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
             @Param("idEstado")  Integer       idEstado,  // siempre 2 = aprobado
             Pageable                     pageable
     );
+
+
+
 
 }
 

@@ -122,6 +122,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     boolean existsByDni(String dni);
     boolean existsByEmail(String email);
 
+
+
 }
 
 

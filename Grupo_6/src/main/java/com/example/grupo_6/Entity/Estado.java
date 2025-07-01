@@ -23,4 +23,5 @@ public class Estado {
     public enum TipoAplicacion {
         reserva, servicio, incidencia, pago, reembolso, taller, usuario
     }
+
 }
