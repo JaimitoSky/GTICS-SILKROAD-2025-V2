@@ -76,5 +76,13 @@
     <!-- Botón que redirige al login -->
     <a th:href="@{/login}" class="btn">Volver al Login</a>
 </div>
+<script>
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = function () {
+        window.location.href = "/login";
+    };
+</script>
+
+
 </body>
 </html>

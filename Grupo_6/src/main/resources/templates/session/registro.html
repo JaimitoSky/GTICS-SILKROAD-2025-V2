@@ -415,12 +415,30 @@
                 <div th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}" class="text-danger small"></div>
             </div>
 
+            <!-- Contraseña -->
             <div class="form-floating col-12 position-relative">
-                <input type="password" th:field="*{passwordHash}" class="form-control" placeholder="Contraseña"
-                       required minlength="6" autocomplete="new-password" />
+                <input type="password" th:field="*{passwordHash}" id="passwordHash" class="form-control"
+                       placeholder="Contraseña" required minlength="6" autocomplete="new-password" />
                 <label for="passwordHash">Contraseña (mínimo 6 caracteres)</label>
+                <i class="fa-solid fa-eye-slash position-absolute"
+                   style="top: 50%; right: 1rem; transform: translateY(-50%); cursor: pointer;"
+                   onclick="togglePassword('passwordHash', this)"></i>
                 <div th:if="${#fields.hasErrors('passwordHash')}" th:errors="*{passwordHash}" class="text-danger small"></div>
             </div>
+
+
+
+            <!-- Repetir contraseña -->
+            <div class="form-floating col-12 position-relative">
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Repetir contraseña"
+                       required minlength="6" autocomplete="new-password" />
+                <label for="confirmPassword">Repetir contraseña</label>
+                <i class="fa-solid fa-eye-slash position-absolute"
+                   style="top: 50%; right: 1rem; transform: translateY(-50%); cursor: pointer;"
+                   onclick="togglePassword('confirmPassword', this)"></i>
+                <div id="confirmPasswordError" class="text-danger small" style="display: none;">Las contraseñas no coinciden.</div>
+            </div>
+
 
         </div>
 
@@ -455,6 +473,15 @@
         div.style.display = check.checked ? "block" : "none";
     }
 
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+
+        icon.classList.toggle("fa-eye-slash", !isHidden);
+        icon.classList.toggle("fa-eye", isHidden);
+    }
+
     async function obtenerDatosPorDNI() {
         const dniInput = document.querySelector('input[name="dni"]');
         const nombresInput = document.querySelector('input[name="nombres"]');
@@ -469,8 +496,6 @@
 
         try {
             const response = await fetch(`/api/reniec/dni/${dni}`);
-
-
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.data) {
@@ -479,59 +504,63 @@
                 } else {
                     nombresInput.value = '';
                     apellidosInput.value = '';
-                    // Opcional: mostrar un toast de error si el DNI no es válido
-                    // showToast('No se encontraron datos para el DNI', 'error');
                 }
             } else {
                 nombresInput.value = '';
                 apellidosInput.value = '';
-                // Opcional: mostrar un toast de error si la API falla
-                // showToast('Error al consultar DNI. Intente más tarde.', 'error');
             }
         } catch (error) {
             console.error("Error al consultar DNI:", error);
             nombresInput.value = '';
             apellidosInput.value = '';
-            // Opcional: mostrar un toast de error en caso de fallo de red
-            // showToast('Error de red al consultar DNI.', 'error');
         }
     }
 
-    // Helper para mostrar toasts (podrías añadirlo aquí si quieres feedback de DNI)
-    // function showToast(message, type) {
-    //     const toast = document.getElementById('toast');
-    //     toast.textContent = message;
-    //     toast.className = `toast show ${type}`;
-    //     setTimeout(() => toast.classList.remove('show'), 4000);
-    // }
-
     document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('registroForm');
         const dniInput = document.querySelector('input[name="dni"]');
+        const passwordInput = document.getElementById('passwordHash');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const errorDiv = document.getElementById('confirmPasswordError');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const submitButton = document.getElementById('submitButton');
+
         dniInput.addEventListener('input', () => {
             if (dniInput.value.length === 8) {
                 obtenerDatosPorDNI();
             }
         });
 
+        form.addEventListener('submit', function (e) {
+            const pass = passwordInput.value;
+            const confirm = confirmPasswordInput.value;
 
-        const form = document.getElementById('registroForm');
-        const loadingMessage = document.getElementById('loadingMessage');
-        const submitButton = document.getElementById('submitButton');
+            if (pass !== confirm) {
+                e.preventDefault();
+                errorDiv.style.display = 'block';
+                confirmPasswordInput.classList.add('is-invalid');
+                loadingMessage.style.display = 'none';
+                submitButton.disabled = false;
+                return;
+            }
 
-        form.addEventListener('submit', () => {
-            // Se muestra el mensaje de cargando y deshabilita el botón solo si el formulario es válido (HTML5 validation)
+            errorDiv.style.display = 'none';
+            confirmPasswordInput.classList.remove('is-invalid');
+
+            // Mostrar loading solo si el formulario es válido (HTML5 validations)
             if (form.checkValidity()) {
-                loadingMessage.style.display = 'flex'; // Usar 'flex' para alinear spinner y texto
+                loadingMessage.style.display = 'flex';
                 submitButton.disabled = true;
             }
         });
 
-        // Mostrar toast flotante si aplica
+        // Oculta cualquier toast flotante si se usara
         const toast = document.getElementById('toast');
         if (toast && toast.classList.contains('show')) {
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
     });
 </script>
+
 </body>
 </html>
