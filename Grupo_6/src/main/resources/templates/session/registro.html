@@ -367,8 +367,17 @@
         <div class="row">
 
             <div class="form-floating col-6 position-relative">
-                <input type="text" th:field="*{dni}" class="form-control" placeholder="DNI"
-                       required pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos" autocomplete="off" />
+                <input type="text"
+                       th:field="*{dni}"
+                       class="form-control"
+                       placeholder="DNI"
+                       required
+                       pattern="[0-9]{8}"
+                       title="Ingrese un DNI válido de 8 dígitos"
+                       autocomplete="off"
+                       maxlength="8"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8)" />
+
                 <label for="dni">DNI</label>
                 <div th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}" class="text-danger small"></div>
             </div>
@@ -459,11 +468,8 @@
         }
 
         try {
-            const response = await fetch(`https://apiperu.dev/api/dni/${dni}`, {
-                headers: {
-                    'Authorization': 'Bearer 5394cbd1d8a849d1be9e2ce6bd9b3d52cfd284272780f81cced91f3738234c46'
-                }
-            });
+            const response = await fetch(`/api/reniec/dni/${dni}`);
+
 
             if (response.ok) {
                 const data = await response.json();
@@ -501,7 +507,12 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const dniInput = document.querySelector('input[name="dni"]');
-        dniInput.addEventListener('blur', obtenerDatosPorDNI);
+        dniInput.addEventListener('input', () => {
+            if (dniInput.value.length === 8) {
+                obtenerDatosPorDNI();
+            }
+        });
+
 
         const form = document.getElementById('registroForm');
         const loadingMessage = document.getElementById('loadingMessage');

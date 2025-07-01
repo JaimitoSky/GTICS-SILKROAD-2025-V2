@@ -46,16 +46,25 @@
 								<div class="card-body">
 									<div class="mb-3">
 										<label class="form-label">DNI</label>
-										<input type="text" th:field="*{dni}" class="form-control" required />
+										<input type="text" th:field="*{dni}" class="form-control"
+											   id="inputDni"
+											   maxlength="8"
+											   pattern="[0-9]{8}"
+											   required
+											   oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8)" />
 									</div>
+
 									<div class="mb-3">
 										<label class="form-label">Nombres</label>
-										<input type="text" th:field="*{nombres}" class="form-control" required />
+										<input type="text" th:field="*{nombres}" class="form-control" id="inputNombres" readonly required
+											   style="background-color: #e9ecef;" />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Apellidos</label>
-										<input type="text" th:field="*{apellidos}" class="form-control" required />
+										<input type="text" th:field="*{apellidos}" class="form-control" id="inputApellidos" readonly required
+											   style="background-color: #e9ecef;" />
 									</div>
+
 									<div class="mb-3">
 										<label class="form-label">Email</label>
 										<input type="email" th:field="*{email}" class="form-control" required />
@@ -152,5 +161,42 @@
 <script>
 	feather.replace();
 </script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const dniInput = document.getElementById("inputDni");
+		const nombresInput = document.getElementById("inputNombres");
+		const apellidosInput = document.getElementById("inputApellidos");
+
+		dniInput.addEventListener("input", () => {
+			const dni = dniInput.value;
+
+			if (dni.length === 8) {
+				// Mostrar mensaje opcional: console.log("Consultando RENIEC...");
+				fetch(`/api/reniec/dni/${dni}`)
+						.then(response => response.json())
+						.then(data => {
+							if (data.success && data.data) {
+								nombresInput.value = data.data.nombres;
+								apellidosInput.value = `${data.data.apellido_paterno} ${data.data.apellido_materno}`;
+							} else {
+								nombresInput.value = '';
+								apellidosInput.value = '';
+								alert("No se encontró información para el DNI ingresado.");
+							}
+						})
+						.catch(error => {
+							console.error("Error al consultar DNI:", error);
+							alert("Hubo un error al consultar el DNI.");
+						});
+			} else {
+				nombresInput.value = '';
+				apellidosInput.value = '';
+			}
+		});
+	});
+</script>
+
+
 </body>
 </html>

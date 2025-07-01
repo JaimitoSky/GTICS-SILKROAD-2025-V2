@@ -98,6 +98,7 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/api/chatbot/procesar").permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/reniec/dni/**").permitAll()
 
                         .requestMatchers("/superadmin/**").hasAuthority("Superadmin")
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
