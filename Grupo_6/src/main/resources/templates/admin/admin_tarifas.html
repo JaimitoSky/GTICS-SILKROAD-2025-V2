@@ -210,7 +210,6 @@
                 <th>Descripción</th>
                 <th>Precio por hora</th>
                 <th>Última actualización</th>
-                <th>Acciones</th>
               </tr>
               </thead>
               <tbody>
@@ -219,11 +218,6 @@
                 <td th:text="${tarifa.descripcion}">Descripción</td>
                 <td th:text="|S/ ${#numbers.formatDecimal(tarifa.monto, 2, 2)}|">S/ 0.00</td>
                 <td th:text="${#temporals.format(tarifa.fechaActualizacion, 'dd/MM/yyyy')}">15/04/2025</td>
-                <td>
-                  <a th:href="@{/admin/tarifas/editar/{id}(id=${tarifa.idtarifa})}" class="btn btn-sm btn-warning me-1">
-                    <i data-feather="edit"></i> Editar
-                  </a>
-                </td>
               </tr>
               </tbody>
             </table>

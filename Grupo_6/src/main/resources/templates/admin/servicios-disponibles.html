@@ -3,39 +3,84 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Configurar Servicio - Admin</title>
+        <title>Gestión de Servicios - Admin</title>
 
-        <!-- Estilos externos -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
         <meta name="_csrf" th:content="${_csrf.token}"/>
         <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-        <!-- Estilos internos -->
 
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+
+            h1.h4 {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 700;
+                font-size: 1.8rem;
+                color: #004085;
+                margin-bottom: 1.5rem;
+            }
+
+            .card {
+                border-radius: 1rem;
+                border: none;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                background-color: #ffffff;
+            }
+
+            .table {
+                font-size: 0.95rem;
+            }
+
+            .table th {
+                background-color: #e9f2ff;
+                color: #003366;
+                font-weight: 600;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .table td {
+                vertical-align: middle;
+            }
+
+            .badge {
+                font-size: 0.85rem;
+                padding: 0.45em 0.8em;
+                border-radius: 0.5rem;
+            }
+
+            .btn-sm {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+                border-radius: 0.4rem;
+                transition: all 0.2s ease-in-out;
+            }
+
+            .btn-sm:hover {
+                opacity: 0.9;
+            }
+
+            .pagination {
+                justify-content: center;
+            }
+        </style>
     </head>
     <body>
         <div class="wrapper">
-            <!-- Sidebar -->
             <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
-
-            <!-- Main -->
             <div class="main">
                 <div th:replace="fragments/navbar-admin.html :: navbar"></div>
 
-
-
-
-
-
-
-                <!-- Contenido principal -->
                 <main class="content">
-                    <div class="container-fluid p-0">
+                    <div class="container-fluid p-4">
                         <div class="text-center mb-3">
                             <h1 class="h4"><strong>Gestión de Servicios</strong></h1>
                         </div>
+
                         <div class="card">
                             <div class="card-body">
                                 <table class="table table-bordered align-middle table-hover">
@@ -62,39 +107,26 @@
                                                 </ul>
                                             </td>
                                             <td>
-                                <span th:class="${sede.activo} ? 'badge bg-success' : 'badge bg-secondary'"
-                                      th:text="${sede.activo} ? 'Activa' : 'Inactiva'"></span>
+                  <span th:class="${sede.activo} ? 'badge bg-success' : 'badge bg-secondary'"
+                        th:text="${sede.activo} ? 'Activa' : 'Inactiva'"></span>
                                             </td>
                                             <td>
-                                                <a th:href="@{/admin/servicios/disponibles/ver/{id}(id=${sede.idsede})}"
-                                                   class="btn btn-sm btn-primary" title="Ver">
+                                                <a th:href="@{/admin/servicios/disponibles/ver/{id}(id=${sede.idsede})}" class="btn btn-sm btn-primary" title="Ver">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-
-                                                <a th:href="@{/admin/servicios/disponibles/editar/{id}(id=${sede.idsede})}"
-                                                   class="btn btn-sm btn-warning" title="Editar">
+                                                <a th:href="@{/admin/servicios/disponibles/editar/{id}(id=${sede.idsede})}" class="btn btn-sm btn-warning" title="Editar">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
-
-                                                <a th:href="@{/admin/servicios/disponibles/configurar/{id}(id=${sede.idsede})}"
-                                                   class="btn btn-sm btn-info" title="Configurar">
+                                                <a th:href="@{/admin/servicios/disponibles/configurar/{id}(id=${sede.idsede})}" class="btn btn-sm btn-info" title="Configurar">
                                                     <i class="bi bi-gear"></i>
                                                 </a>
-
-                                                <form th:if="${sede.activo}"
-                                                      th:action="@{'/admin/servicios/disponibles/desactivar/' + ${sede.idsede}}"
-                                                      method="post" style="display:inline;">
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Desactivar"
-                                                            onclick="return confirm('¿Desactivar esta sede?');">
+                                                <form th:if="${sede.activo}" th:action="@{'/admin/servicios/disponibles/desactivar/' + ${sede.idsede}}" method="post" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Desactivar" onclick="return confirm('¿Desactivar esta sede?');">
                                                         <i class="bi bi-x-circle"></i>
                                                     </button>
                                                 </form>
-
-                                                <form th:if="${!sede.activo}"
-                                                      th:action="@{'/admin/servicios/disponibles/activar/' + ${sede.idsede}}"
-                                                      method="post" style="display:inline;">
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Activar"
-                                                            onclick="return confirm('¿Activar esta sede?');">
+                                                <form th:if="${!sede.activo}" th:action="@{'/admin/servicios/disponibles/activar/' + ${sede.idsede}}" method="post" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Activar" onclick="return confirm('¿Activar esta sede?');">
                                                         <i class="bi bi-check-circle"></i>
                                                     </button>
                                                 </form>
@@ -102,12 +134,29 @@
                                         </tr>
                                     </tbody>
                                 </table>
+
+                                <!-- Paginación -->
+                                <nav aria-label="Paginación de sedes" class="mt-4">
+                                    <ul class="pagination">
+                                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/servicios/disponibles(page=${paginaActual - 1})}">Anterior</a>
+                                        </li>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
+                                            <a class="page-link" th:href="@{/admin/servicios/disponibles(page=${i})}" th:text="${i + 1}">1</a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/servicios/disponibles(page=${paginaActual + 1})}">Siguiente</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+
                             </div>
                         </div>
                     </div>
                 </main>
 
-                <!-- Script -->
+
+        <!-- Script -->
                 <script>
                     function getCsrfHeaders() {
                         const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
@@ -129,12 +178,12 @@
 
                         selectServicio.addEventListener("change", function () {
                             const sedeServicioId = this.value;
-                            tablaHorarios.innerHTML = `<p class="text-center">Cargando...</p>`;
+                            tablaHorarios.innerHTML = <p class="text-center">Cargando...</p>;
 
                             if (!sedeServicioId) return;
 
-                            fetch(`/api/horarios-disponibles?sedeServicioId=${sedeServicioId}`)
-                                .then(res => res.json())
+                            fetch(/api/horarios-disponibles?sedeServicioId=${sedeServicioId})
+                        .then(res => res.json())
                                 .then(data => {
                                     const porDia = {};
                                     diasSemana.forEach(d => porDia[d] = []);
@@ -149,110 +198,110 @@
                                         const cont = document.createElement("div");
                                         cont.classList.add("mb-4");
 
-                                        let html = `<h6 class="fw-bold">${dia}</h6>
-                            <table class="table table-bordered">
-                                <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
-                                <tbody>`;
+                                        let html = <h6 class="fw-bold">${dia}</h6>
+                                        <table class="table table-bordered">
+                                            <thead><tr><th>Inicio</th><th>Fin</th><th>Acciones</th></tr></thead>
+                                            <tbody>;
 
-                                        if (porDia[dia].length > 0) {
-                                            porDia[dia].forEach(h => {
-                                                html += `
-                                    <tr>
-                                        <td>${h.horaInicio}</td>
-                                        <td>${h.horaFin}</td>
-                                        <td><button class="btn btn-sm btn-danger" onclick="eliminarHorario(${h.idhorario}, '${sedeServicioId}')">Eliminar</button></td>
-                                    </tr>`;
+                                                if (porDia[dia].length > 0) {
+                                                    porDia[dia].forEach(h => {
+                                                        html +=
+                                                            <tr>
+                                                                <td>${h.horaInicio}</td>
+                                                                <td>${h.horaFin}</td>
+                                                                <td><button class="btn btn-sm btn-danger" onclick="eliminarHorario(${h.idhorario}, '${sedeServicioId}')">Eliminar</button></td>
+                                                            </tr>;
+                                                    });
+                                                } else {
+                                                    html += <tr><td colspan="3" class="text-center text-muted">Sin horarios registrados</td></tr>;
+                                                }
+
+                                                html += </tbody></table>
+                                        <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
+                                            <div class="row g-2 align-items-end">
+                                                <div class="col-md-4">
+                                                    <label class="form-label mb-0">Inicio</label>
+                                                    <input type="time" class="form-control" name="inicio" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label mb-0">Fin</label>
+                                                    <input type="time" class="form-control" name="fin" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
+                                                </div>
+                                            </div>
+                                        </form>;
+
+                                    cont.innerHTML = html;
+                                    tablaHorarios.appendChild(cont);
+                                    });
+                                    })
+                                    .catch(err => {
+                                        tablaHorarios.innerHTML = <p class="text-danger text-center">Error al cargar horarios</p>;
+                                        console.error("Error:", err);
+                                    });
+                                    });
+                                    });
+
+                                    function eliminarHorario(idhorario, sedeServicioId) {
+                                        if (confirm("¿Seguro que deseas eliminar este horario?")) {
+                                            fetch(/api/horarios-disponibles/${idhorario}, {
+                                                method: "DELETE",
+                                                headers: getCsrfHeaders()
+                                            }).then(res => {
+                                                if (res.ok) {
+                                                    document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                                                } else {
+                                                    alert("Error al eliminar horario.");
+                                                }
                                             });
-                                        } else {
-                                            html += `<tr><td colspan="3" class="text-center text-muted">Sin horarios registrados</td></tr>`;
+                                        }
+                                    }
+
+                                    function agregarHorario(event, sedeServicioId, diaSemana) {
+                                        event.preventDefault();
+                                        const form = event.target;
+                                        const inicio = form.querySelector("input[name=inicio]").value;
+                                        const fin = form.querySelector("input[name=fin]").value;
+
+                                        if (inicio >= fin) {
+                                            alert("La hora de inicio debe ser menor que la hora de fin.");
+                                            return false;
                                         }
 
-                                        html += `</tbody></table>
-                            <form onsubmit="return agregarHorario(event, '${sedeServicioId}', '${dia}')">
-                                <div class="row g-2 align-items-end">
-                                    <div class="col-md-4">
-                                        <label class="form-label mb-0">Inicio</label>
-                                        <input type="time" class="form-control" name="inicio" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label mb-0">Fin</label>
-                                        <input type="time" class="form-control" name="fin" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button type="submit" class="btn btn-success w-100">Agregar Intervalo</button>
-                                    </div>
-                                </div>
-                            </form>`;
+                                        console.log("Enviando horario:", {
+                                            sedeServicioId, inicio, fin, diaSemana
+                                        });
 
-                                        cont.innerHTML = html;
-                                        tablaHorarios.appendChild(cont);
-                                    });
-                                })
-                                .catch(err => {
-                                    tablaHorarios.innerHTML = `<p class="text-danger text-center">Error al cargar horarios</p>`;
-                                    console.error("Error:", err);
-                                });
-                        });
-                    });
+                                        const formData = new URLSearchParams();
+                                        formData.append("sedeServicioId", sedeServicioId);
+                                        formData.append("horaInicio", inicio);
+                                        formData.append("horaFin", fin);
+                                        formData.append("diaSemana", diaSemana);
 
-                    function eliminarHorario(idhorario, sedeServicioId) {
-                        if (confirm("¿Seguro que deseas eliminar este horario?")) {
-                            fetch(`/api/horarios-disponibles/${idhorario}`, {
-                                method: "DELETE",
-                                headers: getCsrfHeaders()
-                            }).then(res => {
-                                if (res.ok) {
-                                    document.getElementById("servicio-select").dispatchEvent(new Event("change"));
-                                } else {
-                                    alert("Error al eliminar horario.");
-                                }
-                            });
-                        }
-                    }
+                                        fetch("/api/horarios-disponibles", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/x-www-form-urlencoded",
+                                                ...getCsrfHeaders()
+                                            },
+                                            body: formData
+                                        }).then(async res => {
+                                            const msg = await res.text();
+                                            console.log("Respuesta del servidor:", res.status, msg);
+                                            if (res.ok) {
+                                                document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+                                            } else {
+                                                alert("Error: " + msg);
+                                            }
+                                        }).catch(err => {
+                                            console.error("Error en el fetch:", err);
+                                            alert("Ocurrió un error al enviar los datos.");
+                                        });
 
-                    function agregarHorario(event, sedeServicioId, diaSemana) {
-                        event.preventDefault();
-                        const form = event.target;
-                        const inicio = form.querySelector("input[name=inicio]").value;
-                        const fin = form.querySelector("input[name=fin]").value;
-
-                        if (inicio >= fin) {
-                            alert("La hora de inicio debe ser menor que la hora de fin.");
-                            return false;
-                        }
-
-                        console.log("Enviando horario:", {
-                            sedeServicioId, inicio, fin, diaSemana
-                        });
-
-                        const formData = new URLSearchParams();
-                        formData.append("sedeServicioId", sedeServicioId);
-                        formData.append("horaInicio", inicio);
-                        formData.append("horaFin", fin);
-                        formData.append("diaSemana", diaSemana);
-
-                        fetch("/api/horarios-disponibles", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/x-www-form-urlencoded",
-                                ...getCsrfHeaders()
-                            },
-                            body: formData
-                        }).then(async res => {
-                            const msg = await res.text();
-                            console.log("Respuesta del servidor:", res.status, msg);
-                            if (res.ok) {
-                                document.getElementById("servicio-select").dispatchEvent(new Event("change"));
-                            } else {
-                                alert("Error: " + msg);
-                            }
-                        }).catch(err => {
-                            console.error("Error en el fetch:", err);
-                            alert("Ocurrió un error al enviar los datos.");
-                        });
-
-                        return false;
-                    }
+                                        return false;
+                                    }
 
                 </script>
 

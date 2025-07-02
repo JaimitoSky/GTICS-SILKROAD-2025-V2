@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Asignar Coordinadores</title>
+
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
+
+    <!-- Estilos internos -->
+
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
+
+    <!-- Main -->
+    <div class="main">
+        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+
+
+
+
+
+
+
+        <main class="content">
+            <div class="container p-3 p-md-4">
+                <h2 class="mb-4 text-center text-md-start">
+                    <i class="bi bi-person-plus-fill me-2"></i>
+                    Asignar Coordinadores a <strong th:text="${sede.nombre}"></strong>
+                </h2>
+
+                <form th:action="@{/admin/servicios/disponibles/asignar-coordinadores}"
+                      method="post"
+                      class="bg-white p-4 rounded shadow-sm">
+
+                    <input type="hidden" name="idsede" th:value="${sede.idsede}" />
+
+                    <!-- 1) LISTA DE CHECKBOXES -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-people-fill me-1"></i> Coordinadores disponibles
+                        </label>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-md-4 mb-2"
+                                 th:each="c : ${coordinadores}">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           th:id="'coord-' + ${c.idusuario}"
+                                           name="coordinadores"
+                                           th:value="${c.idusuario}"
+                                           th:checked="${coordinadoresActivos.contains(c.idusuario)}" />
+                                    <label class="form-check-label"
+                                           th:for="'coord-' + ${c.idusuario}"
+                                           th:text="${c.nombres + ' ' + c.apellidos}"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2) TABLAS DE TURNOS (siempre en DOM, ocultas via d-none) -->
+                    <div class="mb-4">
+                        <div th:each="c : ${coordinadores}"
+                             class="coord-schedule border rounded p-3 bg-light mb-3"
+                             th:attr="data-coord=${c.idusuario}"
+                             th:classappend="${!coordinadoresActivos.contains(c.idusuario)} ? ' d-none' : ''"
+                             th:with="misTurnos=${turnosPorCoord[c.idusuario]}">
+
+                            <h5 class="mb-3"
+                                th:text="${c.nombres + ' ' + c.apellidos} + ' – Turnos'"></h5>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>Día</th>
+                                        <th>Desde</th>
+                                        <th>Hasta</th>
+                                        <th class="text-center">Activo?</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="ha : ${horariosAtencion}"
+                                        th:with="t=${misTurnos != null ? misTurnos[ha.diaSemana] : null}">
+
+                                        <td th:text="${ha.diaSemana}"></td>
+
+                                        <td>
+                                            <select class="form-select form-select-sm"
+                                                    th:name="'turnos[' + ${c.idusuario} + '][' + ${ha.diaSemana} + '].horaEntrada'">
+                                                <option th:each="h : ${horas}"
+                                                        th:value="${h}"
+                                                        th:text="${h}"
+                                                        th:selected="${t != null
+                                             ? (h == t.horaEntrada.toString())
+                                             : (h == ha.horaInicio.toString())}">
+                                                </option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select class="form-select form-select-sm"
+                                                    th:name="'turnos[' + ${c.idusuario} + '][' + ${ha.diaSemana} + '].horaSalida'">
+                                                <option th:each="h : ${horas}"
+                                                        th:value="${h}"
+                                                        th:text="${h}"
+                                                        th:selected="${t != null
+                                             ? (h == t.horaSalida.toString())
+                                             : (h == ha.horaFin.toString())}">
+                                                </option>
+                                            </select>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input"
+                                                   th:name="'turnos[' + ${c.idusuario} + '][' + ${ha.diaSemana} + '].activo'"
+                                                   th:checked="${t != null ? t.activo : ha.activo}" />
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3) BOTONES -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
+                        <a th:href="@{/admin/servicios/disponibles}"
+                           class="btn btn-outline-secondary w-100 w-sm-auto">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit"
+                                class="btn btn-success w-100 w-sm-auto">
+                            <i class="bi bi-save"></i> Guardar Asignaciones
+                        </button>
+                    </div>
+                </form>
+
+                <!-- 4) LISTA DE ASIGNADOS (opcional) -->
+                <div class="mt-5" th:if="${coordinadoresAsignados.size() > 0}">
+                    <h5><i class="bi bi-check2-circle me-1"></i> Coordinadores asignados</h5>
+                    <div class="bg-light p-3 rounded border">
+                        <div class="d-flex flex-column gap-2">
+                            <div th:each="asig : ${coordinadoresAsignados}"
+                                 class="d-flex justify-content-between align-items-center">
+            <span class="badge bg-primary text-wrap fs-6"
+                  th:text="${asig.usuario.nombres + ' ' + asig.usuario.apellidos}">
+            </span>
+                                <form th:action="@{/admin/servicios/disponibles/coordinadores/desasignar}"
+                                      method="post" class="d-inline">
+                                    <input type="hidden" name="idCoordinadorSede"
+                                           th:value="${asig.id}" />
+                                    <input type="hidden" name="idsede"
+                                           th:value="${sede.idsede}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i> Quitar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('input[name="coordinadores"]').forEach(chk => {
+                    chk.addEventListener('change', e => {
+                        const id = e.target.value;
+                        const div = document.querySelector(`[data-coord="${id}"]`);
+                        if (div) {
+                            div.classList.toggle('d-none', !e.target.checked);
+                        }
+                    });
+                });
+            });
+        </script>
+
+
+
+
+        <!-- Footer -->
+        <footer class="footer mt-auto py-3 bg-light border-top">
+            <div class="container text-center text-muted">
+                Municipalidad de San Miguel © 2025
+            </div>
+        </footer>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.querySelector(".js-sidebar-toggle");
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggle) {
+            toggle.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.body.classList.toggle("sidebar-collapsed");
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function (event) {
+            if (window.innerWidth <= 991.98) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
+            }
+        });
+
+        // Ajustar al redimensionar
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed");
+            }
+        });
+    });
+
+
+</script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+
+</body>
+</html>
