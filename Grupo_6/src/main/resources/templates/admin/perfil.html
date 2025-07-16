@@ -11,99 +11,105 @@
     <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
     <style>
-        /* Variables CSS Globales para consistencia */
         :root {
-            --primary-color: #007bff; /* Azul principal */
-            --dark-primary-color: #0056b3; /* Azul oscuro para hover */
-            --secondary-color: #6c757d; /* Gris para textos secundarios/botones */
-            --success-color: #28a745; /* Verde para éxito */
-            --info-color: #17a2b8; /* Celeste para información */
-            --warning-color: #ffc107; /* Amarillo para advertencia */
-            --danger-color: #dc3545; /* Rojo para peligro/error */
-            --text-color: #333; /* Color de texto general */
-            --light-text-color: #666; /* Color de texto más claro */
-            --border-color: #e0e0e0; /* Color de bordes */
-            --background-light: #f8f9fa; /* Fondo claro para la aplicación */
-            --card-background: #ffffff; /* Fondo de tarjetas */
-            --shadow-light: rgba(0, 0, 0, 0.08); /* Sombra ligera más sutil */
-            --shadow-medium: rgba(0, 0, 0, 0.12); /* Sombra media más sutil */
-            --border-radius-base: 0.5rem; /* Radio de borde base */
-            --border-radius-lg: 0.75rem; /* Radio de borde grande */
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
+
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--background-light); /* Fondo general de la aplicación */
+            background-color: var(--background-light);
             color: var(--text-color);
         }
 
-        /* Estilos para el main content (área de trabajo principal) */
         .main {
-            min-height: 100vh; /* Asegura que el contenido principal ocupe al menos la altura de la ventana */
+            min-height: 100vh;
             background-color: var(--background-light);
         }
 
         .content {
-            padding: 1.5rem; /* Padding general para el contenido */
+            padding: var(--spacing-lg);
         }
 
-        /* Título de la página */
         h2 {
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--dark-primary-color);
-            margin-bottom: 2rem; /* Más espacio debajo del título */
-            font-size: 1.8rem;
+            margin-bottom: var(--spacing-xl);
+            font-size: 2rem;
         }
 
-        /* Formulario */
         .form-label {
             font-weight: 600;
             color: var(--light-text-color);
-            margin-bottom: 0.5rem;
-            display: block; /* Asegura que la etiqueta esté en su propia línea */
+            margin-bottom: var(--spacing-xs);
+            display: block;
         }
 
-        .form-control {
+        .form-control, .form-select {
             border-radius: var(--border-radius-base);
             border: 1px solid var(--border-color);
-            padding: 0.75rem 1rem; /* Padding consistente */
-            box-shadow: inset 0 1px 2px rgba(0,0,0,.05); /* Sombra interior más sutil */
+            padding: 0.75rem 1rem;
+            box-shadow: none;
             transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
             font-size: 0.95rem;
             color: var(--text-color);
-            background-color: var(--card-background); /* Fondo blanco para inputs */
+            background-color: var(--card-background);
         }
 
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
 
         .form-control:disabled {
-            background-color: var(--background-light); /* Fondo ligeramente gris para campos deshabilitados */
+            background-color: var(--background-light);
             cursor: not-allowed;
             opacity: 0.8;
         }
 
-        /* Botones */
         .btn {
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
             border-radius: var(--border-radius-base);
+            font-weight: 500;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
+            box-shadow: 0 4px 10px var(--shadow-light);
             color: white;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
         }
         .btn-primary:hover {
             background-color: var(--dark-primary-color);
             border-color: var(--dark-primary-color);
-            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 6px 15px var(--shadow-medium);
             transform: translateY(-1px);
         }
 
@@ -125,31 +131,54 @@
             box-shadow: none;
         }
 
-        /* Contenedor del formulario para aplicar estilos de tarjeta si se desea */
         .form-container-card {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius-lg);
             box-shadow: 0 3px 10px var(--shadow-light);
-            padding: 1.5rem; /* Ajustar padding si ya hay padding en .content */
-            margin-bottom: 2rem; /* Espacio para separar del footer */
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
         }
 
-        /* Footer */
         .footer {
             background-color: var(--card-background) !important;
             border-top: 1px solid var(--border-color) !important;
-            padding: 1rem 0;
+            padding: var(--spacing-md) 0;
             color: var(--light-text-color) !important;
             font-size: 0.85rem;
-            margin-top: 2rem; /* Espacio superior para separar del contenido */
+            margin-top: var(--spacing-xl);
         }
 
-        /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
         .mb-4 { margin-bottom: 1.5rem !important; }
         .mb-3 { margin-bottom: 1rem !important; }
         .p-4 { padding: 1.5rem !important; }
-        .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; } /* Consistencia en gutters */
+        .row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 1.5rem; }
+
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: var(--danger-color);
+        }
+
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: var(--danger-color);
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .form-control.is-valid, .form-select.is-valid {
+            border-color: var(--success-color);
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.7L0 4.4 1.4 3l.9 1 .9-.9L6.6 0 8 1.4 3.7 6.7z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
     </style>
 </head>
 <body>
@@ -160,39 +189,43 @@
         <div th:replace="fragments/navbar-admin.html :: navbar"></div>
 
         <main class="content">
-            <div class="container-fluid p-4">
+            <div class="container-fluid p-0">
                 <h2 class="mb-4">Mi Perfil</h2>
-                <div class="form-container-card"> <form method="post" th:action="@{/perfil-admin/actualizar}">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nombres" class="form-label">Nombres</label>
-                            <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
+                <div class="form-container-card">
+                    <form id="profileForm" method="post" th:action="@{/perfil-admin/actualizar}" th:object="${perfil}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nombres" class="form-label">Nombres</label>
+                                <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="apellidos" class="form-label">Apellidos</label>
+                                <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="apellidos" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Correo electrónico</label>
+                                <input type="email" th:field="*{email}" id="email" class="form-control" th:errorclass="is-invalid">
+                                <div class="invalid-feedback" th:errors="*{email}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label">Celular</label>
+                                <input type="text" th:field="*{telefono}" id="telefono" class="form-control" th:errorclass="is-invalid">
+                                <div class="invalid-feedback" th:errors="*{telefono}"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="correo" class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control" id="correo" name="email" th:value="${perfil.email}">
+                        <div class="mb-3">
+                            <label for="direccion" class="form-label">Dirección</label>
+                            <input type="text" th:field="*{direccion}" id="direccion" class="form-control" th:errorclass="is-invalid">
+                            <div class="invalid-feedback" th:errors="*{direccion}"></div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label">Celular</label>
-                            <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
-                    </div>
 
-                    <div class="d-flex justify-content-between mt-4">
-                        <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                    </div>
-                </form>
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </main>
@@ -209,53 +242,108 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar'); // Asegúrate de que el sidebar tenga este ID
+        const sidebar = document.getElementById('sidebar');
 
-        // Asegúrate de que el botón de toggle solo se muestre en pantallas pequeñas
-        const mainDiv = document.querySelector('.main');
-        if (mainDiv && toggle) {
-            const toggleButtonHtml = `
-                        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle-mobile">
-                            <i class="bi bi-list"></i>
-                        </button>
-                    `;
-            // Añadir el botón solo si no existe ya
-            if (!mainDiv.querySelector('.js-sidebar-toggle-mobile')) {
-                mainDiv.insertAdjacentHTML('afterbegin', toggleButtonHtml);
-            }
-            const mobileToggle = mainDiv.querySelector('.js-sidebar-toggle-mobile');
-            mobileToggle.addEventListener('click', function(e) {
+        if (toggle) {
+            toggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
             });
+        }
 
-            // Si el toggle original está en el HTML, deshabilitarlo o eliminarlo
-            if (toggle && toggle !== mobileToggle) {
-                toggle.style.display = 'none'; // O toggle.remove();
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 991.98) {
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
             }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991.98) {
+                document.body.classList.remove("sidebar-collapsed");
+            }
+        });
+
+        const form = document.getElementById('profileForm');
+        const emailInput = document.getElementById('email');
+        const telefonoInput = document.getElementById('telefono');
+        const direccionInput = document.getElementById('direccion');
+
+        function isValid(inputElement) {
+            inputElement.classList.remove('is-invalid');
+            inputElement.classList.add('is-valid');
+            const feedbackElement = inputElement.nextElementSibling;
+            if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+                feedbackElement.textContent = '';
+            }
+            return true;
         }
 
-
-        if (sidebar) { // Solo añadir listeners si el sidebar existe
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(event) {
-                if (window.innerWidth <= 991.98) { // Bootstrap 'lg' breakpoint
-                    const isClickInsideSidebar = sidebar.contains(event.target);
-                    const isClickOnToggle = event.target.closest('.js-sidebar-toggle-mobile'); // Usar el nuevo toggle móvil
-
-                    if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                        document.body.classList.add("sidebar-collapsed");
-                    }
-                }
-            });
-
-            // Ajustar al redimensionar
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 991.98) {
-                    document.body.classList.remove("sidebar-collapsed");
-                }
-            });
+        function isInvalid(inputElement, message) {
+            inputElement.classList.add('is-invalid');
+            inputElement.classList.remove('is-valid');
+            const feedbackElement = inputElement.nextElementSibling;
+            if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
+                feedbackElement.textContent = message;
+            }
+            return false;
         }
+
+        function validateEmail() {
+            const email = emailInput.value.trim();
+            if (email === '') {
+                return isInvalid(emailInput, 'El correo electrónico es obligatorio.');
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return isInvalid(emailInput, 'Ingrese un correo electrónico válido.');
+            }
+            return isValid(emailInput);
+        }
+
+        function validateTelefono() {
+            const telefono = telefonoInput.value.trim();
+            if (telefono === '') {
+                return isInvalid(telefonoInput, 'El teléfono es obligatorio.');
+            }
+            if (!/^\d{9}$/.test(telefono)) {
+                return isInvalid(telefonoInput, 'El teléfono debe contener 9 dígitos numéricos.');
+            }
+            return isValid(telefonoInput);
+        }
+
+        function validateDireccion() {
+            const direccion = direccionInput.value.trim();
+            if (direccion === '') {
+                return isInvalid(direccionInput, 'La dirección es obligatoria.');
+            }
+            if (direccion.length < 5 || direccion.length > 200) {
+                return isInvalid(direccionInput, 'La dirección debe tener entre 5 y 200 caracteres.');
+            }
+            return isValid(direccionInput);
+        }
+
+        form.addEventListener('submit', function (event) {
+            const isEmailValid = validateEmail();
+            const isTelefonoValid = validateTelefono();
+            const isDireccionValid = validateDireccion();
+
+            if (!(isEmailValid && isTelefonoValid && isDireccionValid)) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        emailInput.addEventListener('input', validateEmail);
+        telefonoInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            validateTelefono();
+        });
+        direccionInput.addEventListener('input', validateDireccion);
     });
 </script>
 <script src="https://unpkg.com/feather-icons"></script>
