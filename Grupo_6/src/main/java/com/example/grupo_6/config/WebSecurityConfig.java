@@ -104,9 +104,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/admin/**").hasAuthority("Administrador")
                         .requestMatchers("/coordinador/**").hasAuthority("Coordinador")
                         .requestMatchers("/vecino/**").hasAuthority("Vecino")
-                        .requestMatchers(HttpMethod.GET, "/api/horarios-disponibles").hasAnyAuthority("Superadmin", "Vecino")
-                        .requestMatchers(HttpMethod.POST, "/api/horarios-disponibles").hasAuthority("Superadmin")
-                        .requestMatchers(HttpMethod.DELETE, "/api/horarios-disponibles/**").hasAuthority("Superadmin")
+                        .requestMatchers(HttpMethod.GET, "/api/horarios-disponibles").hasAnyAuthority("Superadmin", "Vecino", "Administrador")
+                        .requestMatchers(HttpMethod.POST, "/api/horarios-disponibles").hasAnyAuthority("Superadmin", "Administrador")
+                        .requestMatchers(HttpMethod.DELETE, "/api/horarios-disponibles/**").hasAnyAuthority("Superadmin", "Administrador")
 
 
                         .anyRequest().authenticated()

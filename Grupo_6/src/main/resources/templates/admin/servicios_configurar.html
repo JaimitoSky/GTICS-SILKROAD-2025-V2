@@ -307,8 +307,6 @@
             const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
-
-
             if (!token || !header) {
               console.error("CSRF token o header no encontrados en el HTML");
               return {};
@@ -317,7 +315,6 @@
             return { [header]: token };
           }
 
-          // 2) Función para activar/desactivar
           function toggleHorario(idHorario, idSedeServicio, esActivo) {
             const accion = esActivo ? 'desactivar' : 'activar';
             if (!confirm(`¿Seguro que deseas ${accion} este horario?`)) return;
@@ -327,7 +324,6 @@
             })
                     .then(res => {
                       if (res.ok) {
-                        // refrescamos el día activo volviendo a "clickear" la pestaña activa
                         const activo = document.querySelector('#dias-pills .nav-link.active');
                         if (activo) activo.click();
                       } else {
@@ -340,83 +336,66 @@
                     });
           }
 
-
           document.addEventListener("DOMContentLoaded", () => {
-            const servicioSelect     = document.getElementById("servicio-select");
-            const diasPills          = document.querySelectorAll("#dias-pills .nav-link");
+            const servicioSelect = document.getElementById("servicio-select");
+            const diasPills = document.querySelectorAll("#dias-pills .nav-link");
             const contenedorHorarios = document.getElementById("lista-horarios-dia");
-
             const aforoInput = document.getElementById("aforo-input");
 
             servicioSelect.addEventListener("change", () => {
-              // …tu código existente para habilitar días…
-              // ahora actualizamos el input de aforo:
               const opt = servicioSelect.selectedOptions[0];
-              if (opt && opt.dataset.aforo) {
-                aforoInput.value = opt.dataset.aforo;
-              } else {
-                aforoInput.value = "";
-              }
-              // opcional: si quieres que el placeholder cambie
-              // aforoInput.placeholder = opt && opt.dataset.aforo ? "" : "Aforo";
+              aforoInput.value = opt && opt.dataset.aforo ? opt.dataset.aforo : "";
             });
 
+            const btnToggle = document.getElementById("btn-toggle-lista");
+            const listaDia = document.getElementById("lista-horarios-dia");
 
-            // botón para expandir/ocultar la lista
-            const btnToggle   = document.getElementById("btn-toggle-lista");
-            const listaDia    = document.getElementById("lista-horarios-dia");
+            if (btnToggle && listaDia) {
+              btnToggle.addEventListener("click", () => {
+                const isHidden = listaDia.style.display === "none";
+                listaDia.style.display = isHidden ? "block" : "none";
+                btnToggle.textContent = isHidden ? "Ocultar horarios" : "Mostrar horarios";
+              });
+            }
 
-            btnToggle.addEventListener("click", () => {
-              const isHidden = listaDia.style.display === "none";
-              listaDia.style.display = isHidden ? "block" : "none";
-              btnToggle.textContent  = isHidden ? "Ocultar horarios" : "Mostrar horarios";
-            });
-
-
-
-            // Al cambiar servicio: habilita/deshabilita días y auto-clic en el primero
             servicioSelect.addEventListener("change", () => {
               const tieneServicio = !!servicioSelect.value;
               diasPills.forEach(btn => {
                 btn.classList.toggle("disabled", !tieneServicio);
               });
               contenedorHorarios.innerHTML = `<p class="text-center text-muted">
-        ${tieneServicio
-                      ? "Seleccione un día para ver horarios"
-                      : "Seleccione servicio y día para ver horarios"}
+        ${tieneServicio ? "Seleccione un día para ver horarios" : "Seleccione servicio y día para ver horarios"}
       </p>`;
 
               if (tieneServicio) {
-                // auto-clic primer día activo
                 const primero = Array.from(diasPills).find(b => !b.classList.contains("disabled"));
                 if (primero) primero.click();
               }
             });
 
-            // Al hacer clic en un día:
             diasPills.forEach(btn => {
               btn.addEventListener("click", () => {
                 if (btn.classList.contains("disabled")) return;
-                // pinta la pestaña activa
                 diasPills.forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
-                // carga horarios de ese día
                 loadHorariosDia(btn.getAttribute("data-dia"));
               });
             });
 
-            // Función que llama al endpoint y muestra la lista
             async function loadHorariosDia(diaSemana) {
               const idSS = servicioSelect.value;
               contenedorHorarios.innerHTML = `<p class="text-center">Cargando…</p>`;
 
               try {
-                const res  = await fetch(`/api/horarios-disponibles?sedeServicioId=${idSS}`, {
+                const res = await fetch(`/api/horarios-disponibles?sedeServicioId=${idSS}`, {
                   headers: getCsrfHeaders()
                 });
                 const data = await res.json();
 
-                // Filtra solo el día y editables
+                if (!Array.isArray(data)) {
+                  throw new Error("Respuesta inesperada del servidor (no es array)");
+                }
+
                 const lista = data.filter(h =>
                         h.diaSemana === diaSemana &&
                         (h.editable === true || h.editable === 'true')
@@ -429,12 +408,11 @@
                   return;
                 }
 
-                // *** AQUÍ *** asignamos el aforo del primer horario
                 aforoInput.value = lista[0].aforoMaximo;
 
-                // Construye un <ul> con cada horario y su botón
                 const ul = document.createElement("ul");
                 ul.className = "list-group";
+
                 lista.forEach(h => {
                   const esActivo = h.activo === true || h.activo === 'true';
                   const li = document.createElement("li");
@@ -463,9 +441,6 @@
               }
             }
           });
-
-
-
 
           function actualizarAforoMasivo(event) {
             event.preventDefault();
@@ -508,78 +483,8 @@
 
             return false;
           }
-
         </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-          <div class="container text-center text-muted">
-            Municipalidad de San Miguel © 2025
-          </div>
-        </footer>
-      </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-
-        if (toggle) {
-          toggle.addEventListener("click", function (e) {
-            e.preventDefault();
-            document.body.classList.toggle("sidebar-collapsed");
-          });
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-          if (window.innerWidth <= 991.98) {
-            const isClickInsideSidebar = sidebar.contains(event.target);
-            const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-            if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-              document.body.classList.add("sidebar-collapsed");
-            }
-          }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-          if (window.innerWidth > 991.98) {
-            document.body.classList.remove("sidebar-collapsed");
-          }
-        });
-      });
-    </script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-      feather.replace();
-    </script>
-
-    <script th:inline="javascript">
-      /*<![CDATA[*/
-      function previewServicio(input, id) {
-        if (!input.files || !input.files.length) return;
-        const url = URL.createObjectURL(input.files[0]);
-        document.getElementById('previewServicio-' + id).src = url;
-      }
-      /*]]>*/
-    </script>
 
   </body>
 </html>

@@ -120,6 +120,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
     @Query("SELECT r FROM Reserva r WHERE r.fechaReserva = :fecha")
     Page<Reserva> filtrarPorFecha2(@Param("fecha") LocalDate fecha, Pageable pageable);
+    @Query("SELECT r.sedeServicio.sede.nombre, COUNT(r) FROM Reserva r GROUP BY r.sedeServicio.sede.nombre ORDER BY COUNT(r) DESC")
+    List<Object[]> obtenerSedesConMasReservas();
+
+    @Query("SELECT r.sedeServicio.servicio.nombre, COUNT(r) FROM Reserva r GROUP BY r.sedeServicio.servicio.nombre ORDER BY COUNT(r) DESC")
+    List<Object[]> obtenerServiciosMasUsados();
+
 
     @Query("SELECT r FROM Reserva r WHERE LOWER(r.estado.nombre) LIKE LOWER(CONCAT('%', :estado, '%'))")
     Page<Reserva> filtrarPorEstado2(@Param("estado") String estado, Pageable pageable);

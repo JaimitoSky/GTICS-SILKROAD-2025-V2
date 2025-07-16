@@ -73,6 +73,8 @@ public class AdminController {
     private CoordinadorHorarioRepository coordinadorHorarioRepository;
     @Autowired
     private FileUploadService fileUploadService;
+    @Autowired
+    private AsistenciaCoordinadorRepository asistenciaCoordinadorRepository;
 
     private void cargarEstadisticas(Model model, YearMonth mes, String rol) {
         if (mes == null) {
@@ -86,18 +88,28 @@ public class AdminController {
         Timestamp inicioTs = Timestamp.valueOf(inicioLdt);
         Timestamp finTs = Timestamp.valueOf(finLdt);
 
+        // Métricas básicas
         long reservasDelMes = reservaRepository.countByFechaCreacionBetween(inicioLdt, finLdt);
         long usuariosTotales = (rol == null || rol.isEmpty())
                 ? usuarioRepository.count()
                 : usuarioRepository.countUsuariosPorNombreRol(rol);
         long usuariosNuevos = usuarioRepository.countByCreateTimeBetween(inicioTs, finTs);
 
+        // Estadísticas agregadas
+        List<Object[]> sedesPopulares = reservaRepository.obtenerSedesConMasReservas();
+        List<Object[]> serviciosPopulares = reservaRepository.obtenerServiciosMasUsados();
+
+        // Enviar al modelo
         model.addAttribute("reservasDelMes", reservasDelMes);
         model.addAttribute("usuariosTotales", usuariosTotales);
         model.addAttribute("usuariosNuevos", usuariosNuevos);
         model.addAttribute("mesActual", mes.toString());
         model.addAttribute("rolActual", rol);
+
+        model.addAttribute("sedesPopulares", sedesPopulares);
+        model.addAttribute("serviciosPopulares", serviciosPopulares);
     }
+
 
 
 
@@ -541,7 +553,7 @@ public class AdminController {
             sede.setActivo(false);
             sedeRepository.save(sede);
         }
-        return "redirect:/admin/servicios-disponibles";
+        return "redirect:/admin/servicios/disponibles";
     }
 
     @PostMapping("/admin/servicios/disponibles/activar/{id}")
@@ -552,7 +564,7 @@ public class AdminController {
             sede.setActivo(true);
             sedeRepository.save(sede);
         }
-        return "redirect:/admin/servicios-disponibles";
+        return "redirect:/admin/servicios/disponibles";
     }
 
     @GetMapping("/admin/servicios/disponibles/ver/{id}")
@@ -563,7 +575,7 @@ public class AdminController {
             return "admin/servicios_detalles";
         } else {
             attr.addFlashAttribute("mensajeError", "Sede no encontrada.");
-            return "redirect:/admin/servicios-disponibles";
+            return "redirect:/admin/servicios/disponibles";
         }
     }
 
@@ -617,7 +629,7 @@ public class AdminController {
         // Guardar la sede (con o sin nueva foto)
         sedeRepository.save(sede);
         attr.addFlashAttribute("mensajeExito", "Sede actualizada correctamente.");
-        return "redirect:/admin/servicios-disponibles";
+        return "redirect:/admin/servicios/disponibles";
     }
 
 
@@ -629,7 +641,7 @@ public class AdminController {
         Optional<Sede> optionalSede = sedeRepository.findById(id);
         if (optionalSede.isEmpty()) {
             attr.addFlashAttribute("mensajeError", "Sede no encontrada.");
-            return "redirect:/admin/servicios-disponibles";
+            return "redirect:/admin/servicios/disponibles";
         }
 
         Sede sede = optionalSede.get();
@@ -1291,7 +1303,7 @@ public class AdminController {
     public String verReserva(@PathVariable("id") Integer id, Model model) {
         Reserva reserva = reservaRepository.findById(id).orElse(null);
         model.addAttribute("reserva", reserva);
-        return "admin/admin_reservas_detalle";
+        return "admin/reserva_detalle";
     }
 
     @PostMapping("/admin/reservas/aprobar-pago/{id}")
@@ -1502,5 +1514,58 @@ public class AdminController {
         List<Tarifa> tarifas = tarifaRepository.findAll();
         model.addAttribute("listaTarifas", tarifas);
         return "admin/admin_puntos_usuarios";
+    }
+    @GetMapping("/admin/coordinadores")
+    public String vistaDashboardCoordinadores(
+            @RequestParam(required = false) String mes,
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) String filtro,
+            Model model) {
+
+        if (mes == null || mes.isBlank()) {
+            mes = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        }
+
+        List<DetalleCoordinadorDTO> coordinadores = asistenciaCoordinadorRepository.obtenerResumenCoordinadoresPorMes(mes);
+        List<Map<String, Object>> coordinadoresConPct = new ArrayList<>();
+        Map<String, Object> coordinadorSeleccionado = null;
+
+        for (DetalleCoordinadorDTO dto : coordinadores) {
+            long total = dto.getPresente() + dto.getTarde() + dto.getFalta();
+            double puntualidadPct = total > 0 ? (dto.getPresente() * 100.0) / total : 0;
+            double tardanzaPct = total > 0 ? (dto.getTarde() * 100.0) / total : 0;
+            double faltaPct = total > 0 ? (dto.getFalta() * 100.0) / total : 0;
+
+            Map<String, Object> mapa = new HashMap<>();
+            mapa.put("idusuario", dto.getIdusuario());
+            mapa.put("nombres", dto.getNombres());
+            mapa.put("apellidos", dto.getApellidos());
+            mapa.put("dni", dto.getDni());
+            mapa.put("presente", dto.getPresente());
+            mapa.put("tarde", dto.getTarde());
+            mapa.put("falta", dto.getFalta());
+            mapa.put("puntualidadPct", Math.round(puntualidadPct));
+            mapa.put("tardanzaPct", Math.round(tardanzaPct));
+            mapa.put("faltasPct", Math.round(faltaPct));
+            mapa.put("incidencias", dto.getIncidencias());
+
+            coordinadoresConPct.add(mapa);
+
+            boolean coincideId = (id != null && Objects.equals(dto.getIdusuario(), id));
+            boolean coincideDni = (filtro != null && filtro.equals(dto.getDni()));
+
+            if (coincideId || coincideDni) {
+                coordinadorSeleccionado = mapa;
+            }
+        }
+
+        List<Usuario> todosCoordinadores = usuarioRepository.findByRolNombre("COORDINADOR");
+        model.addAttribute("todosCoordinadores", todosCoordinadores);
+        model.addAttribute("coordinador", coordinadorSeleccionado);
+        model.addAttribute("mes", mes);
+        model.addAttribute("id", id);
+        model.addAttribute("filtro", filtro);
+
+        return "admin/admin_coordinadores";
     }
 }
