@@ -8,43 +8,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         :root {
-            --primary-color: #007bff; /* Un azul primario */
-            --dark-primary-color: #0056b3; /* Un azul más oscuro para hover */
-            --success-color: #28a745; /* Color para el botón de éxito */
-            --dark-success-color: #218838; /* Color de éxito más oscuro para hover */
-            --text-color: #333;
-            --light-text-color: #666;
-            --border-color: #ddd;
-            --focus-border-color: #88c0eb;
-            --background-light: rgba(255, 255, 255, 0.98);
-            --shadow-light: rgba(0, 0, 0, 0.15);
+            --primary-color: #007aff;
+            --dark-primary-color: #0051c7;
+            --success-color: #28a745;
+            --dark-success-color: #218838;
+            --text-color: #1a1a1a;
+            --light-text-color: #777;
+            --border-color: #ccc;
+            --focus-border-color: #66b2ff;
+            --background-light: rgba(255, 255, 255, 0.9);
+            --shadow-light: rgba(0, 0, 0, 0.1);
             --error-color: #dc3545;
         }
 
-        body {
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
             font-family: 'Inter', sans-serif;
-            background-image: url('/img/photos/fondo-login.jpg');
+            background: linear-gradient(145deg, #1d3557, #457b9d);
             background-size: cover;
-            background-position: center;
             background-repeat: no-repeat;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-color);
+            animation: fadeIn 1s ease;
         }
 
-        .login-container { /* Reutilizamos la clase por consistencia de estilo */
+        .login-container {
             background-color: var(--background-light);
-            padding: 2.5rem; /* Aumento del padding */
-            border-radius: 12px; /* Mayor redondez */
-            max-width: 450px; /* Ancho un poco más compacto */
-            width: 90%;
-            box-shadow: 0 10px 25px var(--shadow-light); /* Sombra más pronunciada */
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            max-width: 420px;
+            width: 92%;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
             text-align: center;
             position: relative;
-            overflow: hidden;
         }
 
         .login-container::before {
@@ -53,46 +58,41 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 10px; /* Una pequeña barra de color en la parte superior */
+            height: 6px;
             background-color: var(--primary-color);
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
         }
 
-        .login-container h4 {
-            margin-bottom: 30px; /* Más espacio debajo del título */
-            font-weight: 700; /* Más énfasis en el título */
+        h4 {
+            margin-bottom: 2rem;
+            font-weight: 700;
+            font-size: 1.6rem;
             color: var(--dark-primary-color);
-            font-size: 1.75rem; /* Tamaño de fuente un poco más grande */
-            padding-top: 10px; /* Espacio para la barra superior */
+            padding-top: 10px;
         }
 
         .form-floating {
             position: relative;
             text-align: left;
-            margin-bottom: 25px; /* Espacio entre los campos */
+            margin-bottom: 1.5rem;
         }
 
         .form-control {
-            display: block;
             width: 100%;
-            padding: 0.75rem 1rem; /* Ajuste del padding para mayor altura */
+            padding: 0.8rem 1rem;
             font-size: 1rem;
-            line-height: 1.5;
             color: var(--text-color);
             background-color: #fff;
-            background-clip: padding-box;
             border: 1px solid var(--border-color);
-            border-radius: 0.5rem; /* Bordes más redondeados */
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            border-radius: 0.6rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .form-control:focus {
-            color: var(--text-color);
-            background-color: #fff;
             border-color: var(--focus-border-color);
-            outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Sombra al enfocar */
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.2);
+            outline: none;
         }
 
         .form-floating > label {
@@ -102,26 +102,20 @@
             height: 100%;
             padding: 0.75rem 1rem;
             pointer-events: none;
-            border: 1px solid transparent;
-            transform-origin: 0 0;
-            transition: opacity .15s ease-in-out, transform .15s ease-in-out;
+            transform-origin: top left;
+            transition: 0.2s ease-in-out;
             color: var(--light-text-color);
         }
 
-        .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-            opacity: 0.75;
-        }
-
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
         .form-floating > .form-control:focus ~ label {
-            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+            transform: scale(0.85) translateY(-0.6rem) translateX(0.15rem);
             opacity: 0.75;
-            color: var(--primary-color); /* Color de la etiqueta al enfocar */
+            color: var(--primary-color);
         }
 
         .form-floating input {
-            padding-left: 1rem;
-            padding-right: 2.7rem; /* Ajuste para el icono */
+            padding-right: 2.7rem;
         }
 
         .form-floating label {
@@ -130,13 +124,12 @@
 
         .toggle-password {
             position: absolute;
-            right: 15px; /* Ajuste a la derecha */
+            right: 1rem;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
             color: var(--light-text-color);
-            z-index: 3;
-            font-size: 1.1rem; /* Icono un poco más grande */
+            font-size: 1.1rem;
             transition: color 0.2s ease;
         }
 
@@ -146,38 +139,30 @@
 
         .btn {
             display: inline-block;
-            font-weight: 400;
-            line-height: 1.5;
-            color: var(--background-light);
+            font-weight: 600;
             text-align: center;
-            text-decoration: none;
-            vertical-align: middle;
-            cursor: pointer;
-            user-select: none;
             background-color: transparent;
             border: 1px solid transparent;
-            padding: 0.75rem 1.5rem; /* Más padding para el botón */
-            font-size: 1.1rem; /* Fuente más grande */
-            border-radius: 0.5rem; /* Bordes más redondeados */
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .btn-success {
-            color: #fff;
             background-color: var(--success-color);
+            color: #fff;
             border-color: var(--success-color);
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); /* Sombra para el botón de éxito */
+            box-shadow: 0 6px 18px rgba(40, 167, 69, 0.3);
         }
 
         .btn-success:hover {
-            color: #fff;
             background-color: var(--dark-success-color);
-            border-color: var(--dark-success-color);
-            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4); /* Sombra más pronunciada al hover */
+            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.45);
         }
 
-        .btn-block {
-            display: block;
+        .btn-block, .w-100 {
             width: 100%;
         }
 
@@ -198,43 +183,63 @@
 
         .toast {
             position: fixed;
-            top: 25px; /* Un poco más abajo */
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            min-width: 320px; /* Ancho ligeramente mayor */
-            padding: 0.9rem 1.5rem; /* Más padding */
-            border-radius: 6px; /* Más redondeado */
-            color: white;
-            font-weight: 600; /* Texto más fuerte */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Sombra más visible */
+            min-width: 320px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
             z-index: 9999;
             opacity: 0;
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Transición más suave */
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
         .toast.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(0); /* Vuelve a su posición */
+            transform: translateX(-50%) translateY(0);
         }
 
-        .toast.error { background-color: var(--error-color); }
+        .toast.error {
+            background-color: var(--error-color);
+        }
 
         a.back-link {
             position: absolute;
-            left: 20px; /* Más adentro del borde */
-            top: 20px; /* Más abajo del borde */
-            font-size: 1rem; /* Tamaño de fuente un poco más grande */
-            text-decoration: none;
+            left: 20px;
+            top: 20px;
+            font-size: 1rem;
             color: var(--primary-color);
             display: flex;
             align-items: center;
-            gap: 5px; /* Espacio entre el icono y el texto */
-            font-weight: 600; /* Más peso a la fuente */
-            z-index: 10; /* Asegura que esté por encima del pseudo-elemento */
+            gap: 6px;
+            font-weight: 600;
+            z-index: 10;
         }
 
-        a.back-link i {
-            margin-right: 0; /* Ya no es necesario si usas gap */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 400px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-control {
+                font-size: 0.95rem;
+            }
+
+            h4 {
+                font-size: 1.4rem;
+            }
+
+            .btn {
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>
@@ -252,8 +257,8 @@
                    placeholder="Nueva contraseña" required minlength="6" autocomplete="new-password" />
             <label for="password">Nueva contraseña (mínimo 6 caracteres)</label>
             <span class="toggle-password" onclick="togglePassword()">
-                <i id="eyeIcon" class="fas fa-eye"></i>
-            </span>
+        <i id="eyeIcon" class="fas fa-eye"></i>
+      </span>
         </div>
 
         <button type="submit" class="btn btn-success w-100">
@@ -278,7 +283,6 @@
         }
     }
 
-    // Mostrar y ocultar automáticamente el toast si está presente
     window.addEventListener('DOMContentLoaded', () => {
         const toast = document.getElementById('toast');
         if (toast) {
