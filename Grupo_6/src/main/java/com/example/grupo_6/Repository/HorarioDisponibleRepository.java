@@ -114,6 +114,8 @@ public interface HorarioDisponibleRepository extends JpaRepository<HorarioDispon
 
 
 
+
+
 }
 
 

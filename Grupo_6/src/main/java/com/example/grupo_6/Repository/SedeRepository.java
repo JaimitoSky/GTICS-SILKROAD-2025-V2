@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,4 +29,8 @@ public interface SedeRepository extends JpaRepository<Sede, Integer> {
 
     // 👇 Este método permite buscar una sede exacta por su nombre
     Optional<Sede> findByNombre(String nombre);
+
+    @Query("SELECT DISTINCT s FROM Sede s WHERE EXISTS (SELECT ss FROM SedeServicio ss WHERE ss.sede = s)")
+    List<Sede> listarSedesDisponibles();
+
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ServicioRepository extends JpaRepository<Servicio, Integer> {
@@ -17,6 +18,7 @@ public interface ServicioRepository extends JpaRepository<Servicio, Integer> {
     @Query("SELECT s FROM Servicio s WHERE s.estado.idestado = 4") // Solo activos
     List<Servicio> listarServiciosActivos();
 
+    Optional<Servicio> findByNombre(String nombre);
 
 }
 

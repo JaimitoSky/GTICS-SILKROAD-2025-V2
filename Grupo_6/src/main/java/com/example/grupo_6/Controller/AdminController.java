@@ -51,6 +51,10 @@ public class AdminController {
     private TarifaRepository tarifaRepository;
 
     @Autowired
+    private com.example.grupo_6.Service.EmailService emailService;
+
+
+    @Autowired
     private ServicioRepository servicioRepository;
 
     @Autowired
@@ -1214,6 +1218,26 @@ public class AdminController {
         if (reserva != null) {
             reserva.setEstado(estadoAprobadoReserva);
             reservaRepository.save(reserva);
+
+            try {
+                String asunto = "Reserva aprobada";
+                String mensajeHtml = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                        + "<h2>Reserva aprobada</h2>"
+                        + "<p>Hola " + reserva.getUsuario().getNombres() + ",</p>"
+                        + "<p>Tu reserva ha sido aprobada para el servicio <strong>"
+                        + reserva.getSedeServicio().getServicio().getNombre() + "</strong> en la sede <strong>"
+                        + reserva.getSedeServicio().getSede().getNombre() + "</strong> el día <strong>"
+                        + reserva.getFechaReserva() + "</strong> a las <strong>"
+                        + reserva.getHorarioDisponible().getHoraInicio() + "</strong>.</p>"
+                        + "<br><p>Gracias por usar el sistema de reservas deportivas de la Municipalidad de San Miguel.</p>"
+                        + "<img src='cid:logoSanMiguel' style='margin-top:20px; width:180px;'/>"
+                        + "</div>";
+
+                emailService.enviarNotificacionReserva(reserva.getUsuario().getEmail(), asunto, mensajeHtml);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
         return "redirect:/admin/pagos/historial";
@@ -1317,6 +1341,26 @@ public class AdminController {
             if (aprobadoReserva != null && confirmadoPago != null) {
                 reserva.setEstado(aprobadoReserva);
                 reservaRepository.save(reserva);
+
+                try {
+                    String asunto = "Reserva aprobada";
+                    String mensajeHtml = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                            + "<h2>Reserva aprobada</h2>"
+                            + "<p>Hola " + reserva.getUsuario().getNombres() + ",</p>"
+                            + "<p>Tu reserva ha sido aprobada para el servicio <strong>"
+                            + reserva.getSedeServicio().getServicio().getNombre() + "</strong> en la sede <strong>"
+                            + reserva.getSedeServicio().getSede().getNombre() + "</strong> el día <strong>"
+                            + reserva.getFechaReserva() + "</strong> a las <strong>"
+                            + reserva.getHorarioDisponible().getHoraInicio() + "</strong>.</p>"
+                            + "<br><p>Gracias por usar el sistema de reservas deportivas de la Municipalidad de San Miguel.</p>"
+                            + "<img src='cid:logoSanMiguel' style='margin-top:20px; width:180px;'/>"
+                            + "</div>";
+
+                    emailService.enviarNotificacionReserva(reserva.getUsuario().getEmail(), asunto, mensajeHtml);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
 
                 Pago pago = reserva.getPago();
                 pago.setEstado(confirmadoPago);

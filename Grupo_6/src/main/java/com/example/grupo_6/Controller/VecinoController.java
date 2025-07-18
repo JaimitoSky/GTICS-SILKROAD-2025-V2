@@ -5,6 +5,7 @@ import com.example.grupo_6.Dto.VecinoPerfilDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.UsuarioRepository;
 import com.example.grupo_6.Repository.ServicioRepository;
+import com.example.grupo_6.Service.EmailService;
 import com.example.grupo_6.Service.FileUploadService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,9 @@ public class VecinoController {
     private ReservaRepository reservaRepository;
     @Autowired
     private PagoRepository pagoRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private HorarioDisponibleRepository horarioDisponibleRepository;
@@ -494,6 +498,26 @@ public class VecinoController {
         // 7) Guardar reserva (ya contiene referencia al pago)
         reservaRepository.save(reserva);
 
+        try {
+            String asunto = "Reserva aprobada";
+            String mensajeHtml = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                    + "<h2>Reserva aprobada</h2>"
+                    + "<p>Hola " + reserva.getUsuario().getNombres() + ",</p>"
+                    + "<p>Tu reserva ha sido aprobada para el servicio <strong>"
+                    + reserva.getSedeServicio().getServicio().getNombre() + "</strong> en la sede <strong>"
+                    + reserva.getSedeServicio().getSede().getNombre() + "</strong> el día <strong>"
+                    + reserva.getFechaReserva() + "</strong> a las <strong>"
+                    + reserva.getHorarioDisponible().getHoraInicio() + "</strong>.</p>"
+                    + "<br><p>Gracias por usar el sistema de reservas deportivas de la Municipalidad de San Miguel.</p>"
+                    + "<img src='cid:logoSanMiguel' style='margin-top:20px; width:180px;'/>"
+                    + "</div>";
+
+            emailService.enviarNotificacionReserva(reserva.getUsuario().getEmail(), asunto, mensajeHtml);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
 
         // 8) Redirigir al detalle
         return "redirect:/vecino/reservas/" + idreserva;
@@ -605,6 +629,30 @@ public class VecinoController {
             reserva.setEstado(estadoPendienteReserva); // siempre será pendiente
 
             reservaRepository.save(reserva);
+
+            try {
+                String asunto = "Reserva registrada correctamente";
+                String mensajeHtml = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                        + "<h2>Reserva registrada</h2>"
+                        + "<p>Hola " + usuario.getNombres() + ",</p>"
+                        + "<p>Tu reserva ha sido registrada correctamente para el servicio <strong>"
+                        + sedeServicio.getServicio().getNombre() + "</strong> en la sede <strong>"
+                        + sedeServicio.getSede().getNombre() + "</strong> el día <strong>"
+                        + reserva.getFechaReserva() + "</strong> a las <strong>"
+                        + reserva.getHorarioDisponible().getHoraInicio() + "</strong>.</p>"
+                        + "<br><p>Gracias por usar el sistema de reservas deportivas de la Municipalidad de San Miguel.</p>"
+                        + "<img src='cid:logoSanMiguel' style='margin-top:20px; width:180px;'/>"
+                        + "</div>";
+
+                emailService.enviarNotificacionReserva(usuario.getEmail(), asunto, mensajeHtml);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+
+
+
 
             // Notificación
             Notificacion noti = new Notificacion();

@@ -78,4 +78,11 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
     WHERE s.tipoServicio.idtipo = :idtipo AND s.estado.idestado = 4
 """)
     List<ServicioComplejoDTO> listarServiciosPorTipoConNombre(@Param("idtipo") int idtipo);
+
+    @Query("SELECT ss.servicio.nombre FROM SedeServicio ss WHERE ss.sede.nombre = :nombreSede")
+    List<String> listarServiciosPorNombreSede(@Param("nombreSede") String nombreSede);
+
+
+    List<SedeServicio> findByServicio_Idservicio(Integer idservicio);
+
 }

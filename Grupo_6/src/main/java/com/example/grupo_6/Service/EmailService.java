@@ -79,5 +79,21 @@ public class EmailService {
         mailSender.send(mensaje);
     }
 
+    @Async
+    public void enviarNotificacionReserva(String destinatario, String asunto, String mensajeHtml) throws MessagingException {
+        MimeMessage mensaje = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mensaje, true);
+
+        helper.setTo(destinatario);
+        helper.setSubject(asunto);
+        helper.setText(mensajeHtml, true); // true = HTML
+
+        // Adjuntar logo (opcional)
+        ClassPathResource logo = new ClassPathResource("static/img/photos/logo-san-miguel.png");
+        helper.addInline("logoSanMiguel", logo);
+
+        mailSender.send(mensaje);
+    }
+
 
 }
