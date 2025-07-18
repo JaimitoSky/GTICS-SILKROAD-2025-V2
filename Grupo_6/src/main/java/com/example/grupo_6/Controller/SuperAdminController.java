@@ -61,7 +61,7 @@ public class SuperAdminController {
     @Autowired
     private TarifaRepository tarifaRepository;
 
-    
+
     @Autowired
     private ServicioRepository servicioRepository;
     @Autowired

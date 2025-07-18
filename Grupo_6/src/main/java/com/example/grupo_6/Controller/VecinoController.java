@@ -454,48 +454,61 @@ public class VecinoController {
                                       @RequestParam Integer idreserva,
                                       RedirectAttributes attr) {
 
-        // 1) Validar existencia de tarjeta virtual
+        // 🔴 AQUÍ ESTABA TU LÍNEA QUE FALLABA:
+        // Optional<TarjetaVirtual> opt = tarjetaVirtualRepository
+        //         .findByNumeroTarjetaAndVencimientoAndCvv(
+        //                 numero,
+        //                 LocalDate.parse(vencimiento + "-01"),
+        //                 cvv
+        //         );
+
+        // ✅ SOLUCIÓN:
+        LocalDate vencimientoDate;
+        try {
+            YearMonth ym = YearMonth.parse(vencimiento);
+            vencimientoDate = ym.atDay(1); // Esto devuelve LocalDate con el primer día del mes
+        } catch (Exception e) {
+            attr.addFlashAttribute("msg", "Formato de fecha inválido.");
+            return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
+        }
+
         Optional<TarjetaVirtual> opt = tarjetaVirtualRepository
                 .findByNumeroTarjetaAndVencimientoAndCvv(
                         numero,
-                        LocalDate.parse(vencimiento + "-01"),
+                        vencimientoDate,
                         cvv
                 );
+
         if (opt.isEmpty()) {
             attr.addFlashAttribute("msg", "Tarjeta inválida");
             return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
         }
+
         TarjetaVirtual tarjeta = opt.get();
 
-        // 2) Obtener reserva y monto
         Reserva reserva = reservaRepository.findById(idreserva)
                 .orElseThrow();
         BigDecimal monto = reserva.getPago().getMonto();
 
-        // 3) Chequear saldo suficiente
         if (tarjeta.getSaldo().compareTo(monto) < 0) {
             attr.addFlashAttribute("msg", "Saldo insuficiente");
             return "redirect:/vecino/reservas/pago-tarjeta?idreserva=" + idreserva;
         }
 
-        // 4) Descontar saldo y persistir
         tarjeta.setSaldo(tarjeta.getSaldo().subtract(monto));
         tarjetaVirtualRepository.save(tarjeta);
 
-        // 5) Marcar reserva como aprobada
         reserva.setEstado(
                 estadoRepository.findByNombre("aprobada")
                         .orElseThrow(() -> new IllegalStateException("Estado 'aprobada' no existe"))
         );
 
-        // 6) Actualizar el pago asociado
         Pago pago = reserva.getPago();
         pago.setMetodo(Pago.Metodo.online);
         pago.setFechaPago(LocalDateTime.now(ZoneId.of("America/Lima")));
-        pago.setTarjeta(tarjeta);             // ← Aquí vinculamos la tarjeta usada
+        pago.setTarjeta(tarjeta);
         pagoRepository.save(pago);
 
-        // 7) Guardar reserva (ya contiene referencia al pago)
         reservaRepository.save(reserva);
 
         try {
@@ -517,11 +530,9 @@ public class VecinoController {
             e.printStackTrace();
         }
 
-
-
-        // 8) Redirigir al detalle
         return "redirect:/vecino/reservas/" + idreserva;
     }
+
 
 
 

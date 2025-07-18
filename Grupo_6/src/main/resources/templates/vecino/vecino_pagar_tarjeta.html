@@ -5,124 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reserva pendiente</title>
 
-    <!-- Estilos locales -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        .form-container {
-            display: flex;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        .form-section {
-            flex: 1;
-            background: #fff;
+        .payment-card {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .image-section {
-            flex: 1;
+
+        .payment-card h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .input-group-text {
+            background-color: #f1f1f1;
+            border-right: 0;
+        }
+
+        .form-control {
+            border-left: 0;
+        }
+
+        .card-icons {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .image-section img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
+            justify-content: flex-end;
             margin-bottom: 1rem;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
+        .card-icons img {
+            width: 50px;
+            height: auto;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
+
+        .form-label {
             font-weight: 600;
-            color: #333;
+            margin-bottom: 0.3rem;
         }
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            font-size: 1rem;
-        }
-        .form-control[readonly] {
-            background-color: #eee;
-            cursor: not-allowed;
-        }
+
         .btn-submit {
-            background-color: #00bfff; /* celeste */
-            color: white;
-            padding: 0.75rem 1.5rem;
+            background-color: #00bfff;
+            color: #fff;
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-            margin-top: 1rem;
+            transition: background 0.3s ease;
         }
 
         .btn-submit:hover {
-            background-color: #009fd6; /* celeste más oscuro */
+            background-color: #009fd6;
         }
-        .qr-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #333;
-            text-align: center;
-        }
-        ::-webkit-scrollbar {
-            display: none;
+
+        /* Ajustar tamaño de input pequeño */
+        .small-input {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.6rem;
         }
     </style>
     <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
-
 </head>
 
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
-
     <div class="main">
-        <!-- Navbar -->
         <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
         <main class="content">
             <div class="container-fluid p-4">
-                <h2 class="mb-4">Pagar con Tarjeta Virtual</h2>
-                <form th:action="@{/vecino/reservas/procesar-pago-tarjeta}" method="post">
-                    <input type="hidden" name="idreserva" th:value="${reserva.idreserva}" />
-                    <div class="mb-3">
-                        <label>Número de Tarjeta:</label>
-                        <input type="text" name="numero" class="form-control" required />
+                <div class="payment-card">
+                    <h4>Pagar con Tarjeta</h4>
+                    <div class="card-icons">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa">
                     </div>
-                    <div class="mb-3">
-                        <label>Vencimiento:</label>
-                        <input type="month" name="vencimiento" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label>CVV:</label>
-                        <input type="password" name="cvv" class="form-control" maxlength="4" required />
-                    </div>
-                    <button type="submit" class="btn btn-primary">Confirmar Pago</button>
-                </form>
+
+                    <form th:action="@{/vecino/reservas/procesar-pago-tarjeta}" method="post" onsubmit="return validarFormulario()">
+                        <input type="hidden" name="idreserva" th:value="${reserva.idreserva}" />
+
+                        <div class="mb-3">
+                            <label for="numero" class="form-label">Número de Tarjeta</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                <input type="text" name="numero" id="numero" class="form-control"
+                                       th:value="${param.numero}" placeholder="•••• •••• •••• ••••" maxlength="16" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="vencimiento" class="form-label">Vencimiento</label>
+                                <input type="month" name="vencimiento" id="vencimiento" class="form-control small-input"
+                                       th:value="${param.vencimiento}" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="password" name="cvv" id="cvv" maxlength="3" class="form-control small-input"
+                                       th:value="${param.cvv}" placeholder="123" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Confirmar Pago</button>
+                    </form>
+                </div>
             </div>
         </main>
 
-
-
-        <!-- Footer -->
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
                 <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo" height="60">
@@ -134,90 +130,33 @@
     </div>
 </div>
 
-
-
-
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/feather-icons"></script>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
+    function validarFormulario() {
+        const numero = document.getElementById("numero").value.trim().replace(/\s+/g, '');
+        const vencimiento = document.getElementById("vencimiento").value.trim();
+        const cvv = document.getElementById("cvv").value.trim();
+
+        if (!/^\d{16}$/.test(numero)) {
+            alert("El número de tarjeta debe tener exactamente 16 dígitos.");
+            return false;
         }
-    });
+
+        if (!/^\d{3}$/.test(cvv)) {
+            alert("El CVV debe tener exactamente 3 dígitos.");
+            return false;
+        }
+
+        if (!/^\d{4}-\d{2}$/.test(vencimiento)) {
+            alert("Seleccione una fecha de vencimiento válida.");
+            return false;
+        }
+
+        return true;
+    }
 </script>
-<script>
-    document.getElementById("btnComprobante").addEventListener("click", function () {
-        const inputFile = document.getElementById("adjuntar");
-        const file = inputFile?.files?.[0];
-        const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic'];
-
-        if (!file) {
-            const modalAdvertencia = new bootstrap.Modal(document.getElementById("modalSinComprobante"));
-            modalAdvertencia.show();
-
-            document.getElementById("btnEntendido").onclick = function () {
-                modalAdvertencia.hide();
-                window.location.href = "/vecino/reservas";
-            };
-
-            return;
-        }
-
-
-        const tipo = file.type;
-        const nombreArchivo = file.name.toLowerCase();
-
-        if (!extensionesValidas.includes(tipo) || !nombreArchivo.match(/\.(jpg|jpeg|png|heic)$/)) {
-            mostrarModalError("Archivo no válido. Solo se permiten imágenes JPG, PNG, JPEG o HEIC.");
-            return;
-        }
-
-        const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
-        modal.show();
-
-        const botonEnviar = document.getElementById("btnModalEnviar");
-        botonEnviar.onclick = null; // limpia handlers anteriores
-        botonEnviar.onclick = function () {
-            modal.hide(); // opcional
-            document.getElementById("formComprobante").submit(); // usa ID del formulario directamente
-        };
-    });
-
-    function mostrarModalError(mensaje) {
-        document.getElementById("mensajeModalError").innerText = mensaje;
-        const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
-        modalError.show();
-    }
-    function mostrarModalExito(mensaje) {
-        document.getElementById("mensajeModalExito").innerText = mensaje;
-        const modal = new bootstrap.Modal(document.getElementById("modalExito"));
-        modal.show();
-    }
-
-    function mostrarModalAdvertencia(mensaje) {
-        document.getElementById("mensajeModalAdvertencia").innerText = mensaje;
-        const modal = new bootstrap.Modal(document.getElementById("modalAdvertencia"));
-        modal.show();
-    }
-
-    function mostrarModalExpirado(mensaje) {
-        document.getElementById("mensajeModalExpirado").innerText = mensaje;
-        const modal = new bootstrap.Modal(document.getElementById("modalExpirado"));
-        modal.show();
-    }
-
-</script>
-
-
-
-
 
 <div th:replace="~{fragments/chatbot.html}"></div>
 </body>
