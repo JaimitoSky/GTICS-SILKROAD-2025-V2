@@ -1,50 +1,415 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Gestión de Reservas - Superadmin</title>
 
-    <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
-    <!-- Estilos internos -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
 
+            /* Spacing scale */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Consistent padding */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title { /* New style for page titles */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center; /* CENTRADO DEL TÍTULO */
+        }
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+            margin-bottom: var(--spacing-lg); /* Add margin below card */
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+            color: var(--dark-primary-color); /* Added text color */
+        }
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            font-size: 1.3rem; /* Adjusted for table titles */
+        }
+
+        /* Form elements */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs); /* Small space below label */
+        }
+
+        .form-control,
+        .form-select,
+        .form-control[type="file"] {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color); /* Ensure text color is consistent */
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .form-control[type="file"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Button style */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex; /* For icon alignment if used */
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .btn i.bi, .btn i[data-feather] { /* Spacing for icons within buttons */
+            margin-right: var(--spacing-xs);
+        }
+        .btn i[data-feather] { /* Specific style for feather icons in buttons */
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            stroke-width: 2.5; /* Make feather icons a bit bolder */
+        }
+
+        /* Specific button colors */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-color: transparent;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5c636a; /* Darker secondary */
+            border-color: #565e64;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            background-color: transparent;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #157347; /* Darker success */
+            border-color: #146c43;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+            background-color: transparent;
+        }
+        .btn-outline-success:hover {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #bb2d3b; /* Darker danger */
+            border-color: #b02a37;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+            background-color: transparent;
+        }
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-info {
+            background-color: var(--info-color);
+            border-color: var(--info-color);
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #0aa2c0; /* Darker info */
+            border-color: #0aa2c0;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-info {
+            color: var(--info-color);
+            border-color: var(--info-color);
+            background-color: transparent;
+        }
+        .btn-outline-info:hover {
+            background-color: var(--info-color);
+            color: white;
+            border-color: var(--info-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        /* Table styling */
+        .table {
+            width: 100%;
+            margin-bottom: 0; /* Remove default margin from bootstrap table */
+            border-collapse: separate; /* Required for border-radius on cells */
+            border-spacing: 0;
+            font-size: 0.95rem;
+        }
+
+        .table-bordered {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-base); /* Apply border-radius to the whole table */
+            overflow: hidden; /* Hide overflow for rounded corners */
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05); /* Light hover effect with primary color */
+            cursor: pointer;
+        }
+
+        .table th, .table td {
+            padding: var(--spacing-md); /* Consistent padding */
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+        .table th:last-child, .table td:last-child {
+            border-right: none; /* No border on last column */
+        }
+        .table tr:last-child td {
+            border-bottom: none; /* No border on last row */
+        }
+
+        .table-light thead th {
+            background-color: var(--background-light); /* Light header background */
+            color: var(--dark-primary-color); /* Darker text for header */
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color); /* Stronger bottom border for header */
+        }
+
+        /* Badges for status */
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: var(--border-radius-base);
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .badge.bg-success { background-color: var(--success-color) !important; color: white !important; }
+        .badge.bg-warning { background-color: var(--warning-color) !important; color: var(--text-color) !important; }
+        .badge.bg-danger { background-color: var(--danger-color) !important; color: white !important; }
+        .badge.bg-secondary { background-color: var(--secondary-color) !important; color: white !important; }
+
+        /* Highlighted row */
+        .table-info {
+            background-color: rgba(13, 110, 253, 0.1) !important; /* Lighter primary background */
+            border-color: var(--primary-color) !important; /* Primary color border */
+        }
+        .table-info.shadow {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important; /* Primary color glow */
+        }
+
+
+        /* Paginación */
+        .pagination {
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg); /* Consistent bottom margin */
+        }
+        .page-item .page-link {
+            border-radius: var(--border-radius-base);
+            margin: 0 var(--spacing-xs); /* Small space between pages */
+            color: var(--primary-color);
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .page-item .page-link:hover {
+            background-color: var(--background-light);
+            border-color: var(--primary-color);
+            color: var(--dark-primary-color);
+            box-shadow: 0 2px 8px var(--shadow-light);
+        }
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow-light);
+            font-weight: 600;
+        }
+        .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+            background-color: var(--background-light);
+            border-color: var(--border-color);
+            opacity: 0.7;
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl);
+        }
+
+        /* Adjust margin for the main content to match overall layout */
+        .container-fluid {
+            padding: 0; /* Content wrapper handles padding */
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-    <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
-
-
-
-
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
 
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-4"><strong>Gestión de Reservas</strong> - Super Admin</h1>
+                <h2 class="page-title"><strong>Gestión de Reservas</strong> - Super Admin</h2>
 
-                <!-- Botón superior -->
                 <div class="mb-3 text-end">
                     <a th:href="@{/superadmin/reservas/nueva}" class="btn btn-primary">
                         <i data-feather="plus" class="me-1"></i> Crear Reserva
                     </a>
                 </div>
 
-                <!-- Filtros -->
-                <form method="get" class="row g-2 mb-3 align-items-center justify-content-end">
+                <form method="get" class="row g-3 mb-4 align-items-end justify-content-end">
 
-                    <!-- Selector del campo -->
                     <div class="col-12 col-sm-auto">
+                        <label for="campoSelect" class="form-label visually-hidden">Filtrar por</label>
                         <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
                             <option th:value="'codigo'" th:selected="${campo == 'codigo'}">Código</option>
                             <option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
@@ -54,36 +419,30 @@
                         </select>
                     </div>
 
-                    <!-- Campo de filtro dinámico -->
-                    <div class="col-12 col-sm" id="filtroContainer">
-                        <!-- Este input será reemplazado dinámicamente por JS -->
+                    <div class="col-12 col-sm-auto" id="filtroContainer" style="min-width: 200px;">
                         <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
                     </div>
 
-                    <!-- Botón Buscar -->
                     <div class="col-auto">
                         <button type="submit" class="btn btn-outline-primary">
-                            <i class="bi bi-search"></i> Buscar
+                            <i data-feather="search" class="me-1"></i> Buscar
                         </button>
                     </div>
 
-                    <!-- Botón Limpiar -->
                     <div class="col-auto" th:if="${campo != null and campo != '' or filtro != null and filtro != ''}">
                         <a th:href="@{/superadmin/reservas}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Limpiar
+                            <i data-feather="x-circle" class="me-1"></i> Limpiar
                         </a>
                     </div>
 
                 </form>
 
-
-                <!-- Tabla de reservas -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Reservas Registradas</h5>
                     </div>
                     <div class="card-body">
-                        <table class="table table-hover table-bordered align-middle">
+                        <div class="table-responsive"> <table class="table table-hover table-bordered align-middle">
                             <thead class="table-light">
                             <tr>
                                 <th>Código</th>
@@ -98,7 +457,7 @@
                             </thead>
                             <tbody>
                             <tr th:each="reserva : ${reservas}"
-                                th:classappend="${reserva.idreserva == idReservaDestacado} ? 'table-info border border-primary border-2 rounded-2 shadow-sm'"
+                                th:classappend="${reserva.idreserva == idReservaDestacado} ? 'table-info border border-primary border-3 shadow-sm'"
                                 th:id="'reserva-' + ${reserva.idreserva}">
                                 <td th:text="${reserva.idreserva}">1</td>
                                 <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></td>
@@ -107,119 +466,91 @@
                                 <td th:text="${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')}"></td>
                                 <td th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')} + ' - ' + ${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></td>
                                 <td>
-                            <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
-                                             (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
-                                             (reserva.estado.nombre == 'cancelada' ? 'badge bg-danger' : 'badge bg-secondary'))}"
-                                  th:text="${reserva.estado.nombre}"></span>
+                                <span th:class="${reserva.estado.nombre == 'confirmada' ? 'badge bg-success' :
+                                                 (reserva.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' :
+                                                 (reserva.estado.nombre == 'cancelada' ? 'badge bg-danger' : 'badge bg-secondary'))}"
+                                      th:text="${reserva.estado.nombre}"></span>
                                 </td>
                                 <td>
-                                    <a th:href="@{/superadmin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">Ver</a>
+                                    <a th:href="@{/superadmin/reservas/ver/{id}(id=${reserva.idreserva})}" class="btn btn-sm btn-primary me-1">
+                                        <i data-feather="eye" class="me-1"></i> Ver
+                                    </a>
                                     <a th:if="${reserva.pago != null}"
                                        th:href="@{/superadmin/pagos/redirigir(idPago=${reserva.pago.idpago})}"
                                        class="btn btn-sm btn-outline-info">
-                                        Ir al Pago
+                                        <i data-feather="dollar-sign" class="me-1"></i> Ir al Pago
                                     </a>
                                 </td>
                             </tr>
+                            <tr th:if="${#lists.isEmpty(reservas)}">
+                                <td colspan="8" class="text-center text-muted py-4">No se encontraron reservas con los filtros aplicados.</td>
+                            </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
 
-                    <!-- Paginación -->
-                    <nav aria-label="Paginación de reservas">
+                    <nav aria-label="Paginación de reservas" th:if="${totalPaginas > 1}">
                         <ul class="pagination justify-content-center flex-wrap">
                             <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/superadmin/reservas(page=${paginaActual - 1}, size=5, nombre=${nombre}, dni=${dni}, codigo=${codigo}, fecha=${fecha})}">Anterior</a>
+                                   th:href="@{/superadmin/reservas(page=${paginaActual - 1}, size=5, campo=${campo}, filtro=${filtro})}">Anterior</a>
                             </li>
 
                             <li class="page-item"
                                 th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
                                 th:classappend="${i == paginaActual} ? 'active'">
                                 <a class="page-link"
-                                   th:href="@{/superadmin/reservas(page=${i}, size=5, nombre=${nombre}, dni=${dni}, codigo=${codigo}, fecha=${fecha})}"
+                                   th:href="@{/superadmin/reservas(page=${i}, size=5, campo=${campo}, filtro=${filtro})}"
                                    th:text="${i + 1}">1</a>
                             </li>
 
                             <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/superadmin/reservas(page=${paginaActual + 1}, size=5, nombre=${nombre}, dni=${dni}, codigo=${codigo}, fecha=${fecha})}">Siguiente</a>
+                                   th:href="@{/superadmin/reservas(page=${paginaActual + 1}, size=5, campo=${campo}, filtro=${filtro})}">Siguiente</a>
                             </li>
                         </ul>
                     </nav>
-
+                    <div class="text-center text-muted small mb-3" th:if="${totalPaginas == 0}">
+                        No hay reservas registradas.
+                    </div>
                 </div>
             </div>
         </main>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const idDestacado = /*[[${idReservaDestacado}]]*/ 0;
-                if (idDestacado && idDestacado !== 0) {
-                    const fila = document.getElementById("reserva-" + idDestacado);
-                    if (fila) {
-                        fila.scrollIntoView({ behavior: "smooth", block: "center" });
-                        fila.classList.add("shadow", "border", "border-primary", "border-3");
-                    }
-                }
-            });
-        </script>
-
-        <script>
-            function actualizarInputFiltro() {
-                const campo = document.getElementById("campoSelect").value;
-                const contenedor = document.getElementById("filtroContainer");
-
-                let nuevoInput = '';
-
-                if (campo === 'estado') {
-                    nuevoInput = `
-                <select name="filtro" class="form-select">
-                    <option value="">Seleccionar estado</option>
-                    <option value="aprobada">Confirmada</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="rechazada">Rechazada</option>
-                </select>
-            `;
-                } else if (campo === 'fecha') {
-                    nuevoInput = `<input type="date" name="filtro" class="form-control" />`;
-                } else if (campo === 'dni') {
-                    nuevoInput = `<input type="text" name="filtro" class="form-control" maxlength="8" minlength="8" pattern="\\d{8}" title="Ingrese 8 dígitos numéricos" placeholder="DNI (8 dígitos)" />`;
-                } else if (campo === 'codigo') {
-                    nuevoInput = `<input type="number" name="filtro" class="form-control" min="1" placeholder="ID exacto de la reserva" />`;
-                } else {
-                    nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
-                }
-
-                contenedor.innerHTML = nuevoInput;
-            }
-
-            document.addEventListener("DOMContentLoaded", () => actualizarInputFiltro());
-        </script>
-
-
-
-
-
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-3">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+            </div>
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        feather.replace(); // Initialize feather icons
+
+        // Lógica para resaltar fila (NO SE MODIFICA LA LÓGICA EXISTENTE)
+        const idDestacado = /*[[${idReservaDestacado}]]*/ 0;
+        if (idDestacado && idDestacado !== 0) {
+            const fila = document.getElementById("reserva-" + idDestacado);
+            if (fila) {
+                fila.scrollIntoView({ behavior: "smooth", block: "center" });
+                // Clases ya proporcionadas en Thymeleaf, solo se añade visualización de scroll
+            }
+        }
+
+        // Lógica de Sidebar (NO SE MODIFICA LA LÓGICA EXISTENTE)
         const toggle = document.querySelector(".js-sidebar-toggle");
         const sidebar = document.getElementById('sidebar');
 
-        if (toggle) {
+        if (toggle && sidebar) {
             toggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
@@ -229,10 +560,10 @@
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
             if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
                 const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
                     document.body.classList.add("sidebar-collapsed");
                 }
             }
@@ -246,9 +577,57 @@
         });
     });
 </script>
-<script src="https://unpkg.com/feather-icons"></script>
+
 <script>
-    feather.replace();
+    function actualizarInputFiltro() {
+        const campo = document.getElementById("campoSelect").value;
+        const contenedor = document.getElementById("filtroContainer");
+
+        // Guardar el valor actual del filtro si existe para rellenarlo después
+        const valorActualFiltro = contenedor.querySelector('input, select') ? contenedor.querySelector('input, select').value : '';
+
+        let nuevoInput = '';
+
+        if (campo === 'estado') {
+            nuevoInput = `
+                <select name="filtro" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="cancelada">Cancelada</option>
+                </select>
+            `;
+        } else if (campo === 'fecha') {
+            nuevoInput = `<input type="date" name="filtro" class="form-control" />`;
+        } else if (campo === 'dni') {
+            nuevoInput = `<input type="text" name="filtro" class="form-control" maxlength="8" pattern="\\d{8}" title="Ingrese 8 dígitos numéricos" placeholder="DNI (8 dígitos)" />`;
+        } else if (campo === 'codigo') {
+            nuevoInput = `<input type="number" name="filtro" class="form-control" min="1" placeholder="ID exacto de la reserva" />`;
+        } else {
+            nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
+        }
+
+        contenedor.innerHTML = nuevoInput;
+
+        // Intentar restaurar el valor si el campo es el mismo o si es compatible
+        const nuevoElementoFiltro = contenedor.querySelector('input, select');
+        if (nuevoElementoFiltro && valorActualFiltro) {
+            if (nuevoElementoFiltro.type === 'text' || nuevoElementoFiltro.type === 'number' || nuevoElementoFiltro.type === 'date' || nuevoElementoFiltro.tagName === 'SELECT') {
+                // Solo restaurar si el tipo de input no cambia drásticamente
+                nuevoElementoFiltro.value = valorActualFiltro;
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        actualizarInputFiltro();
+        // Trigger the change event on load if a filter is already set to ensure the correct input type appears.
+        // This avoids directly manipulating Thymeleaf-set 'th:value' after the JS has replaced the input.
+        const campoSelectElement = document.getElementById("campoSelect");
+        if (campoSelectElement && campoSelectElement.value) {
+            campoSelectElement.dispatchEvent(new Event('change'));
+        }
+    });
 </script>
 
 </body>

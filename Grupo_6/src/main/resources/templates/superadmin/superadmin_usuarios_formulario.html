@@ -174,6 +174,24 @@
 		.container-fluid {
 			padding: 0; /* Content wrapper handles padding */
 		}
+
+		/* --- Estilos para los mensajes de validación de contraseña --- */
+		#passwordHelp .text-danger i {
+			color: var(--danger-color); /* Rojo para "no cumple" */
+		}
+
+		#passwordHelp .text-success i {
+			color: var(--success-color); /* Verde para "cumple" */
+		}
+
+		#passwordHelp li {
+			transition: color 0.2s ease, transform 0.2s ease;
+			padding-left: 0; /* Asegura que el ícono esté alineado */
+		}
+
+		#passwordHelp li.text-success {
+			color: var(--text-color); /* Color de texto normal cuando cumple */
+		}
 	</style>
 </head>
 <body>
@@ -190,7 +208,8 @@
 		<main class="content">
 			<div class="container-fluid p-0">
 				<div class="mb-3">
-					<h2 class="page-title">Registrar Nuevo <strong>Usuario</strong></h2> </div>
+					<h2 class="page-title">Registrar Nuevo <strong>Usuario</strong></h2>
+				</div>
 
 				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}" enctype="multipart/form-data">
 					<div class="row">
@@ -239,12 +258,36 @@
 								</div>
 								<div class="card-body">
 									<div class="mb-3">
-										<label class="form-label">Contraseña</label>
-										<input type="password" name="rawPassword" class="form-control" required />
+										<label class="form-label" for="passwordInput">Contraseña</label>
+										<input type="password" name="rawPassword" class="form-control" id="passwordInput"
+											   required
+											   minlength="8"
+											   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\[\]|\\:;'<>,.?/~`\-]).{8,}$"
+											   data-bs-toggle="tooltip" data-bs-placement="right"
+											   title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un caracter especial."
+										/>
+										<div id="passwordHelp" class="form-text mt-2">
+											<ul class="list-unstyled mb-0 small">
+												<li id="lengthCheck" class="text-danger"><i class="bi bi-x-circle me-1"></i> Al menos 8 caracteres</li>
+												<li id="uppercaseCheck" class="text-danger"><i class="bi bi-x-circle me-1"></i> Al menos una letra mayúscula</li>
+												<li id="lowercaseCheck" class="text-danger"><i class="bi bi-x-circle me-1"></i> Al menos una letra minúscula</li>
+												<li id="numberCheck" class="text-danger"><i class="bi bi-x-circle me-1"></i> Al menos un número</li>
+												<li id="specialCharCheck" class="text-danger"><i class="bi bi-x-circle me-1"></i> Al menos un caracter especial (!@#$...)</li>
+											</ul>
+										</div>
 									</div>
 									<div class="mb-3">
-										<label class="form-label">Teléfono</label>
-										<input type="text" th:field="*{telefono}" class="form-control" required />
+										<label class="form-label" for="telefonoInput">Teléfono</label>
+										<input type="text" th:field="*{telefono}" class="form-control"
+											   id="telefonoInput"
+											   maxlength="9"
+											   pattern="[0-9]{9}"
+											   title="Ingrese 9 dígitos numéricos"
+											   required
+											   oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)" />
+										<div class="invalid-feedback">
+											Por favor, ingrese 9 dígitos numéricos para el teléfono.
+										</div>
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Dirección</label>
@@ -328,30 +371,115 @@
 		dniInput.addEventListener("input", () => {
 			const dni = dniInput.value;
 
+			// Solo intenta consultar si el DNI tiene exactamente 8 dígitos
 			if (dni.length === 8) {
-				// Mostrar mensaje opcional: console.log("Consultando RENIEC...");
+				// console.log("Consultando RENIEC para DNI:", dni); // Mensaje de depuración opcional
 				fetch(`/api/reniec/dni/${dni}`)
 						.then(response => response.json())
 						.then(data => {
 							if (data.success && data.data) {
 								nombresInput.value = data.data.nombres;
 								apellidosInput.value = `${data.data.apellido_paterno} ${data.data.apellido_materno}`;
+								// console.log("Datos de RENIEC cargados:", data.data); // Mensaje de depuración opcional
 							} else {
-								nombresInput.value = '';
-								apellidosInput.value = '';
-								// Using Bootstrap's alert for a more integrated look, or custom modal
-								alert("No se encontró información para el DNI ingresado.");
+								// Si no hay datos o la consulta no fue exitosa
+								nombresInput.value = ''; // Limpiar solo nombres
+								apellidosInput.value = ''; // Limpiar solo apellidos
+								alert("No se encontró información para el DNI ingresado. Verifique el número.");
+								// console.log("No se encontró información o hubo un problema con la respuesta de RENIEC."); // Mensaje de depuración opcional
 							}
 						})
 						.catch(error => {
+							// En caso de un error en la conexión o en la API
 							console.error("Error al consultar DNI:", error);
-							alert("Hubo un error al consultar el DNI.");
+							nombresInput.value = ''; // Limpiar solo nombres
+							apellidosInput.value = ''; // Limpiar solo apellidos
+							alert("Hubo un error al consultar el DNI. Intente de nuevo más tarde.");
 						});
-			} else {
+			} else if (dni.length < 8) {
+				// Si el DNI no tiene 8 dígitos (es decir, el usuario está borrando o no ha terminado),
+				// limpiamos nombres y apellidos, pero no el resto del formulario.
 				nombresInput.value = '';
 				apellidosInput.value = '';
 			}
+			// Si el DNI es diferente de 8 dígitos (ej. más de 8 por algún bug, aunque el pattern lo previene),
+			// los campos de nombre y apellido se mantendrán limpios por el 'else if' anterior.
 		});
+
+		// --- Script para las validaciones de contraseña ---
+		// Inicializar tooltips de Bootstrap
+		var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+		var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+			return new bootstrap.Tooltip(tooltipTriggerEl)
+		});
+
+		// Validaciones dinámicas de contraseña
+		const passwordInput = document.getElementById('passwordInput');
+		const lengthCheck = document.getElementById('lengthCheck');
+		const uppercaseCheck = document.getElementById('uppercaseCheck');
+		const lowercaseCheck = document.getElementById('lowercaseCheck');
+		const numberCheck = document.getElementById('numberCheck');
+		const specialCharCheck = document.getElementById('specialCharCheck');
+
+		passwordInput.addEventListener('input', function() {
+			const password = passwordInput.value;
+
+			// Longitud mínima de 8 caracteres
+			if (password.length >= 8) {
+				lengthCheck.classList.remove('text-danger');
+				lengthCheck.classList.add('text-success');
+				lengthCheck.querySelector('i').classList.replace('bi-x-circle', 'bi-check-circle');
+			} else {
+				lengthCheck.classList.remove('text-success');
+				lengthCheck.classList.add('text-danger');
+				lengthCheck.querySelector('i').classList.replace('bi-check-circle', 'bi-x-circle');
+			}
+
+			// Al menos una letra mayúscula
+			if (/[A-Z]/.test(password)) {
+				uppercaseCheck.classList.remove('text-danger');
+				uppercaseCheck.classList.add('text-success');
+				uppercaseCheck.querySelector('i').classList.replace('bi-x-circle', 'bi-check-circle');
+			} else {
+				uppercaseCheck.classList.remove('text-success');
+				uppercaseCheck.classList.add('text-danger');
+				uppercaseCheck.querySelector('i').classList.replace('bi-check-circle', 'bi-x-circle');
+			}
+
+			// Al menos una letra minúscula
+			if (/[a-z]/.test(password)) {
+				lowercaseCheck.classList.remove('text-danger');
+				lowercaseCheck.classList.add('text-success');
+				lowercaseCheck.querySelector('i').classList.replace('bi-x-circle', 'bi-check-circle');
+			} else {
+				lowercaseCheck.classList.remove('text-success');
+				lowercaseCheck.classList.add('text-danger');
+				lowercaseCheck.querySelector('i').classList.replace('bi-check-circle', 'bi-x-circle');
+			}
+
+			// Al menos un número
+			if (/\d/.test(password)) {
+				numberCheck.classList.remove('text-danger');
+				numberCheck.classList.add('text-success');
+				numberCheck.querySelector('i').classList.replace('bi-x-circle', 'bi-check-circle');
+			} else {
+				numberCheck.classList.remove('text-success');
+				numberCheck.classList.add('text-danger');
+				numberCheck.querySelector('i').classList.replace('bi-check-circle', 'bi-x-circle');
+			}
+
+			// Al menos un caracter especial
+			if (/[!@#$%^&*()_+={}\[\]|\\:;'<>,.?/~`\-]/.test(password)) { // Añadí el guion '-' que es común
+				specialCharCheck.classList.remove('text-danger');
+				specialCharCheck.classList.add('text-success');
+				specialCharCheck.querySelector('i').classList.replace('bi-x-circle', 'bi-check-circle');
+			} else {
+				specialCharCheck.classList.remove('text-success');
+				specialCharCheck.classList.add('text-danger');
+				specialCharCheck.querySelector('i').classList.replace('bi-check-circle', 'bi-x-circle');
+			}
+		});
+		// --- FIN: Script para las validaciones de contraseña ---
 	});
 </script>
 
