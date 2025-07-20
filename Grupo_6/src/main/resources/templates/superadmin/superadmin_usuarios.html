@@ -1,316 +1,605 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Inicio - Superadmin</title>
+	<title>Gestión de Usuarios - Superadmin</title>
 
-	<!-- Estilos externos -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-	<!-- Estilos internos -->
 	<link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
+	<style>
+		:root {
+			--primary-color: #0d6efd;
+			--dark-primary-color: #0a58ca;
+			--secondary-color: #6c757d;
+			--success-color: #198754;
+			--info-color: #0dcaf0;
+			--warning-color: #ffc107;
+			--danger-color: #dc3545;
+			--text-color: #212529; /* Adjusted for consistency with the new style */
+			--light-text-color: #6c757d;
+			--border-color: #dee2e6;
+			--background-light: #f8f9fa;
+			--card-background: #ffffff;
+			--shadow-light: rgba(0, 0, 0, 0.05); /* Lighter shadow for general use */
+			--shadow-medium: rgba(0, 0, 0, 0.15); /* Stronger shadow for hover */
+			--border-radius-base: 0.5rem;
+			--border-radius-lg: 1rem; /* Larger border radius for cards */
+
+			/* Spacing scale - for more consistent spacing */
+			--spacing-xs: 0.25rem; /* 4px */
+			--spacing-sm: 0.5rem;  /* 8px */
+			--spacing-md: 1rem;    /* 16px */
+			--spacing-lg: 1.5rem;  /* 24px */
+			--spacing-xl: 2rem;    /* 32px */
+		}
+
+		body {
+			font-family: 'Inter', sans-serif;
+			background-color: var(--background-light);
+			color: var(--text-color);
+		}
+
+		.main {
+			min-height: 100vh;
+			background-color: var(--background-light);
+		}
+
+		.content {
+			padding: var(--spacing-lg); /* Using spacing variable for general content padding */
+			background-color: var(--background-light) !important; /* Ensure background consistency */
+		}
+
+		h2.page-title { /* Changed to h2.page-title to match the provided Admin style */
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 700;
+			color: var(--dark-primary-color);
+			margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+			font-size: 2rem; /* Larger title */
+			text-align: center; /* Centered the title */
+		}
+
+		h2.page-title strong {
+			color: var(--primary-color);
+		}
+
+		.card {
+			border: 1px solid var(--border-color);
+			border-radius: var(--border-radius-lg); /* Larger border radius */
+			box-shadow: 0 4px 20px var(--shadow-light); /* Stronger initial shadow */
+			background-color: var(--card-background);
+			transition: all 0.3s ease; /* Smoother transition */
+		}
+
+		.card:hover {
+			transform: translateY(-3px); /* More pronounced lift */
+			box-shadow: 0 6px 25px var(--shadow-medium); /* More pronounced shadow */
+		}
+
+		.card-header {
+			font-weight: 600;
+			font-size: 1.1rem;
+			border-bottom: 1px solid var(--border-color);
+			background-color: var(--card-background); /* Ensure consistency with card background */
+			border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; /* Apply border radius only to top corners */
+			padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding using variables */
+		}
+
+		.card-title { /* For "Gestión de Usuarios" inside card */
+			font-size: 1.3rem; /* Slightly larger title for card header */
+			font-weight: 700;
+			color: var(--dark-primary-color);
+		}
+
+		.search-filter-form { /* Styled form container */
+			background-color: var(--card-background);
+			padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+			border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; /* Match card header border radius */
+			border-bottom: 1px solid var(--border-color);
+			align-items: center; /* Ensure vertical alignment of form elements */
+			margin-bottom: 0 !important; /* Remove default form margin-bottom if it exists */
+		}
+
+		.form-control,
+		.form-select {
+			border-radius: var(--border-radius-base);
+			border: 1px solid var(--border-color);
+			padding: 0.75rem 1rem; /* Consistent padding for inputs/selects */
+			font-size: 0.95rem; /* Slightly larger font */
+			box-shadow: none;
+			transition: all 0.2s ease-in-out;
+		}
+
+		.form-control:focus,
+		.form-select:focus {
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+		}
+
+		.btn {
+			padding: 0.6rem 1.2rem;
+			border-radius: var(--border-radius-base);
+			font-weight: 500;
+			transition: all 0.2s ease;
+			display: inline-flex; /* For icon alignment */
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+		}
+
+		.btn i { /* Spacing for icons within buttons */
+			margin-right: var(--spacing-xs);
+		}
+
+		.btn-outline-primary:hover,
+		.btn-outline-secondary:hover,
+		.btn-outline-success:hover,
+		.btn-outline-danger:hover,
+		.btn-outline-warning:hover {
+			opacity: 0.9;
+			transform: translateY(-1px); /* Slight lift on hover */
+			box-shadow: 0 4px 12px var(--shadow-light); /* More consistent shadow on hover */
+		}
+
+		.btn-sm {
+			padding: var(--spacing-sm) var(--spacing-md); /* Using spacing variables */
+			font-size: 0.875rem;
+			display: inline-flex; /* Ensure alignment for the new user button icon */
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+		}
+
+		/* Consistent padding and centering for action buttons in table */
+		.btn-outline-success,
+		.btn-outline-danger,
+		.btn-outline-info, /* Added for edit button */
+		.btn-outline-warning {
+			padding: 0.4rem 0.6rem; /* Reduced padding for compact action buttons */
+			border-radius: var(--border-radius-base); /* Apply border-radius to these specifically */
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 1; /* Helps with vertical alignment of icon */
+			box-shadow: 0 1px 3px var(--shadow-light); /* Subtle shadow for action buttons */
+			border-width: 1px; /* Ensure border is visible */
+		}
+		.btn-outline-success i,
+		.btn-outline-danger i,
+		.btn-outline-info i,
+		.btn-outline-warning i {
+			margin-right: 0; /* Remove margin for single-icon buttons */
+			font-size: 1em; /* Standard icon size */
+		}
+
+		/* Specific hover colors for outline buttons */
+		.btn-outline-success:hover { background-color: var(--success-color); color: white; border-color: var(--success-color); }
+		.btn-outline-danger:hover { background-color: var(--danger-color); color: white; border-color: var(--danger-color); }
+		.btn-outline-info:hover { background-color: var(--info-color); color: var(--text-color); border-color: var(--info-color); }
+		.btn-outline-warning:hover { background-color: var(--warning-color); color: var(--text-color); border-color: var(--warning-color); }
+
+
+		.table {
+			background-color: var(--card-background);
+			border-color: var(--border-color);
+			font-size: 0.9rem; /* Slightly increased for better legibility */
+			margin-bottom: 0; /* Remove default table margin */
+		}
+
+		.table-responsive {
+			border-radius: var(--border-radius-lg); /* Match card border radius */
+			overflow: hidden; /* Hide overflow for rounded corners */
+			border: 1px solid var(--border-color); /* Add border around the entire table */
+		}
+
+		.table-hover tbody tr {
+			transition: background-color 0.2s ease, box-shadow 0.2s ease;
+			cursor: pointer; /* Indicate rows are interactive */
+			background-color: var(--card-background); /* Ensure all rows have the same background */
+		}
+
+		.table-hover tbody tr:hover {
+			background-color: #f1f3f5; /* Lighter hover background */
+			box-shadow: 0 2px 8px var(--shadow-light); /* Subtle shadow on row hover */
+		}
+
+		/* Removed .table-striped style to make all rows the same color */
+
+
+		.table thead {
+			background-color: #f1f3f5; /* Lighter header background */
+			color: var(--dark-primary-color); /* Darker text color for header */
+		}
+
+		.table thead th {
+			font-weight: 700;
+			font-size: 0.95rem; /* Adjusted for hierarchy */
+			padding: 1rem var(--spacing-lg); /* Consistent padding */
+			border-bottom: 2px solid var(--border-color); /* Stronger border bottom */
+		}
+
+		.table tbody td {
+			padding: 0.8rem var(--spacing-lg); /* Consistent cell padding */
+			vertical-align: middle;
+			font-size: 0.9rem; /* Consistent table data font size */
+		}
+
+		/* Specific styles for the dropdown in the actions column */
+		.table tbody td .form-select-sm {
+			padding: 0.25rem 0.75rem; /* Smaller padding for dropdown in table */
+			font-size: 0.85rem;
+			border-radius: var(--border-radius-base);
+			border: 1px solid var(--border-color);
+		}
+
+		.badge {
+			padding: 0.5em 0.8em;
+			border-radius: 0.75rem; /* More rounded badges */
+			font-size: 0.8em;
+			font-weight: 600;
+			text-transform: uppercase;
+		}
+
+		.badge.bg-success { background-color: var(--success-color) !important; color: white; }
+		.badge.bg-danger { background-color: var(--danger-color) !important; color: white; }
+		.badge.bg-warning { background-color: var(--warning-color) !important; color: var(--text-color); } /* Darker text for warning */
+
+		.pagination {
+			margin-top: var(--spacing-lg); /* Add margin top for spacing from table */
+			margin-bottom: 0; /* Remove default margin from nav */
+		}
+		.pagination .page-link {
+			padding: 0.5rem 1rem;
+			border-radius: var(--border-radius-base);
+			color: var(--primary-color);
+			background-color: var(--card-background);
+			border: 1px solid var(--border-color);
+			transition: all 0.2s ease;
+			margin: 0 var(--spacing-xs); /* Small margin between page links */
+		}
+
+		.pagination .page-item.active .page-link {
+			background-color: var(--primary-color);
+			color: white;
+			border-color: var(--primary-color);
+		}
+
+		.pagination .page-item.disabled .page-link {
+			color: var(--light-text-color);
+			pointer-events: none; /* Disable click */
+			background-color: var(--background-light); /* Lighter background for disabled */
+			border-color: var(--border-color);
+		}
+
+		.footer {
+			background-color: var(--card-background);
+			border-top: 1px solid var(--border-color);
+			padding: var(--spacing-md) 0; /* Consistent padding */
+			font-size: 0.85rem;
+			text-align: center;
+			color: var(--light-text-color);
+			margin-top: var(--spacing-xl); /* Reduced margin-top for better spacing */
+		}
+
+		/* Styles for the modal to match the new design */
+		.modal-content {
+			border-radius: var(--border-radius-lg);
+			box-shadow: 0 8px 30px var(--shadow-medium); /* Stronger shadow for modal */
+			border: none; /* Remove default modal border */
+		}
+
+		.modal-header {
+			background-color: var(--background-light); /* Lighter background for header */
+			border-bottom: 1px solid var(--border-color);
+			border-top-left-radius: var(--border-radius-lg);
+			border-top-right-radius: var(--border-radius-lg);
+			padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+		}
+
+		.modal-title {
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 700;
+			font-size: 1.25rem;
+			color: var(--dark-primary-color);
+		}
+
+		.modal-body {
+			padding: var(--spacing-lg); /* Consistent padding */
+			color: var(--text-color);
+			font-size: 0.95rem;
+		}
+
+		.modal-footer {
+			border-top: 1px solid var(--border-color);
+			padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+			justify-content: flex-end; /* Align buttons to the right */
+		}
+
+		.modal-footer .btn { /* Ensure modal buttons also follow general btn styles */
+			padding: 0.5rem 1rem;
+			font-weight: 600;
+		}
+
+		/* Specific modal header for warning (if applicable) */
+		.modal-header.bg-warning {
+			background-color: var(--warning-color) !important;
+			color: var(--text-color) !important;
+		}
+		.modal-header.bg-warning .modal-title,
+		.modal-header.bg-warning .btn-close {
+			color: var(--text-color) !important; /* Ensure text/icon is dark */
+			filter: none; /* Remove filter if previously applied */
+		}
+		.modal-header.bg-warning .btn-close {
+			opacity: 0.7;
+		}
+
+	</style>
 </head>
 <body>
 <div class="wrapper">
-	<!-- Sidebar -->
 	<div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-	<!-- Main -->
 	<div class="main">
 		<div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
+		<button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+			<i class="bi bi-list"></i>
+		</button>
 
+		<main class="content">
+			<div class="container-fluid p-0"> <h2 class="page-title">Gestión de <strong>Usuarios</strong> - Superadmin</h2> <div class="card">
+				<form th:action="@{/superadmin/usuarios}" method="get" class="search-filter-form row g-2 align-items-center">
 
-
-
-
-
-		<main class="content pt-5">
-			<div class="row">
-				<div class="col-12">
-					<div class="card flex-fill">
-						<form th:action="@{/superadmin/usuarios}" method="get" class="row g-2 mb-3 align-items-center justify-content-end">
-
-							<!-- Selector del campo -->
-							<div class="col-12 col-sm-auto">
-								<select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
-									<option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
-									<option th:value="'correo'" th:selected="${campo == 'correo'}">Correo</option>
-									<option th:value="'rol'" th:selected="${campo == 'rol'}">Rol</option>
-									<option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
-									<option th:value="'id'" th:selected="${campo == 'id'}">ID</option>
-								</select>
-							</div>
-
-							<!-- Contenedor del filtro dinámico -->
-							<div class="col-12 col-sm" id="filtroContainer">
-								<input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." th:value="${filtro}">
-							</div>
-
-							<!-- Botón de búsqueda -->
-							<div class="col-auto">
-								<button type="submit" class="btn btn-outline-primary">
-									<i class="bi bi-search"></i> Buscar
-								</button>
-							</div>
-
-							<!-- Botón de limpiar -->
-							<div class="col-auto" th:if="${filtro != null and filtro != ''}">
-								<a th:href="@{/superadmin/usuarios}" class="btn btn-outline-secondary">
-									<i class="bi bi-arrow-left"></i> Volver
-								</a>
-							</div>
-						</form>
-
-						<div class="card-header d-flex align-items-center justify-content-between">
-							<h5 class="card-title mb-0">Gestión de Usuarios</h5>
-							<a th:href="@{/superadmin/usuarios/nuevo}" class="btn btn-sm btn-primary">
-								<i class="bi bi-person-plus-fill"></i> Nuevo Usuario
-							</a>
-						</div>
-
-
-						<div class="table-responsive">
-							<table class="table table-hover table-striped align-middle">
-								<thead class="table-light">
-								<tr>
-									<th>ID</th>
-									<th>Nombre</th>
-									<th class="d-none d-md-table-cell">Correo</th>
-									<th class="d-none d-md-table-cell">Rol</th>
-									<th class="d-none d-md-table-cell">Estado</th>
-									<th class="text-center">Acciones</th>
-								</tr>
-								</thead>
-								<tbody>
-								<tr th:each="usuario : ${usuarios}">
-									<td th:text="${usuario.idusuario}">1</td>
-									<td th:text="${usuario.nombres + ' ' + usuario.apellidos}">Juan Pérez</td>
-									<td class="d-none d-md-table-cell" th:text="${usuario.email}">juan@mail.com</td>
-									<td class="d-none d-md-table-cell" th:text="${mapaRoles[usuario.idrol]}">admin</td>
-									<td class="d-none d-md-table-cell">
-								<span class="badge text-uppercase px-3 py-2"
-									  th:classappend="${usuario.estado} == 'activo' ? 'bg-success' :
-								      (usuario.estado == 'inactivo' ? 'bg-danger' : 'bg-warning')"
-									  th:text="${usuario.estado}">Activo</span>
-									</td>
-									<td class="text-center">
-										<div class="btn-group btn-group-sm" role="group">
-											<form th:action="@{/cambiar-rol}" method="post">
-												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-												<select name="rol" class="form-select form-select-sm"
-														onchange="this.form.submit()"
-														th:disabled="${usuario.email == session.usuario.email}">
-													<option value="1" th:selected="${usuario.idrol == 1}" disabled>Superadmin</option>
-													<option value="2" th:selected="${usuario.idrol == 2}">Administrador</option>
-													<option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
-													<option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
-												</select>
-											</form>
-
-
-											<form th:if="${usuario.estado == 'inactivo' and usuario.email != session.usuario.email}"
-												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
-												<button type="submit" class="btn btn-outline-success" title="Activar Usuario">
-													<i class="bi bi-check-circle"></i>
-												</button>
-											</form>
-
-											<form th:if="${usuario.estado != 'inactivo' and usuario.email != session.usuario.email}"
-												  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
-												<button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
-													<i class="bi bi-slash-circle"></i>
-												</button>
-											</form>
-											<form th:if="${usuario.email != session.usuario.email}"
-												  th:action="@{'/superadmin/usuarios/editar/' + ${usuario.idusuario}}" method="get" class="d-inline">
-												<button type="submit" class="btn btn-outline-info" title="Editar Usuario">
-													<i class="bi bi-pencil-square"></i>
-												</button>
-											</form>
-											<!-- Botón de limpiar
-
-											<form th:if="${usuario.email != session.usuario.email}"
-												  th:action="@{/superadmin/impersonar}" method="post" class="d-inline">
-												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-												<button type="submit" class="btn btn-outline-primary" title="Entrar como este usuario">
-													<i class="bi bi-box-arrow-in-right"></i>
-												</button>
-											</form>-->
-
-
-											<form th:if="${usuario.email != session.usuario.email}" th:action="@{/eliminar}" method="post" class="d-inline">
-												<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
-												<button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
-														data-bs-toggle="modal"
-														data-bs-target="#confirmModal"
-														th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
-													<i class="bi bi-trash"></i>
-												</button>
-											</form>
-
-
-										</div>
-									</td>
-								</tr>
-								</tbody>
-							</table>
-						</div>
-						<nav aria-label="Paginación de usuarios">
-							<ul class="pagination justify-content-center flex-wrap">
-								<li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-									<a class="page-link"
-									   th:href="@{/superadmin/usuarios(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
-								</li>
-
-								<li class="page-item"
-									th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
-									th:classappend="${i == paginaActual} ? 'active'">
-									<a class="page-link"
-									   th:href="@{/superadmin/usuarios(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
-									   th:text="${i + 1}">1</a>
-								</li>
-
-								<li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
-									<a class="page-link"
-									   th:href="@{/superadmin/usuarios(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
-								</li>
-							</ul>
-
-						</nav>
-
+					<div class="col-12 col-md-auto">
+						<label for="campoSelect" class="visually-hidden">Filtrar por</label> <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
+						<option th:value="'nombre'" th:selected="${campo == 'nombre'}">Nombre</option>
+						<option th:value="'correo'" th:selected="${campo == 'correo'}">Correo</option>
+						<option th:value="'rol'" th:selected="${campo == 'rol'}">Rol</option>
+						<option th:value="'estado'" th:selected="${campo == 'estado'}">Estado</option>
+						<option th:value="'id'" th:selected="${campo == 'id'}">ID</option>
+					</select>
 					</div>
+
+					<div class="col-12 col-md" id="filtroContainer">
+						<input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." th:value="${filtro}">
+					</div>
+
+					<div class="col-auto">
+						<button type="submit" class="btn btn-outline-primary">
+							<i class="bi bi-search me-1"></i> Buscar
+						</button>
+					</div>
+
+					<div class="col-auto" th:if="${filtro != null and filtro != ''}">
+						<a th:href="@{/superadmin/usuarios}" class="btn btn-outline-secondary">
+							<i class="bi bi-x-circle me-1"></i> Limpiar
+						</a>
+					</div>
+					<div class="col-12 col-md-auto ms-auto text-end">
+						<a th:href="@{/superadmin/usuarios/nuevo}" class="btn btn-primary btn-sm px-3">
+							<i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
+						</a>
+					</div>
+				</form>
+
+				<div class="card-body px-0 pt-0"> <div class="table-responsive">
+					<table class="table table-hover align-middle mb-0"> <thead class="table-light">
+					<tr>
+						<th>ID</th>
+						<th>Nombre</th>
+						<th class="d-none d-sm-table-cell">Correo</th> <th class="d-none d-md-table-cell">Rol</th>
+						<th class="d-none d-lg-table-cell">Estado</th> <th class="text-center">Acciones</th>
+					</tr>
+					</thead>
+						<tbody>
+						<tr th:each="usuario : ${usuarios}">
+							<td th:text="${usuario.idusuario}">1</td>
+							<td th:text="${usuario.nombres + ' ' + usuario.apellidos}">Juan Pérez</td>
+							<td class="d-none d-sm-table-cell" th:text="${usuario.email}">juan@mail.com</td>
+							<td class="d-none d-md-table-cell" th:text="${mapaRoles[usuario.idrol]}">admin</td>
+							<td class="d-none d-lg-table-cell">
+                                     <span class="badge text-uppercase"
+										   th:classappend="${usuario.estado} == 'activo' ? 'bg-success' :
+                                           (usuario.estado == 'inactivo' ? 'bg-danger' : 'bg-warning')"
+										   th:text="${usuario.estado}">Activo</span>
+							</td>
+							<td class="text-center">
+								<div class="d-flex flex-wrap gap-1 justify-content-center"> <div th:if="${usuario.idrol == 3 or usuario.idrol == 4}"> <form th:action="@{/cambiar-rol}" method="post">
+									<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+									<select name="rol" class="form-select form-select-sm"
+											onchange="this.form.submit()"
+											th:disabled="${usuario.email == session.usuario.email}">
+										<option value="1" th:selected="${usuario.idrol == 1}" disabled>Superadmin</option>
+										<option value="2" th:selected="${usuario.idrol == 2}" disabled>Administrador</option>
+										<option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
+										<option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>
+									</select>
+								</form>
+								</div>
+
+									<div th:if="${usuario.email != session.usuario.email}"> <form th:if="${usuario.estado == 'inactivo'}"
+																								  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/activar'}" method="post" class="d-inline">
+										<button type="submit" class="btn btn-outline-success" title="Activar Usuario">
+											<i class="bi bi-check-circle"></i>
+										</button>
+									</form>
+
+										<form th:if="${usuario.estado != 'inactivo'}"
+											  th:action="@{'/superadmin/usuarios/' + ${usuario.idusuario} + '/ban'}" method="post" class="d-inline">
+											<button type="submit" class="btn btn-outline-danger" title="Banear Usuario">
+												<i class="bi bi-slash-circle"></i>
+											</button>
+										</form>
+
+										<a th:href="@{'/superadmin/usuarios/editar/' + ${usuario.idusuario}}" class="btn btn-outline-primary" title="Editar Usuario">
+											<i class="bi bi-pencil"></i>
+										</a>
+
+										<form th:action="@{/eliminar}" method="post" class="d-inline">
+											<input type="hidden" name="idusuario" th:value="${usuario.idusuario}" />
+											<button type="button" class="btn btn-outline-warning" title="Eliminar Usuario"
+													data-bs-toggle="modal" data-bs-target="#confirmModal"
+													th:attr="data-id=${usuario.idusuario},data-nombre=${usuario.nombres + ' ' + usuario.apellidos}">
+												<i class="bi bi-trash"></i>
+											</button>
+										</form>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(usuarios)}">
+							<td colspan="6" class="text-center py-4 text-muted">No se encontraron usuarios.</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+
+					<nav aria-label="Paginación de usuarios" class="mt-4">
+						<ul class="pagination justify-content-center flex-wrap">
+							<li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+								<a class="page-link"
+								   th:href="@{/superadmin/usuarios(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
+							</li>
+
+							<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+								th:classappend="${i == paginaActual} ? 'active'">
+								<a class="page-link"
+								   th:href="@{/superadmin/usuarios(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
+								   th:text="${i + 1}">1</a>
+							</li>
+
+							<li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+								<a class="page-link"
+								   th:href="@{/superadmin/usuarios(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
+							</li>
+						</ul>
+					</nav>
 				</div>
 			</div>
-
-			<!-- Modal genérico fuera de bucles -->
-			<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="eliminarLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-header bg-warning">
-							<h5 class="modal-title">¿Eliminar Usuario?</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-						</div>
-						<div class="modal-body">
-							¿Estás seguro de que deseas eliminar a <strong id="nombreUsuario">Usuario</strong>?
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-							<form id="formEliminar" method="post" th:action="@{/eliminar}">
-								<input type="hidden" name="idusuario" id="inputIdUsuario" />
-								<button type="submit" class="btn btn-danger">Eliminar</button>
-							</form>
-						</div>
-					</div>
-				</div>
 			</div>
 		</main>
 
-		<script>
-			document.addEventListener("DOMContentLoaded", function () {
-				const modal = document.getElementById("confirmModal");
-				modal.addEventListener("show.bs.modal", function (event) {
-					const button = event.relatedTarget;
-					const idUsuario = button.getAttribute("data-id");
-					const nombre = button.getAttribute("data-nombre");
-					document.getElementById("inputIdUsuario").value = idUsuario;
-					document.getElementById("nombreUsuario").innerText = nombre;
-				});
-			});
-		</script>
-
-
-
-
-
-
-
-		<footer class="footer mt-auto py-3 bg-light border-top">
-			<div class="container text-center text-muted">
+		<footer class="footer mt-auto py-3">
+			<div class="text-center mt-5 mb-3">
+				<img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+			</div>
+			<div class="container text-center text-muted small">
 				Municipalidad de San Miguel © 2025
 			</div>
 		</footer>
 	</div>
 </div>
 
-<!-- Scripts -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="confirmModalLabel">Confirmar Eliminación</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+				<form id="deleteUserForm" th:action="@{/eliminar}" method="post" class="d-inline"> <input type="hidden" name="idusuario" id="inputIdUsuario" value="" />
+					<button type="submit" class="btn btn-danger">Eliminar</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
 <script>
+	function actualizarInputFiltro() {
+		const campo = document.getElementById("campoSelect").value;
+		const contenedor = document.getElementById("filtroContainer");
+		// Get current filter value from URL to pre-fill dynamic input/select
+		const urlParams = new URLSearchParams(window.location.search);
+		const filtroActual = urlParams.get('filtro');
+
+		let nuevoInput = '';
+
+		if (campo === 'estado') {
+			nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
+                  <option value="">Seleccionar estado</option>
+                  <option value="activo" ${filtroActual === 'activo' ? 'selected' : ''}>Activo</option>
+                  <option value="inactivo" ${filtroActual === 'inactivo' ? 'selected' : ''}>Inactivo</option>
+                </select>`;
+		} else if (campo === 'rol') {
+			nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
+                  <option value="">Seleccionar rol</option>
+                  <option value="1" ${filtroActual === '1' ? 'selected' : ''} disabled>Superadmin</option>
+                  <option value="2" ${filtroActual === '2' ? 'selected' : ''} disabled>Administrador</option>
+                  <option value="3" ${filtroActual === '3' ? 'selected' : ''}>Coordinador</option>
+                  <option value="4" ${filtroActual === '4' ? 'selected' : ''}>Vecino</option>
+                </select>`;
+		} else {
+			// Default text input for 'nombre', 'correo', 'id'
+			nuevoInput = `<input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." value="${filtroActual ? filtroActual : ''}">`;
+		}
+
+		contenedor.innerHTML = nuevoInput;
+	}
+
 	document.addEventListener("DOMContentLoaded", function () {
+		feather.replace();
+
 		const toggle = document.querySelector(".js-sidebar-toggle");
 		const sidebar = document.getElementById('sidebar');
 
-		if (toggle) {
+		if (toggle && sidebar) {
 			toggle.addEventListener("click", function (e) {
 				e.preventDefault();
 				document.body.classList.toggle("sidebar-collapsed");
 			});
 		}
 
-		// Close sidebar when clicking outside on mobile
+		// Modified sidebar collapse logic to match Admin example's behavior
 		document.addEventListener('click', function(event) {
-			if (window.innerWidth <= 991.98) {
-				const isClickInsideSidebar = sidebar.contains(event.target);
+			if (window.innerWidth <= 991.98) { // For mobile/tablet viewports
+				const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
 				const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
-				if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+				// If sidebar is open and click is outside sidebar AND not on the toggle
+				if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
 					document.body.classList.add("sidebar-collapsed");
 				}
 			}
 		});
 
-		// Ajustar al redimensionar
 		window.addEventListener('resize', function() {
 			if (window.innerWidth > 991.98) {
 				document.body.classList.remove("sidebar-collapsed");
 			}
 		});
-	});
-</script>
-<script>
-	function actualizarInputFiltro() {
-		const campo = document.getElementById("campoSelect").value;
-		const contenedor = document.getElementById("filtroContainer");
 
-		let nuevoInput = '';
+		const confirmModal = document.getElementById("confirmModal");
+		if (confirmModal) {
+			confirmModal.addEventListener("show.bs.modal", function (event) {
+				const button = event.relatedTarget;
+				const idUsuario = button.getAttribute("data-id");
+				const nombreUsuario = button.getAttribute("data-nombre");
 
-		if (campo === 'estado') {
-			nuevoInput = `
-        <select class="form-select" name="filtro">
-          <option value="">Seleccionar estado</option>
-          <option value="activo">Activo</option>
-          <option value="inactivo">Inactivo</option>
-        </select>`;
-		} else if (campo === 'rol') {
-			nuevoInput = `
-        <select class="form-select" name="filtro">
-          <option value="">Seleccionar rol</option>
-          <option value="1">Superadmin</option>
-          <option value="2">Administrador</option>
-          <option value="3">Coordinador</option>
-          <option value="4">Vecino</option>
-        </select>`;
-		} else {
-			nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
+				const modalBody = confirmModal.querySelector(".modal-body");
+				modalBody.innerHTML = `¿Estás seguro de que deseas eliminar al usuario <strong>${nombreUsuario}</strong> (ID: ${idUsuario})? Esta acción no se puede deshacer.`;
+
+				const form = document.getElementById("deleteUserForm");
+				const inputIdUsuario = document.getElementById("inputIdUsuario");
+				inputIdUsuario.value = idUsuario;
+			});
 		}
 
-		contenedor.innerHTML = nuevoInput;
-	}
-
-	// Ejecutar al cargar la página si ya hay campo seleccionado
-	document.addEventListener("DOMContentLoaded", () => {
+		// Call this on load to ensure the correct input type is shown if a filter is already applied via URL params
 		actualizarInputFiltro();
 	});
 </script>
-
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-	feather.replace();
-</script>
-
 </body>
 </html>

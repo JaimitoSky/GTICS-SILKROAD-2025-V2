@@ -1,110 +1,202 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inicio - Superadmin</title>
 
-    <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
-    <!-- Estilos internos -->
+    <style>
+        /* Base y tipografía */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
 
+        /* Transiciones uniformes */
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Encabezados de contenido principal */
+        h4 {
+            font-weight: 700;
+            color: #333;
+            animation: fadeIn 0.4s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Etiquetas de formulario */
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Campos de formulario */
+        .form-control {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #dee2e6;
+            padding: 0.85rem 1.25rem;
+            transition: all 0.3s ease-in-out;
+            background-color: #ffffff;
+        }
+
+        .form-control:focus {
+            border-color: #17b5c0;
+            box-shadow: 0 0 0 0.25rem rgba(23, 181, 192, 0.25);
+            outline: none;
+        }
+
+        .form-control[disabled] {
+            background-color: #e9ecef;
+            opacity: 0.9;
+            box-shadow: none;
+        }
+
+        /* Contenedor principal del perfil (tarjeta) */
+        .profile-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Botones de acción (estilos genéricos para si se usaran, pero no aplicados a elementos nuevos) */
+        .btn-action-group .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.85rem 2.5rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-action-group .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Botón primario */
+        .btn-primary {
+            background-color: #17b5c0;
+            border-color: #17b5c0;
+        }
+
+        .btn-primary:hover {
+            background-color: #1399a3;
+            border-color: #128c94;
+        }
+
+        /* Botón secundario */
+        .btn-outline-secondary {
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            background-color: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+            border-color: #6c757d;
+        }
+
+        /* Contenido principal */
+        main.content {
+            padding: 2.5rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Footer */
+        footer.footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        footer.footer img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-
-    <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
+        <main class="content">
+            <div class="container mt-4">
+                <h4 class="mb-4">
+                    <i class="bi bi-person-circle text-primary"></i> Mi Perfil
+                </h4>
 
+                <div class="profile-card">
+                    <form method="post" th:action="@{/perfil-superadmin/actualizar}">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="nombres" class="form-label">Nombres</label>
+                                <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="apellidos" class="form-label">Apellidos</label>
+                                <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="correo" class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.email}">
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="telefono" class="form-label">Celular</label>
+                                <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
+                            </div>
+                        </div>
+                        <div class="mb-5">
+                            <label for="direccion" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
+                        </div>
 
-
-
-
-        <!-- Contenido principal -->
-    <main class="content">
-        <div class="container-fluid p-4">
-            <h2 class="mb-4">Mi Perfil</h2>
-            <form method="post" th:action="@{/perfil-superadmin/actualizar}">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="nombres" class="form-label">Nombres</label>
-                        <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="apellidos" class="form-label">Apellidos</label>
-                        <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
-                    </div>
+                    </form>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="correo" class="form-label">Correo electrónico</label>
-                        <input type="email" class="form-control" id="correo" name="correo" th:value="${perfil.email}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="telefono" class="form-label">Celular</label>
-                        <input type="text" class="form-control" id="telefono" name="telefono" th:value="${perfil.telefono}">
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="direccion" class="form-label">Dirección</label>
-                    <input type="text" class="form-control" id="direccion" name="direccion" th:value="${perfil.direccion}">
-                </div>
+            </div>
+        </main>
 
-                <!--<div class="d-flex justify-content-between mt-4">
-                    <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
-                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                </div>-->
-            </form>
-        </div>
-    </main>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-3">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+            </div>
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -118,7 +210,6 @@
             });
         }
 
-        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
             if (window.innerWidth <= 991.98) {
                 const isClickInsideSidebar = sidebar.contains(event.target);
@@ -130,7 +221,6 @@
             }
         });
 
-        // Ajustar al redimensionar
         window.addEventListener('resize', function() {
             if (window.innerWidth > 991.98) {
                 document.body.classList.remove("sidebar-collapsed");

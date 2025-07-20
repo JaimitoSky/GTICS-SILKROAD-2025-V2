@@ -1,34 +1,433 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Gestión de Pagos - Superadmin</title>
 
-    <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
+
+            /* Spacing scale */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Consistent padding */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title { /* New style for page titles */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+        }
+
+        .card-title {
+            font-size: 1.3rem; /* Slightly larger title for card header */
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
+
+        /* Form elements */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs); /* Small space below label */
+        }
+
+        .form-control,
+        .form-select,
+        .form-control[type="file"] {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color); /* Ensure text color is consistent */
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .form-control[type="file"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Button style */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex; /* For icon alignment if used */
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .btn i.bi, .btn i[data-feather] { /* Spacing for icons within buttons */
+            margin-right: var(--spacing-xs);
+        }
+        .btn i[data-feather] { /* Specific style for feather icons in buttons */
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            stroke-width: 2.5; /* Make feather icons a bit bolder */
+        }
+
+        /* Specific button colors */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-color: transparent;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5c636a; /* Darker secondary */
+            border-color: #565e64;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            background-color: transparent;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #157347; /* Darker success */
+            border-color: #146c43;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+            background-color: transparent;
+        }
+        .btn-outline-success:hover {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #bb2d3b; /* Darker danger */
+            border-color: #b02a37;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+            background-color: transparent;
+        }
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        /* Table styles */
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            border-collapse: collapse; /* Ensure single border */
+        }
+
+        .table-bordered {
+            border: 1px solid var(--border-color);
+        }
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--background-light); /* Lighter hover background */
+            color: var(--primary-color); /* Highlight text on hover */
+            cursor: pointer;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--border-color);
+            padding: var(--spacing-md);
+            font-weight: 600;
+            color: var(--dark-primary-color);
+            font-size: 0.9rem;
+        }
+
+        .table tbody td {
+            padding: var(--spacing-md);
+            vertical-align: middle;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .table-light {
+            background-color: var(--background-light);
+        }
+
+        /* Badges for status */
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: var(--border-radius-base);
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: capitalize;
+            display: inline-block; /* Ensure it respects padding */
+        }
+        .badge.bg-success { background-color: var(--success-color) !important; color: white !important; }
+        .badge.bg-warning { background-color: var(--warning-color) !important; color: var(--text-color) !important; }
+        .badge.bg-danger { background-color: var(--danger-color) !important; color: white !important; }
+
+        /* Highlighted row */
+        .table-warning.border.border-primary.border-2.rounded-2.shadow-sm {
+            background-color: #fff3cd !important; /* Lighter warning background for highlight */
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 10px rgba(13, 110, 253, 0.5) !important;
+            transform: scale(1.005); /* Subtle zoom effect */
+            transition: all 0.3s ease;
+        }
+
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            padding-left: 0;
+            list-style: none;
+            border-radius: var(--border-radius-base);
+            margin-top: var(--spacing-lg);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+            background-color: var(--background-light);
+            border-color: var(--border-color);
+        }
+
+        .page-link {
+            position: relative;
+            display: block;
+            color: var(--primary-color);
+            text-decoration: none;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.9rem;
+            margin-left: -1px;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            border-radius: var(--border-radius-base); /* Apply border-radius to each item */
+        }
+        .page-item:first-child .page-link {
+            border-top-left-radius: var(--border-radius-base);
+            border-bottom-left-radius: var(--border-radius-base);
+        }
+        .page-item:last-child .page-link {
+            border-top-right-radius: var(--border-radius-base);
+            border-bottom-right-radius: var(--border-radius-base);
+        }
+
+        .page-link:hover {
+            z-index: 2;
+            color: var(--dark-primary-color);
+            background-color: var(--background-light);
+            border-color: var(--dark-primary-color);
+        }
+
+        /* Modal specific styles */
+        .modal-content {
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 8px 30px var(--shadow-medium);
+        }
+        .modal-header {
+            background-color: var(--background-light);
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+        }
+        .modal-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
+        .modal-body {
+            color: var(--text-color);
+        }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+        .modal-body img.img-fluid {
+            max-height: 70vh; /* Limit height of image in modal */
+            width: auto;
+            object-fit: contain; /* Ensure entire image is visible */
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px var(--shadow-light);
+        }
+
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl);
+        }
+
+        /* Adjust margin for the main content to match overall layout */
+        .container-fluid {
+            padding: 0; /* Content wrapper handles padding */
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-    <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
+
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-3"><strong>Gestión de Pagos</strong></h1>
+                <h2 class="page-title"><strong>Gestión de Pagos</strong></h2>
 
                 <div class="card">
                     <div class="card-body">
-                        <!-- Filtros -->
-                        <form method="get" class="row g-2 mb-3">
+                        <form method="get" class="row g-3 mb-4 align-items-center" th:action="@{/superadmin/pagos}">
                             <div class="col-md-3">
                                 <input type="text" name="filtroNombre" class="form-control" placeholder="Buscar por nombre"
                                        th:value="${filtroNombre}" />
@@ -39,135 +438,128 @@
                             </div>
 
                             <div class="col-md-3 d-flex gap-2">
-                                <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
-                                <a th:href="@{/superadmin/pagos}" class="btn btn-outline-secondary w-100">Limpiar</a>
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i data-feather="search" class="me-1"></i> Buscar
+                                </button>
+                                <a th:href="@{/superadmin/pagos}" class="btn btn-outline-secondary w-100">
+                                    <i data-feather="refresh-cw" class="me-1"></i> Limpiar
+                                </a>
                             </div>
                         </form>
 
-                        <!-- Tabla -->
-                        <table class="table table-bordered table-hover align-middle">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Código</th>
-                                <th>Vecino</th>
-                                <th>DNI</th>
-                                <th>Estado</th>
-                                <th>Comprobante</th>
-                                <th>Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="pago : ${listaPagos}"
-                                th:classappend="${pago.idpago == idPagoDestacado} ? 'table-warning border border-primary border-2 rounded-2 shadow-sm'"
-                                th:id="'pago-' + ${pago.idpago}">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Vecino</th>
+                                    <th>DNI</th>
+                                    <th>Estado</th>
+                                    <th>Comprobante</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="pago : ${listaPagos}"
+                                    th:classappend="${pago.idpago == idPagoDestacado} ? 'table-warning border border-primary border-2 rounded-2 shadow-sm'"
+                                    th:id="'pago-' + ${pago.idpago}">
 
-                                <td th:text="${pago.idpago}"></td>
-                                <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}"></td>
-                                <td th:text="${pago.usuario.dni}"></td>
+                                    <td th:text="${pago.idpago}"></td>
+                                    <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}"></td>
+                                    <td th:text="${pago.usuario.dni}"></td>
 
-                                <td>
-                                <span th:text="${pago.estado.nombre}"
-                                      th:classappend="
-                                        ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
-                                        (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
-                                    Pendiente
-                                </span>
-                                </td>
+                                    <td>
+                                    <span th:text="${pago.estado.nombre == 'confirmado' ? 'Aprobado' : (pago.estado.nombre == 'rechazado' ? 'Rechazado' : 'Pendiente')}"
+                                          th:classappend="
+                                            ${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
+                                            (${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
+                                        </span>
+                                    </td>
 
-                                <!-- Comprobante -->
-                                <td class="text-center">
-                                    <button class="btn btn-outline-secondary btn-sm"
-                                            data-bs-toggle="modal"
-                                            th:data-bs-target="'#modalComprobante' + ${pago.idpago}"
-                                            th:if="${pago.comprobante != null}">
-                                        <i class="bi bi-eye-fill"></i> Ver
-                                    </button>
+                                    <td class="text-center">
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#modalComprobante' + ${pago.idpago}"
+                                                th:if="${pago.comprobante != null}">
+                                            <i class="bi bi-eye-fill"></i> Ver
+                                        </button>
 
-                                    <span th:if="${pago.comprobante == null}" class="text-muted fst-italic">No disponible</span>
-                                </td>
+                                        <span th:if="${pago.comprobante == null}" class="text-muted fst-italic">No disponible</span>
+                                    </td>
 
-
-                                <!-- Acciones -->
-                                <td>
-                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-
-                                        <!-- Estado de pago -->
-                                        <span th:class="'badge px-3 py-2 fw-semibold ' +
-                                        (${pago.estado.nombre == 'confirmado'} ? 'bg-success' :
-                                        (${pago.estado.nombre == 'rechazado'} ? 'bg-danger' : 'bg-warning text-dark'))"
-                                              th:text="${pago.estado.nombre == 'confirmado' ? 'Aprobado' :
-                                        (pago.estado.nombre == 'rechazado' ? 'Rechazado' : 'Pendiente')}">
-                                    </span>
-
-                                        <!-- Botones de acción (si es pendiente) -->
-                                        <div class="d-flex gap-1"
-                                             th:if="${pago.estado.nombre != 'confirmado' and pago.estado.nombre != 'rechazado'}">
-                                            <button class="btn btn-outline-success btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    th:data-bs-target="'#modalAprobar' + ${pago.idpago}">
-                                                <i class="bi bi-check-circle"></i>
-                                            </button>
+                                    <td>
+                                        <div class="d-flex align-items-center justify-content-center flex-wrap gap-2"> <div class="d-flex gap-1"
+                                                                                                                            th:if="${pago.estado.nombre == 'pendiente'}"> <button class="btn btn-outline-success btn-sm"
+                                                                                                                                                                                  data-bs-toggle="modal"
+                                                                                                                                                                                  th:data-bs-target="'#modalAprobar' + ${pago.idpago}"
+                                                                                                                                                                                  data-bs-toggle="tooltip" data-bs-placement="top" title="Aprobar Pago">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
                                             <button class="btn btn-outline-danger btn-sm"
                                                     data-bs-toggle="modal"
-                                                    th:data-bs-target="'#modalRechazar' + ${pago.idpago}">
+                                                    th:data-bs-target="'#modalRechazar' + ${pago.idpago}"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Rechazar Pago">
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
                                         </div>
 
-                                        <!-- Botón Ir a Reserva (siempre visible) -->
-                                        <a th:if="${pago.reserva != null}"
-                                           th:href="@{/superadmin/reservas/redirigir(idReserva=${pago.reserva.idreserva})}"
-                                           class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-box-arrow-up-right"></i> Ir a Reserva
-                                        </a>
+                                            <a th:if="${pago.reserva != null}"
+                                               th:href="@{/superadmin/reservas/redirigir(idReserva=${pago.reserva.idreserva})}"
+                                               class="btn btn-outline-primary btn-sm"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Ir a Reserva">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                            <span th:if="${pago.reserva == null}" class="text-muted fst-italic small">Sin reserva</span>
 
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
 
-                        <!-- Paginación -->
-                        <div class="d-flex justify-content-center mt-4">
-                            <nav aria-label="Paginación de pagos">
-                                <ul class="pagination justify-content-center flex-wrap">
-                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                        <a class="page-link"
-                                           th:href="@{/superadmin/pagos(page=${currentPage - 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Anterior</a>
-                                    </li>
-
-                                    <li class="page-item"
-                                        th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
-                                        th:classappend="${i == currentPage} ? 'active'">
-                                        <a class="page-link"
-                                           th:href="@{/superadmin/pagos(page=${i}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}"
-                                           th:text="${i + 1}">1</a>
-                                    </li>
-
-                                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                                        <a class="page-link"
-                                           th:href="@{/superadmin/pagos(page=${currentPage + 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Siguiente</a>
-                                    </li>
-                                </ul>
-                            </nav>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(listaPagos)}">
+                                    <td colspan="6" class="text-center text-muted py-4">No se encontraron pagos.</td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
+
+                        <nav aria-label="Paginación de pagos">
+                            <ul class="pagination justify-content-center flex-wrap">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/pagos(page=${currentPage - 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Anterior</a>
+                                </li>
+
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/pagos(page=${i}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/superadmin/pagos(page=${currentPage + 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-3">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+            </div>
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Modals -->
 <div th:each="pago : ${listaPagos}">
-    <!-- Modal Aprobar -->
     <div class="modal fade" th:id="'modalAprobar' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -178,18 +570,21 @@
                     </div>
                     <div class="modal-body">
                         <p>¿Estás seguro de aprobar este pago?</p>
-                        <p class="text-warning">Una vez aprobado, no se podrá cambiar el estado.</p>
+                        <p class="text-danger small"><i class="bi bi-exclamation-triangle-fill me-1"></i> Una vez aprobado, el estado no se podrá cambiar.</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Confirmar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-1"></i> Confirmar
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal Rechazar -->
     <div class="modal fade" th:id="'modalRechazar' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -200,18 +595,21 @@
                     </div>
                     <div class="modal-body">
                         <p>¿Estás seguro de rechazar este pago?</p>
-                        <p class="text-danger">Una vez rechazado, no se podrá cambiar el estado.</p>
+                        <p class="text-danger small"><i class="bi bi-exclamation-triangle-fill me-1"></i> Una vez rechazado, el estado no se podrá cambiar.</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash-fill me-1"></i> Confirmar Rechazo
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal de visualización del comprobante -->
     <div class="modal fade"
          th:id="'modalComprobante' + ${pago.idpago}"
          tabindex="-1" aria-hidden="true">
@@ -224,16 +622,13 @@
                 <div class="modal-body text-center">
 
                     <div th:if="${pago.comprobante != null}">
-                        <!-- Mostrar imagen desde backend seguro -->
                         <img th:src="@{'/superadmin/pago/' + ${pago.idpago} + '/comprobante'}"
                              class="img-fluid rounded border" alt="Comprobante" />
 
-                        <!-- Opción de descarga con nombre original -->
                         <div class="mt-3">
                             <a th:href="@{'/superadmin/pago/' + ${pago.idpago} + '/comprobante'}"
-                               th:attr="download=${pago.comprobante.substring(pago.comprobante.lastIndexOf('/') + 1)}"
-                               class="btn btn-primary" target="_blank">
-                                <i class="bi bi-download"></i> Descargar Comprobante
+                               target="_blank"
+                               class="btn btn-primary"> <i class="bi bi-download"></i> Ver en Ventana Nueva
                             </a>
                         </div>
                     </div>
@@ -244,37 +639,26 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Cerrar
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
-
-
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const idDestacado = /*[[${idPagoDestacado}]]*/ 0;
-        if (idDestacado && idDestacado !== 0) {
-            const fila = document.getElementById("pago-" + idDestacado);
-            if (fila) {
-                fila.scrollIntoView({ behavior: "smooth", block: "center" });
-                fila.classList.add("shadow", "border", "border-primary", "border-3");
-            }
-        }
-    });
-</script>
-
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
         const sidebar = document.getElementById('sidebar');
 
-        if (toggle) {
+        if (toggle && sidebar) {
             toggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
@@ -299,16 +683,25 @@
                 document.body.classList.remove("sidebar-collapsed");
             }
         });
+
+        // Tooltips initialization
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     });
 
-    // Solución adicional para problemas con modales
-    document.addEventListener('shown.bs.modal', function () {
-        document.body.style.paddingRight = '0px';
+    document.addEventListener("DOMContentLoaded", () => {
+        const idDestacado = /*[[${idPagoDestacado}]]*/ 0;
+        if (idDestacado && idDestacado !== 0) {
+            const fila = document.getElementById("pago-" + idDestacado);
+            if (fila) {
+                fila.scrollIntoView({ behavior: "smooth", block: "center" });
+                // Original classes: table-warning border border-primary border-2 rounded-2 shadow-sm
+                // These classes are now handled by the .table-warning.border... CSS selector
+            }
+        }
     });
-</script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
 </script>
 
 </body>

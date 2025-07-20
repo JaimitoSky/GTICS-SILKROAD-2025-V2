@@ -1,43 +1,199 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Inicio - Superadmin</title>
+	<title>Registrar Nuevo Usuario - Superadmin</title>
 
-	<!-- Estilos externos -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-	<!-- Estilos internos -->
 	<link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
+	<style>
+		:root {
+			--primary-color: #0d6efd;
+			--dark-primary-color: #0a58ca;
+			--secondary-color: #6c757d;
+			--success-color: #198754;
+			--info-color: #0dcaf0;
+			--warning-color: #ffc107;
+			--danger-color: #dc3545;
+			--text-color: #212529;
+			--light-text-color: #6c757d;
+			--border-color: #dee2e6;
+			--background-light: #f8f9fa;
+			--card-background: #ffffff;
+			--shadow-light: rgba(0, 0, 0, 0.05);
+			--shadow-medium: rgba(0, 0, 0, 0.15);
+			--border-radius-base: 0.5rem;
+			--border-radius-lg: 1rem;
+
+			/* Spacing scale */
+			--spacing-xs: 0.25rem; /* 4px */
+			--spacing-sm: 0.5rem;  /* 8px */
+			--spacing-md: 1rem;    /* 16px */
+			--spacing-lg: 1.5rem;  /* 24px */
+			--spacing-xl: 2rem;    /* 32px */
+		}
+
+		body {
+			font-family: 'Inter', sans-serif;
+			background-color: var(--background-light);
+			color: var(--text-color);
+		}
+
+		.main {
+			min-height: 100vh;
+			background-color: var(--background-light);
+		}
+
+		.content {
+			padding: var(--spacing-lg); /* Consistent padding */
+			background-color: var(--background-light) !important;
+		}
+
+		h2.page-title { /* New style for page titles */
+			font-family: 'Montserrat', sans-serif;
+			font-weight: 700;
+			color: var(--dark-primary-color);
+			margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+			font-size: 2rem;
+			text-align: center;
+		}
+
+		h2.page-title strong {
+			color: var(--primary-color);
+		}
+
+		.card {
+			border: 1px solid var(--border-color);
+			border-radius: var(--border-radius-lg);
+			box-shadow: 0 4px 20px var(--shadow-light);
+			background-color: var(--card-background);
+			transition: all 0.3s ease;
+		}
+
+		.card:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 25px var(--shadow-medium);
+		}
+
+		.card-header {
+			font-weight: 600;
+			font-size: 1.1rem;
+			border-bottom: 1px solid var(--border-color);
+			background-color: var(--card-background);
+			border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+			padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+		}
+
+		.card-title {
+			font-size: 1.3rem; /* Slightly larger title for card header */
+			font-weight: 700;
+			color: var(--dark-primary-color);
+		}
+
+		/* Form elements */
+		.form-label {
+			font-weight: 600;
+			color: var(--text-color);
+			margin-bottom: var(--spacing-xs); /* Small space below label */
+		}
+
+		.form-control,
+		.form-select,
+		.form-control[type="file"] {
+			border-radius: var(--border-radius-base);
+			border: 1px solid var(--border-color);
+			padding: 0.75rem 1rem; /* Consistent padding */
+			font-size: 0.95rem;
+			box-shadow: none;
+			transition: all 0.2s ease-in-out;
+			color: var(--text-color); /* Ensure text color is consistent */
+		}
+
+		.form-control:focus,
+		.form-select:focus,
+		.form-control[type="file"]:focus {
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+		}
+
+		/* Readonly input style */
+		input[readonly] {
+			background-color: var(--background-light) !important; /* Use a lighter background */
+			color: var(--light-text-color); /* Slightly lighter text color */
+			cursor: not-allowed;
+			border-style: dashed; /* Indicate it's not editable */
+		}
+
+		textarea.form-control {
+			min-height: 5rem; /* Ensure minimum height for textarea */
+			resize: vertical; /* Allow vertical resizing */
+		}
+
+		/* Button style */
+		.btn {
+			padding: 0.6rem 1.2rem;
+			border-radius: var(--border-radius-base);
+			font-weight: 500;
+			transition: all 0.2s ease;
+			display: inline-flex; /* For icon alignment if used */
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+		}
+
+		.btn-success {
+			background-color: var(--success-color);
+			border-color: var(--success-color);
+			color: white;
+		}
+
+		.btn-success:hover {
+			background-color: var(--dark-primary-color); /* Slightly darker on hover */
+			border-color: var(--dark-primary-color);
+			opacity: 0.9;
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px var(--shadow-light);
+		}
+
+		.footer {
+			background-color: var(--card-background);
+			border-top: 1px solid var(--border-color);
+			padding: var(--spacing-md) 0;
+			font-size: 0.85rem;
+			text-align: center;
+			color: var(--light-text-color);
+			margin-top: var(--spacing-xl);
+		}
+
+		/* Adjust margin for the main content to match overall layout */
+		.container-fluid {
+			padding: 0; /* Content wrapper handles padding */
+		}
+	</style>
 </head>
 <body>
 <div class="wrapper">
-	<!-- Sidebar -->
 	<div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-	<!-- Main -->
 	<div class="main">
 		<div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
-
-
-
-
+		<button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+			<i class="bi bi-list"></i>
+		</button>
 
 		<main class="content">
 			<div class="container-fluid p-0">
 				<div class="mb-3">
-					<h1 class="h3 d-inline align-middle">Registrar Nuevo Usuario</h1>
-				</div>
+					<h2 class="page-title">Registrar Nuevo <strong>Usuario</strong></h2> </div>
 
 				<form th:action="@{/superadmin/usuarios/guardar}" method="post" th:object="${usuario}" enctype="multipart/form-data">
 					<div class="row">
-						<!-- Columna Izquierda -->
 						<div class="col-12 col-lg-6">
 							<div class="card mb-3">
 								<div class="card-header">
@@ -56,13 +212,11 @@
 
 									<div class="mb-3">
 										<label class="form-label">Nombres</label>
-										<input type="text" th:field="*{nombres}" class="form-control" id="inputNombres" readonly required
-											   style="background-color: #e9ecef;" />
+										<input type="text" th:field="*{nombres}" class="form-control" id="inputNombres" readonly required />
 									</div>
 									<div class="mb-3">
 										<label class="form-label">Apellidos</label>
-										<input type="text" th:field="*{apellidos}" class="form-control" id="inputApellidos" readonly required
-											   style="background-color: #e9ecef;" />
+										<input type="text" th:field="*{apellidos}" class="form-control" id="inputApellidos" readonly required />
 									</div>
 
 									<div class="mb-3">
@@ -78,7 +232,6 @@
 							</div>
 						</div>
 
-						<!-- Columna Derecha -->
 						<div class="col-12 col-lg-6">
 							<div class="card mb-3">
 								<div class="card-header">
@@ -106,8 +259,9 @@
 										</select>
 									</div>
 
-
-									<button type="submit" class="btn btn-success">Registrar Usuario</button>
+									<button type="submit" class="btn btn-success">
+										<i class="bi bi-person-plus-fill me-1"></i> Registrar Usuario
+									</button>
 								</div>
 							</div>
 						</div>
@@ -116,50 +270,53 @@
 			</div>
 		</main>
 
-
-
-
-		<script>
-			document.addEventListener("DOMContentLoaded", function () {
-				const modal = document.getElementById("confirmModal");
-				modal.addEventListener("show.bs.modal", function (event) {
-					const button = event.relatedTarget;
-					const idUsuario = button.getAttribute("data-id");
-					const nombre = button.getAttribute("data-nombre");
-					document.getElementById("inputIdUsuario").value = idUsuario;
-					document.getElementById("nombreUsuario").innerText = nombre;
-				});
-			});
-		</script>
-
-
-
-
-
-
-
-		<footer class="footer mt-auto py-3 bg-light border-top">
-			<div class="container text-center text-muted">
+		<footer class="footer mt-auto py-3">
+			<div class="text-center mt-5 mb-3">
+				<img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+			</div>
+			<div class="container text-center text-muted small">
 				Municipalidad de San Miguel © 2025
 			</div>
 		</footer>
 	</div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-		const toggle = document.querySelector(".js-sidebar-toggle");
-		toggle.addEventListener("click", function (e) {
-			e.preventDefault();
-			document.body.classList.toggle("sidebar-collapsed");
-		});
-	});
-</script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
 	feather.replace();
+</script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const toggle = document.querySelector(".js-sidebar-toggle");
+		const sidebar = document.getElementById('sidebar'); // Assuming sidebar has this ID
+
+		if (toggle && sidebar) {
+			toggle.addEventListener("click", function (e) {
+				e.preventDefault();
+				document.body.classList.toggle("sidebar-collapsed");
+			});
+		}
+
+		// Modified sidebar collapse logic to match Admin example's behavior
+		document.addEventListener('click', function(event) {
+			if (window.innerWidth <= 991.98) { // For mobile/tablet viewports
+				const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+				const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+				// If sidebar is open and click is outside sidebar AND not on the toggle
+				if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
+					document.body.classList.add("sidebar-collapsed");
+				}
+			}
+		});
+
+		window.addEventListener('resize', function() {
+			if (window.innerWidth > 991.98) {
+				document.body.classList.remove("sidebar-collapsed");
+			}
+		});
+	});
 </script>
 
 <script>
@@ -182,6 +339,7 @@
 							} else {
 								nombresInput.value = '';
 								apellidosInput.value = '';
+								// Using Bootstrap's alert for a more integrated look, or custom modal
 								alert("No se encontró información para el DNI ingresado.");
 							}
 						})
@@ -196,7 +354,6 @@
 		});
 	});
 </script>
-
 
 </body>
 </html>

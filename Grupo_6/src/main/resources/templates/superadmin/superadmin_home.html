@@ -1,61 +1,186 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inicio - Superadmin</title>
 
-    <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
-    <!-- Estilos internos -->
+    <style>
+        :root {
+            --primary-color: #0d6efd; /* Azul de Bootstrap */
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754; /* Verde de Bootstrap */
+            --info-color: #0dcaf0;    /* Cyan de Bootstrap */
+            --warning-color: #ffc107; /* Amarillo de Bootstrap */
+            --danger-color: #dc3545;  /* Rojo de Bootstrap */
+            --text-color: #1f1f1f;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #fff;
+            --shadow-light: rgba(0, 0, 0, 0.06);
+            --shadow-medium: rgba(0, 0, 0, 0.12);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 0.75rem;
+        }
 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: 2.5rem; /* Ajustado a tu padding original para no cambiar funcionalidad */
+        }
+
+        h1.h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color); /* Usando dark-primary para el texto general */
+            font-size: 1.8rem;
+            margin-bottom: 2.5rem !important; /* Ajuste para espacio debajo del título */
+        }
+
+        h1.h3 strong {
+            color: var(--primary-color); /* Usando primary para la parte destacada */
+        }
+
+        /* Estilo para las tarjetas de métricas */
+        .card-stats {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 12px var(--shadow-light);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-color: var(--card-background);
+            height: 100%; /* Asegura que tengan la misma altura */
+        }
+
+        .card-stats:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+
+        .card-stats .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-stats h5.card-title { /* Cambiado de h6 a h5.card-title para coincidir con tu HTML */
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--light-text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-stats h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2.1rem;
+            margin: 0;
+            color: var(--dark-primary-color);
+        }
+
+        /* Colores específicos para texto en tarjetas de color de fondo */
+        .card-stats.bg-primary,
+        .card-stats.bg-success,
+        .card-stats.bg-info {
+            color: white !important;
+        }
+
+        .card-stats.bg-warning {
+            color: var(--text-color) !important; /* El warning de Bootstrap es claro */
+        }
+
+        .card-stats.bg-primary h5.card-title,
+        .card-stats.bg-primary h2,
+        .card-stats.bg-success h5.card-title,
+        .card-stats.bg-success h2,
+        .card-stats.bg-info h5.card-title,
+        .card-stats.bg-info h2 {
+            color: white !important;
+        }
+
+        .card-stats.bg-warning h5.card-title,
+        .card-stats.bg-warning h2 {
+            color: var(--text-color) !important;
+        }
+
+
+        /* Estilo para las tarjetas de gráficas */
+        .card { /* Este estilo se aplicará a las tarjetas de gráficas */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 12px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%; /* Asegura que tengan la misma altura */
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--shadow-medium);
+        }
+
+        .card-header {
+            background-color: var(--background-light);
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            color: var(--text-color); /* Color de texto para el header */
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        canvas {
+            max-height: 300px;
+            /* La altura ya la manejas con inline style y min-height en el body de la card */
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 0;
+            color: var(--light-text-color);
+            font-size: 0.85rem;
+            margin-top: auto; /* Para empujar el footer al final */
+        }
+
+        .g-4 { /* Añadido para el espaciado entre columnas si Bootstrap no lo maneja directamente */
+            --bs-gutter-x: 1.5rem;
+            --bs-gutter-y: 1.5rem;
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-
-    <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
-
-
-
-
-        <!-- Métricas principales -->
-        <!--<div class="row mb-4">
-            <div class="col-sm-6 col-xl-3">
-                <div class="card text-white bg-primary">
-                    <div class="card-body">
-                        <h5 class="card-title">Usuarios Activos</h5>
-                        <h2 th:text="${usuariosActivos}">0</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-xl-3">
-                <div class="card text-white bg-info">
-                    <div class="card-body">
-                        <h5 class="card-title">Usuarios Conectados</h5>
-                        <h2 th:text="${usuariosConectados}">0</h2>
-                    </div>
-                </div>
-            </div> -->
-
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-4"><strong>Dashboard General</strong> - Super Admin</h1>
+                <h1 class="h3 mb-4 text-center"><strong>Dashboard General</strong> - Super Admin</h1>
 
-                <!-- Métricas rápidas -->
-                <div class="row mb-4">
+                <div class="row g-4 mb-4">
                     <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-primary h-100">
+                        <div class="card card-stats bg-primary">
                             <div class="card-body">
                                 <h5 class="card-title">Reservas del Mes</h5>
                                 <h2 th:text="${reservasDelMes}">0</h2>
@@ -63,7 +188,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-success h-100">
+                        <div class="card card-stats bg-success">
                             <div class="card-body">
                                 <h5 class="card-title">Reservas Totales</h5>
                                 <h2 th:text="${totalReservas}">0</h2>
@@ -71,7 +196,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-warning h-100">
+                        <div class="card card-stats bg-warning">
                             <div class="card-body">
                                 <h5 class="card-title">Sedes Registradas</h5>
                                 <h2 th:text="${totalSedes}">0</h2>
@@ -79,7 +204,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3 mb-3">
-                        <div class="card text-white bg-info h-100">
+                        <div class="card card-stats bg-info">
                             <div class="card-body">
                                 <h5 class="card-title">Usuarios Nuevos (Mes)</h5>
                                 <h2 th:text="${usuariosNuevos}">0</h2>
@@ -88,8 +213,7 @@
                     </div>
                 </div>
 
-                <!-- Gráficas -->
-                <div class="row">
+                <div class="row g-4">
                     <div class="col-12 col-md-6 mb-4">
                         <div class="card h-100">
                             <div class="card-header"><strong>Reservas por Día (Mes)</strong></div>
@@ -113,12 +237,16 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script th:inline="javascript">
-            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]);
-            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]);
+            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]) || [];
+            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]) || [];
         </script>
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
+                function getCssVariable(name) {
+                    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+                }
+
                 if (document.getElementById("chartReservasMes")) {
                     new Chart(document.getElementById("chartReservasMes"), {
                         type: "line",
@@ -127,17 +255,41 @@
                             datasets: [{
                                 label: "Reservas",
                                 data: reservasPorDia.map(e => e.cantidad),
-                                borderColor: "#0d6efd",
-                                fill: false,
+                                borderColor: getCssVariable('--primary-color'),
+                                fill: true,
+                                backgroundColor: "rgba(0, 123, 255, 0.1)",
                                 tension: 0.4
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: getCssVariable('--text-color'),
+                                        font: { family: 'Inter' }
+                                    }
+                                }
+                            },
                             scales: {
-                                y: { beginAtZero: true }
+                                x: {
+                                    ticks: {
+                                        color: getCssVariable('--light-text-color'),
+                                        font: { family: 'Inter' }
+                                    },
+                                    grid: { color: getCssVariable('--border-color') }
+                                },
+                                y: {
+                                    ticks: {
+                                        color: getCssVariable('--light-text-color'),
+                                        font: { family: 'Inter' },
+                                        stepSize: 1,
+                                        precision: 0,
+                                        beginAtZero: true
+                                    },
+                                    grid: { color: getCssVariable('--border-color') }
+                                }
                             }
                         }
                     });
@@ -150,40 +302,43 @@
                             labels: usuariosPorRol.map(e => e.rol),
                             datasets: [{
                                 data: usuariosPorRol.map(e => e.total),
-                                backgroundColor: ["#0d6efd", "#ffc107", "#dc3545", "#20c997"]
+                                backgroundColor: [
+                                    getCssVariable('--primary-color'),
+                                    getCssVariable('--warning-color'),
+                                    getCssVariable('--danger-color'),
+                                    getCssVariable('--success-color')
+                                ]
                             }]
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: false
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: getCssVariable('--text-color'),
+                                        font: { family: 'Inter' }
+                                    }
+                                }
+                            }
                         }
                     });
                 }
             });
         </script>
 
-
-
-
-        <!-- Comentado: Actividad y alertas -->
-        <!--
-        <div class="row"> ... </div>
-        <div class="row mt-4"> ... </div>
-        -->
-
-
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-3">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+            </div>
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -197,7 +352,6 @@
             });
         }
 
-        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
             if (window.innerWidth <= 991.98) {
                 const isClickInsideSidebar = sidebar.contains(event.target);
@@ -209,7 +363,6 @@
             }
         });
 
-        // Ajustar al redimensionar
         window.addEventListener('resize', function() {
             if (window.innerWidth > 991.98) {
                 document.body.classList.remove("sidebar-collapsed");
