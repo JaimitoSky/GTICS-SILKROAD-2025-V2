@@ -1,83 +1,355 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Gestión de Tarifas - Superadmin</title>
 
-    <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
-    <!-- Estilos internos -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
 
+            /* Spacing scale */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Consistent padding */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title { /* New style for page titles */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+        }
+
+        .card-title {
+            font-size: 1.3rem; /* Slightly larger title for card header */
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
+
+        /* Form elements */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs); /* Small space below label */
+        }
+
+        .form-control,
+        .form-select,
+        .form-control[type="file"] {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color); /* Ensure text color is consistent */
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .form-control[type="file"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Button style */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex; /* For icon alignment if used */
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .btn i[data-feather] { /* Specific style for feather icons in buttons */
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            stroke-width: 2.5; /* Make feather icons a bit bolder */
+        }
+        .btn i.bi { /* Spacing for bootstrap icons within buttons */
+            margin-right: var(--spacing-xs);
+        }
+
+        /* Specific button colors */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-color: transparent;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            background-color: transparent;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        /* Table styles */
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            border-collapse: collapse; /* Ensure single border */
+        }
+
+        .table-bordered {
+            border: 1px solid var(--border-color);
+        }
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--background-light); /* Lighter hover background */
+            color: var(--primary-color); /* Highlight text on hover */
+            cursor: pointer;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--border-color);
+            padding: var(--spacing-md);
+            font-weight: 600;
+            color: var(--dark-primary-color);
+            font-size: 0.9rem;
+        }
+
+        .table tbody td {
+            padding: var(--spacing-md);
+            vertical-align: middle;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .table-light {
+            background-color: var(--background-light);
+        }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            padding-left: 0;
+            list-style: none;
+            border-radius: var(--border-radius-base);
+            margin-top: var(--spacing-lg);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+            background-color: var(--background-light);
+            border-color: var(--border-color);
+        }
+
+        .page-link {
+            position: relative;
+            display: block;
+            color: var(--primary-color);
+            text-decoration: none;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.9rem;
+            margin-left: -1px;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            border-radius: var(--border-radius-base); /* Apply border-radius to each item */
+        }
+        .page-item:first-child .page-link {
+            border-top-left-radius: var(--border-radius-base);
+            border-bottom-left-radius: var(--border-radius-base);
+        }
+        .page-item:last-child .page-link {
+            border-top-right-radius: var(--border-radius-base);
+            border-bottom-right-radius: var(--border-radius-base);
+        }
+
+        .page-link:hover {
+            z-index: 2;
+            color: var(--dark-primary-color);
+            background-color: var(--background-light);
+            border-color: var(--dark-primary-color);
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl);
+        }
+
+        /* Adjust margin for the main content to match overall layout */
+        .container-fluid {
+            padding: 0; /* Content wrapper handles padding */
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-    <!-- Main -->
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
 
-
-
-
-
-
-        <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-4"><strong>Gestión de Tarifas</strong> - Super Admin</h1>
+                <h2 class="page-title"><strong>Gestión de Tarifas</strong></h2> <div class="mb-4 text-end"> <a th:href="@{/superadmin/tarifas/nueva}" class="btn btn-primary">
+                <i data-feather="plus" class="me-1"></i> Nueva Tarifa
+            </a>
+            </div>
 
-                <div class="mb-3 text-end">
-                    <a th:href="@{/superadmin/tarifas/nueva}" class="btn btn-primary">
-                        <i data-feather="plus" class="me-1"></i> Nueva Tarifa
-                    </a>
+                <form class="row g-3 mb-4 align-items-center" method="get" th:action="@{/superadmin/tarifas}"> <div class="col-md-4">
+                    <input type="text" class="form-control" name="filtroNombre" placeholder="Buscar por descripción"
+                           th:value="${filtroNombre}">
                 </div>
-
-                <!-- Filtro -->
-                <form class="row g-2 mb-3" method="get" th:action="@{/superadmin/tarifas}">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" name="filtroNombre" placeholder="Buscar por nombre"
-                               th:value="${filtroNombre}">
-                    </div>
                     <div class="col-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-outline-primary">Buscar</button>
-                        <a th:href="@{/superadmin/tarifas}" class="btn btn-outline-secondary">Limpiar</a>
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i data-feather="search" class="me-1"></i> Buscar
+                        </button>
+                        <a th:href="@{/superadmin/tarifas}" class="btn btn-outline-secondary">
+                            <i data-feather="refresh-cw" class="me-1"></i> Limpiar
+                        </a>
                     </div>
                 </form>
 
-                <!-- Tabla -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Tarifas de Servicios Deportivos</h5>
                     </div>
                     <div class="card-body">
-                        <table class="table table-bordered table-hover align-middle">
+                        <div class="table-responsive"> <table class="table table-bordered table-hover align-middle">
                             <thead class="table-light">
                             <tr>
                                 <th>#</th>
                                 <th>Descripción</th>
-                                <th>Precio por hora</th>
-                                <th>Fecha de creación</th>
+                                <th>Precio por Hora</th>
+                                <th>Fecha de Actualización</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="tarifa, i : ${listaTarifas}">
                                 <td th:text="${i.index + 1}">1</td>
-                                <td th:text="${tarifa.descripcion}">Descripción</td>
+                                <td th:text="${tarifa.descripcion}">Descripción de la tarifa</td>
                                 <td th:text="|S/ ${#numbers.formatDecimal(tarifa.monto, 2, 2)}|">S/ 0.00</td>
                                 <td th:text="${#temporals.format(tarifa.fechaActualizacion, 'dd/MM/yyyy')}">15/04/2025</td>
                             </tr>
+                            <tr th:if="${#lists.isEmpty(listaTarifas)}">
+                                <td colspan="4" class="text-center text-muted py-4">No se encontraron tarifas.</td>
+                            </tr>
                             </tbody>
                         </table>
+                        </div>
 
-                        <!-- Paginación -->
                         <nav aria-label="Paginación de tarifas">
                             <ul class="pagination justify-content-center flex-wrap">
                                 <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
@@ -105,89 +377,53 @@
             </div>
         </main>
 
-
-
-
-        <!-- Feather Icons -->
-        <script>
-            feather.replace();
-        </script>
-
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                // Simulación de gráfica (puedes reemplazarlo con Chart.js real luego)
-                const ctx = document.getElementById('activity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                        datasets: [{
-                            label: 'Reservas',
-                            data: [12, 19, 3, 5, 2, 3, 7],
-                            borderColor: '#dc3545',
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
-
-
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-3">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+            </div>
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
+        const sidebar = document.getElementById('sidebar'); // Assuming sidebar has this ID
 
-        if (toggle) {
+        if (toggle && sidebar) {
             toggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
             });
         }
 
-        // Close sidebar when clicking outside on mobile
+        // Modified sidebar collapse logic to match Admin example's behavior
         document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
+            if (window.innerWidth <= 991.98) { // For mobile/tablet viewports
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
                 const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                // If sidebar is open and click is outside sidebar AND not on the toggle
+                if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
                     document.body.classList.add("sidebar-collapsed");
                 }
             }
         });
 
-        // Ajustar al redimensionar
         window.addEventListener('resize', function() {
             if (window.innerWidth > 991.98) {
                 document.body.classList.remove("sidebar-collapsed");
             }
         });
     });
-</script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
 </script>
 
 </body>
