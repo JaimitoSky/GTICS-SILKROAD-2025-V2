@@ -1,5 +1,6 @@
 package com.example.grupo_6.Controller;
 
+import com.example.grupo_6.Dto.CoordinadorPerfilDTO;
 import com.example.grupo_6.Dto.DetalleCoordinadorDTO;
 import com.example.grupo_6.Entity.*;
 import com.example.grupo_6.Repository.*;
@@ -166,31 +167,34 @@ public class AdminController {
 
     // En SuperAdminController.java
 
-    @GetMapping("/perfil-admin")
-    public String verPerfilAdmin(HttpSession session, Model model) {
+    @GetMapping("/admin/perfil")
+    public String verPerfil(HttpSession session, Model model) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) return "redirect:/login";
-        model.addAttribute("perfil", usuario);
+        Integer idUsuario = usuario.getIdusuario();
+
+        CoordinadorPerfilDTO perfil = usuarioRepository.obtenerPerfilCoordinadorPorId(idUsuario);
+        model.addAttribute("perfil", perfil);
         return "admin/perfil";
     }
 
-    @PostMapping("/perfil-admin/actualizar")
-    public String actualizarPerfilAdmin(HttpSession session,
-                                             @RequestParam String correo,
-                                             @RequestParam String telefono,
-                                             @RequestParam String direccion) {
+    @PostMapping("/admin/perfil/actualizar")
+    public String actualizarPerfil(HttpSession session,
+                                   @RequestParam String correo,
+                                   @RequestParam String telefono,
+                                   @RequestParam String direccion) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario == null) return "redirect:/login";
+        Integer idUsuario = usuario.getIdusuario();
 
-        Usuario u = usuarioRepository.findByIdusuario(usuario.getIdusuario());
+        Usuario u = usuarioRepository.findByIdusuario(idUsuario);
         if (u != null) {
             u.setEmail(correo);
             u.setTelefono(telefono);
             u.setDireccion(direccion);
             usuarioRepository.save(u);
-            session.setAttribute("usuario", u); // actualizar en sesión
         }
-        return "redirect:/perfil-admin?success";
+        return "redirect:/admin/perfil?success";
     }
     @GetMapping("/admin/usuarios/registrados")
     public String listarUsuarios(

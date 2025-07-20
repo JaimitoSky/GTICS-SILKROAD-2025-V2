@@ -192,38 +192,38 @@
             <div class="container-fluid p-0">
                 <h2 class="mb-4">Mi Perfil</h2>
                 <div class="form-container-card">
-                    <form id="profileForm" method="post" th:action="@{/perfil-admin/actualizar}" th:object="${perfil}">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nombres" class="form-label">Nombres</label>
-                                <input type="text" class="form-control" id="nombres" th:value="${perfil.nombres}" disabled>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="apellidos" class="form-label">Apellidos</label>
-                                <input type="text" class="form-control" id="apellidos" th:value="${perfil.apellidos}" disabled>
-                            </div>
+                    <form th:action="@{/admin/perfil/actualizar}" method="post">
+
+                        <div class="mb-4"> <label class="form-label">Nombres</label>
+                            <input type="text" class="form-control" th:value="${perfil.nombres}" disabled>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Correo electrónico</label>
-                                <input type="email" th:field="*{email}" id="email" class="form-control" th:errorclass="is-invalid">
-                                <div class="invalid-feedback" th:errors="*{email}"></div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="telefono" class="form-label">Celular</label>
-                                <input type="text" th:field="*{telefono}" id="telefono" class="form-control" th:errorclass="is-invalid">
-                                <div class="invalid-feedback" th:errors="*{telefono}"></div>
-                            </div>
+                        <div class="mb-4">
+                            <label class="form-label">Apellidos</label>
+                            <input type="text" class="form-control" th:value="${perfil.apellidos}" disabled>
                         </div>
-                        <div class="mb-3">
-                            <label for="direccion" class="form-label">Dirección</label>
-                            <input type="text" th:field="*{direccion}" id="direccion" class="form-control" th:errorclass="is-invalid">
-                            <div class="invalid-feedback" th:errors="*{direccion}"></div>
+                        <div class="mb-4">
+                            <label for="correo" class="form-label">Correo</label>
+                            <input type="email" name="correo" id="correo" class="form-control"
+                                   th:value="${perfil.email}" required
+                                   title="Ingrese un correo válido">
+                        </div>
+                        <div class="mb-4">
+                            <label for="telefono" class="form-label">Celular</label>
+                            <input type="text" name="telefono" id="telefono" class="form-control"
+                                   th:value="${perfil.telefono}" required
+                                   pattern="^\d{9}$"
+                                   title="Ingrese un número de 9 dígitos (9xxxxxxxx)">
+                        </div>
+                        <div class="mb-5"> <label for="direccion" class="form-label">Dirección</label>
+                            <input type="text" name="direccion" id="direccion" class="form-control"
+                                   th:value="${perfil.direccion}" required maxlength="255"
+                                   title="Ingrese su dirección">
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="#" class="btn btn-outline-secondary disabled">Cambiar contraseña</a>
-                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        <div class="d-flex justify-content-between btn-action-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i> Guardar cambios
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -239,116 +239,40 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggle = document.querySelector(".js-sidebar-toggle");
+            const sidebar = document.getElementById('sidebar');
 
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
+            if (toggle) {
+                toggle.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.body.classList.toggle("sidebar-collapsed");
+                });
+            }
 
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
-                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 991.98) {
+                    const isClickInsideSidebar = sidebar.contains(event.target);
+                    const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                    document.body.classList.add("sidebar-collapsed");
+                    if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                        document.body.classList.add("sidebar-collapsed");
+                    }
                 }
-            }
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991.98) {
+                    document.body.classList.remove("sidebar-collapsed");
+                }
+            });
         });
-
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 991.98) {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-        });
-
-        const form = document.getElementById('profileForm');
-        const emailInput = document.getElementById('email');
-        const telefonoInput = document.getElementById('telefono');
-        const direccionInput = document.getElementById('direccion');
-
-        function isValid(inputElement) {
-            inputElement.classList.remove('is-invalid');
-            inputElement.classList.add('is-valid');
-            const feedbackElement = inputElement.nextElementSibling;
-            if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
-                feedbackElement.textContent = '';
-            }
-            return true;
-        }
-
-        function isInvalid(inputElement, message) {
-            inputElement.classList.add('is-invalid');
-            inputElement.classList.remove('is-valid');
-            const feedbackElement = inputElement.nextElementSibling;
-            if (feedbackElement && feedbackElement.classList.contains('invalid-feedback')) {
-                feedbackElement.textContent = message;
-            }
-            return false;
-        }
-
-        function validateEmail() {
-            const email = emailInput.value.trim();
-            if (email === '') {
-                return isInvalid(emailInput, 'El correo electrónico es obligatorio.');
-            }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                return isInvalid(emailInput, 'Ingrese un correo electrónico válido.');
-            }
-            return isValid(emailInput);
-        }
-
-        function validateTelefono() {
-            const telefono = telefonoInput.value.trim();
-            if (telefono === '') {
-                return isInvalid(telefonoInput, 'El teléfono es obligatorio.');
-            }
-            if (!/^\d{9}$/.test(telefono)) {
-                return isInvalid(telefonoInput, 'El teléfono debe contener 9 dígitos numéricos.');
-            }
-            return isValid(telefonoInput);
-        }
-
-        function validateDireccion() {
-            const direccion = direccionInput.value.trim();
-            if (direccion === '') {
-                return isInvalid(direccionInput, 'La dirección es obligatoria.');
-            }
-            if (direccion.length < 5 || direccion.length > 200) {
-                return isInvalid(direccionInput, 'La dirección debe tener entre 5 y 200 caracteres.');
-            }
-            return isValid(direccionInput);
-        }
-
-        form.addEventListener('submit', function (event) {
-            const isEmailValid = validateEmail();
-            const isTelefonoValid = validateTelefono();
-            const isDireccionValid = validateDireccion();
-
-            if (!(isEmailValid && isTelefonoValid && isDireccionValid)) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        });
-
-        emailInput.addEventListener('input', validateEmail);
-        telefonoInput.addEventListener('input', function() {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            validateTelefono();
-        });
-        direccionInput.addEventListener('input', validateDireccion);
-    });
-</script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
-</script>
+    </script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        feather.replace();
+    </script>
 </body>
 </html>
