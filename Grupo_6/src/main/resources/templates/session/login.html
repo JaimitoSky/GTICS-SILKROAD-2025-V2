@@ -5,29 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Iniciar sesión - Sistema de Reservas</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         :root {
-            --primary-color: #007aff;
-            --dark-primary-color: #0051c7;
-            --text-color: #1a1a1a;
-            --light-text-color: #888;
-            --border-color: #ddd;
-            --focus-border-color: #66b2ff;
-            --background-light: rgba(255, 255, 255, 0.85);
-            --shadow-light: rgba(0, 0, 0, 0.1);
+            /* Colores principales */
+            --primary-color: #007aff; /* Azul vibrante */
+            --dark-primary-color: #0051c7; /* Azul más oscuro para hover */
+            --accent-color: #4CAF50; /* Verde para éxito */
+            --danger-color: #F44336; /* Rojo para error */
+
+            /* Colores de texto */
+            --text-color: #1a1a1a; /* Texto oscuro */
+            --light-text-color: #6c757d; /* Texto gris claro */
+            --heading-color: #1d3557; /* Azul oscuro para encabezados */
+
+            /* Colores de bordes y fondos */
+            --border-color: #e0e0e0; /* Gris claro para bordes */
+            --focus-border-color: #66b2ff; /* Azul para enfoque */
+            --background-light: rgba(255, 255, 255, 0.95); /* Fondo claro semi-transparente */
+            --shadow-light: rgba(0, 0, 0, 0.15); /* Sombra ligera */
+            --shadow-medium: rgba(0, 0, 0, 0.25); /* Sombra media */
         }
 
+        /* Reset básico y box-sizing */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* Estilos del cuerpo y fondo */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(145deg, #1d3557, #457b9d);
+            background: linear-gradient(145deg, #1d3557, #457b9d); /* Degradado de fondo */
             background-size: cover;
             background-repeat: no-repeat;
             min-height: 100vh;
@@ -35,155 +46,221 @@
             align-items: center;
             justify-content: center;
             color: var(--text-color);
-            animation: fadeIn 1s ease;
+            animation: fadeIn 1s ease forwards; /* Animación de entrada */
+            position: relative;
+            overflow: hidden; /* Evita barras de desplazamiento si los elementos de fondo se desbordan */
         }
 
+        /* Efecto de partículas/fondo abstracto */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.05) 0%, transparent 40%),
+            radial-gradient(circle at bottom right, rgba(255,255,255,0.05) 0%, transparent 40%);
+            z-index: -1;
+            animation: backgroundPan 15s infinite alternate ease-in-out;
+        }
+
+        /* Contenedor principal del formulario de login */
         .login-container {
             background: var(--background-light);
-            padding: 3rem 2rem;
+            padding: 3rem 2.5rem; /* Aumentado un poco el padding */
             border-radius: 20px;
-            max-width: 420px;
-            width: 92%;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            max-width: 450px; /* Ancho máximo ligeramente aumentado */
+            width: 95%; /* Ajuste para móviles */
+            backdrop-filter: blur(15px); /* Desenfoque más pronunciado */
+            box-shadow: 0 18px 40px var(--shadow-medium); /* Sombra más profunda */
             text-align: center;
             position: relative;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden; /* Asegura que el borde superior se vea bien */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil para el efecto de cristal */
         }
 
+        .login-container:hover {
+            transform: translateY(-5px); /* Efecto sutil al pasar el ratón */
+            box-shadow: 0 22px 45px rgba(0, 0, 0, 0.35); /* Sombra más intensa al pasar el ratón */
+        }
+
+        /* Borde superior decorativo */
         .login-container::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 6px;
-            background-color: var(--primary-color);
+            height: 8px; /* Borde más grueso */
+            background: linear-gradient(to right, var(--primary-color), var(--dark-primary-color)); /* Degradado en el borde */
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
         }
 
+        /* Estilos del logo */
         .login-container img {
-            height: 70px;
-            margin-bottom: 1.5rem;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+            height: 80px; /* Tamaño del logo ligeramente mayor */
+            margin-bottom: 2rem; /* Más espacio debajo del logo */
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.2)); /* Sombra más prominente */
+            animation: bounceIn 0.8s ease-out; /* Animación de entrada para el logo */
         }
 
+        /* Estilos del título principal */
         .login-container h4 {
-            margin-bottom: 2rem;
-            font-weight: 700;
-            font-size: 1.6rem;
-            color: var(--dark-primary-color);
+            margin-bottom: 2.5rem; /* Más espacio debajo del título */
+            font-weight: 700; /* Texto más audaz */
+            font-size: 1.8rem; /* Tamaño de fuente mayor */
+            color: var(--heading-color);
+            line-height: 1.3;
         }
 
+        /* Contenedor para campos de formulario flotantes */
         .form-floating {
             position: relative;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.8rem; /* Espaciado entre campos */
             text-align: left;
         }
 
+        /* Estilos de los campos de texto */
         .form-control {
             width: 100%;
-            padding: 0.8rem 1rem;
-            font-size: 1rem;
+            padding: 1rem 1.2rem; /* Más padding para mayor área táctil */
+            font-size: 1.05rem; /* Tamaño de fuente ligeramente mayor */
             color: var(--text-color);
             background-color: #fff;
             border: 1px solid var(--border-color);
-            border-radius: 0.6rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 10px; /* Bordes más redondeados */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .form-control:focus {
-            border-color: var(--focus-border-color);
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.2);
-            outline: none;
+            border-color: var(--primary-color); /* Color de borde al enfocar */
+            box-shadow: 0 0 0 4px rgba(0,123,255,0.25); /* Sombra más definida al enfocar */
+            outline: none; /* Eliminar el outline por defecto del navegador */
         }
 
+        /* Estilos de las etiquetas flotantes */
         .form-floating > label {
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
-            padding: 0.75rem 1rem;
+            padding: 1rem 1.2rem;
             pointer-events: none;
             color: var(--light-text-color);
             transition: 0.2s ease;
             transform-origin: top left;
+            font-size: 1.05rem;
         }
 
+        /* Animación y estado de las etiquetas flotantes */
         .form-floating > .form-control:not(:placeholder-shown) ~ label,
         .form-floating > .form-control:focus ~ label {
-            transform: scale(0.85) translateY(-0.6rem) translateX(0.15rem);
-            opacity: 0.75;
+            transform: scale(0.8) translateY(-1.4rem) translateX(0.15rem); /* Movimiento y tamaño de la etiqueta */
+            opacity: 0.85;
             color: var(--primary-color);
+            background-color: var(--background-light); /* Fondo para la etiqueta flotante */
+            padding: 0 0.5rem;
+            border-radius: 4px;
         }
 
         .form-floating input {
-            padding-right: 2.7rem;
+            padding-right: 3rem; /* Espacio para el icono de mostrar/ocultar contraseña */
         }
 
         .form-floating label {
-            padding-left: 1rem !important;
+            padding-left: 1.2rem !important;
         }
 
+        /* Icono de mostrar/ocultar contraseña */
         .toggle-password {
             position: absolute;
-            right: 1rem;
+            right: 1.2rem; /* Posición ajustada */
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
             color: var(--light-text-color);
-            font-size: 1.1rem;
+            font-size: 1.2rem; /* Tamaño del icono */
+            transition: color 0.2s ease;
         }
 
         .toggle-password:hover {
-            color: var(--text-color);
+            color: var(--primary-color); /* Cambio de color al pasar el ratón */
         }
 
+        /* Estilos de los botones */
         .btn {
             display: inline-block;
             font-weight: 600;
-            background-color: transparent;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
             border: 1px solid transparent;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
+            padding: 0.9rem 2rem; /* Más padding para botones */
+            font-size: 1.1rem; /* Tamaño de fuente mayor */
+            line-height: 1.5;
+            border-radius: 0.75rem; /* Bordes más redondeados */
+            transition: all 0.3s ease; /* Transición más suave */
             cursor: pointer;
+            text-decoration: none; /* Asegura que no haya subrayado */
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-primary-color)); /* Degradado */
             color: #fff;
             border-color: var(--primary-color);
-            box-shadow: 0 6px 18px rgba(0, 123, 255, 0.35);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4); /* Sombra más pronunciada */
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
 
         .btn-primary:hover {
-            background-color: var(--dark-primary-color);
-            box-shadow: 0 8px 24px rgba(0, 91, 200, 0.45);
+            background: linear-gradient(135deg, var(--dark-primary-color), #0040a0); /* Degradado más oscuro al hover */
+            box-shadow: 0 10px 25px rgba(0, 91, 200, 0.55);
+            transform: translateY(-2px); /* Pequeño desplazamiento hacia arriba */
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.6);
+            opacity: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
+            z-index: -1;
+        }
+
+        .btn-primary:hover::after {
+            width: 200px;
+            height: 200px;
+            opacity: 1;
         }
 
         .btn-block {
             width: 100%;
+            margin-top: 1rem; /* Espacio superior para el botón */
         }
 
-        .text-end {
-            text-align: right !important;
-        }
+        /* Utilidades de texto y margen */
+        .text-end { text-align: right !important; }
+        .text-center { text-align: center !important; }
+        .text-decoration-none { text-decoration: none !important; }
 
-        .text-center {
-            text-align: center !important;
-        }
-
-        .text-decoration-none {
-            text-decoration: none !important;
-        }
-
+        /* Estilos de enlaces */
         a {
             color: var(--primary-color);
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+            font-weight: 500;
         }
 
         a:hover {
@@ -191,65 +268,111 @@
             text-decoration: underline;
         }
 
-        .mb-4 {
-            margin-bottom: 1.5rem !important;
+        /* Márgenes */
+        .mb-4 { margin-bottom: 1.5rem !important; }
+        .my-4 { margin-top: 1.5rem !important; margin-bottom: 1.5rem !important; }
+
+        /* Línea divisoria */
+        hr.my-4 {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 2.5rem 0; /* Más espacio alrededor de la línea */
+            opacity: 0.7;
         }
 
-        .my-4 {
-            margin-top: 1.5rem !important;
-            margin-bottom: 1.5rem !important;
-        }
-
+        /* Estilos del Toast (mensajes flotantes) */
         .toast {
             position: fixed;
-            top: 20px;
+            top: 25px; /* Ligeramente más abajo */
             left: 50%;
-            transform: translateX(-50%);
-            min-width: 320px;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
+            transform: translateX(-50%) translateY(-30px); /* Posición inicial para la animación */
+            min-width: 350px; /* Ancho mínimo */
+            padding: 1rem 1.8rem;
+            border-radius: 12px; /* Más redondeado */
             color: #fff;
             font-weight: 600;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             z-index: 9999;
             opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Transición más suave */
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
         .toast.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0); /* Posición final */
         }
 
-        .toast.success { background-color: #28a745; }
-        .toast.error { background-color: #dc3545; }
+        .toast.success { background-color: var(--accent-color); }
+        .toast.error { background-color: var(--danger-color); }
 
-        hr.my-4 {
-            border: 0;
-            border-top: 1px solid var(--border-color);
-            margin: 2rem 0;
+        .toast i {
+            font-size: 1.3rem;
         }
 
+        /* Animaciones */
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.97); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            60% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes backgroundPan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* Media Queries para responsividad */
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 2.5rem 1.8rem;
+                max-width: 95%;
+                margin: 0 1rem; /* Margen a los lados en pantallas pequeñas */
+            }
+
+            .login-container h4 {
+                font-size: 1.6rem;
+            }
+
+            .form-control, .form-floating > label {
+                font-size: 1rem;
+            }
+
+            .btn {
+                font-size: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+
+            .toast {
+                min-width: unset; /* Ancho flexible */
+                width: calc(100% - 2rem); /* Ancho del 100% menos márgenes */
+                left: 1rem;
+                transform: translateX(0) translateY(-30px);
+                right: 1rem;
+            }
+            .toast.show {
+                transform: translateX(0) translateY(0);
+            }
         }
 
         @media (max-width: 400px) {
             .login-container {
-                padding: 2rem 1.5rem;
+                padding: 2rem 1.2rem;
             }
-
-            .form-control {
-                font-size: 0.95rem;
+            .login-container img {
+                height: 65px;
+                margin-bottom: 1.5rem;
             }
-
-            .btn {
-                font-size: 0.95rem;
-            }
-
             .login-container h4 {
                 font-size: 1.4rem;
+                margin-bottom: 2rem;
             }
         }
     </style>
@@ -257,9 +380,10 @@
 <body>
 
 <div th:if="${mensaje} or ${successMessage}" id="toast"
-     class="toast show"
-     th:classappend="${tipo} ?: (${successMessage} ? 'success' : 'error')"
-     th:text="${mensaje} ?: ${successMessage}">
+     class="toast"
+     th:classappend="${tipo} ?: (${successMessage} ? 'success show' : 'error show')">
+    <i th:class="${tipo == 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'}"></i>
+    <span th:text="${mensaje} ?: ${successMessage}"></span>
 </div>
 
 <div class="login-container">
@@ -278,8 +402,8 @@
                    placeholder="Contraseña" autocomplete="current-password" required />
             <label for="password">Contraseña</label>
             <span class="toggle-password" onclick="togglePassword()">
-        <i id="eyeIcon" class="fas fa-eye-slash"></i>
-      </span>
+                <i id="eyeIcon" class="fas fa-eye-slash"></i>
+            </span>
         </div>
 
         <div class="row mb-4">
@@ -319,9 +443,15 @@
     window.addEventListener('DOMContentLoaded', () => {
         const toast = document.getElementById('toast');
         if (toast) {
+            // Añadir clase 'show' para iniciar la animación si ya no la tiene (Thymeleaf podría añadirla directamente)
+            if (!toast.classList.contains('show')) {
+                toast.classList.add('show');
+            }
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 4000);
+                // Opcional: remover el elemento del DOM después de la animación completa
+                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+            }, 4000); // El toast se ocultará después de 4 segundos
         }
     });
 </script>
