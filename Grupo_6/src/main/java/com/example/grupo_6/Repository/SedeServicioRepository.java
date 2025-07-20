@@ -84,5 +84,6 @@ public interface SedeServicioRepository extends JpaRepository<SedeServicio, Inte
 
 
     List<SedeServicio> findByServicio_Idservicio(Integer idservicio);
+    List<SedeServicio> findBySede_IdsedeAndActivoTrue(Integer idSede);
 
 }

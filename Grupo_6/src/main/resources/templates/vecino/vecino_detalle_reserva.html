@@ -40,48 +40,77 @@
 
 
                 <div class="card p-4">
-                    <p><strong>Fecha de reserva:</strong>
-                        <span th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></span>
-                    </p>
-                    <p><strong>Horario:</strong>
-                        <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
-                        <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
-                    </p>
-                    <p><strong>Instalación:</strong>
-                        <span th:text="${reserva.sedeServicio.sede.nombre}"></span>
-                    </p>
-                    <p><strong>Tipo de Servicio:</strong>
-                        <span th:text="${reserva.sedeServicio.servicio.tipoServicio.nombre}"></span>
-                    </p>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Fecha de reserva:</strong>
+                                <span th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Horario:</strong>
+                                <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
+                                <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
+                            </p>
+                        </div>
 
-                    <p><strong>Servicio:</strong>
-                        <span th:text="${reserva.sedeServicio.nombrePersonalizado}"></span>
-                    </p>
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Instalación:</strong>
+                                <span th:text="${reserva.sedeServicio.sede.nombre}"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Tipo de Servicio:</strong>
+                                <span th:text="${reserva.sedeServicio.servicio.tipoServicio.nombre}"></span>
+                            </p>
+                        </div>
 
-                    <p><strong>Dirección:</strong>
-                        <span th:text="${reserva.sedeServicio.sede.direccion}"></span>
-                    </p>
-                    <p><strong>Estado:</strong>
-                        <span th:text="${reserva.estado.nombre}"></span>
-                    </p>
-                    <p><strong>Monto:</strong>
-                        S/
-                        <span th:text="${reserva.pago?.monto}"></span>
-                    </p>
-                    <p><strong>Método de pago:</strong>
-                        <span th:text="${reserva.pago?.metodo}"></span>
-                    </p>
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Servicio:</strong>
+                                <span th:text="${reserva.sedeServicio.nombrePersonalizado}"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Dirección:</strong>
+                                <span th:text="${reserva.sedeServicio.sede.direccion}"></span>
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Estado:</strong>
+                                <span th:text="${reserva.estado.nombre}"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Monto:</strong>
+                                S/ <span th:text="${reserva.pago?.monto}"></span>
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Fecha límite de pago:</strong>
+                                <span th:text="${#temporals.format(reserva.fechaLimitePago, 'dd/MM/yyyy HH:mm')}"></span>
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <p><strong>Método de pago:</strong>
+                                <span th:text="${reserva.pago?.metodo}"></span>
+                            </p>
+                        </div>
+                    </div>
+
 
                     <p><strong>Comprobante de pago:</strong></p>
 
                     <!-- Caso BANCO: muestro la imagen subida a S3 -->
-                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name().toLowerCase() == 'banco'}">
+                    <div th:if="${reserva.pago != null and reserva.pago.metodo.name().toLowerCase() == 'banco'}" class="text-center mt-3">
                         <img th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
                              alt="Comprobante de pago"
                              class="img-thumbnail border"
                              style="max-width: 500px; height: auto;"
-                             onerror="this.onerror=null;this.src='/img/no-image.png';this.alt='Comprobante no disponible';"/>
+                             onerror="this.onerror=null;this.src='/img/photos/placeholder.jpg';this.alt='Comprobante no disponible';"/>
                     </div>
+
 
                     <!-- Caso ONLINE: botón que abre el modal del voucher -->
                     <div th:if="${reserva.pago != null and reserva.pago.metodo.name().toLowerCase() == 'online'}"
@@ -96,17 +125,21 @@
                     </div>
 
                     <!-- Opción alternativa: Pago con tarjeta (solo si no hay comprobante, aún está a tiempo y la reserva está pendiente) -->
+                    <!-- Opción alternativa: Pago con tarjeta (solo si NO es ONLINE y NO es BANCO) -->
                     <div class="form-group mt-4 text-center"
                          th:if="${reserva.pago?.comprobante == null
-             and reserva.fechaLimitePago != null
-             and ahora.isBefore(reserva.fechaLimitePago)
-             and reserva.estado.nombre == 'pendiente'}">
+                         and reserva.fechaLimitePago != null
+                         and ahora.isBefore(reserva.fechaLimitePago)
+                         and reserva.estado.nombre == 'pendiente'
+                         and reserva.pago?.metodo.name() != 'ONLINE'
+                         and reserva.pago?.metodo.name() != 'BANCO'}">
 
-                    <p class="fw-bold mb-2">¿Prefieres pagar con tarjeta?</p>
+                        <p class="fw-bold mb-2">¿Prefieres pagar con tarjeta?</p>
                         <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}" class="btn btn-success">
                             Pagar con tarjeta
                         </a>
                     </div>
+
 
 
 
@@ -118,8 +151,13 @@
                     </div>
 
                     <!-- Mostrar formulario si el tiempo de pago aún está vigente -->
-                    <div th:if="${reserva.pago?.comprobante == null and reserva.fechaLimitePago != null and ahora.isBefore(reserva.fechaLimitePago)}">
-                        <p>No se ha subido ningún comprobante.</p>
+                    <div th:if="${reserva.pago?.comprobante == null
+                        and reserva.fechaLimitePago != null
+                        and ahora.isBefore(reserva.fechaLimitePago)
+                        and reserva.estado.nombre == 'pendiente'
+                        and reserva.pago?.metodo.name() != 'ONLINE'}">
+
+                    <p>No se ha subido ningún comprobante.</p>
 
                         <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
 
@@ -144,11 +182,6 @@
 
                         </form>
                     </div>
-
-
-                    <p><strong>Fecha límite de pago:</strong>
-                        <span th:text="${#temporals.format(reserva.fechaLimitePago, 'dd/MM/yyyy HH:mm')}"></span>
-                    </p>
                 </div>
             </div>
         </main>
@@ -202,7 +235,7 @@
 
                     <div class="modal-header">
                         <!-- Logo y título -->
-                        <img th:src="@{/img/logo.png}" alt="Logo" style="height: 40px; margin-right: 8px;">
+                        <img th:src="@{/img/photos/logo.jpg}" alt="Logo" style="height: 40px; margin-right: 8px;">
                         <h5 class="modal-title" id="voucherModalLabel">Comprobante de Pago</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
@@ -305,6 +338,8 @@
 
     }
 </script>
+
+
 <!-- Modal de advertencia sin comprobante -->
 <div class="modal fade" id="modalAdvertencia" tabindex="-1" aria-labelledby="modalAdvertenciaLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -322,6 +357,7 @@
         </div>
     </div>
 </div>
+
 <div th:replace="~{fragments/chatbot.html}"></div>
 </body>
 </html>

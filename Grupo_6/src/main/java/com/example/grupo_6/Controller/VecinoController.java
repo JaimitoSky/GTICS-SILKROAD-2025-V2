@@ -107,6 +107,9 @@ public class VecinoController {
 
         System.out.println("🟢 Usuario en sesión: " + usuario.getNombres());
 
+        List<Sede> sedes = sedeRepository.findByActivoTrue();
+        model.addAttribute("sedes", sedes);
+
         model.addAttribute("rol", "vecino");
         model.addAttribute("usuario", usuario);
         return "vecino/vecino_home";
@@ -152,7 +155,7 @@ public class VecinoController {
             @RequestParam("correo")    String correo,
             @RequestParam("telefono")  String telefono,
             @RequestParam("direccion") String direccion,
-            @RequestParam("foto")      MultipartFile foto,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
             RedirectAttributes attr,
             HttpSession session
     ) throws IOException {
@@ -164,70 +167,69 @@ public class VecinoController {
         Usuario usuario = usuarioRepository
                 .findById(usuarioSesion.getIdusuario())
                 .orElseThrow();
-        // Validación de teléfono más robusta
-        telefono = telefono.replaceAll("\\D", ""); // Elimina
+
+        // Validación de teléfono
+        telefono = telefono.replaceAll("\\D", "");
         if (telefono.length() != 9) {
             attr.addFlashAttribute("error", "El celular debe tener exactamente 9 dígitos");
-            attr.addFlashAttribute("telefono", telefono); // Mantener valor ingresado
+            attr.addFlashAttribute("telefono", telefono);
             return "redirect:/vecino/perfil";
         }
-        // Validaciones de correo y teléfono
+
+        // Validación de correo
         if (!correo.matches("^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe)$")) {
             attr.addFlashAttribute("error", "Dominio de correo inválido.");
             return "redirect:/vecino/perfil";
         }
-        if (!telefono.matches("^\\d{9}$")) {
-            attr.addFlashAttribute("error", "El celular debe tener 9 dígitos.");
-            return "redirect:/vecino/perfil";
-        }
 
-        // Foto: sólo si llega archivo y no cambió hoy
-        if (!foto.isEmpty()) {
+        // ---- FOTO: Procesar solo si el usuario ha seleccionado una nueva ----
+        if (foto != null && !foto.isEmpty()) {
             LocalDate hoy = LocalDate.now(ZoneId.of("America/Lima"));
             LocalDate last = usuario.getPhotoUpdatedAt() == null
                     ? LocalDate.MIN
                     : usuario.getPhotoUpdatedAt().toLocalDate();
+
             if (!last.isBefore(hoy)) {
-                attr.addFlashAttribute("error", "Solo puedes cambiar tu foto una vez al día.");
-                return "redirect:/vecino/perfil";
+                // No bloquear el formulario, solo advertir que la foto no se puede cambiar
+                attr.addFlashAttribute("warning", "No puedes cambiar tu foto hoy, pero tus datos se actualizaron.");
+            } else {
+                // Subir la nueva foto
+                String ext = StringUtils.getFilenameExtension(foto.getOriginalFilename());
+                String fileName = usuario.getIdusuario() + "." + ext;
+                fileUploadService.subirArchivoSobrescribible(foto, "usuarios", fileName);
+                usuario.setImagen(fileName);
+                usuario.setPhotoUpdatedAt(LocalDateTime.now(ZoneId.of("America/Lima")));
             }
-            // Nombre det.: "{idusuario}.{ext}"
-            String ext = StringUtils.getFilenameExtension(foto.getOriginalFilename());
-            String fileName = usuario.getIdusuario() + "." + ext;
-            fileUploadService.subirArchivoSobrescribible(foto, "usuarios", fileName);
-            usuario.setImagen(fileName);
-            usuario.setPhotoUpdatedAt(LocalDateTime.now(ZoneId.of("America/Lima")));
         }
 
-        // Guardar datos básicos
+        // Guardar datos básicos (siempre se actualizan)
         usuario.setEmail(correo);
         usuario.setTelefono(telefono);
         usuario.setDireccion(direccion);
         usuarioRepository.save(usuario);
 
-        // Actualizar la sesión
+        // Actualizar sesión
         session.setAttribute("usuario", usuario);
 
-        attr.addFlashAttribute("success", "Perfil actualizado correctamente.");
+        if (!attr.getFlashAttributes().containsKey("warning")) {
+            attr.addFlashAttribute("success", "Perfil actualizado correctamente.");
+        }
+
         return "redirect:/vecino/perfil";
     }
-    @GetMapping("/imagen/{id}")
-    public ResponseEntity<byte[]> verImagenSede(
-            @PathVariable("id") Integer idSedeServicio) {
 
-        // 1) Buscamos el SedeServicio
-        SedeServicio ss = sedeServicioRepository.findById(idSedeServicio)
+    @GetMapping("/imagen/{id}")
+    public ResponseEntity<byte[]> verImagenSede(@PathVariable("id") Integer idSede) {
+
+        // buscar la sede directamente
+        Sede sede = sedeRepository.findById(idSede)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // 2) Obtenemos la ENTIDAD Sede y su nombre de imagen
-        Sede sede = ss.getSede();
         String nombreArchivo = sede.getImagen();
         if (nombreArchivo == null) {
-            // Sin foto asignada
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        // 3) Descargamos los bytes desde la carpeta "sedes"
         byte[] data;
         try {
             data = fileUploadService
@@ -237,7 +239,6 @@ public class VecinoController {
                     HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo leer la imagen", e);
         }
 
-        // 4) Detectamos MIME y deshabilitamos cache
         String mime = URLConnection.guessContentTypeFromName(nombreArchivo);
         if (mime == null) mime = "application/octet-stream";
 
@@ -246,6 +247,7 @@ public class VecinoController {
                 .cacheControl(CacheControl.noStore())
                 .body(data);
     }
+
 
     @GetMapping("/imagen-servicio-sede/{id}")
     public ResponseEntity<byte[]> verImagenServicioSede(
@@ -373,6 +375,19 @@ public class VecinoController {
                 .listarServiciosPorTipoConNombre(idtipo);
         model.addAttribute("complejos", complejos);
         return "vecino/vecino_ListaComplejoDeportivo";
+    }
+
+    @GetMapping("/sede/{id}/servicios")
+    public String mostrarServiciosPorSede(@PathVariable("id") Integer idSede, Model model) {
+        System.out.println("🟢 Entrando a mostrarServiciosPorSede con id: " + idSede);
+
+        List<SedeServicio> servicios = sedeServicioRepository.findBySede_IdsedeAndActivoTrue(idSede);
+        model.addAttribute("servicios", servicios);
+
+        Sede sede = sedeRepository.findById(idSede).orElse(null);
+        model.addAttribute("sede", sede);
+
+        return "vecino/vecino_SedeServicios"; // Verifica que el archivo exista
     }
 
 
@@ -1047,6 +1062,7 @@ public class VecinoController {
 
         return "vecino/vecino_home";
     }
+
     @GetMapping("/vecino/ListaComplejoDeportivo")
     public String listaPorTipo(@RequestParam("idtipo") int idtipo, Model model, HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");

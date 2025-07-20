@@ -8,7 +8,27 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
+
         <style>
+            .horario-select {
+                font-family: inherit;
+                font-variant-numeric: tabular-nums;
+                font-feature-settings: "tnum";
+                letter-spacing: 0.03em;
+                white-space: pre;
+            }
+
+
+            .horario-select option {
+                white-space: pre; /* Mantiene espacios al inicio o en medio */
+                font-family: inherit;
+            }
+
+            .horario-select option.disabled-option {
+                color: #999;
+                font-style: italic;
+            }
+
             ::-webkit-scrollbar {
                 display: none;
             }
@@ -26,7 +46,11 @@
                 <!-- Contenido principal -->
                 <main class="content">
                     <div class="container-fluid p-4">
-
+                        <div class="d-flex align-items-center mb-3">
+                            <a href="javascript:history.back()" class="text-decoration-none">
+                                <img th:src="@{/img/icons/retroceder.png}" alt="Retroceder" style="height: 60px; width: 60px;">
+                            </a>
+                        </div>
                         <div class="container mt-4">
                             <div class="card p-4 shadow rounded">
                                 <form th:action="@{/vecino/reservas/guardar}" th:object="${reserva}" method="post"
@@ -40,24 +64,29 @@
                                     <!-- SEDE -->
                                     <div class="mb-4">
                                         <label class="form-label fw-semibold">Sede</label>
-                                        <input type="text" class="form-control form-control-lg bg-light" readonly
-                                               th:value="${reserva?.sedeServicio?.sede?.nombre}">
-                                        <input type="hidden" name="sede.idsede" th:value="${reserva.sedeServicio.sede.idsede}" />
+                                        <div class="form-control form-control-lg bg-light" style="pointer-events: none;">
+                                            <span th:text="${reserva?.sedeServicio?.sede?.nombre}">Nombre sede</span>
+                                        </div>
+
                                     </div>
 
                                     <!-- NOMBRE PERSONALIZADO -->
                                     <div class="mb-4">
                                         <label class="form-label fw-semibold">Nombre servicio</label>
-                                        <input type="text" class="form-control form-control-lg bg-light" readonly
-                                               th:value="${reserva.sedeServicio.nombrePersonalizado}">
+                                        <div class="form-control form-control-lg bg-light" style="pointer-events: none;">
+                                            <span th:text="${reserva.sedeServicio.nombrePersonalizado}">Nombre servicio</span>
+                                        </div>
+
                                     </div>
 
-                                    <!-- TIPO DE SERVICIO -->
                                     <div class="mb-4">
-                                        <label class="form-label fw-semibold">Tipo de servicio</label>
-                                        <input type="text" class="form-control form-control-lg bg-light" readonly
-                                               th:value="${reserva.sedeServicio.servicio.tipoServicio.nombre}">
+                                        <label class="form-label fw-semibold">Servicio</label>
+                                        <div class="form-control form-control-lg bg-light" style="pointer-events: none;">
+                                            <span th:text="${reserva.sedeServicio.servicio.tipoServicio.nombre}">Tipo de servicio</span>
+                                        </div>
+
                                     </div>
+
 
                                     <!-- ID SEDE SERVICIO (oculto) -->
                                     <input type="hidden" name="sedeServicio.idSedeServicio" th:value="${reserva.sedeServicio.idSedeServicio}" />
@@ -71,11 +100,14 @@
 
                                     <!-- HORARIO DISPONIBLE -->
                                     <div class="mb-4">
-                                        <label class="form-label fw-semibold">Horario Disponible</label>
-                                        <select class="form-select form-select-lg" name="horarioDisponible.idhorario" id="horarioDisponible" required>
+                                        <label for="horarioDisponible" class="form-label fw-semibold">Horario Disponible</label>
+                                        <select class="form-select form-select-lg horario-select" name="horarioDisponible.idhorario" id="horarioDisponible" required>
                                             <option value="">Seleccione servicio y fecha</option>
+                                            <!-- Opciones se agregan automáticamente -->
                                         </select>
                                     </div>
+
+
 
 
 
@@ -135,22 +167,28 @@
                                                     horaInicioDate.setHours(hInicioHoras, hInicioMinutos, 0, 0);
 
                                                     const opt = document.createElement("option");
-                                                    opt.value = h.idhorario;
-                                                    opt.textContent = `${h.horaInicio} - ${h.horaFin} (max: ${aforoMaximo}, libres: ${aforoDisponible})`;
 
-                                                    // Si es hoy y la hora ya pasó, deshabilitar
+                                                    const rango = `${h.horaInicio} - ${h.horaFin}`.padEnd(18);
+                                                    const aforo = `AFORO (${String(aforoDisponible).padStart(2)} / ${String(aforoMaximo).padStart(2)})`;
+                                                    let label = `${rango} | ${aforo}`;
+
+
                                                     if (fechaSeleccionada.toDateString() === hoy.toDateString() && horaInicioDate <= hoy) {
                                                         opt.disabled = true;
-                                                        opt.textContent += " - HORA PASADA";
-                                                    }
-                                                    // Si ya no hay cupos, deshabilitar
-                                                    else if (aforoDisponible <= 0) {
+                                                        label += " - HORA PASADA";
+                                                        opt.classList.add("disabled-option");
+                                                    } else if (aforoDisponible <= 0) {
                                                         opt.disabled = true;
-                                                        opt.textContent += " - SIN CUPOS";
+                                                        label += " - SIN CUPOS";
+                                                        opt.classList.add("disabled-option");
                                                     }
 
+                                                    opt.value = h.idhorario;
+                                                    opt.textContent = label;
                                                     horarioSelect.appendChild(opt);
                                                 });
+
+
                                             })
                                             .catch(error => {
                                                 console.error("Error al cargar horarios:", error);

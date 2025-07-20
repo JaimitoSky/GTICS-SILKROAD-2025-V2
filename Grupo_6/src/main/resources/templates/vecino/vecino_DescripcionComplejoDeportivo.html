@@ -43,7 +43,11 @@
                 <!-- Contenido principal -->
                 <main class="content">
                     <div class="container py-4">
-                        <div th:replace="~{fragments/opciones-reserva :: opciones-reserva}"></div>
+                        <div class="d-flex align-items-center mb-3">
+                            <a href="javascript:history.back()" class="text-decoration-none">
+                                <img th:src="@{/img/icons/retroceder.png}" alt="Retroceder" style="height: 60px; width: 60px;">
+                            </a>
+                        </div>
                         <div class="card shadow-lg border-0 mb-5"
                              data-aos="zoom-in"
                              data-aos-duration="900"
@@ -51,24 +55,24 @@
                              data-aos-anchor-placement="top-bottom">
 
 
-                        <div class="row g-0 align-items-stretch">
-                            <div class="col-md-6 position-relative">
-                                <div style="width:100%; height:100%; max-height:450px; overflow:hidden; border-radius:.25rem;">
-                                    <!-- Imagen del servicio-sede si ya se subió -->
-                                    <img th:if="${sedeServicio.imagen != null}"
-                                         th:src="@{/vecino/imagen-servicio-sede/{id}(id=${sedeServicio.idSedeServicio})}"
-                                         class="img-fluid w-100 h-100"
-                                         style="object-fit:cover;"
-                                         alt="Foto del servicio" />
+                            <div class="row g-0 align-items-stretch">
+                                <div class="col-md-6 position-relative">
+                                    <div style="width:100%; height:100%; max-height:450px; overflow:hidden; border-radius:.25rem;">
+                                        <!-- Imagen del servicio-sede si ya se subió -->
+                                        <img th:if="${sedeServicio.imagen != null}"
+                                             th:src="@{/vecino/imagen-servicio-sede/{id}(id=${sedeServicio.idSedeServicio})}"
+                                             class="img-fluid w-100 h-100"
+                                             style="object-fit:cover;"
+                                             alt="Foto del servicio" />
 
-                                    <!-- Placeholder si no hay foto -->
-                                    <img th:if="${sedeServicio.imagen == null}"
-                                         src="/img/servicio-placeholder.png"
-                                         class="img-fluid w-100 h-100"
-                                         style="object-fit:cover;"
-                                         alt="Sin foto del servicio" />
+                                        <!-- Placeholder si no hay foto -->
+                                        <img th:if="${sedeServicio.imagen == null}"
+                                             src="/img/servicio-placeholder.png"
+                                             class="img-fluid w-100 h-100"
+                                             style="object-fit:cover;"
+                                             alt="Sin foto del servicio" />
+                                    </div>
                                 </div>
-                            </div>
 
                                 <div class="col-md-6 d-flex align-items-center">
                                     <div class="card-body p-4">
@@ -76,8 +80,13 @@
                                             th:text="${sedeServicio.nombrePersonalizado != null and !#strings.isEmpty(sedeServicio.nombrePersonalizado) ? sedeServicio.nombrePersonalizado : sedeServicio.servicio.nombre}">
                                             Nombre del Servicio
                                         </h2>
+                                        <p><strong>Sede:</strong>
+                                            <span th:text="${sedeServicio.sede.nombre}">Nombre de la sede</span>
+                                        </p>
 
-
+                                        <p><strong>Dirección:</strong>
+                                            <span th:text="${sedeServicio.sede.direccion}">Dirección completa</span>
+                                        </p>
                                         <p class="text-muted fst-italic mb-3">
                                             <i class="bi bi-info-circle-fill me-2"></i>
                                             <span th:text="${sedeServicio.servicio.descripcion}">Descripción detallada</span>
@@ -113,6 +122,8 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Mapa de la sede -->
+                        <div id="map" class="my-4" style="height: 200px; border-radius: .5rem; overflow: hidden;"></div>
 
                     </div>
                 </main>
@@ -156,4 +167,29 @@
 
         <div th:replace="~{fragments/chatbot.html}"></div>
     </body>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+            var latitud = /*[[${sedeServicio.sede.latitud}]]*/ 0;
+            var longitud = /*[[${sedeServicio.sede.longitud}]]*/ 0;
+            var nombre = /*[[${sedeServicio.sede.nombre}]]*/ 'Sede Deportiva';
+            var direccion = /*[[${sedeServicio.sede.direccion}]]*/ 'Dirección';
+
+            var map = L.map('map').setView([latitud, longitud], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([latitud, longitud])
+                .addTo(map)
+                .bindPopup("<b>" + nombre + "</b><br>" + direccion)
+                .openPopup();
+        });
+        /*]]>*/
+    </script>
+
 </html>

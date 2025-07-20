@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.List;
+
 @Repository
 public interface SedeRepository extends JpaRepository<Sede, Integer> {
 
@@ -25,6 +27,7 @@ public interface SedeRepository extends JpaRepository<Sede, Integer> {
                                         @Param("servicio") String servicio,
                                         Pageable pageable);
 
+    List<Sede> findByActivoTrue();
 
 
     // 👇 Este método permite buscar una sede exacta por su nombre
