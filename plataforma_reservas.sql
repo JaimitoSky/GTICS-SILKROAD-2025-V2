@@ -20,67 +20,23 @@ USE `plataforma_reservas`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `asignacion_sede`
 --
 
-DROP TABLE IF EXISTS `asignacion_sede`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `asignacion_sede` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `fecha` date NOT NULL,
-  `idusuario` int NOT NULL,
-  `idsede` int NOT NULL,
-  `entrada` tinyint(1) DEFAULT '0',
-  `salida` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `idusuario` (`idusuario`),
-  KEY `idsede` (`idsede`),
-  CONSTRAINT `asignacion_sede_ibfk_1` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`),
-  CONSTRAINT `asignacion_sede_ibfk_2` FOREIGN KEY (`idsede`) REFERENCES `sede` (`idsede`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 --
--- Dumping data for table `asignacion_sede`
 --
 
-LOCK TABLES `asignacion_sede` WRITE;
-/*!40000 ALTER TABLE `asignacion_sede` DISABLE KEYS */;
-INSERT INTO `asignacion_sede` VALUES (4,'2025-05-12',5,2,0,0);
-/*!40000 ALTER TABLE `asignacion_sede` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `asistencia`
 --
 
-DROP TABLE IF EXISTS `asistencia`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `asistencia` (
-  `idasistencia` int NOT NULL AUTO_INCREMENT,
-  `idusuario` int NOT NULL,
-  `fecha` date NOT NULL,
-  `hora_entrada` time DEFAULT NULL,
-  `hora_salida` time DEFAULT NULL,
-  `latitud` decimal(10,8) DEFAULT NULL,
-  `longitud` decimal(11,8) DEFAULT NULL,
-  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  PRIMARY KEY (`idasistencia`),
-  KEY `idusuario` (`idusuario`),
-  CONSTRAINT `asistencia_ibfk_1` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `asistencia`
 --
 
-LOCK TABLES `asistencia` WRITE;
-/*!40000 ALTER TABLE `asistencia` DISABLE KEYS */;
-/*!40000 ALTER TABLE `asistencia` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `chatbot_log`
@@ -190,11 +146,7 @@ CREATE TABLE `horario_atencion` (
 -- Dumping data for table `horario_atencion`
 --
 
-LOCK TABLES `horario_atencion` WRITE;
-/*!40000 ALTER TABLE `horario_atencion` DISABLE KEYS */;
-INSERT INTO `horario_atencion` VALUES (1,1,'Lunes','08:00:00','20:00:00',1),(2,1,'Martes','08:00:00','20:00:00',1),(3,1,'Miércoles','08:00:00','20:00:00',1),(4,1,'Jueves','08:00:00','20:00:00',1),(5,1,'Viernes','08:00:00','20:00:00',1),(6,1,'Sábado','08:00:00','15:00:00',1),(7,1,'Domingo','00:00:00','00:00:00',0),(8,2,'Lunes','08:00:00','20:00:00',1),(9,2,'Martes','08:00:00','20:00:00',1),(10,2,'Miércoles','08:00:00','20:00:00',1),(11,2,'Jueves','08:00:00','20:00:00',1),(12,2,'Viernes','08:00:00','20:00:00',1),(13,2,'Sábado','08:00:00','15:00:00',1),(14,2,'Domingo','00:00:00','00:00:00',0),(15,3,'Lunes','08:00:00','20:00:00',1),(16,3,'Martes','08:00:00','20:00:00',1),(17,3,'Miércoles','08:00:00','20:00:00',1),(18,3,'Jueves','08:00:00','20:00:00',1),(19,3,'Viernes','08:00:00','20:00:00',1),(20,3,'Sábado','08:00:00','15:00:00',1),(21,3,'Domingo','00:00:00','00:00:00',0),(22,4,'Lunes','08:00:00','20:00:00',1),(23,4,'Martes','08:00:00','20:00:00',1),(24,4,'Miércoles','08:00:00','20:00:00',1),(25,4,'Jueves','08:00:00','20:00:00',1),(26,4,'Viernes','08:00:00','20:00:00',1),(27,4,'Sábado','08:00:00','15:00:00',1),(28,4,'Domingo','00:00:00','00:00:00',0);
-/*!40000 ALTER TABLE `horario_atencion` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `horario_disponible`
@@ -222,11 +174,7 @@ CREATE TABLE `horario_disponible` (
 -- Dumping data for table `horario_disponible`
 --
 
-LOCK TABLES `horario_disponible` WRITE;
-/*!40000 ALTER TABLE `horario_disponible` DISABLE KEYS */;
-INSERT INTO `horario_disponible` VALUES (1,1,1,'08:00:00','09:00:00',1),(2,1,1,'09:00:00','10:00:00',1),(3,2,1,'10:00:00','11:00:00',1),(4,2,1,'11:00:00','12:00:00',1),(5,3,1,'08:00:00','10:00:00',1);
-/*!40000 ALTER TABLE `horario_disponible` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `log`
@@ -278,11 +226,7 @@ CREATE TABLE `media_servicio` (
 -- Dumping data for table `media_servicio`
 --
 
-LOCK TABLES `media_servicio` WRITE;
-/*!40000 ALTER TABLE `media_servicio` DISABLE KEYS */;
-INSERT INTO `media_servicio` VALUES (1,1,'imagen','https://ejemplo.com/piscina1.jpg'),(2,1,'imagen','https://ejemplo.com/piscina2.jpg'),(3,2,'imagen','https://ejemplo.com/gimnasio1.jpg'),(4,3,'imagen','https://ejemplo.com/cancha-futbol1.jpg'),(5,4,'imagen','https://ejemplo.com/cancha-voley1.jpg'),(6,5,'imagen','https://ejemplo.com/salon-eventos1.jpg'),(7,6,'imagen','https://ejemplo.com/taller-artesanal1.jpg');
-/*!40000 ALTER TABLE `media_servicio` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `notificacion`
@@ -344,11 +288,7 @@ CREATE TABLE `pago` (
 -- Dumping data for table `pago`
 --
 
-LOCK TABLES `pago` WRITE;
-/*!40000 ALTER TABLE `pago` DISABLE KEYS */;
-INSERT INTO `pago` VALUES (1,3,60.00,'online',NULL,15,'2025-05-13 04:40:00',NULL),(2,4,50.00,'banco',NULL,18,'2025-05-13 04:40:00',NULL);
-/*!40000 ALTER TABLE `pago` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `reembolso`
@@ -445,11 +385,7 @@ CREATE TABLE `reserva` (
 -- Dumping data for table `reserva`
 --
 
-LOCK TABLES `reserva` WRITE;
-/*!40000 ALTER TABLE `reserva` DISABLE KEYS */;
-INSERT INTO `reserva` VALUES (1,3,1,'2025-06-10',1,2,1,'2025-05-13 04:40:00','2025-05-13 03:40:00'),(2,4,2,'2025-06-15',4,3,2,'2025-05-13 04:40:00','2025-05-13 03:40:00');
-/*!40000 ALTER TABLE `reserva` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `rol`
@@ -501,11 +437,7 @@ CREATE TABLE `sede` (
 -- Dumping data for table `sede`
 --
 
-LOCK TABLES `sede` WRITE;
-/*!40000 ALTER TABLE `sede` DISABLE KEYS */;
-INSERT INTO `sede` VALUES (1,'Complejo Deportivo Maranga','Av. La Marina 1350','San Miguel','Frente a la Universidad San Marcos',-12.0795,-77.0873,NULL),(2,'Polideportivo San Miguel','Av. Costanera 1535','San Miguel','Cerca al Parque de las Leyendas',-12.0758,-77.0902,NULL),(3,'Centro Cultural San Miguel','Av. Federico Gallese 750','San Miguel','Junto a la Municipalidad',-12.0774,-77.084,NULL),(4,'Complejo Deportivo San Miguel','Av. Universitaria 456','San Miguel','Frente al parque central',-12.0689,-77.0795,NULL);
-/*!40000 ALTER TABLE `sede` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `sede_servicio`
@@ -533,11 +465,7 @@ CREATE TABLE `sede_servicio` (
 -- Dumping data for table `sede_servicio`
 --
 
-LOCK TABLES `sede_servicio` WRITE;
-/*!40000 ALTER TABLE `sede_servicio` DISABLE KEYS */;
-INSERT INTO `sede_servicio` VALUES (1,1,1,1),(2,2,2,2),(3,1,3,3),(4,1,4,4),(5,3,5,5),(6,3,6,6),(7,2,7,7);
-/*!40000 ALTER TABLE `sede_servicio` ENABLE KEYS */;
-UNLOCK TABLES;
+
 
 --
 -- Table structure for table `servicio`
@@ -574,11 +502,11 @@ LOCK TABLES `servicio` WRITE;
 INSERT INTO `servicio` (`idservicio`, `nombre`, `descripcion`, `idtipo`, `idestado`, `contacto_soporte`, `horario_inicio`, `horario_fin`, `imagen_complejo`) VALUES
 (1, 'Piscina Principal', 'Piscina olímpica con 6 carriles', 1, 4, '987654321', '08:00:00', '18:00:00', NULL),
 (2, 'Gimnasio Municipal', 'Gimnasio equipado con máquinas de última generación', 2, 4, '987654321', '06:00:00', '22:00:00', NULL),
-(3, 'Cancha Fútbol 1', 'Cancha de fútbol 7 con césped sintético', 3, 4, '987654321', '07:00:00', '21:00:00', NULL),
+(3, 'Cancha Fútbol ', 'Cancha de fútbol  con césped sintético', 3, 4, '987654321', '07:00:00', '21:00:00', NULL),
 (4, 'Cancha Vóley', 'Cancha reglamentaria para vóley', 4, 4, '987654321', '08:00:00', '18:00:00', NULL),
 (5, 'Salón de Eventos', 'Salón para reuniones o eventos sociales', 5, 4, '987654321', '10:00:00', '22:00:00', NULL),
-(6, 'Taller Artesanal', 'Espacio para talleres municipales', 6, 4, '987654321', '09:00:00', '13:00:00', NULL),
-(7, 'Campo de Atletismo Principal', 'Campo de Atletismo de 5 carriles', 7, 4, '987654321', '09:00:00', '18:00:00', NULL);
+(6, 'Taller', 'Espacio para talleres municipales', 6, 4, '987654321', '09:00:00', '13:00:00', NULL),
+(7, 'Campo de Atletismo ', 'Campo de Atletismo de 5 carriles', 7, 4, '987654321', '09:00:00', '18:00:00', NULL);
 
  /*!40000 ALTER TABLE `servicio` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -705,41 +633,14 @@ CREATE TABLE `taller` (
 -- Dumping data for table `taller`
 --
 
-LOCK TABLES `taller` WRITE;
-/*!40000 ALTER TABLE `taller` DISABLE KEYS */;
-INSERT INTO `taller` VALUES (1,6,'Taller de Cerámica','Aprende técnicas básicas de cerámica','2025-06-01','2025-06-30','10:00:00','12:00:00',15,'Prof. Ana Sánchez',18),(2,6,'Taller de Pintura','Introducción a la pintura al óleo','2025-06-15','2025-07-15','15:00:00','17:00:00',12,'Prof. Carlos López',18);
-/*!40000 ALTER TABLE `taller` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `taller_inscripcion`
 --
 
-DROP TABLE IF EXISTS `taller_inscripcion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `taller_inscripcion` (
-  `idinscripcion` int NOT NULL AUTO_INCREMENT,
-  `idtaller` int NOT NULL,
-  `idusuario` int NOT NULL,
-  `fecha_inscripcion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`idinscripcion`),
-  KEY `idtaller` (`idtaller`),
-  KEY `idusuario` (`idusuario`),
-  CONSTRAINT `taller_inscripcion_ibfk_1` FOREIGN KEY (`idtaller`) REFERENCES `taller` (`idtaller`),
-  CONSTRAINT `taller_inscripcion_ibfk_2` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Dumping data for table `taller_inscripcion`
 --
-
-LOCK TABLES `taller_inscripcion` WRITE;
-/*!40000 ALTER TABLE `taller_inscripcion` DISABLE KEYS */;
-INSERT INTO `taller_inscripcion` VALUES (1,1,3,'2025-05-13 04:40:00'),(2,1,4,'2025-05-13 04:40:00'),(3,2,3,'2025-05-13 04:40:00');
-/*!40000 ALTER TABLE `taller_inscripcion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tarifa`
@@ -763,7 +664,7 @@ CREATE TABLE `tarifa` (
 
 LOCK TABLES `tarifa` WRITE;
 /*!40000 ALTER TABLE `tarifa` DISABLE KEYS */;
-INSERT INTO `tarifa` VALUES (1,'Tarifa estándar piscina',15,'2025-05-08'),(2,'Tarifa gimnasio mañana',10,'2025-05-08'),(3,'Tarifa cancha fútbol',50,'2025-05-08'),(4,'Tarifa cancha vóley',25,'2025-05-08'),(5,'Tarifa evento social',100,'2025-05-08'),(6,'Tarifa taller',60,'2025-05-08'),(7,'Tarifa campo Atletismo',30,'2025-05-08');
+INSERT INTO `tarifa` VALUES (1,'Piscina',15,'2025-05-08'),(2,'Gimnasio',10,'2025-05-08'),(3,'Cancha fútbol',50,'2025-05-08'),(4,'Tarifa cancha vóley',25,'2025-05-08'),(5,'Tarifa evento social',100,'2025-05-08'),(6,'Taller',60,'2025-05-08'),(7,'Campo Atletismo',30,'2025-05-08');
 /*!40000 ALTER TABLE `tarifa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -906,14 +807,7 @@ CREATE TABLE incidencia (
     FOREIGN KEY (idusuario) REFERENCES usuario(idusuario)
 );
 
-ALTER TABLE asistencia
-ADD COLUMN idreserva INT;
 
-ALTER TABLE asistencia
-ADD CONSTRAINT asistencia_fk_reserva
-FOREIGN KEY (idreserva) REFERENCES reserva(idreserva)
-ON UPDATE RESTRICT
-ON DELETE RESTRICT;
 
 RENAME TABLE spring_session TO spring_session_temp;
 RENAME TABLE spring_session_temp TO SPRING_SESSION;
@@ -974,8 +868,6 @@ WHERE idservicio = 6;
 UPDATE servicio
 SET nombre = 'Campo de Atletismo'
 WHERE idservicio = 7;
-
-DROP TABLE asistencia;
 
 
 -- Asegura que no existan restricciones activas
@@ -1088,31 +980,14 @@ ALTER TABLE usuario
 
 SET FOREIGN_KEY_CHECKS=1;
 
--- Para limpiar los datos de servicios + reservas  (opcional)
-SET SQL_SAFE_UPDATES = 0;
 
-SET FOREIGN_KEY_CHECKS = 0;
-
-DELETE FROM reembolso;
-DELETE FROM pago;
-DELETE FROM reserva;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-SET FOREIGN_KEY_CHECKS = 0;
-
-DELETE FROM horario_disponible;
-DELETE FROM taller_inscripcion;
-DELETE FROM taller;
-DELETE FROM media_servicio;
-DELETE FROM sede_servicio;
-
-SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE reserva AUTO_INCREMENT = 1;
 ALTER TABLE pago AUTO_INCREMENT = 1;
 ALTER TABLE reembolso AUTO_INCREMENT = 1;
 ALTER TABLE sede_servicio AUTO_INCREMENT = 1;
 
-SET SQL_SAFE_UPDATES = 1;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
 

@@ -12,15 +12,46 @@
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- Estilos internos -->
 
 </head>
 
-<script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap">
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const latInput = document.querySelector("input[name='latitud']");
+        const lngInput = document.querySelector("input[name='longitud']");
+
+        const initialLat = parseFloat(latInput.value) || -12.0758;
+        const initialLng = parseFloat(lngInput.value) || -77.0902;
+
+        // 1) Crear el mapa
+        const map = L.map('map').setView([initialLat, initialLng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 2) Crear marcador DRAGGABLE
+        const marker = L.marker([initialLat, initialLng], {
+            draggable: true
+        })
+            .addTo(map)
+            .bindPopup('Arrástrame para actualizar la ubicación');
+
+        // 3) ¡Activas el dragging!
+        marker.dragging.enable();
+
+        // 4) Al soltar, vuelca coords en los inputs y centra
+        marker.on('dragend', () => {
+            const { lat, lng } = marker.getLatLng();
+            latInput.value = lat.toFixed(8);
+            lngInput.value = lng.toFixed(8);
+            map.panTo([lat, lng]);
+        });
+    });
 </script>
 
 <body>
@@ -124,11 +155,11 @@
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label class="form-label">Latitud</label>
-                                        <input type="text" th:field="*{latitud}" class="form-control" />
+                                        <input type="text" name="latitud" th:value="${sede.latitud}" class="form-control" />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Longitud</label>
-                                        <input type="text" th:field="*{longitud}" class="form-control" />
+                                        <input type="text" name="longitud" th:value="${sede.longitud}" class="form-control" />
                                     </div>
                                     <div class="form-check mb-3">
                                         <input type="checkbox" th:field="*{activo}" class="form-check-input" id="activoCheck" />
@@ -136,7 +167,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Ubicación en el mapa</label>
-                                        <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
+                                        <div id="map" style="height:300px;border:1px solid #ccc;"></div>
                                     </div>
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-primary">Actualizar Sede</button>
@@ -163,44 +194,11 @@
                 }
             }
 
-            /* Inicialización del mapa */
-            /*<![CDATA[*/
-            const lat = [[${sede.latitud}]];
-            const lng = [[${sede.longitud}]];
-            const map = L.map('map').setView([lat, lng], 16);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup('Ubicación de la sede')
-                .openPopup();
-            /*]]>*/
         </script>
 
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const latInput = document.querySelector("input[name='latitud']");
-                const lngInput = document.querySelector("input[name='longitud']");
 
-                const initialLat = parseFloat(latInput.value) || -12.0758;
-                const initialLng = parseFloat(lngInput.value) || -77.0902;
 
-                const map = L.map('map').setView([initialLat, initialLng], 15);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
-
-                const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-
-                marker.on('dragend', function (e) {
-                    const pos = marker.getLatLng();
-                    latInput.value = pos.lat.toFixed(8);
-                    lngInput.value = pos.lng.toFixed(8);
-                });
-            });
-        </script>
 
 
 

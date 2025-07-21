@@ -76,6 +76,10 @@ public class CoordinadorController {
             return "redirect:/login";
         }
 
+
+
+
+
         // 1) Traer sedes activas del coordinador
         var asignas = coordinadorSedeRepository
                 .findByUsuario_IdusuarioAndActivoTrue(usuario.getIdusuario());
@@ -159,8 +163,11 @@ public class CoordinadorController {
     @Transactional
     @PostMapping("/asistencia-dia/registrar")
     public String registrarAsistencia(
-            @RequestParam BigDecimal latitud,
-            @RequestParam BigDecimal longitud,
+            @RequestParam (required = false)BigDecimal latitud,
+            @RequestParam(required = false) BigDecimal longitud,
+            @RequestParam(required = false) BigDecimal latitudSalida,
+            @RequestParam(required = false) BigDecimal longitudSalida,
+
             @RequestParam Integer idsede,
             @RequestParam String accion,
             @RequestParam("id_coordinador_horario") Integer idCoordHorario,
@@ -173,22 +180,23 @@ public class CoordinadorController {
             return "redirect:/login";
         }
 
-        LocalDate ld = LocalDate.now();
-        Date hoy = Date.valueOf(ld);
-        LocalDateTime ahora = LocalDateTime.now();
+        BigDecimal lat = "entrada".equals(accion) ? latitud : latitudSalida;
+        BigDecimal lon = "entrada".equals(accion) ? longitud : longitudSalida;
 
-        System.out.printf("[DEBUG] Usuario: %s - Acción: %s - Fecha: %s - IDsede: %d - IDHorario: %d - Lat: %s - Lon: %s%n",
-                u.getEmail(), accion, hoy, idsede, idCoordHorario, latitud, longitud);
-
-        // Validación de parámetros mejorada
-        if (idsede == null || idCoordHorario == null || latitud == null || longitud == null ||
+        if (idsede == null || idCoordHorario == null || lat == null || lon == null ||
                 (!"entrada".equals(accion) && !"salida".equals(accion))) {
             System.out.println("[VALIDATION] Parámetros inválidos recibidos");
             flash.addFlashAttribute("errorAsistencia", "Parámetros inválidos.");
             return "redirect:/coordinador/home";
         }
 
-        // Verificación de sede con logs mejorados
+        LocalDate ld = LocalDate.now();
+        Date hoy = Date.valueOf(ld);
+        LocalDateTime ahora = LocalDateTime.now();
+
+        System.out.printf("[DEBUG] Usuario: %s - Acción: %s - Fecha: %s - IDsede: %d - IDHorario: %d - Lat: %s - Lon: %s%n",
+                u.getEmail(), accion, hoy, idsede, idCoordHorario, lat, lon);
+
         var sedeOpt = sedeRepository.findById(idsede);
         if (sedeOpt.isEmpty()) {
             System.out.printf("[SEDE] No se encontró sede con ID: %d%n", idsede);
@@ -203,9 +211,8 @@ public class CoordinadorController {
             return "redirect:/coordinador/home";
         }
 
-        // Cálculo de distancia con precisión mejorada
         double dist = calcularDistancia(
-                latitud.doubleValue(), longitud.doubleValue(),
+                lat.doubleValue(), lon.doubleValue(),
                 sede.getLatitud().doubleValue(), sede.getLongitud().doubleValue()
         );
         System.out.printf("[DISTANCE] Sede: %s - Distancia calculada: %.3f km%n", sede.getNombre(), dist);
@@ -216,7 +223,6 @@ public class CoordinadorController {
             return "redirect:/coordinador/home";
         }
 
-        // Obtención de turno con manejo mejorado de errores
         CoordinadorHorario turno;
         try {
             turno = coordinadorHorarioRepository.findById(idCoordHorario)
@@ -235,7 +241,6 @@ public class CoordinadorController {
             return "redirect:/coordinador/home";
         }
 
-        // Búsqueda de asistencia existente
         var asistenciaOpt = asistenciaCoordinadorRepository
                 .findByUsuario_IdusuarioAndFechaAndSede_Idsede(u.getIdusuario(), hoy, idsede);
         AsistenciaCoordinador asistencia = asistenciaOpt.orElse(null);
@@ -246,9 +251,9 @@ public class CoordinadorController {
 
         try {
             if ("entrada".equals(accion)) {
-                asistencia = procesarEntrada(u, sede, hoy, ahora, turno, asistencia, latitud, longitud, flash);
+                asistencia = procesarEntrada(u, sede, hoy, ahora, turno, asistencia, lat, lon, flash);
             } else if ("salida".equals(accion)) {
-                procesarSalida(u, ld, ahora, turno, asistencia, latitud, longitud, flash);
+                procesarSalida(u, ld, ahora, turno, asistencia, lat, lon, flash);
             }
         } catch (Exception e) {
             System.out.printf("[ERROR] Excepción inesperada: %s%n", e.getMessage());
