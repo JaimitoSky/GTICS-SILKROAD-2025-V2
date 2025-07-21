@@ -27,11 +27,10 @@
     </style>
 
 </head>
-<body>z
+<body>
 <div class="wrapper">
     <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
-
 
     <div class="main">
         <!-- Navbar -->
@@ -178,5 +177,18 @@
         $('#tablaReservas').DataTable().search('').columns().search('').draw();
     }
 </script>
+<script>
+    // Prevenir que el enter en cualquier input recargue la página
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('input').forEach(function(input) {
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

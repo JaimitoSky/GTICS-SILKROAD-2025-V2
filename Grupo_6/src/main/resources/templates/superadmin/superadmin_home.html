@@ -275,9 +275,18 @@
                             scales: {
                                 x: {
                                     ticks: {
+                                        callback: function(value, index, ticks) {
+                                            const rawDate = this.getLabelForValue(value); // e.g. "2025-07-21"
+                                            const date = new Date(rawDate);
+                                            const day = String(date.getDate()).padStart(2, '0');
+                                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                                            const year = date.getFullYear();
+                                            return `${day}/${month}/${year}`;
+                                        },
                                         color: getCssVariable('--light-text-color'),
                                         font: { family: 'Inter' }
-                                    },
+                                    }
+                                    ,
                                     grid: { color: getCssVariable('--border-color') }
                                 },
                                 y: {
@@ -296,18 +305,20 @@
                 }
 
                 if (document.getElementById("chartUsuariosRol")) {
+                    const coloresPorRol = {
+                        'Superadmin': '#dc3545',     // rojo (danger)
+                        'Administrador': '#ffc107',  // amarillo (warning)
+                        'Coordinador': '#198754',    // verde (success)
+                        'Vecino': '#0d6efd'          // azul (primary)
+                    };
+
                     new Chart(document.getElementById("chartUsuariosRol"), {
                         type: "doughnut",
                         data: {
                             labels: usuariosPorRol.map(e => e.rol),
                             datasets: [{
                                 data: usuariosPorRol.map(e => e.total),
-                                backgroundColor: [
-                                    getCssVariable('--primary-color'),
-                                    getCssVariable('--warning-color'),
-                                    getCssVariable('--danger-color'),
-                                    getCssVariable('--success-color')
-                                ]
+                                backgroundColor: usuariosPorRol.map(e => coloresPorRol[e.rol])
                             }]
                         },
                         options: {
@@ -325,6 +336,7 @@
                         }
                     });
                 }
+
             });
         </script>
 

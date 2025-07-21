@@ -1,629 +1,529 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Pagos - Superadmin</title>
 
-    <title>Inicio - Superadmin</title>
-
-
-
-    <!-- Estilos externos -->
-
+    <!-- Fuentes y Estilos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
+
+            /* Spacing scale - for more consistent spacing (example values) */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Using spacing variable */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center; /* Centered the title */
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
+
+        .search-filter-form {
+            background-color: var(--card-background);
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center; /* Ensure vertical alignment */
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease; /* Ensure smooth transitions */
+            /* Added for consistent icon alignment in general buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps with vertical alignment of icon and text */
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-secondary:hover,
+        .btn-outline-success:hover,
+        .btn-outline-danger:hover,
+        .btn-outline-warning:hover {
+            opacity: 0.9;
+            transform: translateY(-1px); /* Slight lift on hover */
+            box-shadow: 0 4px 12px var(--shadow-light); /* More consistent shadow on hover */
+        }
+
+        .btn-sm {
+            padding: var(--spacing-sm) var(--spacing-md); /* Using spacing variables */
+            font-size: 0.875rem;
+            /* Ensure alignment for the new user button icon */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* Consistent padding and centering for action buttons in table */
+        .btn-outline-success,
+        .btn-outline-danger,
+        .btn-outline-primary,
+        .btn-outline-warning {
+            padding: 0.4rem 0.6rem; /* Reduced padding for compact action buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps with vertical alignment of icon */
+            box-shadow: 0 1px 3px var(--shadow-light); /* Subtle shadow for action buttons */
+        }
+        .btn-outline-success i,
+        .btn-outline-danger i,
+        .btn-outline-primary i,
+        .btn-outline-warning i {
+            font-size: 1em; /* Standard icon size */
+        }
+
+
+        .table {
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+            font-size: 0.9rem; /* Slightly increased for better legibility */
+        }
+
+        .table-hover tbody tr {
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer; /* Indicate rows are interactive */
+            background-color: var(--card-background); /* Ensure all rows have the same background */
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+            box-shadow: 0 2px 8px var(--shadow-light); /* Subtle shadow on row hover */
+        }
+
+        /* Removed .table-striped style to make all rows the same color */
+        /* .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        } */
+
+
+        .table thead {
+            background-color: #f1f3f5;
+            color: var(--dark-primary-color);
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.95rem; /* Adjusted for hierarchy */
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 0.8rem 1.25rem; /* Consistent cell padding */
+            vertical-align: middle;
+            font-size: 0.9rem; /* Consistent table data font size */
+        }
+
+        /* Specific styles for the dropdown in the actions column */
+        .table tbody td .form-select-sm {
+            padding: 0.25rem 0.75rem; /* Smaller padding for dropdown in table */
+            font-size: 0.85rem;
+            border-radius: var(--border-radius-base);
+        }
+
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 0.75rem;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.bg-success {
+            background-color: var(--success-color) !important; /* Ensure override */
+            color: white;
+        }
+
+        .badge.bg-danger {
+            background-color: var(--danger-color) !important; /* Ensure override */
+            color: white;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--warning-color) !important; /* Ensure override */
+            color: #212529; /* Darker text for warning background */
+        }
+
+        .pagination .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-base);
+            color: var(--primary-color);
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0; /* Consistent padding */
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl); /* Reduced margin-top for better spacing */
+        }
+    </style>
 
 </head>
-
 <body>
-
 <div class="wrapper">
-
-    <!-- Sidebar -->
-
     <div th:replace="fragments/sidebar-superadmin :: sidebar"></div>
 
-
-
-    <!-- Main -->
-
     <div class="main">
-
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
 
         <main class="content">
-
-            <div class="container-fluid p-0">
-
-                <h1 class="h3 mb-3"><strong>Gestión de Pagos</strong></h1>
-
-
+            <div class="container-fluid p-4">
+                <h2 class="page-title mb-4 text-center">Gestión de <strong>Pagos</strong></h2>
 
                 <div class="card">
+                    <!-- Filtro -->
+                    <form method="get" class="search-filter-form row g-2 mb-0 align-items-center">
+                        <div class="col-md-3">
+                            <input type="text" name="filtroNombre" class="form-control" placeholder="Buscar por nombre" th:value="${filtroNombre}" />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="filtroDni" class="form-control" placeholder="Buscar por DNI" th:value="${filtroDni}" />
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search me-1"></i> Buscar
+                            </button>
+                            <a th:href="@{/superadmin/pagos}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-circle me-1"></i> Limpiar
+                            </a>
+                        </div>
+                    </form>
 
-                    <div class="card-body">
-
-                        <!-- Filtros -->
-
-                        <form method="get" class="row g-2 mb-3">
-
-                            <div class="col-md-3">
-
-                                <input type="text" name="filtroNombre" class="form-control" placeholder="Buscar por nombre"
-
-                                       th:value="${filtroNombre}" />
-
-                            </div>
-
-                            <div class="col-md-3">
-
-                                <input type="text" name="filtroDni" class="form-control" placeholder="Buscar por DNI"
-
-                                       th:value="${filtroDni}" />
-
-                            </div>
-
-
-
-                            <div class="col-md-3 d-flex gap-2">
-
-                                <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
-
-                                <a th:href="@{/superadmin/pagos}" class="btn btn-outline-secondary w-100">Limpiar</a>
-
-                            </div>
-
-                        </form>
-
-
-
+                    <div class="card-body px-0 pt-0">
                         <!-- Tabla -->
-
-                        <table class="table table-bordered table-hover align-middle">
-
-                            <thead class="table-light">
-
-                            <tr>
-
-                                <th>Código</th>
-
-                                <th>Vecino</th>
-
-                                <th>DNI</th>
-
-                                <th>Estado</th>
-
-                                <th>Comprobante</th>
-
-                                <th>Acciones</th>
-
-                            </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                            <tr th:each="pago : ${listaPagos}"
-
-                                th:classappend="${pago.idpago == idPagoDestacado} ? 'table-warning border border-primary border-2 rounded-2 shadow-sm'"
-
-                                th:id="'pago-' + ${pago.idpago}">
-
-
-
-                                <td th:text="${pago.idpago}"></td>
-
-                                <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}"></td>
-
-                                <td th:text="${pago.usuario.dni}"></td>
-
-
-
-                                <td>
-
-<span th:text="${pago.estado.nombre}"
-
-      th:classappend="
-
-${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
-
-(${pago.estado.nombre == 'pendiente'} ? 'badge bg-warning text-dark' : 'badge bg-danger')">
-
-Pendiente
-
-</span>
-
-                                </td>
-
-
-
-                                <!-- Comprobante -->
-
-                                <td class="text-center">
-
-                                    <button class="btn btn-outline-secondary btn-sm"
-
-                                            data-bs-toggle="modal"
-
-                                            th:data-bs-target="'#modalComprobante' + ${pago.idpago}"
-
-                                            th:if="${pago.comprobante != null}">
-
-                                        <i class="bi bi-eye-fill"></i> Ver
-
-                                    </button>
-
-
-
-                                    <span th:if="${pago.comprobante == null}" class="text-muted fst-italic">No disponible</span>
-
-                                </td>
-
-
-
-
-
-                                <!-- Acciones -->
-
-                                <td>
-
-                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-
-
-
-                                        <!-- Estado de pago -->
-
-                                        <span th:class="'badge px-3 py-2 fw-semibold ' +
-
-(${pago.estado.nombre == 'confirmado'} ? 'bg-success' :
-
-(${pago.estado.nombre == 'rechazado'} ? 'bg-danger' : 'bg-warning text-dark'))"
-
-                                              th:text="${pago.estado.nombre == 'confirmado' ? 'Aprobado' :
-
-(pago.estado.nombre == 'rechazado' ? 'Rechazado' : 'Pendiente')}">
-
-</span>
-
-
-
-                                        <!-- Botones de acción (si es pendiente) -->
-
-                                        <div class="d-flex gap-1"
-
-                                             th:if="${pago.estado.nombre != 'confirmado' and pago.estado.nombre != 'rechazado'}">
-
-                                            <button class="btn btn-outline-success btn-sm"
-
-                                                    data-bs-toggle="modal"
-
-                                                    th:data-bs-target="'#modalAprobar' + ${pago.idpago}">
-
-                                                <i class="bi bi-check-circle"></i>
-
-                                            </button>
-
-                                            <button class="btn btn-outline-danger btn-sm"
-
-                                                    data-bs-toggle="modal"
-
-                                                    th:data-bs-target="'#modalRechazar' + ${pago.idpago}">
-
-                                                <i class="bi bi-x-circle"></i>
-
-                                            </button>
-
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Vecino</th>
+                                    <th>DNI</th>
+                                    <th>Estado</th>
+                                    <th>Comprobante</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="pago : ${listaPagos}" th:id="'pago-' + ${pago.idpago}">
+                                    <td th:text="${pago.idpago}"></td>
+                                    <td th:text="${pago.usuario.nombres + ' ' + pago.usuario.apellidos}"></td>
+                                    <td th:text="${pago.usuario.dni}"></td>
+                                    <td>
+                                        <span th:text="${pago.estado.nombre}"
+                                              th:classappend="${pago.estado.nombre == 'confirmado'} ? 'badge bg-success' :
+                                                              (pago.estado.nombre == 'pendiente' ? 'badge bg-warning text-dark' : 'badge bg-danger')">
+                                            Pendiente
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#modalComprobante' + ${pago.idpago}"
+                                                th:if="${pago.comprobante != null}">
+                                            <i class="bi bi-eye-fill"></i> Ver
+                                        </button>
+                                        <span th:if="${pago.comprobante == null}" class="text-muted fst-italic">No disponible</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                            <!-- Estado -->
+                                            <span th:class="'badge px-3 py-2 fw-semibold ' +
+                                                            (${pago.estado.nombre == 'confirmado'} ? 'bg-success' :
+                                                            (${pago.estado.nombre == 'rechazado'} ? 'bg-danger' : 'bg-warning text-dark'))"
+                                                  th:text="${pago.estado.nombre == 'confirmado' ? 'Aprobado' :
+                                                            (pago.estado.nombre == 'rechazado' ? 'Rechazado' : 'Pendiente')}">
+                                            </span>
+
+                                            <!-- Acciones si pendiente -->
+                                            <div class="d-flex gap-1"
+                                                 th:if="${pago.estado.nombre != 'confirmado' and pago.estado.nombre != 'rechazado'}">
+                                                <button class="btn btn-outline-success btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        th:data-bs-target="'#modalAprobar' + ${pago.idpago}">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-sm"
+                                                        data-bs-toggle="modal"
+                                                        th:data-bs-target="'#modalRechazar' + ${pago.idpago}">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Ir a reserva -->
+                                            <a th:if="${pago.reserva != null}"
+                                               th:href="@{/superadmin/reservas/redirigir(idReserva=${pago.reserva.idreserva})}"
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
                                         </div>
-
-
-
-                                        <!-- Botón Ir a Reserva (siempre visible) -->
-
-                                        <a th:if="${pago.reserva != null}"
-
-                                           th:href="@{/superadmin/reservas/redirigir(idReserva=${pago.reserva.idreserva})}"
-
-                                           class="btn btn-outline-primary btn-sm">
-
-                                            <i class="bi bi-box-arrow-up-right"></i> Ir a Reserva
-
-                                        </a>
-
-
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                            </tbody>
-
-                        </table>
-
-
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(listaPagos)}">
+                                    <td colspan="6" class="text-center py-4 text-muted">No se encontraron pagos registrados.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
                         <!-- Paginación -->
-
-                        <div class="d-flex justify-content-center mt-4">
-
-                            <nav aria-label="Paginación de pagos">
-
-                                <ul class="pagination justify-content-center flex-wrap">
-
-                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-
-                                        <a class="page-link"
-
-                                           th:href="@{/superadmin/pagos(page=${currentPage - 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Anterior</a>
-
-                                    </li>
-
-
-
-                                    <li class="page-item"
-
-                                        th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
-
-                                        th:classappend="${i == currentPage} ? 'active'">
-
-                                        <a class="page-link"
-
-                                           th:href="@{/superadmin/pagos(page=${i}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}"
-
-                                           th:text="${i + 1}">1</a>
-
-                                    </li>
-
-
-
-                                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-
-                                        <a class="page-link"
-
-                                           th:href="@{/superadmin/pagos(page=${currentPage + 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Siguiente</a>
-
-                                    </li>
-
-                                </ul>
-
-                            </nav>
-
-                        </div>
-
+                        <nav aria-label="Paginación de pagos" class="mt-4">
+                            <ul class="pagination justify-content-center flex-wrap">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/superadmin/pagos(page=${currentPage - 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Anterior</a>
+                                </li>
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/superadmin/pagos(page=${i}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/superadmin/pagos(page=${currentPage + 1}, filtroNombre=${filtroNombre}, filtroDni=${filtroDni})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
-
                 </div>
-
             </div>
-
         </main>
 
-
-
-        <!-- Footer -->
-
         <footer class="footer mt-auto py-3 bg-light border-top">
-
             <div class="container text-center text-muted">
-
-                Municipalidad de San Miguel © 2025
-
+                Municipalidad de San Miguel ©️ 2025
             </div>
-
         </footer>
-
     </div>
-
 </div>
-
-
 
 <!-- Modals -->
-
 <div th:each="pago : ${listaPagos}">
-
     <!-- Modal Aprobar -->
-
     <div class="modal fade" th:id="'modalAprobar' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
-
         <div class="modal-dialog modal-dialog-centered">
-
             <div class="modal-content">
-
                 <form th:action="@{/superadmin/reservas/aprobar-pago/{id}(id=${pago.idpago})}" method="post">
-
                     <div class="modal-header">
-
                         <h5 class="modal-title">Confirmar Aprobación</h5>
-
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-
                     </div>
-
                     <div class="modal-body">
-
                         <p>¿Estás seguro de aprobar este pago?</p>
-
                         <p class="text-warning">Una vez aprobado, no se podrá cambiar el estado.</p>
-
                     </div>
-
                     <div class="modal-footer">
-
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-
                         <button type="submit" class="btn btn-success">Confirmar</button>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     </div>
-
-
 
     <!-- Modal Rechazar -->
-
     <div class="modal fade" th:id="'modalRechazar' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
-
         <div class="modal-dialog modal-dialog-centered">
-
             <div class="modal-content">
-
                 <form th:action="@{/superadmin/pagos/rechazar/{id}(id=${pago.idpago})}" method="post">
-
                     <div class="modal-header">
-
                         <h5 class="modal-title">Confirmar Rechazo</h5>
-
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-
                     </div>
-
                     <div class="modal-body">
-
                         <p>¿Estás seguro de rechazar este pago?</p>
-
                         <p class="text-danger">Una vez rechazado, no se podrá cambiar el estado.</p>
-
                     </div>
-
                     <div class="modal-footer">
-
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-
                         <button type="submit" class="btn btn-danger">Confirmar</button>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     </div>
 
-
-
-    <!-- Modal de visualización del comprobante -->
-
-    <div class="modal fade"
-
-         th:id="'modalComprobante' + ${pago.idpago}"
-
-         tabindex="-1" aria-hidden="true">
-
+    <!-- Modal Comprobante -->
+    <div class="modal fade" th:id="'modalComprobante' + ${pago.idpago}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-
             <div class="modal-content">
-
                 <div class="modal-header">
-
                     <h5 class="modal-title">Comprobante de Pago #<span th:text="${pago.idpago}"></span></h5>
-
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-
                 </div>
-
                 <div class="modal-body text-center">
-
-
-
                     <div th:if="${pago.comprobante != null}">
-
-                        <!-- Mostrar imagen desde backend seguro -->
-
-                        <img th:src="@{'/superadmin/pago/' + ${pago.idpago} + '/comprobante'}"
-
-                             class="img-fluid rounded border" alt="Comprobante" />
-
-
-
-                        <!-- Opción de descarga con nombre original -->
-
+                        <img th:src="@{'/superadmin/pagos' + ${pago.idpago} + '/comprobante'}" class="img-fluid rounded border" alt="Comprobante" />
                         <div class="mt-3">
-
-                            <a th:href="@{'/superadmin/pago/' + ${pago.idpago} + '/comprobante'}"
-
+                            <a th:href="@{'/superadmin/pagos' + ${pago.idpago} + '/comprobante'}"
                                th:attr="download=${pago.comprobante.substring(pago.comprobante.lastIndexOf('/') + 1)}"
-
                                class="btn btn-primary" target="_blank">
-
                                 <i class="bi bi-download"></i> Descargar Comprobante
-
                             </a>
-
                         </div>
-
                     </div>
-
-
-
                     <div th:if="${pago.comprobante == null}">
-
                         <p class="text-muted">No hay comprobante disponible.</p>
-
                     </div>
-
-
-
                 </div>
-
                 <div class="modal-footer">
-
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
-
-
-
-
-
 </div>
 
-
-
-<script>
-
-    document.addEventListener("DOMContentLoaded", () => {
-
-        const idDestacado = /*[[${idPagoDestacado}]]*/ 0;
-
-        if (idDestacado && idDestacado !== 0) {
-
-            const fila = document.getElementById("pago-" + idDestacado);
-
-            if (fila) {
-
-                fila.scrollIntoView({ behavior: "smooth", block: "center" });
-
-                fila.classList.add("shadow", "border", "border-primary", "border-3");
-
-            }
-
-        }
-
-    });
-
-</script>
-
-
-
 <!-- Scripts -->
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://unpkg.com/feather-icons"></script>
 <script>
-
+    feather.replace();
+</script>
+<script>
     document.addEventListener("DOMContentLoaded", function () {
-
         const toggle = document.querySelector(".js-sidebar-toggle");
-
         const sidebar = document.getElementById('sidebar');
-
-
-
-        if (toggle) {
-
+        if (toggle && sidebar) {
             toggle.addEventListener("click", function (e) {
-
                 e.preventDefault();
-
                 document.body.classList.toggle("sidebar-collapsed");
-
             });
-
         }
 
-
-
-// Close sidebar when clicking outside on mobile
-
-        document.addEventListener('click', function(event) {
-
+        document.addEventListener('click', function (event) {
             if (window.innerWidth <= 991.98) {
-
-                const isClickInsideSidebar = sidebar.contains(event.target);
-
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
                 const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-
-
                 if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-
                     document.body.classList.add("sidebar-collapsed");
-
                 }
-
             }
-
         });
 
-
-
-// Ajustar al redimensionar
-
-        window.addEventListener('resize', function() {
-
+        window.addEventListener('resize', function () {
             if (window.innerWidth > 991.98) {
-
                 document.body.classList.remove("sidebar-collapsed");
-
             }
-
         });
-
     });
-
-
-
-    // Solución adicional para problemas con modales
-
-    document.addEventListener('shown.bs.modal', function () {
-
-        document.body.style.paddingRight = '0px';
-
-    });
-
 </script>
-
-<script src="https://unpkg.com/feather-icons"></script>
-
-<script>
-
-    feather.replace();
-
-</script>
-
-
-
 </body>
-
 </html>

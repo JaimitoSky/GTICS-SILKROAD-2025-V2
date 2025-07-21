@@ -104,11 +104,12 @@
 
                     <!-- Caso BANCO: muestro la imagen subida a S3 -->
                     <div th:if="${reserva.pago != null and reserva.pago.metodo.name().toLowerCase() == 'banco'}" class="text-center mt-3">
-                        <img th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
+                        <img th:if="${reserva.pago.comprobante != null}"
+                             th:src="@{'/vecino/comprobante/' + ${reserva.pago.idpago}}"
                              alt="Comprobante de pago"
                              class="img-thumbnail border"
-                             style="max-width: 500px; height: auto;"
-                             onerror="this.onerror=null;this.src='/img/photos/placeholder.jpg';this.alt='Comprobante no disponible';"/>
+                             style="max-width: 500px; height: auto;" />
+
                     </div>
 
 
@@ -145,9 +146,10 @@
 
                     <!-- Mostrar mensaje de tiempo expirado -->
                     <div th:if="${reserva.pago?.comprobante == null and reserva.fechaLimitePago != null and ahora.isAfter(reserva.fechaLimitePago)}">
-                        <div class="alert alert-danger text-center fw-bold">
+                        <div th:if="${reserva.tipoPago != 'online' and tiempoPagoExpirado}" class="alert alert-danger">
                             Tiempo de pago expirado. Ya no puedes subir un comprobante.
                         </div>
+
                     </div>
 
                     <!-- Mostrar formulario si el tiempo de pago aún está vigente -->

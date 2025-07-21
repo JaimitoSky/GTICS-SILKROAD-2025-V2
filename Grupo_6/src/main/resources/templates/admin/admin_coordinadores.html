@@ -1,41 +1,350 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Coordinadores - Admin</title>
+    <title>Dashboard Coordinador - Admin</title>
 
-    <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Estilos internos -->
     <link rel="stylesheet" th:href="@{/css/admin_sidebar.css}">
 
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
+
+            /* Spacing scale */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Consistent padding */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title { /* New style for page titles */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xs); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+        }
+        p.page-subtitle { /* New style for page subtitles */
+            color: var(--light-text-color);
+            margin-bottom: var(--spacing-xl);
+            font-size: 1rem;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+            color: var(--dark-primary-color); /* Added text color */
+        }
+
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem; /* Larger title for card headers like name */
+            font-weight: 700;
+            color: var(--primary-color); /* Primary color for card titles */
+            margin-bottom: 0;
+        }
+
+        /* Form elements */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs); /* Small space below label */
+        }
+
+        .form-control,
+        .form-select,
+        .form-control[type="file"] {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color); /* Ensure text color is consistent */
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .form-control[type="file"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Button style */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex; /* For icon alignment if used */
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .btn i.bi, .btn i[data-feather] { /* Spacing for icons within buttons */
+            margin-right: var(--spacing-xs);
+        }
+        .btn i[data-feather] { /* Specific style for feather icons in buttons */
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            stroke-width: 2.5; /* Make feather icons a bit bolder */
+        }
+
+        /* Specific button colors */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-color: transparent;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5c636a; /* Darker secondary */
+            border-color: #565e64;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            background-color: transparent;
+        }
+        .btn-outline-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #157347; /* Darker success */
+            border-color: #146c43;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+            background-color: transparent;
+        }
+        .btn-outline-success:hover {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #bb2d3b; /* Darker danger */
+            border-color: #b02a37;
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+            background-color: transparent;
+        }
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        /* Progress bars */
+        .progress {
+            height: 1.5rem; /* Larger progress bar height */
+            border-radius: var(--border-radius-base);
+            background-color: var(--border-color); /* Light background for empty part */
+        }
+        .progress-bar {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* List group */
+        .list-group-item {
+            border: none; /* Remove default border */
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--text-color);
+            background-color: var(--card-background);
+            font-size: 0.95rem;
+        }
+        .list-group-item i {
+            font-size: 1.1em;
+            vertical-align: middle;
+        }
+        .list-group-item strong {
+            color: var(--dark-primary-color);
+        }
+
+        /* Chart container styling */
+        .chart-container {
+            position: relative;
+            height: 250px; /* Fixed height for the chart */
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Alert styling */
+        .alert-info {
+            background-color: #e0f2f7; /* Lighter info blue */
+            border-color: #b3e0ed;
+            color: #0c5460;
+            border-radius: var(--border-radius-base);
+            padding: var(--spacing-lg);
+            font-size: 1.1rem;
+        }
+        .alert-info .bi-info-circle-fill {
+            margin-right: var(--spacing-sm);
+            font-size: 1.3em;
+            vertical-align: middle;
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl);
+        }
+
+        /* Adjust margin for the main content to match overall layout */
+        .container-fluid {
+            padding: 0; /* Content wrapper handles padding */
+        }
+    </style>
 </head>
 <body>
 <div class="wrapper">
-    <!-- Sidebar -->
     <div th:replace="fragments/sidebar-administrador.html :: sidebar"></div>
 
-    <!-- Main -->
     <div class="main">
-        <div th:replace="fragments/navbar-admin.html :: navbar"></div>
+        <div th:replace="fragments/navbar-admin :: navbar"></div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <button class="btn btn-outline-secondary d-lg-none m-3 js-sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
 
-        <main class="content pt-4">
-            <div class="container-fluid">
-                <!-- Título y filtros -->
+        <main class="content">
+            <div class="container-fluid p-0">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
                     <div>
-                        <h2 class="fw-bold mb-2">Dashboard del Coordinador</h2>
-                        <p class="text-muted mb-0">Resumen mensual de asistencias e incidencias</p>
+                        <h2 class="page-title">Dashboard del <strong>Coordinador</strong></h2>
+                        <p class="page-subtitle">Resumen mensual de asistencias e incidencias</p>
                     </div>
-                    <form th:action="@{/admin/coordinadores}" method="get" class="row g-2 align-items-center mt-3 mt-md-0">
+                    <form th:action="@{/admin/coordinadores}" method="get" class="row g-3 align-items-end mt-3 mt-md-0">
                         <div class="col-auto">
-                            <select name="id" class="form-select" onchange="this.form.submit()">
+                            <label for="selectCoordinador" class="form-label visually-hidden">Seleccionar coordinador</label>
+                            <select name="id" id="selectCoordinador" class="form-select" onchange="this.form.submit()">
                                 <option value="" disabled th:if="${id == null}" selected>Seleccionar coordinador</option>
                                 <option th:each="c : ${todosCoordinadores}"
                                         th:value="${c.idusuario}"
@@ -45,74 +354,74 @@
                         </div>
 
                         <div class="col-auto">
-                            <input type="text" name="filtro" class="form-control" placeholder="Buscar por DNI"
+                            <label for="filtroDni" class="form-label visually-hidden">Buscar por DNI</label>
+                            <input type="text" name="filtro" id="filtroDni" class="form-control" placeholder="Buscar por DNI"
                                    th:value="${filtro}" onchange="this.form.submit()"
                                    th:disabled="${id != null}" />
                         </div>
 
                         <div class="col-auto">
-                            <input type="month" name="mes" class="form-control" th:value="${mes}" onchange="this.form.submit()" />
+                            <label for="filtroMes" class="form-label visually-hidden">Filtrar por mes</label>
+                            <input type="month" name="mes" id="filtroMes" class="form-control" th:value="${mes}" onchange="this.form.submit()" />
                         </div>
 
                         <div class="col-auto">
                             <a th:href="@{/admin/coordinadores}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Limpiar
+                                <i data-feather="x-circle" class="me-1"></i> Limpiar
                             </a>
                         </div>
                     </form>
                 </div>
 
-                <!-- Panel con datos -->
                 <div th:if="${coordinador != null}">
-                    <div class="card shadow border-0 mb-4">
+                    <div class="card mb-4">
                         <div class="card-body">
                             <h4 class="card-title mb-1" th:text="${coordinador.nombres + ' ' + coordinador.apellidos}">Nombre Apellido</h4>
-                            <p class="text-muted">
-                                <i class="bi bi-card-text"></i> DNI: <span th:text="${coordinador.dni}">00000000</span>
+                            <p class="text-muted small">
+                                <i class="bi bi-card-text me-1"></i> DNI: <span th:text="${coordinador.dni}">00000000</span>
                             </p>
 
                             <div class="row mt-4">
-                                <!-- Asistencias -->
                                 <div class="col-md-6 mb-4">
-                                    <h6 class="fw-bold">Distribución de Asistencias</h6>
+                                    <h6 class="fw-bold mb-3">Distribución de Asistencias</h6>
                                     <div class="progress mb-2" style="height: 26px;">
-                                        <div class="progress-bar bg-success" th:if="${coordinador.puntualidadPct != null}"
+                                        <div class="progress-bar bg-success" th:if="${coordinador.puntualidadPct != null and coordinador.puntualidadPct > 0}"
                                              th:style="'width:' + ${coordinador.puntualidadPct} + '%'"
                                              th:text="'Puntual ' + ${coordinador.puntualidadPct + '%'}"></div>
-                                        <div class="progress-bar bg-warning" th:if="${coordinador.tardanzaPct != null}"
+                                        <div class="progress-bar bg-warning" th:if="${coordinador.tardanzaPct != null and coordinador.tardanzaPct > 0}"
                                              th:style="'width:' + ${coordinador.tardanzaPct} + '%'"
                                              th:text="'Tarde ' + ${coordinador.tardanzaPct + '%'}"></div>
-                                        <div class="progress-bar bg-danger" th:if="${coordinador.faltasPct != null}"
+                                        <div class="progress-bar bg-danger" th:if="${coordinador.faltasPct != null and coordinador.faltasPct > 0}"
                                              th:style="'width:' + ${coordinador.faltasPct} + '%'"
                                              th:text="'Faltas ' + ${coordinador.faltasPct + '%'}"></div>
                                     </div>
 
                                     <div class="d-flex justify-content-between small text-muted">
-                                        <span>Asistencias: <strong th:text="${coordinador.presente}">0</strong></span>
-                                        <span>Tardanzas: <strong th:text="${coordinador.tarde}">0</strong></span>
-                                        <span>Faltas: <strong th:text="${coordinador.falta}">0</strong></span>
+                                        <span>Asistencias: <strong class="text-success" th:text="${coordinador.presente}">0</strong></span>
+                                        <span>Tardanzas: <strong class="text-warning" th:text="${coordinador.tarde}">0</strong></span>
+                                        <span>Faltas: <strong class="text-danger" th:text="${coordinador.falta}">0</strong></span>
                                     </div>
 
-                                    <div class="mt-3" th:if="${coordinador.falta > 0}">
-                                        <a th:href="@{'/superadmin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=falta'}"
-                                           class="btn btn-sm btn-danger">
-                                            <i class="bi bi-search"></i> Ver faltas en detalle
+                                    <div class="mt-3">
+                                        <a th:if="${coordinador.falta > 0}"
+                                           th:href="@{'/admin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=falta'}"
+                                           class="btn btn-sm btn-outline-danger me-2">
+                                            <i data-feather="alert-circle" class="me-1"></i> Ver faltas en detalle
+                                        </a>
+                                        <a th:if="${coordinador.tarde > 0}"
+                                           th:href="@{'/admin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=tarde'}"
+                                           class="btn btn-sm btn-outline-warning">
+                                            <i data-feather="clock" class="me-1"></i> Ver tardanzas
                                         </a>
                                     </div>
-                                    <div class="mt-2" th:if="${coordinador.tarde > 0}">
-                                        <a th:href="@{'/superadmin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=tarde'}"
-                                           class="btn btn-sm btn-warning">
-                                            <i class="bi bi-clock-history"></i> Ver tardanzas
-                                        </a>
-                                    </div>
+
                                 </div>
 
-                                <!-- Datos adicionales -->
                                 <div class="col-md-6 mb-4">
-                                    <h6 class="fw-bold">Resumen del Mes</h6>
+                                    <h6 class="fw-bold mb-3">Resumen del Mes</h6>
                                     <ul class="list-group list-group-flush mb-4">
                                         <li class="list-group-item">
-                                            <i class="bi bi-calendar-event-fill me-2"></i>
+                                            <i class="bi bi-calendar-event-fill me-2 text-primary"></i>
                                             Mes evaluado: <strong th:text="${mes}">2025-06</strong>
                                         </li>
                                         <li class="list-group-item">
@@ -122,8 +431,9 @@
                                     </ul>
 
                                     <div th:if="${coordinador.presente + coordinador.tarde + coordinador.falta > 0}">
-                                        <div style="height: 250px;"> <!-- Contenedor con altura fija -->
-                                            <canvas id="asistenciaChart" height="250"></canvas>
+                                        <h6 class="fw-bold mb-3">Gráfico de Asistencias</h6>
+                                        <div class="chart-container">
+                                            <canvas id="asistenciaChart"></canvas>
                                         </div>
                                     </div>
                                 </div>
@@ -132,91 +442,193 @@
                     </div>
                 </div>
 
-                <!-- Sin registros -->
-                <div th:if="${coordinador == null or (coordinador.presente + coordinador.tarde + coordinador.falta) == 0}">
-                    <div class="alert alert-info text-center mt-4">
-                        <i class="bi bi-info-circle-fill"></i> No hay registros de asistencia para este coordinador en el mes seleccionado.
+                <div th:if="${coordinador == null or (coordinador.presente == 0 and coordinador.tarde == 0 and coordinador.falta == 0)}">
+                    <div class="alert alert-info text-center mt-4 p-4">
+                        <i class="bi bi-info-circle-fill me-2"></i> No hay registros de asistencia para este coordinador en el mes seleccionado.
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Script de Chart.js -->
-        <script th:inline="javascript" th:if="${coordinador != null and (coordinador.presente + coordinador.tarde + coordinador.falta) > 0}">
-            const presente = [[${coordinador.presente}]];
-            const tarde = [[${coordinador.tarde}]];
-            const falta = [[${coordinador.falta}]];
-            const ctx = document.getElementById('asistenciaChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Presente', 'Tarde', 'Falta'],
-                    datasets: [{
-                        data: [presente, tarde, falta],
-                        backgroundColor: ['#198754', '#ffc107', '#dc3545']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // Añadido para mantener las proporciones dentro del contenedor
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        title: {
-                            display: true,
-                            text: 'Distribución de Asistencias - [[${mes}]]'
-                        }
-                    }
-                }
-            });
-        </script>
-
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer mt-auto py-3">
+            <div class="text-center mt-5 mb-3">
+                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
+            </div>
+            <div class="container text-center text-muted small">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+
+<script th:inline="javascript" th:if="${coordinador != null and (coordinador.presente + coordinador.tarde + coordinador.falta) > 0}">
+    const presente = [[${coordinador.presente}]];
+    const tarde = [[${coordinador.tarde}]];
+    const falta = [[${coordinador.falta}]];
+    const mesEvaluado = [[${mes}]]; // Get the month from Thymeleaf
+
     document.addEventListener("DOMContentLoaded", function () {
+        feather.replace(); // Initialize feather icons
+
+        function formatearMes(mes) {
+            const [anio, mesNumero] = mes.split("-");
+            const nombreMes = new Date(`${mes}-01`).toLocaleString('es-PE', { month: 'long' });
+            return `${nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1)} ${anio}`;
+        }
+
+
+        const ctx = document.getElementById('asistenciaChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Presente', 'Tarde', 'Falta'],
+                datasets: [{
+                    data: [presente, tarde, falta],
+                    backgroundColor: [
+                        '#198754', /* success-color */
+                        '#ffc107', /* warning-color */
+                        '#dc3545'  /* danger-color */
+                    ],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Ensures chart fills its container
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 15
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: `Distribución de Asistencias - ${formatearMes(mesEvaluado)}`,
+                        font: {
+                            size: 16,
+                            weight: 'bold',
+                            family: 'Montserrat, sans-serif'
+                        },
+                        color: '#0a58ca' // dark-primary-color
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: '#dee2e6',
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    });
+</script>
+<script>
+    function actualizarInputFiltro() {
+        const campo = document.getElementById("campoSelect").value;
+        const contenedor = document.getElementById("filtroContainer");
+        // Get current filter value from URL to pre-fill dynamic input/select
+        const urlParams = new URLSearchParams(window.location.search);
+        const filtroActual = urlParams.get('filtro');
+
+        let nuevoInput = '';
+
+        if (campo === 'estado') {
+            nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
+                  <option value="">Seleccionar estado</option>
+                  <option value="activo" ${filtroActual === 'activo' ? 'selected' : ''}>Activo</option>
+                  <option value="inactivo" ${filtroActual === 'inactivo' ? 'selected' : ''}>Inactivo</option>
+                </select>`;
+        } else if (campo === 'rol') {
+            nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
+                  <option value="">Seleccionar rol</option>
+                  <option value="1" ${filtroActual === '1' ? 'selected' : ''} disabled>Superadmin</option>
+                  <option value="2" ${filtroActual === '2' ? 'selected' : ''} disabled>Administrador</option>
+                  <option value="3" ${filtroActual === '3' ? 'selected' : ''}>Coordinador</option>
+                  <option value="4" ${filtroActual === '4' ? 'selected' : ''}>Vecino</option>
+                </select>`;
+        } else {
+            // Default text input for 'nombre', 'correo', 'id'
+            nuevoInput = `<input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." value="${filtroActual ? filtroActual : ''}">`;
+        }
+
+        contenedor.innerHTML = nuevoInput;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        feather.replace();
+
         const toggle = document.querySelector(".js-sidebar-toggle");
         const sidebar = document.getElementById('sidebar');
 
-        if (toggle) {
+        if (toggle && sidebar) {
             toggle.addEventListener("click", function (e) {
                 e.preventDefault();
                 document.body.classList.toggle("sidebar-collapsed");
             });
         }
 
-        // Close sidebar when clicking outside on mobile
+        // Modified sidebar collapse logic to match Admin example's behavior
         document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
+            if (window.innerWidth <= 991.98) { // For mobile/tablet viewports
+                const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
                 const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
+                // If sidebar is open and click is outside sidebar AND not on the toggle
+                if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
                     document.body.classList.add("sidebar-collapsed");
                 }
             }
         });
 
-        // Ajustar al redimensionar
         window.addEventListener('resize', function() {
             if (window.innerWidth > 991.98) {
                 document.body.classList.remove("sidebar-collapsed");
             }
         });
+
+        const confirmModal = document.getElementById("confirmModal");
+        if (confirmModal) {
+            confirmModal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+                const idUsuario = button.getAttribute("data-id");
+                const nombreUsuario = button.getAttribute("data-nombre");
+
+                const modalBody = confirmModal.querySelector(".modal-body");
+                modalBody.innerHTML = `¿Estás seguro de que deseas eliminar al usuario <strong>${nombreUsuario}</strong> (ID: ${idUsuario})? Esta acción no se puede deshacer.`;
+
+                const form = document.getElementById("deleteUserForm");
+                const inputIdUsuario = document.getElementById("inputIdUsuario");
+                inputIdUsuario.value = idUsuario;
+            });
+        }
+
+        // Call this on load to ensure the correct input type is shown if a filter is already applied via URL params
+        actualizarInputFiltro();
     });
 </script>
-
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
-</script>
-
 </body>
 </html>

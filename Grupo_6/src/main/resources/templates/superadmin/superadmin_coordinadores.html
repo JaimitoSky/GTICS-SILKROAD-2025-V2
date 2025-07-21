@@ -404,15 +404,25 @@
 
                                     <div class="mt-3">
                                         <a th:if="${coordinador.falta > 0}"
-                                           th:href="@{'/superadmin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=falta'}"
+                                           th:href="@{/superadmin/asistencias(
+       campo='estado',
+       filtro='falta',
+       mes=${mes}
+   )}"
                                            class="btn btn-sm btn-outline-danger me-2">
                                             <i data-feather="alert-circle" class="me-1"></i> Ver faltas en detalle
                                         </a>
+
                                         <a th:if="${coordinador.tarde > 0}"
-                                           th:href="@{'/superadmin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=tarde'}"
+                                           th:href="@{/superadmin/asistencias(
+       campo='estado',
+       filtro='tarde',
+       mes=${mes}
+   )}"
                                            class="btn btn-sm btn-outline-warning">
                                             <i data-feather="clock" class="me-1"></i> Ver tardanzas
                                         </a>
+
                                     </div>
 
                                 </div>
@@ -474,6 +484,13 @@
     document.addEventListener("DOMContentLoaded", function () {
         feather.replace(); // Initialize feather icons
 
+        function formatearMes(mes) {
+            const [anio, mesNumero] = mes.split("-");
+            const nombreMes = new Date(`${mes}-01`).toLocaleString('es-PE', { month: 'long' });
+            return `${nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1)} ${anio}`;
+        }
+
+
         const ctx = document.getElementById('asistenciaChart').getContext('2d');
         new Chart(ctx, {
             type: 'pie',
@@ -503,7 +520,7 @@
                     },
                     title: {
                         display: true,
-                        text: `Distribución de Asistencias - ${mesEvaluado}`,
+                        text: `Distribución de Asistencias - ${formatearMes(mesEvaluado)}`,
                         font: {
                             size: 16,
                             weight: 'bold',
@@ -535,7 +552,45 @@
             }
         });
 
-        // Sidebar toggle logic (remains consistent)
+    });
+</script>
+<script>
+    function actualizarInputFiltro() {
+        const campo = document.getElementById("campoSelect").value;
+        const contenedor = document.getElementById("filtroContainer");
+        // Get current filter value from URL to pre-fill dynamic input/select
+        const urlParams = new URLSearchParams(window.location.search);
+        const filtroActual = urlParams.get('filtro');
+
+        let nuevoInput = '';
+
+        if (campo === 'estado') {
+            nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
+                  <option value="">Seleccionar estado</option>
+                  <option value="activo" ${filtroActual === 'activo' ? 'selected' : ''}>Activo</option>
+                  <option value="inactivo" ${filtroActual === 'inactivo' ? 'selected' : ''}>Inactivo</option>
+                </select>`;
+        } else if (campo === 'rol') {
+            nuevoInput = `
+                <select class="form-select" name="filtro" id="filtroInput">
+                  <option value="">Seleccionar rol</option>
+                  <option value="1" ${filtroActual === '1' ? 'selected' : ''} disabled>Superadmin</option>
+                  <option value="2" ${filtroActual === '2' ? 'selected' : ''} disabled>Administrador</option>
+                  <option value="3" ${filtroActual === '3' ? 'selected' : ''}>Coordinador</option>
+                  <option value="4" ${filtroActual === '4' ? 'selected' : ''}>Vecino</option>
+                </select>`;
+        } else {
+            // Default text input for 'nombre', 'correo', 'id'
+            nuevoInput = `<input type="text" name="filtro" class="form-control" id="filtroInput" placeholder="Buscar..." value="${filtroActual ? filtroActual : ''}">`;
+        }
+
+        contenedor.innerHTML = nuevoInput;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        feather.replace();
+
         const toggle = document.querySelector(".js-sidebar-toggle");
         const sidebar = document.getElementById('sidebar');
 
@@ -546,11 +601,13 @@
             });
         }
 
+        // Modified sidebar collapse logic to match Admin example's behavior
         document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
+            if (window.innerWidth <= 991.98) { // For mobile/tablet viewports
                 const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
                 const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
 
+                // If sidebar is open and click is outside sidebar AND not on the toggle
                 if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
                     document.body.classList.add("sidebar-collapsed");
                 }
@@ -562,8 +619,26 @@
                 document.body.classList.remove("sidebar-collapsed");
             }
         });
+
+        const confirmModal = document.getElementById("confirmModal");
+        if (confirmModal) {
+            confirmModal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+                const idUsuario = button.getAttribute("data-id");
+                const nombreUsuario = button.getAttribute("data-nombre");
+
+                const modalBody = confirmModal.querySelector(".modal-body");
+                modalBody.innerHTML = `¿Estás seguro de que deseas eliminar al usuario <strong>${nombreUsuario}</strong> (ID: ${idUsuario})? Esta acción no se puede deshacer.`;
+
+                const form = document.getElementById("deleteUserForm");
+                const inputIdUsuario = document.getElementById("inputIdUsuario");
+                inputIdUsuario.value = idUsuario;
+            });
+        }
+
+        // Call this on load to ensure the correct input type is shown if a filter is already applied via URL params
+        actualizarInputFiltro();
     });
 </script>
-
 </body>
 </html>
