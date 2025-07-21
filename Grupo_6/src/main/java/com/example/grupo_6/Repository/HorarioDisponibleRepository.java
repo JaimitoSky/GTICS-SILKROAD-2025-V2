@@ -20,7 +20,7 @@ public interface HorarioDisponibleRepository extends JpaRepository<HorarioDispon
     @Query("SELECT h FROM HorarioDisponible h " +
             "WHERE h.servicio IN (SELECT ss.servicio FROM SedeServicio ss WHERE ss.sede.nombre = :sede) " +
             "AND h.horaInicio = :hora AND h.horarioAtencion.diaSemana = :diaSemana")
-    Optional<HorarioDisponible> buscarHorarioDisponible(
+    List<HorarioDisponible> buscarHorarioDisponible(
             @Param("sede") String sede,
             @Param("hora") LocalTime hora,
             @Param("diaSemana") HorarioAtencion.DiaSemana diaSemana);

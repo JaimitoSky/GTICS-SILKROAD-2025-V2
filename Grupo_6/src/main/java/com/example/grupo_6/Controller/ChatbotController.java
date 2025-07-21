@@ -267,17 +267,17 @@ public class ChatbotController {
                     case SUNDAY    -> HorarioAtencion.DiaSemana.Domingo;
                 };
 
-                Optional<HorarioDisponible> horarioOpt = horarioDisponibleRepository
+                // ⚠️ Ajuste aquí: usamos List<HorarioDisponible> y elegimos el primero
+                List<HorarioDisponible> horarios = horarioDisponibleRepository
                         .buscarHorarioDisponible(sede, hora, diaSemana);
 
-                if (horarioOpt.isEmpty()) {
+                if (horarios.isEmpty()) {
                     return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró un horario disponible para la hora indicada."));
                 }
 
-                HorarioDisponible horario = horarioOpt.get();
+                HorarioDisponible horario = horarios.get(0);  // Tomamos el primero
                 Estado estado = estadoRepository.findById(1).orElseThrow(); // Estado PENDIENTE
 
-                // Obtener sede y servicio a partir del horario
                 Optional<Sede> sedeOpt = sedeRepository.findByNombre(sede);
                 if (sedeOpt.isEmpty()) {
                     return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró la sede con el nombre proporcionado."));
@@ -291,40 +291,31 @@ public class ChatbotController {
                     return ResponseEntity.ok(Map.of("fulfillmentText", "No se encontró la relación entre la sede y el servicio."));
                 }
 
-                // 📥 Leer el método de pago enviado por Dialogflow (default = banco)
                 String metodoPagoStr = parametros.get("metodo_pago") != null ? parametros.get("metodo_pago").toString() : "banco";
                 Pago.Metodo metodoPago = metodoPagoStr.equalsIgnoreCase("online") ? Pago.Metodo.online : Pago.Metodo.banco;
 
-                // 1. Crear el objeto Pago
                 Pago pago = new Pago();
                 pago.setUsuario(usuario);
                 pago.setMetodo(metodoPago);
                 pago.setMonto(BigDecimal.valueOf(sedeServicioOpt.get().getTarifa().getMonto()));
                 pago.setEstado(estado);
 
-                // 2. Guardar el pago antes de asignarlo a la reserva
                 pagoRepository.save(pago);
 
-                // 3. Crear y guardar la reserva
                 Reserva nuevaReserva = new Reserva();
                 nuevaReserva.setUsuario(usuario);
                 nuevaReserva.setHorarioDisponible(horario);
                 nuevaReserva.setFechaReserva(fecha);
                 nuevaReserva.setEstado(estado);
                 nuevaReserva.setSedeServicio(sedeServicioOpt.get());
-                nuevaReserva.setPago(pago); // asignar el pago guardado
+                nuevaReserva.setPago(pago);
 
-// ⚠️ Agregar las siguientes dos líneas:
                 LocalDateTime fechaCreacion = LocalDateTime.now();
                 nuevaReserva.setFechaCreacion(fechaCreacion);
                 nuevaReserva.setFechaLimitePago(fechaCreacion.plusHours(2));
 
                 reservaRepository.save(nuevaReserva);
 
-
-                reservaRepository.save(nuevaReserva);
-
-                // 4. Mensaje personalizado según método de pago
                 String mensaje;
                 if (metodoPago == Pago.Metodo.banco) {
                     mensaje = "✅ ¡Reserva registrada para el " + fecha + " a las " + hora + "!\n" +
@@ -340,6 +331,7 @@ public class ChatbotController {
                 return ResponseEntity.ok(Map.of("fulfillmentText", "❌ Error al crear la reserva: " + e.getMessage()));
             }
         }
+
 
 
 
