@@ -535,11 +535,14 @@
             </div>
 
             <div class="form-floating col-6 position-relative">
-                <input type="email" th:field="*{email}" class="form-control" placeholder="Correo"
-                       required autocomplete="email" />
+                <input type="text" th:field="*{email}" class="form-control" placeholder="Correo"
+                       required autocomplete="email"
+                       pattern=".*@.*"
+                       title="El correo debe contener un @" />
                 <label for="email">Correo</label>
                 <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
             </div>
+
 
             <div class="form-floating col-6 position-relative">
                 <input type="text" th:field="*{telefono}" class="form-control" placeholder="Celular"
