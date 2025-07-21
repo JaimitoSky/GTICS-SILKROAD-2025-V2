@@ -3,19 +3,276 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Registrar/Editar Sede - Superadmin</title>
 
     <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <!-- Estilos internos -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
+
+            /* Spacing scale - for more consistent spacing (example values) */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Using spacing variable */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center; /* Centered the title */
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
+
+        .search-filter-form {
+            background-color: var(--card-background);
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center; /* Ensure vertical alignment */
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease; /* Ensure smooth transitions */
+            /* Added for consistent icon alignment in general buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps with vertical alignment of icon and text */
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-secondary:hover,
+        .btn-outline-success:hover,
+        .btn-outline-danger:hover,
+        .btn-outline-warning:hover {
+            opacity: 0.9;
+            transform: translateY(-1px); /* Slight lift on hover */
+            box-shadow: 0 4px 12px var(--shadow-light); /* More consistent shadow on hover */
+        }
+
+        .btn-sm {
+            padding: var(--spacing-sm) var(--spacing-md); /* Using spacing variables */
+            font-size: 0.875rem;
+            /* Ensure alignment for the new user button icon */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* Consistent padding and centering for action buttons in table */
+        .btn-outline-success,
+        .btn-outline-danger,
+        .btn-outline-primary,
+        .btn-outline-warning {
+            padding: 0.4rem 0.6rem; /* Reduced padding for compact action buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps with vertical alignment of icon */
+            box-shadow: 0 1px 3px var(--shadow-light); /* Subtle shadow for action buttons */
+        }
+        .btn-outline-success i,
+        .btn-outline-danger i,
+        .btn-outline-primary i,
+        .btn-outline-warning i {
+            font-size: 1em; /* Standard icon size */
+        }
+
+
+        .table {
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+            font-size: 0.9rem; /* Slightly increased for better legibility */
+        }
+
+        .table-hover tbody tr {
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer; /* Indicate rows are interactive */
+            background-color: var(--card-background); /* Ensure all rows have the same background */
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+            box-shadow: 0 2px 8px var(--shadow-light); /* Subtle shadow on row hover */
+        }
+
+        /* Removed .table-striped style to make all rows the same color */
+        /* .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        } */
+
+
+        .table thead {
+            background-color: #f1f3f5;
+            color: var(--dark-primary-color);
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.95rem; /* Adjusted for hierarchy */
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 0.8rem 1.25rem; /* Consistent cell padding */
+            vertical-align: middle;
+            font-size: 0.9rem; /* Consistent table data font size */
+        }
+
+        /* Specific styles for the dropdown in the actions column */
+        .table tbody td .form-select-sm {
+            padding: 0.25rem 0.75rem; /* Smaller padding for dropdown in table */
+            font-size: 0.85rem;
+            border-radius: var(--border-radius-base);
+        }
+
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 0.75rem;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.bg-success {
+            background-color: var(--success-color) !important; /* Ensure override */
+            color: white;
+        }
+
+        .badge.bg-danger {
+            background-color: var(--danger-color) !important; /* Ensure override */
+            color: white;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--warning-color) !important; /* Ensure override */
+            color: #212529; /* Darker text for warning background */
+        }
+
+        .pagination .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-base);
+            color: var(--primary-color);
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0; /* Consistent padding */
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl); /* Reduced margin-top for better spacing */
+        }
+    </style>
 
 </head>
 <body>
@@ -27,36 +284,25 @@
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
-
-
-
-
-
         <!-- Contenido principal -->
         <main class="content">
-            <div class="container-fluid p-0">
-                <div class="mb-3">
-                    <h1 class="h3 d-inline align-middle"
-                        th:text="${sede.idsede == null}
-                    ? 'Registrar Nueva Sede'
-                    : 'Editar Sede'"></h1>
+            <div class="container-fluid p-4">
+                <div class="text-center mb-4">
+                    <h2 class="page-title fw-bold text-primary"
+                        th:text="${sede.idsede == null} ? 'Registrar Nueva Sede' : 'Editar Sede'">
+                        Registrar Nueva Sede
+                    </h2>
                 </div>
 
-                <!-- Agregamos enctype para multipart -->
-                <form th:action="@{/superadmin/sedes/guardar}"
-                      method="post"
-                      th:object="${sede}"
-                      enctype="multipart/form-data">
-
+                <form th:action="@{/superadmin/sedes/guardar}" method="post" th:object="${sede}" enctype="multipart/form-data">
                     <div class="row">
+                        <!-- Columna izquierda -->
                         <div class="col-12 col-lg-6">
-                            <div class="card mb-3">
-                                <div class="card-header">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
                                     <h5 class="card-title mb-0">Datos de la Sede</h5>
                                 </div>
                                 <div class="card-body">
-                                    <!-- Campos existentes -->
                                     <div class="mb-3">
                                         <label class="form-label">Nombre</label>
                                         <input type="text" th:field="*{nombre}" class="form-control" required />
@@ -71,16 +317,14 @@
                                         <input type="text" th:field="*{referencia}" class="form-control" />
                                     </div>
 
-                                    <!-- NUEVO: Subida de foto  NOTA PARA EL FRONT: SE DEBE INCLUIR UNA FOTO COMO PLACEHOLDER-->
+                                    <!-- Subida de imagen -->
                                     <div class="mb-3">
                                         <label class="form-label">Foto de la Sede</label>
                                         <div class="d-flex align-items-center">
-                                            <!-- Wrapper para previsualizar -->
-                                            <div class="rounded border me-3"
-                                                 style="width:100px; height:100px; overflow:hidden;">
+                                            <div class="rounded border me-3" style="width:100px; height:100px; overflow:hidden;">
                                                 <img id="previewSede"
                                                      src="/img/sede-placeholder.png"
-                                                     alt="Previsualización de foto"
+                                                     alt="Previsualización"
                                                      class="w-100 h-100"
                                                      style="object-fit:cover; cursor:pointer;"
                                                      onclick="document.getElementById('fotoSede').click()" />
@@ -98,14 +342,14 @@
                                                    onchange="previewSedeImage(this)" />
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Columna derecha -->
                         <div class="col-12 col-lg-6">
-                            <div class="card mb-3">
-                                <div class="card-header">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
                                     <h5 class="card-title mb-0">Ubicación y Estado</h5>
                                 </div>
                                 <div class="card-body">
@@ -117,14 +361,10 @@
                                         <label class="form-label">Longitud</label>
                                         <input type="text" th:field="*{longitud}" class="form-control" placeholder="-77.033" readonly />
                                     </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-12">
-                                            <label class="form-label fw-bold">Ubicación en el Mapa:</label>
-                                            <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
-                                        </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Ubicación en el Mapa:</label>
+                                        <div id="map" style="height: 300px; border: 1px solid #ccc;"></div>
                                     </div>
-
                                     <div class="form-check mb-3">
                                         <input type="checkbox" th:field="*{activo}" class="form-check-input" id="activoCheck" />
                                         <label class="form-check-label" for="activoCheck">¿Sede activa?</label>
@@ -136,60 +376,15 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </form>
             </div>
         </main>
 
-        <script>
-            function previewSedeImage(input) {
-                if (!input.files || !input.files.length) return;
-                const file = input.files[0];
-                const url  = URL.createObjectURL(file);
-                const img  = document.getElementById('previewSede');
-                img.removeAttribute('width');
-                img.removeAttribute('height');
-                img.src = url;
-            }
-        </script>
-
-
-        <!-- Leaflet -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            const latInput = document.querySelector("input[name='latitud']");
-            const lngInput = document.querySelector("input[name='longitud']");
-            const initialLat = parseFloat(latInput.value) || -12.0758;
-            const initialLng = parseFloat(lngInput.value) || -77.0902;
-
-            const map = L.map('map').setView([initialLat, initialLng], 15);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-
-            marker.on('dragend', function (e) {
-                const pos = marker.getLatLng();
-                latInput.value = pos.lat.toFixed(8);
-                lngInput.value = pos.lng.toFixed(8);
-            });
-            /*]]>*/
-        </script>
-
-
-
-
-
         <!-- Footer -->
         <footer class="footer mt-auto py-3 bg-light border-top">
             <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
+                Municipalidad de San Miguel ©️ 2025
             </div>
         </footer>
     </div>
@@ -197,11 +392,19 @@
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+    function previewSedeImage(input) {
+        if (!input.files || !input.files.length) return;
+        const file = input.files[0];
+        const url  = URL.createObjectURL(file);
+        const img  = document.getElementById('previewSede');
+        img.src = url;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
         const sidebar = document.getElementById('sidebar');
-
         if (toggle) {
             toggle.addEventListener("click", function (e) {
                 e.preventDefault();
@@ -209,20 +412,37 @@
             });
         }
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
+        // Cerrar sidebar al hacer clic fuera en móviles
+        document.addEventListener('click', function (event) {
             if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickInsideSidebar = sidebar?.contains(event.target);
                 const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
                 if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
                     document.body.classList.add("sidebar-collapsed");
                 }
             }
         });
 
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
+        // Leaflet map
+        const latInput = document.querySelector("input[name='latitud']");
+        const lngInput = document.querySelector("input[name='longitud']");
+        const initialLat = parseFloat(latInput.value) || -12.0758;
+        const initialLng = parseFloat(lngInput.value) || -77.0902;
+
+        const map = L.map('map').setView([initialLat, initialLng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+        marker.on('dragend', function (e) {
+            const pos = marker.getLatLng();
+            latInput.value = pos.lat.toFixed(8);
+            lngInput.value = pos.lng.toFixed(8);
+        });
+
+        // Resize
+        window.addEventListener('resize', function () {
             if (window.innerWidth > 991.98) {
                 document.body.classList.remove("sidebar-collapsed");
             }
@@ -233,6 +453,5 @@
 <script>
     feather.replace();
 </script>
-
 </body>
 </html>
