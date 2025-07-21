@@ -297,8 +297,10 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body">
                         <form th:action="@{/superadmin/asistencias}" method="get" class="row g-2 mb-4 justify-content-end align-items-center">
+
+                            <!-- Selección del campo -->
                             <div class="col-12 col-sm-auto">
-                                <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
+                                <select class="form-select" name="campo" id="campoSelect">
                                     <option value="coordinador" th:selected="${campo == 'coordinador'}">Coordinador</option>
                                     <option value="sede" th:selected="${campo == 'sede'}">Sede</option>
                                     <option value="estado" th:selected="${campo == 'estado'}">Estado</option>
@@ -306,28 +308,38 @@
                                 </select>
                             </div>
 
+                            <!-- Input del valor del filtro -->
                             <div class="col-12 col-sm" id="filtroContainer">
-                                <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
+                                <input type="text" name="filtro" class="form-control" placeholder="Buscar..."
+                                       th:value="${filtro}" th:if="${campo != 'estado'}" />
+                                <select name="filtro" class="form-select" th:if="${campo == 'estado'}">
+                                    <option value="tarde" th:selected="${filtro == 'tarde'}">Tarde</option>
+                                    <option value="falta" th:selected="${filtro == 'falta'}">Falta</option>
+                                </select>
                             </div>
 
+                            <!-- Selector de mes -->
                             <div class="col-12 col-sm-auto">
                                 <input type="month" name="mes" class="form-control"
-                                       th:value="${mes != null ? mes : #temporals.format(#temporals.createNow(), 'yyyy-MM')}"
-                                />
+                                       th:value="${mes != null ? mes : #temporals.format(#temporals.createNow(), 'yyyy-MM')}" />
                             </div>
 
+                            <!-- Botón Buscar -->
                             <div class="col-auto">
                                 <button type="submit" class="btn btn-outline-primary">
                                     <i class="bi bi-search"></i> Buscar
                                 </button>
                             </div>
 
+                            <!-- Botón Limpiar -->
                             <div class="col-auto" th:if="${filtro != null or mes != null}">
                                 <a th:href="@{/superadmin/asistencias}" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-left"></i> Limpiar
                                 </a>
                             </div>
+
                         </form>
+
 
                         <div class="table-responsive">
                             <table class="table table-hover table-striped align-middle">

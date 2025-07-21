@@ -404,15 +404,25 @@
 
                                     <div class="mt-3">
                                         <a th:if="${coordinador.falta > 0}"
-                                           th:href="@{'/superadmin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=falta'}"
+                                           th:href="@{/superadmin/asistencias(
+       campo='estado',
+       filtro='falta',
+       mes=${mes}
+   )}"
                                            class="btn btn-sm btn-outline-danger me-2">
                                             <i data-feather="alert-circle" class="me-1"></i> Ver faltas en detalle
                                         </a>
+
                                         <a th:if="${coordinador.tarde > 0}"
-                                           th:href="@{'/superadmin/asistencias?filtro=' + ${coordinador.dni} + '&mes=' + ${mes} + '&estado=tarde'}"
+                                           th:href="@{/superadmin/asistencias(
+       campo='estado',
+       filtro='tarde',
+       mes=${mes}
+   )}"
                                            class="btn btn-sm btn-outline-warning">
                                             <i data-feather="clock" class="me-1"></i> Ver tardanzas
                                         </a>
+
                                     </div>
 
                                 </div>
