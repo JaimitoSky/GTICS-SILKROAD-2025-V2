@@ -11,8 +11,178 @@
 
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
 
-    <link rel="stylesheet" th:href="@{/css/estilos_superadmin.css}">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
 
+            /* Spacing scale */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Consistent padding */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title { /* New style for page titles */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+            color: var(--dark-primary-color); /* Added text color */
+        }
+
+        .card-title {
+            font-size: 1.8rem; /* Larger title for stats */
+            font-weight: 700;
+            color: var(--primary-color); /* Primary color for stats */
+            margin-bottom: 0; /* Remove default margin */
+        }
+
+        /* Form elements */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs); /* Small space below label */
+        }
+
+        .form-control,
+        .form-select,
+        .form-control[type="file"] {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color); /* Ensure text color is consistent */
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .form-control[type="file"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Button style */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex; /* For icon alignment if used */
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .btn i.bi, .btn i[data-feather] { /* Spacing for icons within buttons */
+            margin-right: var(--spacing-xs);
+        }
+        .btn i[data-feather] { /* Specific style for feather icons in buttons */
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            stroke-width: 2.5; /* Make feather icons a bit bolder */
+        }
+
+        /* Specific button colors */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--dark-primary-color);
+            border-color: var(--dark-primary-color);
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl);
+        }
+
+        /* Adjust margin for the main content to match overall layout */
+        .container-fluid {
+            padding: 0; /* Content wrapper handles padding */
+        }
+
+        /* Chart-specific styling for better integration */
+        .chart-container {
+            position: relative;
+            height: 300px; /* Standard height for charts */
+            width: 100%;
+            margin-top: var(--spacing-md); /* Space below header in card */
+            padding: var(--spacing-sm); /* Some padding around the chart */
+        }
+
+    </style>
 </head>
 <body>
 <div class="wrapper">
@@ -129,225 +299,184 @@
             </div>
         </main>
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script th:inline="javascript">
+            const reservasPorDia = JSON.parse([[${reservasPorDiaJson}]]) || [];
+            const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]) || [];
+            const serviciosMasUsados = JSON.parse([[${serviciosMasUsadosJson}]]) || [];
+            const estadoReservas = JSON.parse([[${estadoReservasJson}]]) || [];
+        </script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                function getCssVariable(name) {
+                    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+                }
+
+                if (document.getElementById("chart-estados")) {
+                    new Chart(document.getElementById("chart-estados"), {
+                        type: "doughnut",
+                        data: {
+                            labels: estadoReservas.map(e => e.estado),
+                            datasets: [{
+                                data: estadoReservas.map(e => e.cantidad),
+                                backgroundColor: estadoReservas.map(e => {
+                                    if (e.estado.toLowerCase() === 'aprobada') return getCssVariable('--success-color');
+                                    if (e.estado.toLowerCase() === 'rechazada') return getCssVariable('--danger-color');
+                                    if (e.estado.toLowerCase() === 'pendiente') return getCssVariable('--warning-color');
+                                    return getCssVariable('--secondary-color');
+                                })
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: getCssVariable('--text-color'),
+                                        font: { family: 'Inter' }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                if (document.getElementById("chart-servicios")) {
+                    new Chart(document.getElementById("chart-servicios"), {
+                        type: "bar",
+                        data: {
+                            labels: serviciosMasUsados.map(e => e.servicio),
+                            datasets: [{
+                                label: "Reservas aprobadas",
+                                data: serviciosMasUsados.map(e => e.cantidad),
+                                backgroundColor: getCssVariable('--primary-color')
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        color: getCssVariable('--text-color'),
+                                        font: { family: 'Inter' }
+                                    },
+                                    grid: { display: false }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: getCssVariable('--light-text-color'),
+                                        font: { family: 'Inter' }
+                                    },
+                                    grid: { color: getCssVariable('--border-color') }
+                                }
+                            }
+                        }
+                    });
+                }
+
+
+                if (document.getElementById("chart-reservas-dia")) {
+                    new Chart(document.getElementById("chart-reservas-dia"), {
+                        type: "line",
+                        data: {
+                            labels: reservasPorDia.map(e => e.dia),
+                            datasets: [{
+                                label: "Reservas",
+                                data: reservasPorDia.map(e => e.cantidad),
+                                borderColor: getCssVariable('--primary-color'),
+                                fill: true,
+                                backgroundColor: "rgba(0, 123, 255, 0.1)",
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: getCssVariable('--text-color'),
+                                        font: { family: 'Inter' }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        color: getCssVariable('--light-text-color'),
+                                        font: { family: 'Inter' }
+                                    },
+                                    grid: { color: getCssVariable('--border-color') }
+                                },
+                                y: {
+                                    ticks: {
+                                        color: getCssVariable('--light-text-color'),
+                                        font: { family: 'Inter' },
+                                        stepSize: 1,
+                                        precision: 0,
+                                        beginAtZero: true
+                                    },
+                                    grid: { color: getCssVariable('--border-color') }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                if (document.getElementById("chart-usuarios")) {
+                    new Chart(document.getElementById("chart-usuarios"), {
+                        type: "doughnut",
+                        data: {
+                            labels: usuariosPorRol.map(e => e.rol),
+                            datasets: [{
+                                data: usuariosPorRol.map(e => e.total),
+                                backgroundColor: [
+                                    getCssVariable('--primary-color'),
+                                    getCssVariable('--warning-color'),
+                                    getCssVariable('--danger-color'),
+                                    getCssVariable('--success-color')
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: getCssVariable('--text-color'),
+                                        font: { family: 'Inter' }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+
         <footer class="footer mt-auto py-3">
             <div class="text-center mt-5 mb-3">
                 <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
             </div>
             <div class="container text-center text-muted small">
-                Municipalidad de San Miguel © 2025
+                Municipalidad de San Miguel ©️ 2025
             </div>
         </footer>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/feather-icons"></script>
-
-<script th:inline="javascript">
-    const reservasPorDia = /*[[${reservasPorDiaJson}]]*/ [];
-    const serviciosPopulares = /*[[${serviciosPopularesJson}]]*/ [];
-    const usuariosPorRol = /*[[${usuariosPorRolJson}]]*/ [];
-    const estadoReservas = /*[[${estadoReservasJson}]]*/ [];
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        feather.replace(); // Initialize feather icons
-
-        // Línea: Reservas por día
-        new Chart(document.getElementById("chart-reservas-dia"), {
-            type: "line",
-            data: {
-                labels: reservasPorDia.map(e => e.dia),
-                datasets: [{
-                    label: "Reservas",
-                    data: reservasPorDia.map(e => e.cantidad),
-                    borderColor: '#0d6efd', /* Use primary-color from CSS */
-                    backgroundColor: 'rgba(13, 110, 253, 0.1)', /* Lighter fill */
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // Allows chart-container to control height
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        borderColor: '#dee2e6',
-                        borderWidth: 1,
-                        padding: 10
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0 // Ensure integer ticks for quantities
-                        }
-                    }
-                }
-            }
-        });
-
-        // Barras: Servicios más usados
-        new Chart(document.getElementById("chart-servicios"), {
-            type: "bar",
-            data: {
-                labels: serviciosPopulares.map(e => e.nombre),
-                datasets: [{
-                    label: "Reservas",
-                    data: serviciosPopulares.map(e => e.cantidad),
-                    backgroundColor: '#198754', /* Use success-color from CSS */
-                    borderColor: '#198754',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        borderColor: '#dee2e6',
-                        borderWidth: 1,
-                        padding: 10
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
-        });
-
-        // Doughnut: Tipos de usuarios
-        new Chart(document.getElementById("chart-usuarios"), {
-            type: "doughnut",
-            data: {
-                labels: usuariosPorRol.map(e => e.rol),
-                datasets: [{
-                    data: usuariosPorRol.map(e => e.total),
-                    backgroundColor: [
-                        '#0d6efd', /* primary-color */
-                        '#ffc107', /* warning-color */
-                        '#dc3545', /* danger-color */
-                        '#6f42c1'  /* purple (can be mapped to an info/tertiary color if defined) */
-                    ],
-                    borderColor: 'white',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right', // Place legend on the right
-                        labels: {
-                            boxWidth: 20, // Adjust legend box size
-                            padding: 15 // Padding between legend items
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        borderColor: '#dee2e6',
-                        borderWidth: 1,
-                        padding: 10,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed;
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // Pie: Estados de reserva
-        new Chart(document.getElementById("chart-estados"), {
-            type: "pie",
-            data: {
-                labels: estadoReservas.map(e => e.estado),
-                datasets: [{
-                    data: estadoReservas.map(e => e.cantidad),
-                    backgroundColor: [
-                        '#198754', /* success-color */
-                        '#ffc107', /* warning-color */
-                        '#dc3545'  /* danger-color */
-                    ],
-                    borderColor: 'white',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right', // Place legend on the right
-                        labels: {
-                            boxWidth: 20,
-                            padding: 15
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        borderColor: '#dee2e6',
-                        borderWidth: 1,
-                        padding: 10,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed;
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-
-    });
-</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.querySelector(".js-sidebar-toggle");
@@ -360,7 +489,6 @@
             });
         }
 
-        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
             if (window.innerWidth <= 991.98) {
                 const isClickInsideSidebar = sidebar.contains(event.target);
@@ -372,7 +500,6 @@
             }
         });
 
-        // Ajustar al redimensionar
         window.addEventListener('resize', function() {
             if (window.innerWidth > 991.98) {
                 document.body.classList.remove("sidebar-collapsed");
@@ -380,5 +507,10 @@
         });
     });
 </script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+    feather.replace();
+</script>
+
 </body>
 </html>

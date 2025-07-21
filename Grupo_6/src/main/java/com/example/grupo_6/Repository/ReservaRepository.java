@@ -158,6 +158,15 @@ public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
             Pageable                     pageable
     );
 
+    @Query("""
+    SELECT r.sedeServicio.servicio.nombre, COUNT(r)
+    FROM Reserva r
+    WHERE LOWER(r.estado.nombre) = 'aprobada'
+    GROUP BY r.sedeServicio.servicio.nombre
+    ORDER BY COUNT(r) DESC
+""")
+    List<Object[]> countReservasAprobadasPorServicio();
+
 
 
 

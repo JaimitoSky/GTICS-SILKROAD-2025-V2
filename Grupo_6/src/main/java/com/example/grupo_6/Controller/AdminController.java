@@ -323,6 +323,21 @@ public class AdminController {
         return "redirect:/admin/usuarios/registrados"; // ajusta a la vista correspondiente
     }
 
+    @GetMapping("/admin/usuarios/registrados/imagen/{id}")
+    @ResponseBody
+    public ResponseEntity<byte[]> verImagenUsuario(@PathVariable Integer id) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (u.getImagen() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        byte[] data = fileUploadService.descargarArchivoSobrescribible("usuarios", u.getImagen());
+        String mime = fileUploadService.obtenerMimeDesdeKey(u.getImagen());
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mime))
+                .body(data);
+    }
+
     private String getExtension(String filename) {
         return filename != null && filename.contains(".")
                 ? filename.substring(filename.lastIndexOf("."))
@@ -479,20 +494,6 @@ public class AdminController {
         return "redirect:/admin/usuarios/registrados";
     }
 
-    @GetMapping("/admin/usuarios/registrados/imagen/{id}")
-    @ResponseBody
-    public ResponseEntity<byte[]> verImagenUsuario(@PathVariable Integer id) {
-        Usuario u = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if (u.getImagen() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        byte[] data = fileUploadService.descargarArchivoSobrescribible("usuarios", u.getImagen());
-        String mime = fileUploadService.obtenerMimeDesdeKey(u.getImagen());
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(mime))
-                .body(data);
-    }
     @GetMapping("/admin/usuarios/registrados/editar/{id}")
     public String mostrarFormularioEdicionUsuario(@PathVariable("id") Integer id, Model model, RedirectAttributes attr) {
         Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
@@ -1253,7 +1254,7 @@ public class AdminController {
         if (pago == null) return "redirect:/admin/pagos/historial";
 
         Estado estadoRechazado = estadoRepository.findByNombreAndTipoAplicacion("rechazado", Estado.TipoAplicacion.pago);
-        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("pendiente", Estado.TipoAplicacion.reserva);
+        Estado estadoPendienteReserva = estadoRepository.findByNombreAndTipoAplicacion("rechazada", Estado.TipoAplicacion.reserva);
         if (estadoRechazado == null || estadoPendienteReserva == null) return "redirect:/admin/pagos/historial";
 
         pago.setEstado(estadoRechazado);
@@ -1289,10 +1290,54 @@ public class AdminController {
         return "redirect:/admin/pagos/historial";
     }
     @GetMapping("/admin/estadisticas")
-    public String verEstadisticas(@RequestParam(value = "mes", required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mes,
-                                  @RequestParam(value = "rol", required = false) String rol,
-                                  Model model) {
-        cargarEstadisticas(model, mes, rol);
+    public String verEstadisticas(Model model) {
+        System.out.println("Entrando a controlador /admin");
+
+        model.addAttribute("rol", "admin");
+        model.addAttribute("usuariosConectados", 0); // Temporal o lo puedes quitar
+        model.addAttribute("totalReservas", reservaRepository.count());
+        model.addAttribute("totalSedes", sedeRepository.count());
+
+        // Agregamos las métricas del mes actual y sin filtro de rol
+        YearMonth mesActual = YearMonth.now();
+        cargarEstadisticas(model, mesActual, null);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Reservas por día (para gráfico de línea)
+            List<Map<String, Object>> reservasPorDia = reservaRepository.countReservasPorDiaFormatted();
+            model.addAttribute("reservasPorDiaJson", objectMapper.writeValueAsString(reservasPorDia));
+
+            // Usuarios por rol (para gráfico de torta)
+            List<Map<String, Object>> usuariosPorRol = usuarioRepository.countUsuariosPorRolFormatted();
+            model.addAttribute("usuariosPorRolJson", objectMapper.writeValueAsString(usuariosPorRol));
+
+            // Reservas por estado (opcional)
+            List<Map<String, Object>> estadoReservas = reservaRepository.countReservasPorEstado()
+                    .stream()
+                    .map(row -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("estado", row[0]);
+                        map.put("cantidad", row[1]);
+                        return map;
+                    }).collect(Collectors.toList());
+            model.addAttribute("estadoReservasJson", objectMapper.writeValueAsString(estadoReservas));
+
+            // Servicios más usados (solo reservas aprobadas)
+            List<Map<String, Object>> serviciosMasUsados = reservaRepository.countReservasAprobadasPorServicio().stream()
+                    .map(row -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("servicio", row[0]);
+                        map.put("cantidad", row[1]);
+                        return map;
+                    }).collect(Collectors.toList());
+            model.addAttribute("serviciosMasUsadosJson", objectMapper.writeValueAsString(serviciosMasUsados));
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace(); // También puedes redirigir a una página de error o loguear mejor
+        }
+
         return "admin/admin_estadisticas";
     }
     @GetMapping("/admin/reservas")
@@ -1615,6 +1660,79 @@ public class AdminController {
         model.addAttribute("filtro", filtro);
 
         return "admin/admin_coordinadores";
+    }
+    @GetMapping("/admin/asistencias")
+    public String listarAsistencias(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "coordinador") String campo,
+                                    @RequestParam(required = false) String filtro,
+                                    @RequestParam(required = false) String mes,
+                                    Model model) {
+
+        System.out.printf("[DEBUG] Página solicitada: %d - Campo: %s - Filtro: %s - Mes: %s%n", page, campo, filtro, mes);
+
+        // Sanear entradas antes de usarlas
+        if (filtro != null && filtro.isBlank()) filtro = null;
+        if (mes != null && mes.isBlank()) mes = null;
+
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<AsistenciaCoordinador> asistencias;
+
+        boolean hayFiltro = filtro != null;
+        boolean hayMes = mes != null;
+
+        if (!hayFiltro && !hayMes) {
+            System.out.println("[DEBUG] No se aplicaron filtros. Listando todos.");
+            asistencias = asistenciaCoordinadorRepository.findAll(pageable);
+        } else {
+            asistencias = switch (campo) {
+                case "sede" -> {
+                    System.out.println("[DEBUG] Filtro por sede");
+                    yield asistenciaCoordinadorRepository.buscarPorSedeYMes(filtro != null ? filtro : "", mes, pageable);
+                }
+                case "estado" -> {
+                    System.out.println("[DEBUG] Filtro por estado");
+                    if (filtro == null) {
+                        System.out.println("[ERROR] Estado nulo");
+                        yield Page.empty(pageable);
+                    }
+                    try {
+                        var estado = AsistenciaCoordinador.EstadoAsistencia.valueOf(filtro.toLowerCase());
+                        yield asistenciaCoordinadorRepository.buscarPorEstadoYMes(estado, mes, pageable);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("[ERROR] Estado inválido: " + filtro);
+                        yield Page.empty(pageable);
+                    }
+                }
+                case "dni" -> {
+                    System.out.println("[DEBUG] Filtro por DNI");
+                    yield asistenciaCoordinadorRepository.buscarPorDniYMes(filtro != null ? filtro : "", mes, pageable);
+                }
+                default -> {
+                    System.out.println("[DEBUG] Filtro por nombre de coordinador");
+                    yield asistenciaCoordinadorRepository.buscarPorNombreYMes(filtro != null ? filtro : "", mes, pageable);
+                }
+            };
+
+        }
+
+        int ultimaPagina = Math.max(0, asistencias.getTotalPages() - 1);
+        System.out.printf("[DEBUG] Total páginas: %d - Última página válida: %d%n", asistencias.getTotalPages(), ultimaPagina);
+
+        if (page > ultimaPagina) {
+            System.out.println("[DEBUG] Página fuera de rango. Redireccionando...");
+            return "redirect:/admin/asistencias?page=" + ultimaPagina +
+                    "&campo=" + campo +
+                    "&filtro=" + (filtro != null ? filtro : "") +
+                    (mes != null ? "&mes=" + mes : "");
+        }
+
+        model.addAttribute("asistencias", asistencias.getContent());
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", asistencias.getTotalPages());
+        model.addAttribute("campo", campo);
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("mes", mes);
+        return "admin/admin_asistencias";
     }
 
 }

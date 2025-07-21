@@ -1628,12 +1628,55 @@ public class SuperAdminController {
     private RolRepository rolRepository;
 
 
-
     @GetMapping("/superadmin/estadisticas")
-    public String verEstadisticas(@RequestParam(value = "mes", required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mes,
-                                  @RequestParam(value = "rol", required = false) String rol,
-                                  Model model) {
-        cargarEstadisticas(model, mes, rol);
+    public String verEstadisticas(Model model) {
+        System.out.println("Entrando a controlador /superadmin");
+
+        model.addAttribute("rol", "superadmin");
+        model.addAttribute("usuariosConectados", 0); // Temporal o lo puedes quitar
+        model.addAttribute("totalReservas", reservaRepository.count());
+        model.addAttribute("totalSedes", sedeRepository.count());
+
+        // Agregamos las métricas del mes actual y sin filtro de rol
+        YearMonth mesActual = YearMonth.now();
+        cargarEstadisticas(model, mesActual, null);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Reservas por día (para gráfico de línea)
+            List<Map<String, Object>> reservasPorDia = reservaRepository.countReservasPorDiaFormatted();
+            model.addAttribute("reservasPorDiaJson", objectMapper.writeValueAsString(reservasPorDia));
+
+            // Usuarios por rol (para gráfico de torta)
+            List<Map<String, Object>> usuariosPorRol = usuarioRepository.countUsuariosPorRolFormatted();
+            model.addAttribute("usuariosPorRolJson", objectMapper.writeValueAsString(usuariosPorRol));
+
+            // Reservas por estado (opcional)
+            List<Map<String, Object>> estadoReservas = reservaRepository.countReservasPorEstado()
+                    .stream()
+                    .map(row -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("estado", row[0]);
+                        map.put("cantidad", row[1]);
+                        return map;
+                    }).collect(Collectors.toList());
+            model.addAttribute("estadoReservasJson", objectMapper.writeValueAsString(estadoReservas));
+
+            // Servicios más usados (solo reservas aprobadas)
+            List<Map<String, Object>> serviciosMasUsados = reservaRepository.countReservasAprobadasPorServicio().stream()
+                    .map(row -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("servicio", row[0]);
+                        map.put("cantidad", row[1]);
+                        return map;
+                    }).collect(Collectors.toList());
+            model.addAttribute("serviciosMasUsadosJson", objectMapper.writeValueAsString(serviciosMasUsados));
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace(); // También puedes redirigir a una página de error o loguear mejor
+        }
+
         return "superadmin/superadmin_estadisticas";
     }
 

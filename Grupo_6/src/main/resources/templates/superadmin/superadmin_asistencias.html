@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Asistencias - Superadmin</title>
 
     <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -12,6 +12,268 @@
 
     <!-- Estilos internos -->
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-primary-color: #0a58ca;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #212529;
+            --light-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --background-light: #f8f9fa;
+            --card-background: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --border-radius-base: 0.5rem;
+            --border-radius-lg: 1rem;
+
+            /* Spacing scale - for more consistent spacing (example values) */
+            --spacing-xs: 0.25rem; /* 4px */
+            --spacing-sm: 0.5rem;  /* 8px */
+            --spacing-md: 1rem;    /* 16px */
+            --spacing-lg: 1.5rem;  /* 24px */
+            --spacing-xl: 2rem;    /* 32px */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+        }
+
+        .main {
+            min-height: 100vh;
+            background-color: var(--background-light);
+        }
+
+        .content {
+            padding: var(--spacing-lg); /* Using spacing variable */
+            background-color: var(--background-light) !important;
+        }
+
+        h2.page-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+            margin-bottom: var(--spacing-xl); /* Adjusted for better hierarchy */
+            font-size: 2rem;
+            text-align: center; /* Centered the title */
+        }
+
+        h2.page-title strong {
+            color: var(--primary-color);
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 20px var(--shadow-light);
+            background-color: var(--card-background);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px var(--shadow-medium);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-primary-color);
+        }
+
+        .search-filter-form {
+            background-color: var(--card-background);
+            padding: var(--spacing-md) var(--spacing-lg); /* Consistent padding */
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center; /* Ensure vertical alignment */
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: var(--border-radius-base);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem; /* Consistent padding */
+            font-size: 0.95rem;
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius-base);
+            font-weight: 500;
+            transition: all 0.2s ease; /* Ensure smooth transitions */
+            /* Added for consistent icon alignment in general buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps with vertical alignment of icon and text */
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-secondary:hover,
+        .btn-outline-success:hover,
+        .btn-outline-danger:hover,
+        .btn-outline-warning:hover {
+            opacity: 0.9;
+            transform: translateY(-1px); /* Slight lift on hover */
+            box-shadow: 0 4px 12px var(--shadow-light); /* More consistent shadow on hover */
+        }
+
+        .btn-sm {
+            padding: var(--spacing-sm) var(--spacing-md); /* Using spacing variables */
+            font-size: 0.875rem;
+            /* Ensure alignment for the new user button icon */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* Consistent padding and centering for action buttons in table */
+        .btn-outline-success,
+        .btn-outline-danger,
+        .btn-outline-primary,
+        .btn-outline-warning {
+            padding: 0.4rem 0.6rem; /* Reduced padding for compact action buttons */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Helps with vertical alignment of icon */
+            box-shadow: 0 1px 3px var(--shadow-light); /* Subtle shadow for action buttons */
+        }
+        .btn-outline-success i,
+        .btn-outline-danger i,
+        .btn-outline-primary i,
+        .btn-outline-warning i {
+            font-size: 1em; /* Standard icon size */
+        }
+
+
+        .table {
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+            font-size: 0.9rem; /* Slightly increased for better legibility */
+        }
+
+        .table-hover tbody tr {
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer; /* Indicate rows are interactive */
+            background-color: var(--card-background); /* Ensure all rows have the same background */
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+            box-shadow: 0 2px 8px var(--shadow-light); /* Subtle shadow on row hover */
+        }
+
+        /* Removed .table-striped style to make all rows the same color */
+        /* .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        } */
+
+
+        .table thead {
+            background-color: #f1f3f5;
+            color: var(--dark-primary-color);
+        }
+
+        .table thead th {
+            font-weight: 700;
+            font-size: 0.95rem; /* Adjusted for hierarchy */
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 0.8rem 1.25rem; /* Consistent cell padding */
+            vertical-align: middle;
+            font-size: 0.9rem; /* Consistent table data font size */
+        }
+
+        /* Specific styles for the dropdown in the actions column */
+        .table tbody td .form-select-sm {
+            padding: 0.25rem 0.75rem; /* Smaller padding for dropdown in table */
+            font-size: 0.85rem;
+            border-radius: var(--border-radius-base);
+        }
+
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 0.75rem;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.bg-success {
+            background-color: var(--success-color) !important; /* Ensure override */
+            color: white;
+        }
+
+        .badge.bg-danger {
+            background-color: var(--danger-color) !important; /* Ensure override */
+            color: white;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--warning-color) !important; /* Ensure override */
+            color: #212529; /* Darker text for warning background */
+        }
+
+        .pagination .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-base);
+            color: var(--primary-color);
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: var(--light-text-color);
+            pointer-events: none;
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: var(--spacing-md) 0; /* Consistent padding */
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--light-text-color);
+            margin-top: var(--spacing-xl); /* Reduced margin-top for better spacing */
+        }
+    </style>
 
 </head>
 <body>
@@ -23,18 +285,18 @@
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
+        <main class="content">
+            <div class="container-fluid p-4">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="container-fluid p-4">
+                        <h2 class="page-title mb-4 text-center">Lista de Asistencias <strong>Coordinador</strong></h2>
 
+                        <div class="card">
+                </div>
 
-
-
-
-
-        <main class="content pt-5">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card flex-fill">
-                        <form th:action="@{/superadmin/asistencias}" method="get" class="row g-2 mb-3 align-items-center justify-content-end">
-                            <!-- Campo de filtro -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <form th:action="@{/superadmin/asistencias}" method="get" class="row g-2 mb-4 justify-content-end align-items-center">
                             <div class="col-12 col-sm-auto">
                                 <select class="form-select" name="campo" id="campoSelect" onchange="actualizarInputFiltro()">
                                     <option value="coordinador" th:selected="${campo == 'coordinador'}">Coordinador</option>
@@ -44,18 +306,15 @@
                                 </select>
                             </div>
 
-                            <!-- Input dinámico -->
                             <div class="col-12 col-sm" id="filtroContainer">
                                 <input type="text" name="filtro" class="form-control" placeholder="Buscar..." th:value="${filtro}">
                             </div>
 
-                            <!-- Filtro por mes -->
                             <div class="col-12 col-sm-auto">
                                 <input type="month" name="mes" class="form-control"
                                        th:value="${mes != null ? mes : #temporals.format(#temporals.createNow(), 'yyyy-MM')}"
                                 />
                             </div>
-
 
                             <div class="col-auto">
                                 <button type="submit" class="btn btn-outline-primary">
@@ -69,11 +328,6 @@
                                 </a>
                             </div>
                         </form>
-
-
-                            <div class="card-header d-flex align-items-center justify-content-between">
-                            <h5 class="card-title mb-0">Lista de Asistencias</h5>
-                        </div>
 
                         <div class="table-responsive">
                             <table class="table table-hover table-striped align-middle">
@@ -105,7 +359,6 @@
                                                 <option value="no_trabaja" th:selected="${asistencia.estado.toString() == 'no_trabaja'}">No asignado</option>
                                             </select>
                                         </form>
-
                                     </td>
                                     <td class="text-center">
                                         <a th:href="@{'/superadmin/asistencias/' + ${asistencia.idasistencia}}" class="btn btn-sm btn-outline-info">
@@ -119,15 +372,13 @@
 
                         <nav aria-label="Paginación de asistencias">
                             <ul class="pagination justify-content-center flex-wrap">
-                                <li class="page-item" th:if="${paginaActual > 0}">
+                                <li class="page-item" th:if="${paginaActual > 1}">
                                     <a class="page-link"
                                        th:href="@{/superadmin/asistencias(page=${paginaActual - 1}, size=10, campo=${campo}, filtro=${filtro})}">Anterior</a>
                                 </li>
                                 <li class="page-item disabled" th:if="${paginaActual == 0}">
                                     <span class="page-link">Anterior</span>
                                 </li>
-
-
                                 <li class="page-item"
                                     th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
                                     th:classappend="${i == paginaActual} ? 'active'">
@@ -135,7 +386,6 @@
                                        th:href="@{/superadmin/asistencias(page=${i}, size=10, campo=${campo}, filtro=${filtro})}"
                                        th:text="${i + 1}">1</a>
                                 </li>
-
                                 <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
                                     <a class="page-link"
                                        th:href="@{/superadmin/asistencias(page=${paginaActual + 1}, size=10, campo=${campo}, filtro=${filtro})}">Siguiente</a>
@@ -147,41 +397,9 @@
             </div>
         </main>
 
-        <script>
-            function actualizarInputFiltro() {
-                const campo = document.getElementById("campoSelect").value;
-                const contenedor = document.getElementById("filtroContainer");
-                let nuevoInput = '';
-
-                if (campo === 'estado') {
-                    nuevoInput = `
-        <select class="form-select" name="filtro">
-            <option value="">Seleccionar estado</option>
-            <option value="presente">Presente</option>
-            <option value="tarde">Tarde</option>
-            <option value="falta">Falta</option>
-            <option value="no_trabaja">No asignado</option>
-        </select>`;
-                } else {
-                    nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
-                }
-
-                contenedor.innerHTML = nuevoInput;
-            }
-
-            document.addEventListener("DOMContentLoaded", actualizarInputFiltro);
-        </script>
-
-
-
-
-
-
-
-
         <footer class="footer mt-auto py-3 bg-light border-top">
             <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
+                Municipalidad de San Miguel ©️ 2025
             </div>
         </footer>
     </div>
@@ -190,43 +408,31 @@
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
+    function actualizarInputFiltro() {
+        const campo = document.getElementById("campoSelect").value;
+        const contenedor = document.getElementById("filtroContainer");
+        let nuevoInput = '';
 
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
+        if (campo === 'estado') {
+            nuevoInput = `
+                <select class="form-select" name="filtro">
+                    <option value="">Seleccionar estado</option>
+                    <option value="presente">Presente</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="falta">Falta</option>
+                    <option value="no_trabaja">No asignado</option>
+                </select>`;
+        } else {
+            nuevoInput = `<input type="text" name="filtro" class="form-control" placeholder="Buscar..." />`;
         }
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+        contenedor.innerHTML = nuevoInput;
+    }
 
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                    document.body.classList.add("sidebar-collapsed");
-                }
-            }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 991.98) {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-        });
-    });
+    document.addEventListener("DOMContentLoaded", actualizarInputFiltro);
 </script>
-
 
 <script src="https://unpkg.com/feather-icons"></script>
-<script>
-    feather.replace();
-</script>
-
+<script>feather.replace();</script>
 </body>
 </html>
