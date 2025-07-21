@@ -244,7 +244,44 @@
     const usuariosPorRol = JSON.parse([[${usuariosPorRolJson}]]) || [];
 </script>
 
-<script>
+    <script>
+        feather.replace();
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggle = document.querySelector(".js-sidebar-toggle");
+            const sidebar = document.getElementById('sidebar'); // Assuming sidebar has this ID
+
+            if (toggle && sidebar) {
+                toggle.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.body.classList.toggle("sidebar-collapsed");
+                });
+            }
+
+            // Modified sidebar collapse logic to match Admin example's behavior
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 991.98) { // For mobile/tablet viewports
+                    const isClickInsideSidebar = sidebar && sidebar.contains(event.target);
+                    const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
+
+                    // If sidebar is open and click is outside sidebar AND not on the toggle
+                    if (!document.body.classList.contains("sidebar-collapsed") && !isClickInsideSidebar && !isClickOnToggle) {
+                        document.body.classList.add("sidebar-collapsed");
+                    }
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991.98) {
+                    document.body.classList.remove("sidebar-collapsed");
+                }
+            });
+        });
+    </script>
+
+
+    <script>
     document.addEventListener("DOMContentLoaded", function () {
         function getCssVariable(name) {
             return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
