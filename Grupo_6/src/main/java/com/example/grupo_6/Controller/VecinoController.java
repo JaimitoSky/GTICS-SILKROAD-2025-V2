@@ -548,10 +548,6 @@ public class VecinoController {
         return "redirect:/vecino/reservas/" + idreserva;
     }
 
-
-
-
-
     @PostMapping("/reservas/guardar")
     public String guardarReserva(@ModelAttribute("reserva") Reserva reserva,
                                  HttpSession session,
@@ -674,12 +670,6 @@ public class VecinoController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
-
-
-
-
             // Notificación
             Notificacion noti = new Notificacion();
             noti.setUsuario(usuario);
