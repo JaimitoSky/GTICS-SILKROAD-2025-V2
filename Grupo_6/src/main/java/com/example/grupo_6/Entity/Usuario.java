@@ -33,13 +33,13 @@ public class Usuario implements Serializable {
     private String apellidos;
 
     @Pattern(
-            regexp = "^[\\w.-]+@(gmail\\.com|outlook\\.com|hotmail\\.com|pucp\\.edu\\.pe|upc\\.edu\\.pe)$",
+            regexp = ".*@.*",
             message = "Formato de correo inválido"
     )
-    @Email(message = "Formato de correo inválido")
     @Size(max = 255)
     @Column(length = 255)
     private String email;
+
 
     @NotBlank(message = "La contraseña no puede estar vacía")
     @Size(min = 6, message = "Mínimo 6 caracteres")
