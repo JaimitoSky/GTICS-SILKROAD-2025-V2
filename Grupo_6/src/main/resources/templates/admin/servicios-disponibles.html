@@ -136,19 +136,23 @@
                                 </table>
 
                                 <!-- Paginación -->
-                                <nav aria-label="Paginación de sedes" class="mt-4">
-                                    <ul class="pagination">
-                                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/servicios/disponibles(page=${paginaActual - 1})}">Anterior</a>
+                                <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{'/admin/servicios-disponibles?page=' + (${currentPage > 0} ? ${currentPage - 1} : 0)}" tabindex="-1">Anterior</a>
                                         </li>
-                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" th:classappend="${i == paginaActual} ? 'active'">
-                                            <a class="page-link" th:href="@{/admin/servicios/disponibles(page=${i})}" th:text="${i + 1}">1</a>
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                            th:classappend="${i == currentPage} ? 'active'">
+                                            <a class="page-link"
+                                               th:href="@{'/admin/servicios-disponibles?page=' + ${i}}"
+                                               th:text="${i + 1}">1</a>
                                         </li>
-                                        <li class="page-item" th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/servicios/disponibles(page=${paginaActual + 1})}">Siguiente</a>
+                                        <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+                                            <a class="page-link" th:href="@{'/admin/servicios-disponibles?page=' + (${currentPage + 1})}">Siguiente</a>
                                         </li>
                                     </ul>
                                 </nav>
+
 
                             </div>
                         </div>
