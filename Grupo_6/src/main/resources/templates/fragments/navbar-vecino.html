@@ -19,6 +19,12 @@
         <!-- Contenido colapsable del navbar -->
         <div class="collapse navbar-collapse justify-content-end" id="navbarContenido">
             <ul class="navbar-nav align-items-center gap-3">
+                <li class="nav-item">
+                    <span class="nav-link text-dark fw-bold">
+                        <i class="bi bi-clock me-1"></i>
+                        <span id="horaActual">--:--:--</span>
+                    </span>
+                </li>
 
                 <!-- Dropdown Reservar -->
                 <li class="nav-item dropdown">
@@ -83,6 +89,21 @@
             min-height: 72px;
         }
     </style>
+    <script>
+        function actualizarHora() {
+            const ahora = new Date();
+            const horas = ahora.getHours().toString().padStart(2, '0');
+            const minutos = ahora.getMinutes().toString().padStart(2, '0');
+            const segundos = ahora.getSeconds().toString().padStart(2, '0');
+            document.getElementById('horaActual').textContent = `${horas}:${minutos}:${segundos}`;
+        }
+
+        // Actualiza cada segundo
+        setInterval(actualizarHora, 1000);
+        // Llama una vez al cargar
+        actualizarHora();
+    </script>
+
 
 
 </nav>
