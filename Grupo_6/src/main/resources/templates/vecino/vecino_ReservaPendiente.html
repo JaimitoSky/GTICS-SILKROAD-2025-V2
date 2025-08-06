@@ -91,300 +91,393 @@
 </head>
 
 <body>
-<div class="wrapper">
-    <!-- Sidebar -->
-    <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar-vecino :: sidebar}"></div>
 
-    <div class="main">
-        <!-- Navbar -->
-        <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
-        <!-- Contenido principal -->
-        <main class="content">
-            <div class="container-fluid p-4">
+        <div class="main">
+            <!-- Navbar -->
+            <div th:replace="~{fragments/navbar-vecino :: navbar}"></div>
+            <!-- Contenido principal -->
+            <main class="content">
+                <div class="container-fluid p-4">
 
-                <h2 class="mb-4 text-success">¡Reserva pendiente registrada!</h2>
-                <div id="mensajeAlerta" class="mt-3"></div>
+                    <h2 class="mb-4 text-success">¡Reserva pendiente registrada!</h2>
+                    <div id="mensajeAlerta" class="mt-3"></div>
 
-                <!-- Imagen del Servicio -->
-                <div class="mb-4">
-                    <h4 th:text="${servicio.nombre}">Nombre del servicio</h4>
-                    <img th:if="${imagenBase64 != null}"
-                         th:src="'data:image/jpeg;base64,' + ${imagenBase64}"
-                         class="img-fluid rounded shadow"
-                         style="max-height: 300px;"
-                         alt="Imagen del complejo" />
-                </div>
-
-
-                <!-- Datos del Usuario -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Nombre:</label>
-                        <input type="text" class="form-control" th:value="${usuario.nombres + ' ' + usuario.apellidos}" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label>DNI:</label>
-                        <input type="text" class="form-control" th:value="${usuario.dni}" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label>Email:</label>
-                        <input type="text" class="form-control" th:value="${usuario.email}" readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label>Teléfono:</label>
-                        <input type="text" class="form-control" th:value="${usuario.telefono}" readonly />
-                    </div>
-                </div>
-
-                <!-- Horario -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label>Fecha de reserva:</label>
-                        <input type="text" class="form-control" th:value="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label>Hora de Inicio:</label>
-                        <input type="text" class="form-control" th:value="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label>Hora de Fin:</label>
-                        <input type="text" class="form-control" th:value="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}" readonly />
-                    </div>
-                </div>
-
-
-                <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
-
-                    <div class="form-group">
-                        <label for="adjuntar">Adjuntar Comprobante de Pago (.jpg, .png):</label>
-                        <input type="file" class="form-control" id="adjuntar" name="comprobante"
-                               accept=".jpg,.jpeg,.png,.heic" required />
-
+                    <!-- Imagen del Servicio -->
+                    <div class="mb-4">
+                        <h4 th:text="${servicio.nombre}">Nombre del servicio</h4>
+                        <img th:if="${imagenBase64 != null}"
+                             th:src="'data:image/jpeg;base64,' + ${imagenBase64}"
+                             class="img-fluid rounded shadow"
+                             style="max-height: 300px;"
+                             alt="Imagen del complejo" />
                     </div>
 
-                    <!-- Aquí va la imagen QR -->
-                    <div class="form-group mt-4 text-center">
-                        <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label>
-                        <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
+
+                    <!-- Datos del Usuario -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>Nombre:</label>
+                            <input type="text" class="form-control" th:value="${usuario.nombres + ' ' + usuario.apellidos}" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label>DNI:</label>
+                            <input type="text" class="form-control" th:value="${usuario.dni}" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Email:</label>
+                            <input type="text" class="form-control" th:value="${usuario.email}" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Teléfono:</label>
+                            <input type="text" class="form-control" th:value="${usuario.telefono}" readonly />
+                        </div>
                     </div>
 
-                    <div class="form-group mt-3 text-center">
-                        <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}"
-                           class="btn btn-outline-success">
-                            Pagar con Tarjeta Virtual
-                        </a>
+                    <!-- Horario -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label>Fecha de reserva:</label>
+                            <input type="text" class="form-control" th:value="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Hora de Inicio:</label>
+                            <input type="text" class="form-control" th:value="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Hora de Fin:</label>
+                            <input type="text" class="form-control" th:value="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}" readonly />
+                        </div>
+                    </div>
+                    <!-- Botón de opciones de pago -->
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalOpcionesPago">
+                            <i class="bi bi-wallet2 me-2"></i> Opciones de Pago
+                        </button>
                     </div>
 
                     <div class="form-group mt-3 text-center">
                         <button type="button" class="btn btn-primary" id="btnComprobante">Reservar</button>
                     </div>
 
+                    <!--<form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
 
-                </form>
+                        <div class="form-group">
+                            <label for="adjuntar">Adjuntar Comprobante de Pago (.jpg, .png):</label>
+                            <input type="file" class="form-control" id="adjuntar" name="comprobante"
+                                   accept=".jpg,.jpeg,.png,.heic" required />
+
+                        </div>
+
+                         Aquí va la imagen QR
+                        <div class="form-group mt-4 text-center">
+                            <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label>
+                            <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
+                        </div>
+
+                        <div class="form-group mt-3 text-center">
+                            <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}"
+                               class="btn btn-outline-success">
+                                Pagar con Tarjeta Virtual
+                            </a>
+                        </div>
+
+                        <div class="form-group mt-3 text-center">
+                            <button type="button" class="btn btn-primary" id="btnComprobante">Reservar</button>
+                        </div>
 
 
-            </div>
-        </main>
+                    </form>
+    -->
 
-        <!-- Footer -->
-        <footer class="footer mt-auto py-3">
-            <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo" height="60">
-            </div>
-            <div class="container text-center text-muted">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-auto py-3">
+                <div class="text-center mt-5 mb-3">
+                    <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo" height="60">
+                </div>
+                <div class="container text-center text-muted">
+                    Municipalidad de San Miguel © 2025
+                </div>
+            </footer>
+        </div>
     </div>
-</div>
 
-<!-- Modal de error de archivo -->
-<div class="modal fade" id="modalErrorArchivo" tabindex="-1" aria-labelledby="modalErrorArchivoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="modalErrorArchivoLabel">Error</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center" id="mensajeModalError">
-                <!-- Mensaje dinámico desde JS -->
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+    <!-- Modal de error de archivo -->
+    <div class="modal fade" id="modalErrorArchivo" tabindex="-1" aria-labelledby="modalErrorArchivoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalErrorArchivoLabel">Error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center" id="mensajeModalError">
+                    <!-- Mensaje dinámico desde JS -->
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal de éxito -->
-<div class="modal fade" id="modalExito" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-success">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="modalExitoLabel">¡Éxito!</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center" id="mensajeModalExito">
-                El comprobante fue enviado correctamente.
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+    <!-- Modal de éxito -->
+    <div class="modal fade" id="modalExito" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-success">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalExitoLabel">¡Éxito!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center" id="mensajeModalExito">
+                    El comprobante fue enviado correctamente.
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal advertencia -->
-<div class="modal fade" id="modalAdvertencia" tabindex="-1" aria-labelledby="modalAdvertenciaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-warning">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="modalAdvertenciaLabel">Advertencia</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center" id="mensajeModalAdvertencia">
-                Ya has subido un comprobante previamente.
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Entendido</button>
+    <!-- Modal advertencia -->
+    <div class="modal fade" id="modalAdvertencia" tabindex="-1" aria-labelledby="modalAdvertenciaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalAdvertenciaLabel">Advertencia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center" id="mensajeModalAdvertencia">
+                    Ya has subido un comprobante previamente.
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Entendido</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal tiempo expirado -->
-<div class="modal fade" id="modalExpirado" tabindex="-1" aria-labelledby="modalExpiradoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="modalExpiradoLabel">Tiempo expirado</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center" id="mensajeModalExpirado">
-                El tiempo para subir el comprobante ha expirado. Ya no puedes realizar esta acción.
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
+    <!-- Modal tiempo expirado -->
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-primary">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalConfirmacionLabel">¿Confirmar envío?</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center">
+                    ¿Estás seguro de que deseas enviar el comprobante de pago?
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnModalEnviar">Enviar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<!-- Modal de confirmación -->
-<div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-primary">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalConfirmacionLabel">¿Confirmar envío?</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center">
-                ¿Estás seguro de que deseas enviar el comprobante de pago?
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnModalEnviar">Enviar</button>
+
+    <!-- Modal sin comprobante (advertencia y redirección) -->
+    <div class="modal fade" id="modalSinComprobante" tabindex="-1" aria-labelledby="modalSinComprobanteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalSinComprobanteLabel">Advertencia</h5>
+                </div>
+                <div class="modal-body text-center fw-semibold">
+                    No se ha subido ningún comprobante.<br>
+                    Tienes <strong>2 horas</strong> para hacerlo o tu reserva será cancelada automáticamente.
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-warning" id="btnEntendido">Entendido</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal sin comprobante (advertencia y redirección) -->
-<div class="modal fade" id="modalSinComprobante" tabindex="-1" aria-labelledby="modalSinComprobanteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-warning">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="modalSinComprobanteLabel">Advertencia</h5>
-            </div>
-            <div class="modal-body text-center fw-semibold">
-                No se ha subido ningún comprobante.<br>
-                Tienes <strong>2 horas</strong> para hacerlo o tu reserva será cancelada automáticamente.
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-warning" id="btnEntendido">Entendido</button>
+    <!-- Opciones de Pago -->
+    <div class="modal fade" id="modalOpcionesPago" tabindex="-1" aria-labelledby="modalOpcionesPagoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-primary">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalOpcionesPagoLabel">Selecciona un método de pago</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- OPCIONES DE PAGO -->
+                    <div class="d-flex justify-content-around mb-4">
+                        <button class="btn btn-outline-info w-50 me-2" id="btnYape">
+                            <i class="bi bi-qr-code me-2"></i> Pagar con Yape/Plin
+                        </button>
+                        <button class="btn btn-outline-success w-50" id="btnTarjeta">
+                            <i class="bi bi-credit-card me-2"></i> Pagar con Tarjeta
+                        </button>
+                    </div>
+
+                    <!-- CONTENIDO DINÁMICO -->
+                    <div id="seccionYape" style="display: none;">
+                        <div class="d-flex justify-content-center gap-5 flex-wrap">
+                            <!-- Yape QR -->
+                            <div class="text-center">
+                                <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-width: 200px;">
+                                <p class="mt-2 mb-0">Yape</p>
+                            </div>
+
+                            <!-- Plin QR -->
+                            <div class="text-center">
+                                <img th:src="@{/img/photos/plin.jpg}" alt="QR Plin" class="img-fluid rounded" style="max-width: 200px;">
+                                <p class="mt-2 mb-0">Plin</p>
+                            </div>
+                        </div>
+
+
+                        <form id="formComprobanteModal" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
+                            <div class="form-group mb-3">
+                                <label for="archivoComprobante">Subir comprobante (.jpg, .png):</label>
+                                <input type="file" class="form-control" id="archivoComprobante" name="comprobante" accept=".jpg,.jpeg,.png,.heic" required />
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Enviar comprobante</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="seccionTarjeta" style="display: none;">
+                        <form th:action="@{/vecino/reservas/procesar-pago-tarjeta}" method="post" onsubmit="return validarFormulario()">
+                            <input type="hidden" name="idreserva" th:value="${reserva.idreserva}" />
+                            <div class="mb-3">
+                                <label for="numero" class="form-label">Número de Tarjeta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                    <input type="text" name="numero" id="numero" class="form-control"
+                                           th:value="${param.numero}" placeholder="•••• •••• •••• ••••" maxlength="16" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="vencimiento" class="form-label">Vencimiento (MM/AAAA)</label>
+                                    <input type="month" name="vencimiento" id="vencimiento" class="form-control small-input" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="password" name="cvv" id="cvv" maxlength="3" class="form-control small-input"
+                                           th:value="${param.cvv}" placeholder="123" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Confirmar Pago</button>
+                        </form>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggle = document.querySelector(".js-sidebar-toggle");
+            const sidebar = document.getElementById('sidebar');
+            if (toggle) {
+                toggle.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    document.body.classList.toggle("sidebar-collapsed");
+                });
+            }
+        });
+    </script>
+    <script>
+        document.getElementById("btnComprobante").addEventListener("click", function () {
+            const inputFile = document.getElementById("adjuntar");
+            const file = inputFile?.files?.[0];
+            const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic'];
+
+            if (!file) {
+                const modalAdvertencia = new bootstrap.Modal(document.getElementById("modalSinComprobante"));
+                modalAdvertencia.show();
+
+                document.getElementById("btnEntendido").onclick = function () {
+                    modalAdvertencia.hide();
+                    window.location.href = "/vecino/reservas";
+                };
+
+                return;
+            }
 
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/feather-icons"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-    });
-</script>
-<script>
-    document.getElementById("btnComprobante").addEventListener("click", function () {
-        const inputFile = document.getElementById("adjuntar");
-        const file = inputFile?.files?.[0];
-        const extensionesValidas = ['image/jpeg', 'image/png', 'image/heic'];
+            const tipo = file.type;
+            const nombreArchivo = file.name.toLowerCase();
 
-        if (!file) {
-            const modalAdvertencia = new bootstrap.Modal(document.getElementById("modalSinComprobante"));
-            modalAdvertencia.show();
+            if (!extensionesValidas.includes(tipo) || !nombreArchivo.match(/\.(jpg|jpeg|png|heic)$/)) {
+                mostrarModalError("Archivo no válido. Solo se permiten imágenes JPG, PNG, JPEG o HEIC.");
+                return;
+            }
 
-            document.getElementById("btnEntendido").onclick = function () {
-                modalAdvertencia.hide();
-                window.location.href = "/vecino/reservas";
+            const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
+            modal.show();
+
+            const botonEnviar = document.getElementById("btnModalEnviar");
+            botonEnviar.onclick = null; // limpia handlers anteriores
+            botonEnviar.onclick = function () {
+                modal.hide(); // opcional
+                document.getElementById("formComprobante").submit(); // usa ID del formulario directamente
             };
+        });
 
-            return;
+        function mostrarModalError(mensaje) {
+            document.getElementById("mensajeModalError").innerText = mensaje;
+            const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
+            modalError.show();
+        }
+        function mostrarModalExito(mensaje) {
+            document.getElementById("mensajeModalExito").innerText = mensaje;
+            const modal = new bootstrap.Modal(document.getElementById("modalExito"));
+            modal.show();
         }
 
-
-        const tipo = file.type;
-        const nombreArchivo = file.name.toLowerCase();
-
-        if (!extensionesValidas.includes(tipo) || !nombreArchivo.match(/\.(jpg|jpeg|png|heic)$/)) {
-            mostrarModalError("Archivo no válido. Solo se permiten imágenes JPG, PNG, JPEG o HEIC.");
-            return;
+        function mostrarModalAdvertencia(mensaje) {
+            document.getElementById("mensajeModalAdvertencia").innerText = mensaje;
+            const modal = new bootstrap.Modal(document.getElementById("modalAdvertencia"));
+            modal.show();
         }
 
-        const modal = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
-        modal.show();
+        function mostrarModalExpirado(mensaje) {
+            document.getElementById("mensajeModalExpirado").innerText = mensaje;
+            const modal = new bootstrap.Modal(document.getElementById("modalExpirado"));
+            modal.show();
+        }
 
-        const botonEnviar = document.getElementById("btnModalEnviar");
-        botonEnviar.onclick = null; // limpia handlers anteriores
-        botonEnviar.onclick = function () {
-            modal.hide(); // opcional
-            document.getElementById("formComprobante").submit(); // usa ID del formulario directamente
-        };
-    });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnYape = document.getElementById("btnYape");
+            const btnTarjeta = document.getElementById("btnTarjeta");
+            const seccionYape = document.getElementById("seccionYape");
+            const seccionTarjeta = document.getElementById("seccionTarjeta");
 
-    function mostrarModalError(mensaje) {
-        document.getElementById("mensajeModalError").innerText = mensaje;
-        const modalError = new bootstrap.Modal(document.getElementById("modalErrorArchivo"));
-        modalError.show();
-    }
-    function mostrarModalExito(mensaje) {
-        document.getElementById("mensajeModalExito").innerText = mensaje;
-        const modal = new bootstrap.Modal(document.getElementById("modalExito"));
-        modal.show();
-    }
+            btnYape.addEventListener("click", function () {
+                seccionYape.style.display = "block";
+                seccionTarjeta.style.display = "none";
+            });
 
-    function mostrarModalAdvertencia(mensaje) {
-        document.getElementById("mensajeModalAdvertencia").innerText = mensaje;
-        const modal = new bootstrap.Modal(document.getElementById("modalAdvertencia"));
-        modal.show();
-    }
+            btnTarjeta.addEventListener("click", function () {
+                seccionYape.style.display = "none";
+                seccionTarjeta.style.display = "block";
+            });
+        });
+    </script>
 
-    function mostrarModalExpirado(mensaje) {
-        document.getElementById("mensajeModalExpirado").innerText = mensaje;
-        const modal = new bootstrap.Modal(document.getElementById("modalExpirado"));
-        modal.show();
-    }
 
-</script>
-<div th:replace="~{fragments/chatbot.html}"></div>
+    <div th:replace="~{fragments/chatbot.html}"></div>
 </body>
 </html>
