@@ -4,54 +4,59 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recuperar Contraseña - Sistema de Reservas</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
+        /* ====================
+           Variables CSS - Paleta San Miguel
+           ==================== */
         :root {
-            /* Colores principales */
-            --primary-color: #007aff; /* Azul vibrante */
-            --dark-primary-color: #0051c7; /* Azul más oscuro para hover */
-            --accent-color: #4CAF50; /* Verde para éxito */
-            --danger-color: #F44336; /* Rojo para error */
+            --primary-color: #0055a5; /* Azul institucional */
+            --secondary-color: #00a9e0; /* Celeste institucional */
+            --primary-gradient: linear-gradient(135deg, #0055a5, #00a9e0);
+            --dark-primary: #003b75;
+            --light-primary: #e6f4f9;
 
-            /* Colores de texto */
-            --text-color: #1a1a1a; /* Texto oscuro */
-            --light-text-color: #6c757d; /* Texto gris claro */
-            --heading-color: #1d3557; /* Azul oscuro para encabezados */
+            --accent-color: #f8b319; /* Amarillo para acentos */
+            --success-color: #4CAF50;
+            --danger-color: #e74c3c;
 
-            /* Colores de bordes y fondos */
-            --border-color: #e0e0e0; /* Gris claro para bordes */
-            --focus-border-color: #66b2ff; /* Azul para enfoque */
-            --background-light: rgba(255, 255, 255, 0.95); /* Fondo claro semi-transparente */
-            --shadow-light: rgba(0, 0, 0, 0.15); /* Sombra ligera */
-            --shadow-medium: rgba(0, 0, 0, 0.25); /* Sombra media */
+            --text-color: #333333;
+            --light-text-color: #7f8c8d;
+            --heading-color: #ffffff;
+            --input-text-color: #333333;
+            --input-bg-color: transparent;
+            --card-bg: rgba(255, 255, 255, 0.9);
+
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
+
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
         }
 
-        /* Reset básico y box-sizing */
+        /* ====================
+           Estilos Globales
+           ==================== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        /* Estilos del cuerpo y fondo */
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(145deg, #1d3557, #457b9d); /* Degradado de fondo */
-            background-size: cover;
-            background-repeat: no-repeat;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0055a5, #00a9e0);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--text-color);
-            animation: fadeIn 1s ease forwards; /* Animación de entrada */
             position: relative;
-            overflow: hidden; /* Evita barras de desplazamiento si los elementos de fondo se desbordan */
+            overflow: hidden;
         }
 
-        /* Efecto de partículas/fondo abstracto */
         body::before {
             content: '';
             position: absolute;
@@ -59,230 +64,204 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.05) 0%, transparent 40%),
-            radial-gradient(circle at bottom right, rgba(255,255,255,0.05) 0%, transparent 40%);
+            background:
+                    radial-gradient(circle at 20% 30%, rgba(0, 169, 224, 0.1) 0%, transparent 25%),
+                    radial-gradient(circle at 80% 70%, rgba(0, 85, 165, 0.1) 0%, transparent 25%);
             z-index: -1;
-            animation: backgroundPan 15s infinite alternate ease-in-out;
         }
 
-        /* Contenedor principal del formulario */
+        /* ====================
+           Contenedor de Login - Estilo Municipal
+           ==================== */
         .login-container {
-            background: var(--background-light);
-            padding: 3rem 2.5rem; /* Aumentado un poco el padding */
-            border-radius: 20px;
-            max-width: 450px; /* Ancho máximo ligeramente aumentado */
-            width: 95%; /* Ajuste para móviles */
-            backdrop-filter: blur(15px); /* Desenfoque más pronunciado */
-            box-shadow: 0 18px 40px var(--shadow-medium); /* Sombra más profunda */
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 95%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             text-align: center;
+            animation: fadeIn 0.8s ease forwards;
             position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden; /* Asegura que el borde superior se vea bien */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil para el efecto de cristal */
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .login-container:hover {
-            transform: translateY(-5px); /* Efecto sutil al pasar el ratón */
-            box-shadow: 0 22px 45px rgba(0, 0, 0, 0.35); /* Sombra más intensa al pasar el ratón */
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
 
-        /* Borde superior decorativo */
-        .login-container::before {
+        .login-container img {
+            height: 80px;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-container h1, h4 {
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        .login-container h1::after, h4::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px; /* Borde más grueso */
-            background: linear-gradient(to right, var(--primary-color), var(--dark-primary-color)); /* Degradado en el borde */
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--secondary-color);
+            border-radius: 3px;
         }
 
-        /* Estilos del logo (si se incluye) */
-        .login-container img {
-            height: 80px; /* Tamaño del logo ligeramente mayor */
-            margin-bottom: 2rem; /* Más espacio debajo del logo */
-            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.2)); /* Sombra más prominente */
-            animation: bounceIn 0.8s ease-out; /* Animación de entrada para el logo */
+        .form-description {
+            margin-bottom: 1.8rem;
+            color: var(--light-text-color);
+            font-size: 0.95rem;
         }
 
-        /* Estilos del título principal */
-        h4 {
-            margin-bottom: 2.5rem; /* Más espacio debajo del título */
-            font-weight: 700; /* Texto más audaz */
-            font-size: 1.8rem; /* Tamaño de fuente mayor */
-            color: var(--heading-color);
-            line-height: 1.3;
-            padding-top: 10px; /* Mantiene un pequeño margen del borde */
-        }
-
-        /* Contenedor para campos de formulario flotantes */
+        /* ====================
+           Elementos del Formulario (Estilo limpio)
+           ==================== */
         .form-floating {
             position: relative;
-            margin-bottom: 1.8rem; /* Espaciado entre campos */
+            margin-bottom: 1.5rem;
             text-align: left;
         }
 
-        /* Estilos de los campos de texto */
-        .form-control {
+        .form-floating .form-control {
             width: 100%;
-            padding: 1rem 1.2rem; /* Más padding para mayor área táctil */
-            font-size: 1.05rem; /* Tamaño de fuente ligeramente mayor */
-            color: var(--text-color);
-            background-color: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 10px; /* Bordes más redondeados */
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            padding: 1rem 1.25rem 1rem 3rem;
+            font-size: 1rem;
+            color: var(--input-text-color);
+            background-color: var(--input-bg-color); /* Fondo transparente */
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            border-radius: 0;
+            transition: all 0.3s ease;
         }
 
-        .form-control:focus {
-            border-color: var(--primary-color); /* Color de borde al enfocar */
-            box-shadow: 0 0 0 4px rgba(0,123,255,0.25); /* Sombra más definida al enfocar */
-            outline: none; /* Eliminar el outline por defecto del navegador */
+        .form-floating .form-control:focus {
+            outline: none;
+            border-bottom-color: var(--secondary-color);
+            box-shadow: none;
         }
 
-        /* Estilos de las etiquetas flotantes */
-        .form-floating > label {
+        .form-floating .input-group-icon {
             position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            padding: 1rem 1.2rem;
-            pointer-events: none;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--light-text-color);
-            transition: 0.2s ease;
-            transform-origin: top left;
-            font-size: 1.05rem;
+            transition: color 0.3s ease;
+            pointer-events: none;
         }
 
-        /* Animación y estado de las etiquetas flotantes */
-        .form-floating > .form-control:not(:placeholder-shown) ~ label,
-        .form-floating > .form-control:focus ~ label {
-            transform: scale(0.8) translateY(-1.4rem) translateX(0.15rem); /* Movimiento y tamaño de la etiqueta */
-            opacity: 0.85;
+        .form-floating .form-control:focus ~ .input-group-icon {
             color: var(--primary-color);
-            background-color: var(--background-light); /* Fondo para la etiqueta flotante */
-            padding: 0 0.5rem;
-            border-radius: 4px;
-        }
-
-        .form-floating input {
-            padding-right: 1.2rem; /* No se necesita más espacio para el ojo aquí */
         }
 
         .form-floating label {
-            padding-left: 1.2rem !important;
+            position: absolute;
+            top: 1rem;
+            left: 3rem;
+            pointer-events: none;
+            color: var(--light-text-color);
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            background-color: transparent; /* Eliminado el fondo blanco */
         }
 
-        /* Estilos de los botones */
+        .form-floating .form-control:focus ~ label,
+        .form-floating .form-control:not(:placeholder-shown) ~ label {
+            top: -1.2rem;
+            left: 0;
+            font-size: 0.75rem;
+            color: var(--primary-color);
+            padding: 0;
+            background-color: transparent; /* Asegurando que no haya fondo */
+        }
+
+        /* ====================
+           Botones - Estilo Municipal
+           ==================== */
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
             font-weight: 600;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: middle;
-            user-select: none;
-            border: 1px solid transparent;
-            padding: 0.9rem 2rem; /* Más padding para botones */
-            font-size: 1.1rem; /* Tamaño de fuente mayor */
-            line-height: 1.5;
-            border-radius: 0.75rem; /* Bordes más redondeados */
-            transition: all 0.3s ease; /* Transición más suave */
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: var(--border-radius-sm);
             cursor: pointer;
-            text-decoration: none; /* Asegura que no haya subrayado */
+            transition: all 0.3s ease;
+            border: none;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-primary-color)); /* Degradado */
+            background: var(--primary-gradient);
             color: #fff;
-            border-color: var(--primary-color);
-            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4); /* Sombra más pronunciada */
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0, 85, 165, 0.3);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--dark-primary-color), #0040a0); /* Degradado más oscuro al hover */
-            box-shadow: 0 10px 25px rgba(0, 91, 200, 0.55);
-            transform: translateY(-2px); /* Pequeño desplazamiento hacia arriba */
+            background: linear-gradient(135deg, #004a8f, #0095c7);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 85, 165, 0.4);
         }
 
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.6);
-            opacity: 0;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
-            z-index: -1;
-        }
-
-        .btn-primary:hover::after {
-            width: 200px;
-            height: 200px;
-            opacity: 1;
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-primary:disabled {
-            opacity: 0.5; /* Más opaco cuando está deshabilitado */
+            opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
             box-shadow: none;
-            background: var(--primary-color); /* Fondo plano para disabled */
-            transform: none; /* No animar si está deshabilitado */
-        }
-        .btn-primary:disabled::after {
-            display: none; /* Desactivar efecto ripple cuando está deshabilitado */
         }
 
-        .w-100 {
+        .btn-block {
             width: 100%;
-            margin-top: 1rem; /* Espacio superior para el botón */
+            margin-top: 1rem;
         }
 
-        /* Utilidades de texto y margen */
-        .text-center { text-align: center !important; }
-        .text-decoration-none { text-decoration: none !important; }
-
-        /* Márgenes */
-        .mb-3 { margin-bottom: 1rem !important; }
-        .mt-3 { margin-top: 1.5rem !important; } /* Más espacio para el spinner */
-        .mt-4 { margin-top: 2rem !important; } /* Más espacio para el enlace de volver */
-
-        /* Estilos de enlaces */
+        /* ====================
+           Enlaces y otros elementos
+           ==================== */
         a {
             color: var(--primary-color);
             text-decoration: none;
-            transition: color 0.2s ease, text-decoration 0.2s ease;
+            transition: color 0.2s ease;
             font-weight: 500;
         }
 
         a:hover {
-            color: var(--dark-primary-color);
+            color: var(--secondary-color);
             text-decoration: underline;
         }
 
-        /* Estilos del Toast (mensajes flotantes) */
+        /* ====================
+           Toast (Mensajes)
+           ==================== */
         .toast {
             position: fixed;
-            top: 25px; /* Ligeramente más abajo */
+            top: 25px;
             left: 50%;
-            transform: translateX(-50%) translateY(-30px); /* Posición inicial para la animación */
-            min-width: 350px; /* Ancho mínimo */
-            padding: 1rem 1.8rem;
-            border-radius: 12px; /* Más redondeado */
+            transform: translateX(-50%) translateY(-30px);
+            min-width: 350px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius-sm);
             color: #fff;
             font-weight: 600;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
             z-index: 9999;
             opacity: 0;
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Transición más suave */
+            transition: all 0.4s ease;
             display: flex;
             align-items: center;
             gap: 0.8rem;
@@ -290,90 +269,60 @@
 
         .toast.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(0); /* Posición final */
+            transform: translateX(-50%) translateY(0);
         }
 
-        .toast.success { background-color: var(--accent-color); }
-        .toast.error { background-color: var(--danger-color); }
-
-        .toast i {
-            font-size: 1.3rem;
+        .toast.success {
+            background: var(--success-color);
+            border-left: 4px solid #388e3c;
+        }
+        .toast.error {
+            background: var(--danger-color);
+            border-left: 4px solid #c62828;
         }
 
         /* Spinner de carga */
         .spinner-border {
             display: inline-block;
-            width: 1.8rem; /* Tamaño ligeramente más grande */
-            height: 1.8rem;
-            vertical-align: middle; /* Alineación vertical */
-            border: 0.25em solid currentColor; /* Grosor del borde */
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: 0.25em solid currentColor;
             border-right-color: transparent;
             border-radius: 50%;
-            animation: .85s linear infinite spinner-border; /* Animación más suave */
+            animation: .75s linear infinite spinner-border;
         }
 
-        .spinner-border-sm { /* Si se usa este, mantener las propiedades ajustadas */
-            height: 1.2rem;
-            width: 1.2rem;
-            border-width: 0.2em;
-        }
-
-        .ms-2 {
-            margin-left: 0.5rem !important;
-            color: var(--text-color); /* Color del texto del spinner */
-            font-weight: 500;
-        }
-
-        .text-primary {
-            color: var(--primary-color) !important;
-        }
-
-        /* Animaciones */
         @keyframes spinner-border {
             to { transform: rotate(360deg); }
         }
 
+        /* ====================
+           Animaciones
+           ==================== */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes bounceIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            60% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes backgroundPan {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-
-        /* Media Queries para responsividad */
+        /* ====================
+           Media Queries
+           ==================== */
         @media (max-width: 600px) {
             .login-container {
-                padding: 2.5rem 1.8rem;
-                max-width: 95%;
-                margin: 0 1rem;
+                padding: 2rem 1.5rem;
             }
 
-            .login-container img {
-                height: 70px;
-                margin-bottom: 1.5rem;
+            .login-container h1, h4 {
+                font-size: 1.5rem;
             }
 
-            h4 {
-                font-size: 1.6rem;
-                margin-bottom: 2rem;
+            .form-floating .form-control {
+                padding: 0.9rem 1rem 0.9rem 2.8rem;
             }
 
-            .form-control, .form-floating > label {
-                font-size: 1rem;
-            }
-
-            .btn {
-                font-size: 1rem;
-                padding: 0.8rem 1.5rem;
+            .form-floating .input-group-icon {
+                left: 0.5rem;
             }
 
             .toast {
@@ -381,89 +330,72 @@
                 width: calc(100% - 2rem);
                 left: 1rem;
                 transform: translateX(0) translateY(-30px);
-                right: 1rem;
             }
+
             .toast.show {
                 transform: translateX(0) translateY(0);
-            }
-        }
-
-        @media (max-width: 400px) {
-            .login-container {
-                padding: 2rem 1.2rem;
-            }
-            .login-container img {
-                height: 60px;
-            }
-            h4 {
-                font-size: 1.4rem;
-                margin-bottom: 1.8rem;
-            }
-            .form-floating {
-                margin-bottom: 1.2rem;
             }
         }
     </style>
 </head>
 <body>
 
-<div id="toast"
-     th:class="'toast ' + (${error} ? 'error' : (${success} ? 'success' : ''))"
-     th:if="${error} or ${success}">
+<div th:if="${error} or ${success}" id="toast"
+     class="toast"
+     th:classappend="${error} ? 'error show' : (${success} ? 'success show' : '')">
     <i th:class="${error} ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'"></i>
     <span th:text="${error} ?: ${success}"></span>
 </div>
 
-<div class="login-container">
+<main class="login-container">
     <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad San Miguel" />
     <h4>Recuperar Contraseña</h4>
 
+    <p class="form-description">
+        Ingresa tu correo electrónico y te enviaremos un código para restablecer tu contraseña.
+    </p>
+
     <form th:action="@{/recuperar/enviar-codigo}" method="post" onsubmit="mostrarCargando()">
-        <p class="text-center" style="margin-bottom: 1.8rem; color: var(--light-text-color); font-size: 0.95rem;">
-            Ingresa tu correo electrónico y te enviaremos un código para restablecer tu contraseña.
-        </p>
-        <div class="form-floating mb-3 position-relative">
+        <div class="form-floating position-relative">
+            <i class="input-group-icon fas fa-envelope"></i>
             <input type="email" id="email" name="email" class="form-control"
-                   placeholder="Correo electrónico" autocomplete="email" required />
+                   placeholder=" " autocomplete="email" required />
             <label for="email">Correo electrónico</label>
         </div>
 
-        <button type="submit" id="btnEnviar" class="btn btn-primary w-100">
+        <button type="submit" id="btnEnviar" class="btn btn-primary btn-block">
             <i class="fas fa-paper-plane"></i> Enviar código
         </button>
 
-        <div id="spinner" class="text-center mt-3" style="display:none;">
-            <span class="spinner-border text-primary" role="status" aria-hidden="true"></span>
-            <span class="ms-2"> Enviando...</span>
-        </div>
     </form>
 
-    <div class="mt-4 text-center">
-        <a th:href="@{/login}" class="text-decoration-none">
+    <hr class="my-4" style="border: 0; height: 1px; background: linear-gradient(to right, transparent, #ddd, transparent); margin: 2rem 0;">
+
+    <div class="text-center">
+        <a th:href="@{/login}">
             <i class="fas fa-arrow-left"></i> Volver al inicio de sesión
         </a>
     </div>
-</div>
+</main>
 
 <script>
     function mostrarCargando() {
-        document.getElementById('btnEnviar').disabled = true;
-        document.getElementById('btnEnviar').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
-        // Esto es opcional, ya que el spinner ya está en el botón.
-        // document.getElementById('spinner').style.display = 'block';
+        const btnEnviar = document.getElementById('btnEnviar');
+        // Deshabilitar el botón para evitar múltiples envíos
+        btnEnviar.disabled = true;
+        // Cambiar el contenido del botón a un spinner con texto de carga
+        btnEnviar.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         const toast = document.getElementById('toast');
         if (toast) {
-            // Asegurarse de que el toast tenga la clase 'show' para iniciar la animación si tiene contenido
-            if (toast.textContent.trim() !== '') {
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-                }, 4000); // El toast se ocultará después de 4 segundos
-            }
+            // Se muestra automáticamente el toast si tiene contenido
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+            }, 4000);
         }
     });
 </script>
