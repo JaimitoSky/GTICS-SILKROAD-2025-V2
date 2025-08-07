@@ -294,7 +294,11 @@
       font-size: 0.85rem;
       margin-top: 2rem; /* Espacio superior para separar del contenido */
     }
-
+    /* Corrige sobreposición de texto y flecha en selects */
+    select.form-select {
+      padding-left: 2rem !important;         /* Da espacio al texto */
+      background-position-x: 0.6rem !important; /* Mueve la flecha más a la izquierda */
+    }
     /* Clases de utilidad Bootstrap sobrescritas para mayor consistencia */
     .mb-4 { margin-bottom: 1.5rem !important; }
     .mb-3 { margin-bottom: 1rem !important; }
