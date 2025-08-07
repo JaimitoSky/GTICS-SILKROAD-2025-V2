@@ -1,761 +1,531 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Coordinador</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinador - Sistema de Gestión</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/coordinador_sidebar.css}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --primary-50: #f0fdfa;
+            --primary-100: #ccfbf1;
+            --primary-200: #99f6e4;
+            --primary-300: #5eead4;
+            --primary-400: #2dd4bf;
+            --primary-500: #14b8a6;
+            --primary-600: #0d9488;
+            --primary-700: #0f766e;
+            --primary-800: #115e59;
+            --primary-900: #134e4a;
+
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            display: flex;
+            min-height: 100vh;
         }
 
-        .fade-in {
-            animation: fadeIn 0.4s ease-in-out;
+        /* Sidebar estilo LinkedIn */
+        #sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
-        * {
-            transition: all 0.2s ease-in-out;
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            text-align: center;
         }
 
-        h3 {
-            font-weight: 700;
+        .sidebar-header img {
+            max-height: 50px;
         }
 
-        .form-label {
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-decoration: none; /* Asegura que los enlaces no tengan subrayado */
+        }
+
+        .sidebar-nav .nav-link:hover {
+            background-color: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .sidebar-nav .nav-link.active {
+            background-color: var(--primary-100);
+            color: var(--primary-700);
+            font-weight: 500;
+        }
+
+        .sidebar-nav .nav-link i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Navbar superior */
+        .top-navbar {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 280px;
+            z-index: 900;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .nav-item {
+            margin-left: 1rem;
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-600);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .dropdown-menu {
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            color: var(--gray-700);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid var(--gray-200);
+            margin: 0.5rem 0;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 280px;
+            margin-top: 60px;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h3 {
+            font-size: 1.5rem;
             font-weight: 600;
-            color: #555;
+            color: var(--gray-800);
+            margin: 0;
         }
 
-        .form-select, .btn {
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        .page-header i {
+            color: var(--primary-500);
+            margin-right: 1rem;
+            font-size: 1.5rem;
         }
 
-        #map {
-            border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .alert {
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .modal-content {
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        footer.footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-        }
-
+        /* Cards */
         .card {
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: none;
-            background-color: #ffffff;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .card-header {
-            background-color: #f1f3f5;
-            border-bottom: 1px solid #e9ecef;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-            font-weight: 600;
-            color: #333;
             padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            background-color: white;
+            border-radius: 12px 12px 0 0;
+            font-weight: 600;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* Ajuste para el espacio entre el ícono y el texto */
+        }
+
+        .card-header i {
+            color: var(--primary-500);
+            font-size: 1.25rem; /* Icono un poco más grande */
         }
 
         .card-body {
             padding: 1.5rem;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+        /* Formularios */
+        .form-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+        }
+
+        /* Botones */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-lg {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Espacio entre el icono y el texto */
+        }
+
+        .alert-info {
+            background-color: var(--primary-50);
+            color: var(--primary-800);
+        }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            color: #92400e;
+        }
+
+        /* Mapa */
+        #map {
+            height: 350px;
+            width: 100%;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            #sidebar {
+                left: -280px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .top-navbar {
+                left: 0;
             }
-        }
 
-        .spinner-border {
-            vertical-align: middle;
-        }
+            .main-content {
+                margin-left: 0;
+            }
 
-        .toast-container {
-            z-index: 1080;
-        }
-
-        .my-div-icon {
-            text-align: center;
-            line-height: 1;
-        }
-
-        #sinTurnoMensaje {
-            display: none;
+            #sidebar.active {
+                left: 0;
+            }
         }
     </style>
 </head>
 <body>
-<div class="wrapper">
-    <div th:replace="~{fragments/sidebar-coordinador :: sidebar}"></div>
+<nav id="sidebar" th:fragment="sidebar">
+    <div class="sidebar-header text-center py-4">
+        <a th:href="@{/coordinador/home}" class="logo-link d-block">
+            <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" class="img-fluid">
+        </a>
+        <span class="d-block mt-3 fw-bold" style="color: var(--primary-700)">Coordinador</span>
+    </div>
 
-    <div class="main bg-light">
-        <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
+    <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item">
+            <a th:href="@{/coordinador/home}" class="nav-link active">
+                <i class="bi bi-house-door-fill"></i>Inicio
+            </a>
+        </li>
 
-        <main class="content">
-            <div class="container mt-4">
-                <h3 class="mb-4 fade-in">
-                    <i class="bi bi-geo-alt-fill me-2 text-primary"></i>Local asignado
-                </h3>
+        <li class="nav-item">
+            <a th:href="@{/coordinador/reservas-hoy}" class="nav-link">
+                <i class="bi bi-calendar-check-fill"></i>Reservas
+            </a>
+        </li>
 
-                <div class="row g-4">
-                    <!-- Selección de sede -->
-                    <div class="col-md-6">
-                        <div class="card h-100 fade-in">
-                            <div class="card-header">
-                                <i class="bi bi-building me-2"></i>Selecciona un local
-                            </div>
-                            <div class="card-body">
-                                <label for="sedeSelect" class="form-label visually-hidden">
-                                    Selecciona un local
-                                </label>
-                                <select id="sedeSelect" class="form-select form-select-lg">
-                                    <option
-                                            th:each="sede : ${sedesAsignadas}"
-                                            th:value="${sede.idsede}"
-                                            th:text="${sede.nombre}">
-                                    </option>
-                                </select>
+        <li class="nav-item">
+            <a th:href="@{/coordinador/perfil}" class="nav-link">
+                <i class="bi bi-person-circle"></i>Mi Perfil
+            </a>
+        </li>
+    </ul>
+</nav>
 
+<nav class="top-navbar" th:fragment="navbar">
+    <button class="btn btn-sm d-lg-none me-3" id="sidebarToggle" type="button">
+        <i class="bi bi-list"></i>
+    </button>
+    <div class="navbar-content">
+        <div class="d-flex align-items-center ms-auto me-3 d-none d-md-block">
+            <i class="bi bi-clock-fill text-muted me-2"></i>
+            <span class="text-muted" id="reloj"></span>
+        </div>
 
+        <ul class="navbar-nav d-flex flex-row align-items-center">
+            <li class="nav-item me-3">
+                <a class="nav-link position-relative" th:href="@{/coordinador/notificaciones}" title="Ver notificaciones">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${notificacionesNoLeidas > 0}"
+                          th:text="${notificacionesNoLeidas}">
+                        </span>
+                </a>
+            </li>
 
-                                <div
-                                        id="mensajeAsistencia"
-                                        class="alert alert-info text-center mt-4 fade-in d-none"
-                                        role="alert"
-                                >
-                                    <i class="bi bi-info-circle-fill me-2"></i>
-                                    Ya registraste tu entrada hoy a las: <strong id="horaAsistenciaTexto"></strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mapa de la sede -->
-                    <div class="col-md-6">
-                        <div class="card h-100 fade-in">
-                            <div class="card-header">
-                                <i class="bi bi-map-fill me-2"></i>Ubicación del Local
-                            </div>
-                            <div class="card-body p-0">
-                                <div
-                                        id="map"
-                                        style="height: 350px; width: 100%; border-radius: 0 0 16px 16px;"
-                                ></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Registro de asistencia -->
-                    <div class="col-12 mt-4">
-                        <div class="card text-center fade-in" id="bloqueFormulario">
-                            <div class="card-body">
-                                <div id="sinTurnoMensaje" class="alert alert-warning">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                    Hoy no tienes ningún horario asignado
-                                </div>
-
-                                <div id="conTurnoContenido">
-                                    <p class="card-text mb-4">
-                                        Usa los botones para registrar tu entrada o salida según tu turno.
-                                    </p>
-
-                                    <!-- Datos de TURNOS DEL COORDINADOR en coordinador_horario -->
-                                    <div
-                                            id="turnos-data"
-                                            th:data-json="${turnosJson}"
-                                            style="display: none;"
-                                    ></div>
-                                    <!-- Asistencias previas -->
-                                    <div
-                                            id="asistencias-data"
-                                            th:data-json="${asistenciasPorSede}"
-                                            style="display: none;"
-                                    ></div>
-
-                                    <!-- Formulario Entrada -->
-                                    <form id="formEntrada" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
-
-                                        <input type="hidden" id="latitudInput" name="latitud" />
-                                        <input type="hidden" id="longitudInput" name="longitud" />
-                                        <input type="hidden" id="idsedeInput" name="idsede" />
-                                        <input type="hidden" id="turnoIdInput" name="id_coordinador_horario">
-
-                                        <input type="hidden" name="accion" value="entrada" />
-                                        <input type="hidden" id="programadaEntradaInput" name="hora_programada_entrada" />
-                                        <input type="hidden" id="estadoEntradaInput"     name="estado"                />
-                                        <button
-                                                type="button"
-                                                class="btn btn-success btn-lg px-5 d-none"
-                                                id="btnEntrada"
-                                        >
-                                            <i class="bi bi-check-circle"></i> Registrar entrada
-                                        </button>
-                                    </form>
-
-                                    <!-- Formulario Salida -->
-                                    <form id="formSalida" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
-
-                                        <input type="hidden" id="latitudSalida"  name="latitudSalida">
-                                        <input type="hidden" id="longitudSalida" name="longitudSalida">
-                                        <input type="hidden" id="idsedeInputSalida"   name="idsede">
-                                        <input type="hidden" id="turnoIdInputSalida" name="id_coordinador_horario">
-
-                                        <input type="hidden" id="accionSalida"   name="accion" value="salida">
-                                        <input type="hidden" id="programadaSalidaInput"  name="hora_programada_salida" />
-                                        <input type="hidden" id="estadoSalidaInput"      name="estado"                 />
-                                        <button type="button"
-                                                class="btn btn-warning btn-lg px-5 d-none"
-                                                id="btnSalida">
-                                            <i class="bi bi-box-arrow-right"></i> Registrar salida
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span class="d-none d-sm-inline fw-medium">Coordinador</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-lg">
+                    <h6 class="dropdown-header fw-bold text-uppercase text-muted">Cuenta</h6>
+                    <a class="dropdown-item" th:href="@{/coordinador/perfil}">
+                        <i class="bi bi-person-fill me-2"></i> Mi Perfil
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" th:href="@{/logout}">
+                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                    </a>
                 </div>
+            </li>
+        </ul>
+    </div>
+</nav>
 
-                <!-- Modal Fuera de rango -->
-                <div class="modal fade" id="modalFueraDeRango" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-warning text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>¡Advertencia!
-                                </h5>
-                                <button
-                                        type="button"
-                                        class="btn-close btn-close-white"
-                                        data-bs-dismiss="modal"
-                                ></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                Estás fuera del rango permitido (500 m).<br />
-                                Acércate al local.
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                                <button
-                                        type="button"
-                                        class="btn btn-secondary"
-                                        data-bs-dismiss="modal"
-                                >
-                                    Aceptar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+<div class="main-content">
+    <div class="page-header">
+        <i class="bi bi-geo-alt-fill"></i>
+        <h3>Local asignado</h3>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-building"></i>Selecciona un local
                 </div>
-
-                <!-- Modal Confirmación Entrada -->
-                <div
-                        class="modal fade"
-                        id="modalConfirmacionEntrada"
-                        tabindex="-1"
-                        aria-hidden="true"
-                >
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-question-circle-fill me-2"></i>Confirmar entrada
-                                </h5>
-                                <button
-                                        type="button"
-                                        class="btn-close btn-close-white"
-                                        data-bs-dismiss="modal"
-                                ></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                ¿Registrar <strong>entrada</strong>?<br />
-                                Hora actual: <span id="horaActualEntrada"></span>
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                                <button
-                                        type="button"
-                                        class="btn btn-secondary"
-                                        data-bs-dismiss="modal"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                        type="button"
-                                        class="btn btn-primary"
-                                        id="btnConfirmarEntrada"
-                                >
-              <span
-                      class="spinner-border spinner-border-sm me-2 d-none"
-                      role="status"
-                      aria-hidden="true"
-              ></span>
-                                    Confirmar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Confirmación Salida -->
-                <div
-                        class="modal fade"
-                        id="modalConfirmacionSalida"
-                        tabindex="-1"
-                        aria-hidden="true"
-                >
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-question-circle-fill me-2"></i>Confirmar salida
-                                </h5>
-                                <button
-                                        type="button"
-                                        class="btn-close btn-close-white"
-                                        data-bs-dismiss="modal"
-                                ></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                ¿Registrar <strong>salida</strong>?<br />
-                                Hora actual: <span id="horaActualSalida"></span>
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                                <button
-                                        type="button"
-                                        class="btn btn-secondary"
-                                        data-bs-dismiss="modal"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                        type="button"
-                                        class="btn btn-primary"
-                                        id="btnConfirmarSalida"
-                                >
-              <span
-                      class="spinner-border spinner-border-sm me-2 d-none"
-                      role="status"
-                      aria-hidden="true"
-              ></span>
-                                    Confirmar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Toasts -->
-                <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div class="card-body">
+                    <label for="sedeSelect" class="form-label visually-hidden">
+                        Selecciona un local
+                    </label>
+                    <select id="sedeSelect" class="form-select form-select-lg mb-4">
+                        <option
+                                th:each="sede : ${sedesAsignadas}"
+                                th:value="${sede.idsede}"
+                                th:text="${sede.nombre}">
+                        </option>
+                    </select>
                     <div
-                            id="successToast"
-                            class="toast text-bg-success border-0"
+                            id="mensajeAsistencia"
+                            class="alert alert-info text-start mt-4 d-none"
                             role="alert"
-                            data-bs-delay="5000"
                     >
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="bi bi-check-circle-fill me-2"></i>Operación exitosa
-                            </div>
-                            <button
-                                    type="button"
-                                    class="btn-close btn-close-white me-2 m-auto"
-                                    data-bs-dismiss="toast"
-                            ></button>
-                        </div>
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Ya registraste tu entrada hoy a las: <strong id="horaAsistenciaTexto"></strong>
                     </div>
-                    <div
-                            id="errorToast"
-                            class="toast text-bg-danger border-0"
-                            role="alert"
-                            data-bs-delay="7000"
-                    >
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="bi bi-x-circle-fill me-2"></i>Ocurrió un error
-                            </div>
-                            <button
-                                    type="button"
-                                    class="btn-close btn-close-white me-2 m-auto"
-                                    data-bs-dismiss="toast"
-                            ></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-map-fill"></i>Ubicación del Local
+                </div>
+                <div class="card-body p-0">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card text-center" id="bloqueFormulario">
+                <div class="card-body py-4">
+                    <div id="sinTurnoMensaje" class="alert alert-warning mb-4 justify-content-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span>Hoy no tienes ningún horario asignado</span>
+                    </div>
+
+                    <div id="conTurnoContenido">
+                        <p class="card-text mb-4 text-muted">
+                            Usa los botones para registrar tu entrada o salida según tu turno.
+                        </p>
+
+                        <div
+                                id="turnos-data"
+                                th:data-json="${turnosJson}"
+                                style="display: none;"
+                        ></div>
+                        <div
+                                id="asistencias-data"
+                                th:data-json="${asistenciasPorSede}"
+                                style="display: none;"
+                        ></div>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <form id="formEntrada" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
+                                <input type="hidden" id="latitudInput" name="latitud" />
+                                <input type="hidden" id="longitudInput" name="longitud" />
+                                <input type="hidden" id="idsedeInput" name="idsede" />
+                                <input type="hidden" id="turnoIdInput" name="id_coordinador_horario">
+                                <input type="hidden" name="accion" value="entrada" />
+                                <input type="hidden" id="programadaEntradaInput" name="hora_programada_entrada" />
+                                <input type="hidden" id="estadoEntradaInput" name="estado" />
+                                <button
+                                        type="button"
+                                        class="btn btn-success btn-lg px-5 d-none"
+                                        id="btnEntrada"
+                                >
+                                    <i class="bi bi-check-circle-fill me-2"></i> Registrar entrada
+                                </button>
+                            </form>
+
+                            <form id="formSalida" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
+                                <input type="hidden" id="latitudSalida" name="latitudSalida">
+                                <input type="hidden" id="longitudSalida" name="longitudSalida">
+                                <input type="hidden" id="idsedeInputSalida" name="idsede">
+                                <input type="hidden" id="turnoIdInputSalida" name="id_coordinador_horario">
+                                <input type="hidden" id="accionSalida" name="accion" value="salida">
+                                <input type="hidden" id="programadaSalidaInput" name="hora_programada_salida" />
+                                <input type="hidden" id="estadoSalidaInput" name="estado" />
+                                <button type="button"
+                                        class="btn btn-warning btn-lg px-5 d-none"
+                                        id="btnSalida">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Registrar salida
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            document.addEventListener("DOMContentLoaded", () => {
-                const MAX_LATE_MIN = 30;
-                const EARLY_MIN = 50;
-
-                // Variables para el mapa
-                let map;
-                let userMarker;
-                let sedeMarker;
-                let sedeCircle;
-
-                // DOM refs
-                const sedeSelect = document.getElementById("sedeSelect");
-                const idsedeInput = document.getElementById("idsedeInput");
-                const idsedeInputSalida = document.getElementById("idsedeInputSalida");
-                const latInput = document.getElementById("latitudInput");
-                const lonInput = document.getElementById("longitudInput");
-                const bloqueForm = document.getElementById("bloqueFormulario");
-                const btnEntrada = document.getElementById("btnEntrada");
-                const btnSalida = document.getElementById("btnSalida");
-                const latInputSalida = document.getElementById("latitudSalida");
-                const lonInputSalida = document.getElementById("longitudSalida");
-                const horaActEn = document.getElementById("horaActualEntrada");
-                const horaActSal = document.getElementById("horaActualSalida");
-                const btnConfEn = document.getElementById("btnConfirmarEntrada");
-                const btnConfSal = document.getElementById("btnConfirmarSalida");
-                const formEn = document.getElementById("formEntrada");
-                const formSal = document.getElementById("formSalida");
-                const sinTurnoMensaje = document.getElementById("sinTurnoMensaje");
-                const conTurnoContenido = document.getElementById("conTurnoContenido");
-                const mensajeAsistencia = document.getElementById("mensajeAsistencia");
-                const horaAsistenciaTexto = document.getElementById("horaAsistenciaTexto");
-                const turnoIdInput = document.getElementById("turnoIdInput");
-                const turnoIdInputSalida = document.getElementById("turnoIdInputSalida");
-
-                // Función para reemplazar comas por puntos
-                function normalizarCoordenadas() {
-                    const inputs = [
-                        document.getElementById("latitudInput"),
-                        document.getElementById("longitudInput"),
-                        document.getElementById("latitudSalida"),
-                        document.getElementById("longitudSalida"),
-                    ];
-
-                    inputs.forEach(input => {
-                        if (input && input.value) {
-                            // Reemplaza coma por punto
-                            let val = input.value.trim().replace(",", ".");
-                            let num = Number(val);
-
-                            if (!isNaN(num)) {
-                                // Redondea a 8 decimales si es válido
-                                input.value = num.toFixed(8);
-                            } else {
-                                // Si no es número, limpia el campo y lanza alerta
-                                input.value = "";
-                                alert("Ubicación no válida detectada. Verifica tu geolocalización.");
-                            }
-                        }
-                    });
-                }
-
-
-                btnConfEn.addEventListener("click", () => {
-                    normalizarCoordenadas();
-
-                    const latOk = latInput.value && !isNaN(Number(latInput.value));
-                    const lonOk = lonInput.value && !isNaN(Number(lonInput.value));
-
-                    if (!latOk || !lonOk) {
-                        alert("No se pudo obtener tu ubicación. Por favor, verifica tu geolocalización.");
-                        return;
-                    }
-
-                    btnConfEn.disabled = true;
-                    btnConfEn.querySelector(".spinner-border").classList.remove("d-none");
-                    formEn.submit();
-                });
-
-                btnConfSal.addEventListener("click", () => {
-                    normalizarCoordenadas();
-
-                    const latOk = latInputSalida.value && !isNaN(Number(latInputSalida.value));
-                    const lonOk = lonInputSalida.value && !isNaN(Number(latInputSalida.value));
-
-                    if (!latOk || !lonOk) {
-                        alert("No se pudo obtener tu ubicación. Por favor, verifica tu geolocalización.");
-                        return;
-                    }
-
-                    btnConfSal.disabled = true;
-                    btnConfSal.querySelector(".spinner-border").classList.remove("d-none");
-                    formSal.submit();
-                });
-
-
-                // JSON turnos y asistencias
-                const turnos = JSON.parse(document.getElementById("turnos-data").dataset.json || '{}');
-                const asist = JSON.parse(document.getElementById("asistencias-data").dataset.json || '{}');
-
-                const sedesData = [
-                    /*[# th:each="sede, iterStat : ${sedesAsignadas}"]*/
-                    {
-                        id: [[${sede.idsede}]],
-                        nombre: '[[${sede.nombre}]]',
-                        latitud: [[${sede.latitud}]],
-                        longitud: [[${sede.longitud}]]
-                    }/*[(${iterStat.last} ? '' : ',')]*/
-                    /*[/]*/
-                ];
-
-                function initMap() {
-                    if (sedesData.length > 0) {
-                        const primeraSede = sedesData[0];
-                        map = L.map('map').setView([primeraSede.latitud, primeraSede.longitud], 16);
-
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap contributors'
-                        }).addTo(map);
-
-                        updateSedeMarker(primeraSede);
-
-                        if (navigator.geolocation) {
-                            const latInputSalida = document.getElementById("latitudSalida");
-                            const lonInputSalida = document.getElementById("longitudSalida");
-
-                            navigator.geolocation.watchPosition((position) => {
-                                const userLat = position.coords.latitude;
-                                const userLng = position.coords.longitude;
-
-                                latInput.value = userLat;
-                                lonInput.value = userLng;
-                                latInputSalida.value = userLat;
-                                lonInputSalida.value = userLng;
-
-                                if (userMarker) {
-                                    userMarker.setLatLng([userLat, userLng]);
-                                } else {
-                                    userMarker = L.marker([userLat, userLng], {
-                                        icon: L.divIcon({
-                                            className: 'my-div-icon',
-                                            html: '<i class="bi bi-person-fill" style="color: #0d6efd; font-size: 24px;"></i>',
-                                            iconSize: [24, 24]
-                                        })
-                                    }).addTo(map);
-                                }
-                            }, (error) => {
-                                console.error("Error de geolocalización:", error);
-                            }, { enableHighAccuracy: true });
-                        }
-                    }
-                }
-
-                function updateSedeMarker(sede) {
-                    if (sedeMarker) map.removeLayer(sedeMarker);
-                    if (sedeCircle) map.removeLayer(sedeCircle);
-
-                    sedeMarker = L.marker([sede.latitud, sede.longitud], {
-                        icon: L.divIcon({
-                            className: 'my-div-icon',
-                            html: '<i class="bi bi-building" style="color: #dc3545; font-size: 24px;"></i>',
-                            iconSize: [24, 24]
-                        })
-                    }).addTo(map);
-
-                    sedeCircle = L.circle([sede.latitud, sede.longitud], {
-                        color: '#dc3545',
-                        fillColor: '#f8d7da',
-                        fillOpacity: 0.2,
-                        radius: 500
-                    }).addTo(map);
-
-                    if (userMarker) {
-                        const bounds = L.latLngBounds([
-                            [sede.latitud, sede.longitud],
-                            [userMarker.getLatLng().lat, userMarker.getLatLng().lng]
-                        ]);
-                        map.fitBounds(bounds, { padding: [50, 50] });
-                    } else {
-                        map.setView([sede.latitud, sede.longitud], 16);
-                    }
-                }
-
-                function diaHoy() {
-                    let d = new Date().toLocaleDateString("es-PE", { weekday: "long" });
-                    return d.charAt(0).toUpperCase() + d.slice(1);
-                }
-
-                function updateButtons() {
-                    const sid = parseInt(sedeSelect.value, 10);
-                    const sedeActual = sedesData.find(s => s.id === sid);
-                    if (sedeActual && map) updateSedeMarker(sedeActual);
-
-                    const turno = turnos[sid] && turnos[sid][diaHoy()];
-                    turnoIdInput.value = turno?.id || "";
-                    turnoIdInputSalida.value = turno?.id || "";
-                    document.getElementById("programadaEntradaInput").value = turno?.horaEntrada || "";
-                    document.getElementById("programadaSalidaInput").value = turno?.horaSalida || "";
-                    document.getElementById("estadoEntradaInput").value = "presente";
-                    document.getElementById("estadoSalidaInput").value = "";
-
-                    const reg = asist[sid] || {};
-                    const now = new Date();
-
-                    if (!turno || !turno.activo) {
-                        sinTurnoMensaje.style.display = 'block';
-                        conTurnoContenido.style.display = 'none';
-                        return;
-                    }
-
-                    sinTurnoMensaje.style.display = 'none';
-                    conTurnoContenido.style.display = 'block';
-                    idsedeInput.value = sid;
-                    idsedeInputSalida.value = sid;
-
-                    if (reg.entrada) {
-                        mensajeAsistencia.classList.remove('d-none');
-                        horaAsistenciaTexto.textContent = reg.entrada;
-                        if (reg.salida) horaAsistenciaTexto.textContent += ' y salida: ' + reg.salida;
-                    } else {
-                        mensajeAsistencia.classList.add('d-none');
-                    }
-
-                    const [he, me] = turno.horaEntrada.split(":").map(Number);
-                    const [hs, ms] = turno.horaSalida.split(":").map(Number);
-                    const schedEn = new Date(now.getFullYear(), now.getMonth(), now.getDate(), he, me);
-                    const schedSa = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hs, ms);
-                    const early = new Date(schedEn.getTime() - EARLY_MIN * 60000);
-                    const lateLim = new Date(schedEn.getTime() + MAX_LATE_MIN * 60000);
-                    const endDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-
-                    if (!reg.entrada && now >= early && now <= lateLim) {
-                        btnEntrada.classList.remove("d-none");
-                    } else {
-                        btnEntrada.classList.add("d-none");
-                    }
-
-                    if (reg.entrada && !reg.salida && now >= schedSa && now <= endDay) {
-                        btnSalida.classList.remove("d-none");
-                    } else {
-                        btnSalida.classList.add("d-none");
-                    }
-                }
-
-                function updateModalTimes() {
-                    const t = new Date().toLocaleTimeString("es-PE", {
-                        hour: "2-digit", minute: "2-digit", second: "2-digit"
-                    });
-                    horaActEn.textContent = t;
-                    horaActSal.textContent = t;
-                }
-
-                sedeSelect.addEventListener("change", updateButtons);
-                btnEntrada.addEventListener("click", () => {
-                    updateModalTimes();
-                    new bootstrap.Modal(document.getElementById("modalConfirmacionEntrada")).show();
-                });
-                btnSalida.addEventListener("click", () => {
-                    updateModalTimes();
-                    new bootstrap.Modal(document.getElementById("modalConfirmacionSalida")).show();
-                });
-
-                // Inicialización
-                initMap();
-                updateButtons();
-
-                const errorAsistencia = /*[[${errorAsistencia}]]*/ null;
-                const mensajeAsistenciaFlash = /*[[${mensajeAsistencia}]]*/ null;
-
-                if (errorAsistencia) {
-                    const toast = new bootstrap.Toast(document.getElementById('errorToast'));
-                    document.querySelector('#errorToast .toast-body').textContent = errorAsistencia;
-                    toast.show();
-                }
-
-                if (mensajeAsistenciaFlash) {
-                    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-                    document.querySelector('#successToast .toast-body').textContent = mensajeAsistenciaFlash;
-                    toast.show();
-                }
-            });
-            /*]]>*/
-        </script>
-
-
-
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            // Función para actualizar la hora y la fecha en la navbar
-            function updateDateTime() {
-                const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
-                const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
-
-                if (relojElement || fechaElement) {
-                    const now = new Date();
-                    // Formato de hora (ej: 01:19:03 a. m.)
-                    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-                    const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
-
-                    // Formato de fecha (ej: 12/06/2025)
-                    const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                    const dateString = now.toLocaleDateString('es-PE', dateOptions);
-
-                    if (relojElement) {
-                        relojElement.textContent = timeString;
-                    }
-                    if (fechaElement) {
-                        fechaElement.textContent = dateString;
-                    }
-                }
-            }
-
-            // Actualizar cada segundo
-            setInterval(updateDateTime, 1000);
-            // Llamar al inicio para mostrar la hora inmediatamente
-            updateDateTime();
-
-            // Lógica para el toggle de la sidebar
-            document.addEventListener("DOMContentLoaded", function () {
-                const sidebarToggle = document.querySelector(".js-sidebar-toggle");
-                const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
-                const mainContent = document.querySelector('.main');
-
-                if (sidebarToggle && sidebar && mainContent) {
-                    sidebarToggle.addEventListener("click", function (e) {
-                        e.preventDefault();
-                        document.body.classList.toggle("sidebar-collapsed");
-                        // Guarda el estado en localStorage
-                        localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
-                    });
-
-                    // Recupera el estado guardado al cargar la página
-                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-                    if (isCollapsed) {
-                        document.body.classList.add('sidebar-collapsed');
-                    }
-                }
-            });
-
-            // Se eliminó la lógica de geolocalización y el modal de "fuera de zona"
-            // ya que no son relevantes para la vista de perfil.
-            /*]]>*/
-        </script>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Toggle sidebar en móviles
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('active');
+    });
+
+    // Reloj en tiempo real
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        document.getElementById('reloj').innerHTML = `<span class="fw-medium">${timeString}</span>, <span class="text-muted">${dateString}</span>`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ... (Resto de tu código JavaScript existente) ...
+</script>
 </body>
 </html>

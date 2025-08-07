@@ -5,390 +5,654 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reservas Hoy - Coordinador</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/coordinador_sidebar.css}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        /* Base y tipografía */
+        /* Estilos base (copiados de tu código anterior) */
+        :root {
+            --primary-50: #f0fdfa;
+            --primary-100: #ccfbf1;
+            --primary-200: #99f6e4;
+            --primary-300: #5eead4;
+            --primary-400: #2dd4bf;
+            --primary-500: #14b8a6;
+            --primary-600: #0d9488;
+            --primary-700: #0f766e;
+            --primary-800: #115e59;
+            --primary-900: #134e4a;
+
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        /* Estructura principal de la página */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Fondo claro general */
-            color: #333;
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            display: flex;
+            min-height: 100vh;
         }
 
-        /* Transiciones uniformes */
-        * {
-            transition: all 0.2s ease-in-out;
+        /* Sidebar estilo LinkedIn */
+        #sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
-        /* Encabezados de contenido principal */
-        h2 {
-            font-weight: 700;
-            color: #333; /* Color oscuro para el título */
-            animation: fadeIn 0.4s ease-in-out;
-            display: flex; /* Para alinear el icono con el texto */
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            text-align: center;
+        }
+
+        .sidebar-header img {
+            max-height: 50px;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-600);
+            display: flex;
             align-items: center;
-            gap: 0.75rem; /* Espacio entre icono y texto */
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
         }
 
-        /* Etiquetas de formulario */
-        .form-label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
+        .sidebar-nav .nav-link:hover {
+            background-color: var(--primary-50);
+            color: var(--primary-600);
         }
 
-        /* Selects y botones de filtro */
-        .form-select,
-        .btn-filter-group .btn { /* Agrupación para botones de filtro */
-            border-radius: 12px;
+        .sidebar-nav .nav-link.active {
+            background-color: var(--primary-100);
+            color: var(--primary-700);
             font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra suave */
-            transition: all 0.2s ease-in-out;
+        }
+
+        .sidebar-nav .nav-link i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Navbar superior */
+        .top-navbar {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 280px;
+            z-index: 900;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .nav-item {
+            margin-left: 1rem;
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-600);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .dropdown-menu {
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            color: var(--gray-700);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid var(--gray-200);
+            margin: 0.5rem 0;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 280px;
+            margin-top: 60px;
+            padding: 2rem;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .page-header i {
+            color: var(--primary-500);
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            #sidebar {
+                left: -280px;
+            }
+
+            .top-navbar {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            #sidebar.active {
+                left: 0;
+            }
+        }
+
+        /* Estilos de la tabla, filtros y paginación adaptados */
+        .card {
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            padding: 1.5rem;
+        }
+
+        .form-select {
+            border-radius: 8px;
+            font-weight: 400;
+            box-shadow: none;
+            border: 1px solid var(--gray-300);
+            padding: 0.5rem 1rem;
+            background-color: #ffffff;
         }
 
         .form-select:focus {
-            border-color: #17b5c0;
-            box-shadow: 0 0 0 0.25rem rgba(23, 181, 192, 0.25);
-            outline: none;
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
         }
 
-        /* Botones de filtro */
+        .form-control {
+            border-radius: 8px;
+            box-shadow: none;
+            border: 1px solid var(--gray-300);
+            padding: 0.5rem 1rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+        }
+
         .btn-filter-group .btn {
-            padding: 0.5rem 1.25rem; /* Padding para los botones de filtro */
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
         }
 
         .btn-filter-group .btn-outline-primary {
-            border-color: #17b5c0;
-            color: #17b5c0;
+            border-color: var(--primary-500);
+            color: var(--primary-500);
         }
-        .btn-filter-group .btn-outline-primary:hover {
-            background-color: #17b5c0;
+        .btn-filter-group .btn-outline-primary:hover,
+        .btn-filter-group .btn-outline-primary.active {
+            background-color: var(--primary-500);
             color: white;
         }
+
         .btn-filter-group .btn-outline-secondary {
-            border-color: #6c757d;
-            color: #6c757d;
+            border-color: var(--gray-400);
+            color: var(--gray-600);
         }
-        .btn-filter-group .btn-outline-secondary:hover {
-            background-color: #6c757d;
+        .btn-filter-group .btn-outline-secondary:hover,
+        .btn-filter-group .btn-outline-secondary.active {
+            background-color: var(--gray-400);
             color: white;
         }
 
-
-        /* Tabla */
         .table {
-            background-color: #ffffff; /* Fondo blanco para la tabla */
-            border-radius: 16px; /* Bordes redondeados en la tabla */
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra a la tabla */
-            overflow: hidden; /* Asegura que los bordes redondeados se apliquen bien */
-            margin-top: 1.5rem; /* Espacio superior */
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 1.5rem;
+            border: 1px solid var(--gray-200);
         }
 
         .table thead th {
-            background-color: #f0f2f5; /* Fondo más claro para el thead */
-            color: #555;
+            background-color: var(--gray-100);
+            color: var(--gray-600);
             font-weight: 600;
-            padding: 1rem 1.25rem; /* Más padding para los encabezados */
-            border-bottom: 2px solid #e9ecef; /* Borde inferior más pronunciado */
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-200);
         }
 
         .table tbody td {
-            padding: 1rem 1.25rem; /* Más padding para las celdas */
-            border-color: #e9ecef; /* Color de borde de celda */
+            padding: 1rem 1.25rem;
+            border-color: var(--gray-200);
+            color: var(--gray-700);
         }
 
         .table-hover tbody tr:hover {
-            background-color: #f5f5f5; /* Un gris muy claro al hover */
+            background-color: var(--gray-50);
         }
 
-        /* Botones de acción en la tabla */
         .table .btn {
-            border-radius: 8px; /* Ligeramente menos redondeado que los grandes */
-            font-weight: 600;
-            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
             font-size: 0.9rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
         }
 
         .table .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #212529; /* Texto oscuro para botón amarillo */
+            background-color: var(--warning);
+            border-color: var(--warning);
+            color: var(--gray-800);
         }
         .table .btn-warning:hover {
             background-color: #e0a800;
             border-color: #d39e00;
-            transform: translateY(-1px);
         }
 
         .table .btn-info {
-            background-color: #17b5c0; /* Turquesa como info/detalle */
-            border-color: #17b5c0;
+            background-color: var(--primary-500);
+            border-color: var(--primary-500);
             color: white;
         }
         .table .btn-info:hover {
-            background-color: #1399a3;
-            border-color: #128c94;
-            transform: translateY(-1px);
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
         }
 
-        /* Alerta de error (errorAsistencia) */
         .alert-danger {
-            background-color: #ffe6e6; /* Fondo rojo muy claro */
-            color: #cc0000; /* Texto rojo oscuro */
-            border: 1px solid #ffb3b3; /* Borde rojo claro */
-            padding: 1.25rem 1.5rem;
+            background-color: #fcebeb;
+            color: var(--danger);
+            border: 1px solid #f8e1e1;
+            padding: 1.25rem;
             font-size: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-info {
+            background-color: var(--info);
+            color: #ffffff;
+            border: none;
+            padding: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 500;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.75rem;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1.5rem;
+            margin-top: 1rem;
         }
-        .alert-danger .btn-close {
-            color: #cc0000;
-            font-size: 0.9rem;
-        }
-        .alert-danger .btn-close:hover {
-            color: #990000;
+        .alert-info i {
+            color: #ffffff;
         }
 
-        /* Paginación */
-        .pagination .page-item .page-link {
+        .pagination .page-link {
             border-radius: 8px;
             margin: 0 4px;
-            border: 1px solid #dee2e6;
-            color: #17b5c0; /* Color turquesa para enlaces de paginación */
+            border: 1px solid var(--gray-300);
+            color: var(--primary-500);
             font-weight: 600;
-            transition: all 0.2s ease-in-out;
-            min-width: 40px; /* Ancho mínimo para enlaces */
-            text-align: center;
         }
-
-        .pagination .page-item .page-link:hover {
-            background-color: #e6f7ff; /* Fondo turquesa muy claro al hover */
-            border-color: #17b5c0;
+        .pagination .page-link:hover {
+            background-color: var(--primary-50);
+            border-color: var(--primary-500);
+            color: var(--primary-600);
         }
-
         .pagination .page-item.active .page-link {
-            background-color: #17b5c0; /* Fondo turquesa para el activo */
-            border-color: #17b5c0;
+            background-color: var(--primary-500);
+            border-color: var(--primary-500);
             color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .pagination .page-item.disabled .page-link {
-            background-color: #e9ecef;
-            color: #6c757d;
-            border-color: #dee2e6;
+        .modal-header {
+            background-color: var(--primary-500);
+            color: white;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .modal-content {
+            border-radius: 12px;
         }
 
-        /* Contenido principal */
-        main.content {
-            padding: 2.5rem; /* Mayor padding general */
-            background-color: #f8f9fa; /* Asegura que el contenido principal tenga este fondo */
+        .modal-footer .btn-primary {
+            background-color: var(--primary-500);
+            border-color: var(--primary-500);
+        }
+        .modal-footer .btn-primary:hover {
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
+        }
+        .modal-footer .btn-outline-secondary {
+            border-color: var(--gray-400);
+            color: var(--gray-600);
         }
 
-        /* Footer */
-        footer.footer {
-            background-color: #f8f9fa; /* Fondo consistente */
-            border-top: 1px solid #e9ecef; /* Separador sutil */
-            padding-top: 2rem; /* Más padding para el footer */
-            padding-bottom: 2rem;
-        }
-
-        footer.footer img {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* Sombra al logo del footer */
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
-<div class="wrapper">
-    <div th:replace="~{fragments/sidebar-coordinador :: sidebar}"></div>
+<nav id="sidebar">
+    <div class="sidebar-header text-center py-4">
+        <a th:href="@{/coordinador/home}" class="logo-link d-block">
+            <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" class="img-fluid">
+        </a>
+        <span class="d-block mt-3 fw-bold" style="color: var(--primary-700)">Coordinador</span>
+    </div>
 
-    <div class="main">
-        <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
+    <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item">
+            <a th:href="@{/coordinador/home}" class="nav-link">
+                <i class="bi bi-house-door-fill"></i>Inicio
+            </a>
+        </li>
 
-        <main class="content">
-            <div class="container mt-4">
-                <h2 class="mb-4">
-                    <i class="bi bi-calendar-event-fill text-primary"></i> Reservas de Sedes Asignadas
-                </h2>
+        <li class="nav-item">
+            <a th:href="@{/coordinador/reservas-hoy}" class="nav-link active">
+                <i class="bi bi-calendar-check-fill"></i>Reservas
+            </a>
+        </li>
 
-                <div class="card p-4 mb-4 shadow-sm" style="border-radius: 16px;">
-                    <div class="row g-3 align-items-end">
-                        <!-- FILTRO DE SEDE -->
-                        <div class="col-md-5 col-lg-4">
-                            <label for="sedeFiltro" class="form-label">Filtrar por sede</label>
-                            <select id="sedeFiltro" class="form-select">
-                                <option th:value="todas"
-                                        th:selected="${filtroSedeId == null}">Todas las sedes</option>
-                                <option th:each="sede : ${sedesAsignadas}"
-                                        th:value="${sede.idsede}"
-                                        th:text="${sede.nombre}"
-                                        th:selected="${sede.idsede == filtroSedeId}">
-                                </option>
-                            </select>
-                        </div>
+        <li class="nav-item">
+            <a th:href="@{/coordinador/perfil}" class="nav-link">
+                <i class="bi bi-person-circle"></i>Mi Perfil
+            </a>
+        </li>
+    </ul>
+</nav>
 
-                        <!-- FILTRO DE FECHA Y BUSCADOR -->
-                        <div class="col-md-7 col-lg-8">
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="form-label me-2 mb-0">Filtrar por fecha:</label>
-                                <div class="btn-group btn-filter-group" role="group">
-                                    <button id="btnHoy" class="btn btn-outline-primary">
-                                        <i class="bi bi-calendar-day me-1"></i> Hoy
-                                    </button>
-                                    <button id="btnCalendario" class="btn btn-outline-secondary">
-                                        <i class="bi bi-calendar-date me-1"></i> Calendario
-                                    </button>
-                                    <button id="btnTodas" class="btn btn-outline-secondary">
-                                        <i class="bi bi-calendar-week me-1"></i> Todas
-                                    </button>
-                                </div>
-                                <div class="ms-3">
-                                    <input type="text" id="buscador" class="form-control" placeholder="Buscar..." />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<nav class="top-navbar">
+    <button class="btn btn-sm d-lg-none me-3" id="sidebarToggle" type="button">
+        <i class="bi bi-list"></i>
+    </button>
+    <div class="navbar-content">
+        <div class="d-flex align-items-center ms-auto me-3 d-none d-md-block">
+            <i class="bi bi-clock-fill text-muted me-2"></i>
+            <span class="text-muted" id="reloj"></span>
+        </div>
+
+        <ul class="navbar-nav d-flex flex-row align-items-center">
+            <li class="nav-item me-3">
+                <a class="nav-link position-relative" th:href="@{/coordinador/notificaciones}" title="Ver notificaciones">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${notificacionesNoLeidas > 0}"
+                          th:text="${notificacionesNoLeidas}">
+                        </span>
+                </a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span class="d-none d-sm-inline fw-medium">Coordinador</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-lg">
+                    <h6 class="dropdown-header fw-bold text-uppercase text-muted">Cuenta</h6>
+                    <a class="dropdown-item" th:href="@{/coordinador/perfil}">
+                        <i class="bi bi-person-fill me-2"></i> Mi Perfil
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" th:href="@{/logout}">
+                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                    </a>
                 </div>
+            </li>
+        </ul>
+    </div>
+</nav>
 
+<div class="main-content">
+    <div class="page-header">
+        <i class="bi bi-calendar-event-fill"></i>
+        <h3>Reservas de Sedes Asignadas</h3>
+    </div>
 
-                <div th:if="${errorAsistencia}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-circle-fill me-2"></i> <span th:text="${errorAsistencia}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-
-                <div th:if="${reservas.isEmpty()}" class="alert alert-info text-center mt-4 p-4 shadow-sm" style="border-radius: 12px;">
-                    <i class="bi bi-info-circle-fill me-2"></i> No hay reservas disponibles para los filtros seleccionados.
-                </div>
-
-                <div th:if="${!reservas.isEmpty()}">
-                    <table class="table table-bordered table-hover align-middle text-center">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Servicio</th>
-                            <th>Horario</th>
-                            <th>Fecha de Reserva</th>
-                            <th>Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody id="tablaReservas">
-                        <tr th:each="reserva : ${reservas.content}"
-                            th:attr="data-sede-id=${reserva.sedeServicio.sede.idsede},
-             data-fecha=${#temporals.format(reserva.fechaReserva, 'yyyy-MM-dd')},
-             data-hora-inicio=${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')},
-             data-hora-fin=${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}">
-
-                            <td th:text="${reserva.usuario != null ? reserva.usuario.nombres + ' ' + reserva.usuario.apellidos : 'Sin usuario'}"></td>
-
-                            <td th:text="${reserva.sedeServicio.servicio.nombre}"></td>
-
-                            <td>
-                                <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
-                                <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
-                            </td>
-
-                            <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></td>
-
-                            <td>
-                                <a th:href="@{'/coordinador/incidencia/' + ${reserva.idreserva}}" class="btn btn-warning btn-sm me-2">
-                                    <i class="bi bi-exclamation-triangle-fill"></i> Incidencia
-                                </a>
-                                <a th:href="@{'/coordinador/reserva-detalle/' + ${reserva.idreserva}}" class="btn btn-info btn-sm">
-                                    <i class="bi bi-info-circle-fill"></i> Detalles
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="d-flex justify-content-center mt-4" th:if="${!reservas.isEmpty()}">
-                    <!-- Paginación -->
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item" th:classappend="${reservas.first} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/coordinador/reservas-hoy(page=${reservas.number - 1},
-                                              sedeId=${filtroSedeId},
-                                              fecha=${filtroFecha})}">
-                                    Anterior
-                                </a>
-                            </li>
-                            <li class="page-item" th:each="i : ${#numbers.sequence(0, reservas.totalPages - 1)}"
-                                th:classappend="${reservas.number == i} ? 'active'">
-                                <a class="page-link"
-                                   th:href="@{/coordinador/reservas-hoy(page=${i},
-                                              sedeId=${filtroSedeId},
-                                              fecha=${filtroFecha})}"
-                                   th:text="${i + 1}">1</a>
-                            </li>
-                            <li class="page-item" th:classappend="${reservas.last} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/coordinador/reservas-hoy(page=${reservas.number + 1},
-                                              sedeId=${filtroSedeId},
-                                              fecha=${filtroFecha})}">
-                                    Siguiente
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+    <div class="card mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5 col-lg-4">
+                <label for="sedeFiltro" class="form-label">Filtrar por sede</label>
+                <select id="sedeFiltro" class="form-select">
+                    <option th:value="todas"
+                            th:selected="${filtroSedeId == null}">Todas las sedes</option>
+                    <option th:each="sede : ${sedesAsignadas}"
+                            th:value="${sede.idsede}"
+                            th:text="${sede.nombre}"
+                            th:selected="${sede.idsede == filtroSedeId}">
+                    </option>
+                </select>
             </div>
-            <!-- Modal Calendario -->
-            <div class="modal fade" id="modalCalendario" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title">Seleccionar fecha de reserva</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <label for="selectorFecha" class="form-label">Fecha:</label>
-                            <input type="date" id="selectorFecha" class="form-control"
-                                   th:value="${filtroFecha}" />
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-1"></i> Cancelar
-                            </button>
-                            <button type="button" id="btnAplicarFecha" class="btn btn-primary">
-                                <i class="bi bi-check-circle me-1"></i> Aplicar
-                            </button>
-                        </div>
+
+            <div class="col-md-7 col-lg-8">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label me-2 mb-0">Filtrar por fecha:</label>
+                    <div class="btn-group btn-filter-group" role="group">
+                        <button id="btnHoy" class="btn btn-outline-primary" th:classappend="${filtroFecha == #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')} ? 'active'">
+                            <i class="bi bi-calendar-day me-1"></i> Hoy
+                        </button>
+                        <button id="btnCalendario" class="btn btn-outline-primary" th:classappend="${filtroFecha != null && filtroFecha != #temporals.format(#temporals.createNow(), 'yyyy-MM-dd') && filtroFecha != 'todas'} ? 'active'">
+                            <i class="bi bi-calendar-date me-1"></i> Calendario
+                        </button>
+                        <button id="btnTodas" class="btn btn-outline-primary" th:classappend="${filtroFecha == 'todas'} ? 'active'">
+                            <i class="bi bi-calendar-week me-1"></i> Todas
+                        </button>
+                    </div>
+                    <div class="ms-3 flex-grow-1">
+                        <input type="text" id="buscador" class="form-control" placeholder="Buscar..." />
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+    </div>
 
-        <footer class="footer mt-auto py-3">
-            <div class="text-center mt-5 mb-3">
-                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
-            </div>
-            <div class="container text-center text-muted small">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
+
+    <div th:if="${errorAsistencia}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i> <span th:text="${errorAsistencia}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <div th:if="${reservas.isEmpty()}" class="alert alert-info text-center mt-4 p-4">
+        <i class="bi bi-info-circle-fill me-2"></i> No hay reservas disponibles para los filtros seleccionados.
+    </div>
+
+    <div th:if="${!reservas.isEmpty()}">
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-light">
+            <tr>
+                <th>Usuario</th>
+                <th>Servicio</th>
+                <th>Horario</th>
+                <th>Fecha de Reserva</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="tablaReservas">
+            <tr th:each="reserva : ${reservas.content}">
+                <td th:text="${reserva.usuario.nombres + ' ' + reserva.usuario.apellidos}"></td>
+                <td th:text="${reserva.sedeServicio.servicio.nombre}"></td>
+                <td>
+                    <span th:text="${#temporals.format(reserva.horarioDisponible.horaInicio, 'HH:mm')}"></span> -
+                    <span th:text="${#temporals.format(reserva.horarioDisponible.horaFin, 'HH:mm')}"></span>
+                </td>
+                <td th:text="${#temporals.format(reserva.fechaReserva, 'dd/MM/yyyy')}"></td>
+                <td>
+                    <a th:href="@{'/coordinador/incidencia/' + ${reserva.idreserva}}" class="btn btn-warning btn-sm me-2">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Incidencia
+                    </a>
+                    <a th:href="@{'/coordinador/reserva-detalle/' + ${reserva.idreserva}}" class="btn btn-info btn-sm">
+                        <i class="bi bi-info-circle-fill"></i> Detalles
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4" th:if="${!reservas.isEmpty()}">
+        <nav>
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${reservas.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/coordinador/reservas-hoy(page=${reservas.number - 1},
+                                  sedeId=${filtroSedeId},
+                                  fecha=${filtroFecha})}">
+                        Anterior
+                    </a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, reservas.totalPages - 1)}"
+                    th:classappend="${reservas.number == i} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/coordinador/reservas-hoy(page=${i},
+                                  sedeId=${filtroSedeId},
+                                  fecha=${filtroFecha})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${reservas.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/coordinador/reservas-hoy(page=${reservas.number + 1},
+                                  sedeId=${filtroSedeId},
+                                  fecha=${filtroFecha})}">
+                        Siguiente
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
+<div class="modal fade" id="modalCalendario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seleccionar fecha de reserva</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label for="selectorFecha" class="form-label">Fecha:</label>
+                <input type="date" id="selectorFecha" class="form-control"
+                       th:value="${filtroFecha}" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                </button>
+                <button type="button" id="btnAplicarFecha" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i> Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container text-center text-muted small py-3">
+        Municipalidad de San Miguel © 2025
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
-    /*<![CDATA[*/
+    // Lógica del reloj
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        const relojElement = document.getElementById('reloj');
+        if (relojElement) {
+            relojElement.innerHTML = `<span class="fw-medium">${timeString}</span>, <span class="text-muted">${dateString}</span>`;
+        }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Lógica para el toggle de la sidebar
+    document.addEventListener("DOMContentLoaded", function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+        }
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
         const basePath = /*[[ @{/coordinador/reservas-hoy} ]]*/ '';
         const sedeFiltro = document.getElementById("sedeFiltro");
@@ -399,10 +663,8 @@
         const selectorFecha = document.getElementById("selectorFecha");
         const btnAplicarFecha = document.getElementById("btnAplicarFecha");
 
-        // Estado actual de la fecha seleccionada
         let fechaSeleccionada = /*[[${filtroFecha} ?: '']]*/ '';
 
-        // Reconstruye y navega a la URL con filtros (y opcionalmente página)
         function navegar(page) {
             const params = new URLSearchParams();
             if (sedeFiltro.value !== "todas") params.set("sedeId", sedeFiltro.value);
@@ -411,17 +673,21 @@
             window.location.href = `${basePath}?${params.toString()}`;
         }
 
-        // Listeners
         sedeFiltro.addEventListener("change", () => navegar());
+
         btnHoy.addEventListener("click", () => {
-            fechaSeleccionada = new Date().toISOString().split("T")[0];
+            const today = new Date().toISOString().split("T")[0];
+            fechaSeleccionada = today;
             navegar();
         });
+
         btnTodas.addEventListener("click", () => {
-            fechaSeleccionada = "";
+            fechaSeleccionada = "todas";
             navegar();
         });
+
         btnCalendario.addEventListener("click", () => modal.show());
+
         btnAplicarFecha.addEventListener("click", () => {
             if (selectorFecha.value) {
                 fechaSeleccionada = selectorFecha.value;
@@ -429,84 +695,35 @@
                 navegar();
             }
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const fechaParam = urlParams.get('fecha');
+
+        if (fechaParam && fechaParam !== 'todas' && fechaParam !== new Date().toISOString().split("T")[0]) {
+            btnCalendario.classList.add('active');
+            btnHoy.classList.remove('active');
+            btnTodas.classList.remove('active');
+        } else if (fechaParam === new Date().toISOString().split("T")[0]) {
+            btnHoy.classList.add('active');
+            btnCalendario.classList.remove('active');
+            btnTodas.classList.remove('active');
+        } else if (fechaParam === 'todas') {
+            btnTodas.classList.add('active');
+            btnHoy.classList.remove('active');
+            btnCalendario.classList.remove('active');
+        }
     });
 
-
-    // 1. Capturamos el input y las filas
     const buscador = document.getElementById("buscador");
     const filas = Array.from(document.querySelectorAll("#tablaReservas tr"));
 
-    // 2. Listener para filtrar a medida que escribe
     buscador.addEventListener("input", function () {
         const termino = this.value.toLowerCase().trim();
-
         filas.forEach(fila => {
-            // todo el texto de la fila
             const textoFila = fila.textContent.toLowerCase();
-            // si incluye el término, la mostramos; si no, la ocultamos
             fila.style.display = textoFila.includes(termino) ? "" : "none";
         });
     });
-    /*]]>*/
-</script>
-
-
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // Función para actualizar la hora y la fecha en la navbar
-    function updateDateTime() {
-        const relojElement = document.getElementById('reloj'); // Asume que el ID es 'reloj'
-        const fechaElement = document.getElementById('fecha'); // Asume que el ID es 'fecha'
-
-        if (relojElement || fechaElement) {
-            const now = new Date();
-            // Formato de hora (ej: 01:19:03 a. m.)
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-            const timeString = now.toLocaleTimeString('es-PE', timeOptions).replace(/a\. m\./g, 'a. m.').replace(/p\. m\./g, 'p. m.');
-
-            // Formato de fecha (ej: 12/06/2025)
-            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-            const dateString = now.toLocaleDateString('es-PE', dateOptions);
-
-            if (relojElement) {
-                relojElement.textContent = timeString;
-            }
-            if (fechaElement) {
-                fechaElement.textContent = dateString;
-            }
-        }
-    }
-
-    // Actualizar cada segundo
-    setInterval(updateDateTime, 1000);
-    // Llamar al inicio para mostrar la hora inmediatamente
-    updateDateTime();
-
-    // Lógica para el toggle de la sidebar
-    document.addEventListener("DOMContentLoaded", function () {
-        const sidebarToggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
-        const mainContent = document.querySelector('.main');
-
-        if (sidebarToggle && sidebar && mainContent) {
-            sidebarToggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-                // Guarda el estado en localStorage
-                localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
-            });
-
-            // Recupera el estado guardado al cargar la página
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
-                document.body.classList.add('sidebar-collapsed');
-            }
-        }
-    });
-
-    // Se eliminó la lógica de geolocalización y el modal de "fuera de zona"
-    // ya que no son relevantes para la vista de perfil.
-    /*]]>*/
 </script>
 </body>
 </html>

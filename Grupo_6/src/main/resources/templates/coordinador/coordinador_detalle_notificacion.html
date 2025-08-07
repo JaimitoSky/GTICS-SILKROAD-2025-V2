@@ -3,350 +3,444 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Detalle de Notificación - Coordinador</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <title>Detalle de Notificación - Coordinador</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link th:href="@{/css/coordinador_sidebar.css}" rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        /* Estilos generales (manteniendo tus estilos base y añadiendo mejoras) */
+        /* Estilos base (copiados de tu código anterior) */
+        :root {
+            --primary-50: #f0fdfa;
+            --primary-100: #ccfbf1;
+            --primary-200: #99f6e4;
+            --primary-300: #5eead4;
+            --primary-400: #2dd4bf;
+            --primary-500: #14b8a6;
+            --primary-600: #0d9488;
+            --primary-700: #0f766e;
+            --primary-800: #115e59;
+            --primary-900: #134e4a;
+
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        /* Estructura principal de la página */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Fondo claro general */
-            color: #333;
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            display: flex;
+            min-height: 100vh;
         }
 
-        /* Aplicar transiciones a todos los elementos */
-        * {
-            transition: all 0.2s ease-in-out;
+        /* Sidebar estilo LinkedIn */
+        #sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
-        h2 {
-            font-weight: 700;
-            color: #333; /* Color oscuro para el título */
-            animation: fadeIn 0.4s ease-in-out;
-            display: flex; /* Para alinear el icono con el texto */
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            text-align: center;
+        }
+
+        .sidebar-header img {
+            max-height: 50px;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-600);
+            display: flex;
             align-items: center;
-            gap: 0.75rem; /* Espacio entre icono y texto */
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
         }
 
-        /* Estilos específicos para la caja de notificación */
+        .sidebar-nav .nav-link:hover {
+            background-color: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .sidebar-nav .nav-link.active {
+            background-color: var(--primary-100);
+            color: var(--primary-700);
+            font-weight: 500;
+        }
+
+        .sidebar-nav .nav-link i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Navbar superior */
+        .top-navbar {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 280px;
+            z-index: 900;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .nav-item {
+            margin-left: 1rem;
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-600);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .dropdown-menu {
+            border: 1px solid var(--gray-200);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            color: var(--gray-700);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid var(--gray-200);
+            margin: 0.5rem 0;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 280px;
+            margin-top: 60px;
+            padding: 2rem;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .page-header i {
+            color: var(--warning);
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            #sidebar {
+                left: -280px;
+            }
+
+            .top-navbar {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            #sidebar.active {
+                left: 0;
+            }
+        }
+
+        /* Estilos de la tarjeta de notificación adaptados */
         .notification-detail-box {
-            background-color: #ffffff; /* Fondo blanco, más limpio */
-            border-left: 6px solid #17b5c0; /* Usar el turquesa de la sidebar del coordinador */
-            padding: 2.5rem; /* Mayor padding para más espacio */
-            border-radius: 16px; /* Más redondeado */
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada para profundidad */
+            background-color: #ffffff;
+            border-left: 4px solid var(--primary-500); /* Usamos la variable de color */
+            padding: 2.5rem;
+            border-radius: 12px; /* Menos redondeado para más coherencia */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             animation: fadeIn 0.3s ease-in-out;
+            border: 1px solid var(--gray-200);
         }
 
         .notification-title {
-            font-weight: 700;
-            font-size: 1.5rem; /* Título ligeramente más grande */
-            color: #333; /* Color oscuro para el título */
-            margin-bottom: 0.75rem; /* Más espacio debajo del título */
-            display: flex; /* Para alinear el icono con el texto */
+            font-weight: 600; /* Ajuste para coherencia */
+            font-size: 1.25rem; /* Título ajustado */
+            color: var(--gray-800);
+            margin-bottom: 0.75rem;
+            display: flex;
             align-items: center;
-            gap: 0.75rem; /* Espacio entre icono y texto del título */
+            gap: 0.75rem;
         }
 
         .notification-description {
-            color: #555;
-            line-height: 1.6; /* Mayor interlineado para mejor legibilidad */
-            font-size: 1.05rem; /* Texto de descripción ligeramente más grande */
+            color: var(--gray-700);
+            line-height: 1.6;
+            font-size: 1rem; /* Ajuste de tamaño */
         }
 
         .notification-footer {
-            margin-top: 2rem; /* Mayor margen superior */
-            font-size: 0.9rem; /* Tamaño de fuente ligeramente más grande */
-            color: #777;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--gray-500);
             text-align: end;
-            display: flex; /* Flexbox para alinear fecha y hora */
+            display: flex;
             justify-content: flex-end;
-            gap: 0.75rem; /* Espacio entre fecha y hora */
+            gap: 0.75rem;
         }
 
         .notification-footer div {
             padding: 0.25rem 0.5rem;
-            background-color: #f0f2f5; /* Fondo sutil para fecha/hora */
+            background-color: var(--gray-100);
             border-radius: 8px;
         }
 
         .extra-text {
-            padding-top: 1.5rem; /* Mayor padding superior */
-            color: #444;
-            border-top: 1px solid #e9ecef; /* Separador sutil */
-            margin-top: 1.5rem; /* Margen superior para el separador */
-            font-size: 1rem;
+            padding-top: 1.5rem;
+            color: var(--gray-600);
+            border-top: 1px solid var(--gray-200);
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
         }
 
-        .btn-action-container { /* Renombrado para mayor claridad */
-            margin-top: 2.5rem; /* Mayor margen superior */
+        .btn-action-container {
+            margin-top: 2.5rem;
             display: flex;
-            justify-content: center;
+            justify-content: flex-end; /* Alinear a la derecha para consistencia */
         }
 
         .btn-action-container .btn {
-            font-weight: 600;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
-            padding: 0.85rem 2.5rem; /* Mayor padding para un botón más robusto */
-            font-size: 1.1rem; /* Texto un poco más grande */
-            /* Usamos el color de éxito de Bootstrap, o el color de tu tema */
-            background-color: #28a745;
-            border-color: #28a745;
-            color: white;
+            font-weight: 500;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            background-color: var(--primary-500); /* Usamos el color primario para el botón */
+            border-color: var(--primary-500);
             transition: all 0.2s ease-in-out;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-action-container .btn:hover {
-            background-color: #218838; /* Verde más oscuro al hover */
-            border-color: #1e7e34;
-            transform: translateY(-2px); /* Pequeña elevación al hover */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra más grande al hover */
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        footer.footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef; /* Separador sutil */
-            padding-top: 2rem; /* Más padding para el footer */
-            padding-bottom: 2rem;
-        }
-
-        footer.footer img {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* Sombra al logo del footer */
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Estilos para la navbar (repetidos aquí para asegurar la aplicación) */
-        .navbar .nav-item.time-display {
-            text-align: end;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin-right: 1.5rem;
-        }
-
-        .navbar .nav-item.time-display .time {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #333; /* Ajuste para navbar blanca */
-        }
-
-        .navbar .nav-item.time-display .date {
-            font-size: 0.8rem;
-            color: #777;
-        }
-
-        /* Ajuste para el ícono de notificaciones en la navbar */
-        .navbar .nav-link.notification-icon {
-            position: relative;
-            padding: 0.5rem 0.75rem;
-        }
-        .navbar .nav-link.notification-icon i {
-            font-size: 1.4rem;
-            color: #333; /* Ajuste para navbar blanca */
-        }
-        .navbar .nav-link.notification-icon .badge {
-            top: 0.2rem;
-            right: 0.3rem;
-            font-size: 0.75rem;
-            padding: 0.3em 0.55em;
-            background-color: #dc3545 !important;
-            border: 1px solid white;
-        }
-
-        /* Ajustes para el dropdown de perfil */
-        .navbar .nav-item.dropdown .nav-link {
-            color: #333 !important; /* Texto oscuro para el enlace de perfil */
-        }
-        .navbar .nav-item.dropdown .nav-link i {
-            color: #333 !important; /* Icono oscuro para el perfil */
-            font-size: 1.3rem; /* Tamaño del icono de persona */
-        }
-        .dropdown-menu {
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            overflow: hidden;
-            padding: 0.5rem 0;
-        }
-        .dropdown-menu a.dropdown-item {
-            padding: 0.75rem 1.25rem;
-            transition: background-color 0.2s ease-in-out;
-            color: #333;
-        }
-        .dropdown-menu a.dropdown-item:hover {
-            background-color: #e9ecef; /* Un gris muy claro al hover */
-            color: #17b5c0; /* Turquesa al hover */
-        }
-
-        /* Asegurarse que el toggle de la sidebar en la navbar sea visible y funcional */
-        .sidebar-toggle {
-            cursor: pointer;
-            font-size: 1.6rem;
-            margin: 0;
-            color: #17b5c0 !important; /* Usar el turquesa principal para el toggle */
-            background-color: transparent;
-            transition: all 0.2s;
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1050;
-            padding: 0.4rem 0.6rem;
-            border-radius: 0.5rem;
-        }
-
-        .sidebar-toggle:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        /* Navbar principal - Asegurando que sea blanca con sombra */
-        .navbar-bg {
-            background-color: #FFFFFF !important; /* Forzar el fondo blanco */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-        }
-        /* Esto es crucial si la navbar del COORDINADOR es de un color diferente.
-           Si la navbar del coordinador es turquesa, necesitarías cambiar estos estilos
-           para que los enlaces y texto sean blancos en ella.
-           Asumo que esta navbar es la misma que usas en otras páginas de coordinador
-           y que ya está estilizada para ser blanca con texto oscuro. */
     </style>
 </head>
 <body>
-<div class="wrapper">
-    <div th:replace="~{fragments/sidebar-coordinador :: sidebar}"></div>
+<nav id="sidebar">
+    <div class="sidebar-header text-center py-4">
+        <a th:href="@{/coordinador/home}" class="logo-link d-block">
+            <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" class="img-fluid">
+        </a>
+        <span class="d-block mt-3 fw-bold" style="color: var(--primary-700)">Coordinador</span>
+    </div>
 
-    <div class="main">
-        <div th:replace="~{fragments/navbar-coordinador :: navbar}"></div>
+    <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item">
+            <a th:href="@{/coordinador/home}" class="nav-link">
+                <i class="bi bi-house-door-fill"></i>Inicio
+            </a>
+        </li>
 
-        <main class="content">
-            <div class="container mt-5">
-                <h2 class="mb-4 text-dark">
-                    <i class="bi bi-bell-fill text-warning"></i>Centro de notificaciones
-                </h2>
+        <li class="nav-item">
+            <a th:href="@{/coordinador/reservas-hoy}" class="nav-link">
+                <i class="bi bi-calendar-check-fill"></i>Reservas
+            </a>
+        </li>
 
-                <div class="notification-detail-box">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                        <div>
-                            <div class="notification-title">
-                                <i class="bi bi-tools"></i> 🛠️ Mantenimiento programado
-                            </div>
-                            <p class="notification-description mt-2">
-                                El jueves 04/04 se realizará mantenimiento eléctrico en el complejo La Paz de 14:00 a 17:00.
-                            </p>
-                        </div>
-                        <div class="notification-footer mt-3 mt-md-0"> <div>03/04/2025</div>
-                            <div>09:00</div>
-                        </div>
-                    </div>
+        <li class="nav-item">
+            <a th:href="@{/coordinador/perfil}" class="nav-link">
+                <i class="bi bi-person-circle"></i>Mi Perfil
+            </a>
+        </li>
+    </ul>
+</nav>
 
-                    <div class="extra-text">
-                        Por favor, asegúrate de suspender cualquier actividad deportiva o de limpieza durante ese horario y comunicarlo a los vecinos en caso sea necesario.
-                    </div>
+<nav class="top-navbar">
+    <button class="btn btn-sm d-lg-none me-3" id="sidebarToggle" type="button">
+        <i class="bi bi-list"></i>
+    </button>
+    <div class="navbar-content">
+        <div class="d-flex align-items-center ms-auto me-3 d-none d-md-block">
+            <i class="bi bi-clock-fill text-muted me-2"></i>
+            <span class="text-muted" id="reloj"></span>
+        </div>
+
+        <ul class="navbar-nav d-flex flex-row align-items-center">
+            <li class="nav-item me-3">
+                <a class="nav-link position-relative" th:href="@{/coordinador/notificaciones}" title="Ver notificaciones">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${notificacionesNoLeidas > 0}"
+                          th:text="${notificacionesNoLeidas}">
+                        </span>
+                </a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span class="d-none d-sm-inline fw-medium">Coordinador</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-lg">
+                    <h6 class="dropdown-header fw-bold text-uppercase text-muted">Cuenta</h6>
+                    <a class="dropdown-item" th:href="@{/coordinador/perfil}">
+                        <i class="bi bi-person-fill me-2"></i> Mi Perfil
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" th:href="@{/logout}">
+                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                    </a>
                 </div>
+            </li>
+        </ul>
+    </div>
+</nav>
 
-                <div class="btn-action-container">
-                    <button class="btn btn-success px-4" onclick="window.location.href='coordinador-notificaciones.html'">
-                        <i class="bi bi-check-circle-fill me-2"></i>Aceptar
-                    </button>
+<div class="main-content">
+    <div class="page-header">
+        <i class="bi bi-bell-fill"></i>
+        <h3>Detalle de Notificación</h3>
+    </div>
+
+    <div class="notification-detail-box">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <div>
+                <div class="notification-title">
+                    <i class="bi bi-tools text-muted"></i>
+                    <span th:text="${notificacion.asunto}">Asunto de la Notificación</span>
+                </div>
+                <p class="notification-description mt-2" th:text="${notificacion.mensaje}">
+                    Descripción de la notificación
+                </p>
+            </div>
+            <div class="notification-footer mt-3 mt-md-0">
+                <div>
+                    <span th:text="${#dates.format(notificacion.fechaEnvio, 'dd/MM/yyyy')}">03/04/2025</span>
+                </div>
+                <div>
+                    <span th:text="${#dates.format(notificacion.fechaEnvio, 'HH:mm')}">09:00</span>
                 </div>
             </div>
-        </main>
+        </div>
 
-        <footer class="footer mt-auto py-3">
-            <div class="text-center mt-5 mb-4">
-                <img th:src="@{/img/photos/logo-san-miguel.png}" alt="Logo Municipalidad" height="60">
-            </div>
-            <div class="container text-center text-muted small">
-                Municipalidad de San Miguel © 2025
-            </div>
-        </footer>
+        <div class="extra-text">
+            Por favor, asegúrate de suspender cualquier actividad deportiva o de limpieza durante ese horario y comunicarlo a los vecinos en caso sea necesario.
+        </div>
+    </div>
+
+    <div class="btn-action-container">
+        <a th:href="@{/coordinador/notificaciones}" class="btn">
+            <i class="bi bi-arrow-left-circle-fill me-2"></i> Volver a Notificaciones
+        </a>
     </div>
 </div>
 
+<footer class="footer">
+    <div class="container text-center text-muted small py-3">
+        Municipalidad de San Miguel © 2025
+    </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script th:inline="javascript">
-    /*<![CDATA[*/
+    // Lógica del reloj
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        const relojElement = document.getElementById('reloj');
+        if (relojElement) {
+            relojElement.innerHTML = `<span class="fw-medium">${timeString}</span>, <span class="text-muted">${dateString}</span>`;
+        }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Lógica para el toggle de la sidebar
     document.addEventListener("DOMContentLoaded", function() {
-        // Obtenemos una referencia al elemento del reloj
-        const clockElement = document.getElementById('reloj');
-        // Obtenemos una referencia al elemento de la fecha
-        const dateElement = document.getElementById('fecha');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
 
-        // Función para actualizar el reloj y la fecha
-        function updateDateTime() {
-            const now = new Date();
-            // Formatear la hora
-            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
-            let timeString = now.toLocaleTimeString('es-PE', timeOptions);
-            // Asegurarse de que "a. m." y "p. m." estén en minúsculas y sin puntos si no se desea
-            timeString = timeString.replace('a. m.', 'a. m.').replace('p. m.', 'p. m.');
-
-            // Formatear la fecha
-            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-            const dateString = now.toLocaleDateString('es-PE', dateOptions);
-
-            if (clockElement) {
-                clockElement.textContent = timeString;
-            }
-            if (dateElement) {
-                dateElement.textContent = dateString;
-            }
-        }
-
-        // Llamar a la función una vez al cargar la página
-        updateDateTime();
-        // Actualizar cada segundo
-        setInterval(updateDateTime, 1000);
-
-        // --- Lógica para el toggle de la sidebar (si no viene del fragmento de navbar) ---
-        // Si tu navbar ya maneja el toggle, puedes eliminar este bloque.
-        // Lo mantengo por si la carga de la sidebar mediante fetch interfiere.
-        const sidebarToggle = document.querySelector('.js-sidebar-toggle');
-        const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
-        const mainContent = document.querySelector('.main');
-
-        if (sidebarToggle && sidebar && mainContent) {
-            sidebarToggle.addEventListener('click', function (e) {
-                e.preventDefault();
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('sidebar-collapsed');
-                // Opcional: guardar el estado en localStorage
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
             });
-
-            // Cargar el estado inicial de la sidebar desde localStorage
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('sidebar-collapsed');
-            }
         }
-
-        // *** NOTA SOBRE LA CARGA DE SIDEBAR CON FETCH ***
-        // El script que usas:
-        // fetch('sidebar-coordinador.html')
-        //    .then(res => res.text())
-        //    .then(html => { document.getElementById('sidebar-container').innerHTML = html; ... });
-        // Carga la sidebar de forma asíncrona. Si tu navbar también es un fragmento
-        // de Thymeleaf (como en mis sugerencias anteriores), entonces la sidebar y navbar
-        // ya se cargarán de forma síncrona con Thymeleaf.
-        // Si sigues usando `fetch` para la sidebar, el `th:replace` en el HTML
-        // de este archivo para la sidebar DEBE SER ELIMINADO.
-        // En este código, asumo que usarás `th:replace` para ambos.
     });
-    /*]]>*/
 </script>
 </body>
 </html>

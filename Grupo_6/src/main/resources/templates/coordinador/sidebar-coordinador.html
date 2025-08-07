@@ -1,30 +1,37 @@
-<nav id="sidebar" class="sidebar js-sidebar">
-    <div class="sidebar-content js-simplebar">
-        <div class="sidebar-header">
-            <img th:src="@{/img/logo-san-miguel.png}" alt="Logo Municipalidad">
-            <div class="municipality-name">Coordinador</div> </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/coordinador/home') ? 'active' : ''}" th:href="@{/coordinador/home}">
-                    <i class="bi bi-house-door-fill"></i>
-                    <span>Inicio</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/coordinador/reservas') ? 'active' : ''}" th:href="@{/coordinador/reservas}">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>Reservas</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/coordinador/perfil') ? 'active' : ''}" th:href="@{/coordinador/perfil}">
-                    <i class="bi bi-person"></i>
-                    <span>Mi Perfil</span>
-                </a>
-            </li>
-        </ul>
+<nav id="sidebar">
+    <div class="sidebar-header text-center py-4">
+        <a th:href="@{/coordinador/home}" class="logo-link d-block">
+            <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" class="img-fluid">
+        </a>
+        <span class="d-block mt-3 fw-bold" style="color: var(--primary-700)">Coordinador</span>
     </div>
+
+    <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item">
+            <a th:href="@{/coordinador/home}"
+               th:classappend="${#request.requestURI.startsWith('/coordinador/home') ? 'active' : ''}"
+               class="nav-link">
+                <i class="bi bi-house-door-fill"></i>
+                <span>Inicio</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a th:href="@{/coordinador/reservas}"
+               th:classappend="${#request.requestURI.startsWith('/coordinador/reservas') ? 'active' : ''}"
+               class="nav-link">
+                <i class="bi bi-calendar-check-fill"></i>
+                <span>Reservas</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a th:href="@{/coordinador/perfil}"
+               th:classappend="${#request.requestURI.startsWith('/coordinador/perfil') ? 'active' : ''}"
+               class="nav-link">
+                <i class="bi bi-person-circle"></i>
+                <span>Mi Perfil</span>
+            </a>
+        </li>
+    </ul>
 </nav>
