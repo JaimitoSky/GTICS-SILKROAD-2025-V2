@@ -1,531 +1,563 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coordinador - Sistema de Gestión</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Coordinador - Sistema de Gestión</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        :root {
-            --primary-50: #f0fdfa;
-            --primary-100: #ccfbf1;
-            --primary-200: #99f6e4;
-            --primary-300: #5eead4;
-            --primary-400: #2dd4bf;
-            --primary-500: #14b8a6;
-            --primary-600: #0d9488;
-            --primary-700: #0f766e;
-            --primary-800: #115e59;
-            --primary-900: #134e4a;
+        <style>
+            :root {
+                --primary-50: #f0fdfa;
+                --primary-100: #ccfbf1;
+                --primary-200: #99f6e4;
+                --primary-300: #5eead4;
+                --primary-400: #2dd4bf;
+                --primary-500: #14b8a6;
+                --primary-600: #0d9488;
+                --primary-700: #0f766e;
+                --primary-800: #115e59;
+                --primary-900: #134e4a;
 
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
+                --gray-50: #f9fafb;
+                --gray-100: #f3f4f6;
+                --gray-200: #e5e7eb;
+                --gray-300: #d1d5db;
+                --gray-400: #9ca3af;
+                --gray-500: #6b7280;
+                --gray-600: #4b5563;
+                --gray-700: #374151;
+                --gray-800: #1f2937;
+                --gray-900: #111827;
 
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-        }
+                --success: #10b981;
+                --warning: #f59e0b;
+                --danger: #ef4444;
+                --info: #3b82f6;
+            }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--gray-50);
-            color: var(--gray-800);
-            display: flex;
-            min-height: 100vh;
-        }
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--gray-50);
+                color: var(--gray-800);
+                display: flex;
+                min-height: 100vh;
+            }
 
-        /* Sidebar estilo LinkedIn */
-        #sidebar {
-            width: 280px;
-            background: white;
-            border-right: 1px solid var(--gray-200);
-            position: fixed;
-            height: 100vh;
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-            text-align: center;
-        }
-
-        .sidebar-header img {
-            max-height: 50px;
-        }
-
-        .sidebar-nav {
-            padding: 1rem 0;
-        }
-
-        .sidebar-nav .nav-link {
-            padding: 0.75rem 1.5rem;
-            color: var(--gray-600);
-            display: flex;
-            align-items: center;
-            margin: 0.25rem 1rem;
-            border-radius: 8px;
-            transition: all 0.2s;
-            text-decoration: none; /* Asegura que los enlaces no tengan subrayado */
-        }
-
-        .sidebar-nav .nav-link:hover {
-            background-color: var(--primary-50);
-            color: var(--primary-600);
-        }
-
-        .sidebar-nav .nav-link.active {
-            background-color: var(--primary-100);
-            color: var(--primary-700);
-            font-weight: 500;
-        }
-
-        .sidebar-nav .nav-link i {
-            margin-right: 12px;
-            font-size: 1.1rem;
-            width: 24px;
-            text-align: center;
-        }
-
-        /* Navbar superior */
-        .top-navbar {
-            height: 60px;
-            background: white;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 280px;
-            z-index: 900;
-        }
-
-        .navbar-content {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            width: 100%;
-        }
-
-        .nav-item {
-            margin-left: 1rem;
-        }
-
-        .nav-link {
-            color: var(--gray-600);
-            display: flex;
-            align-items: center;
-            position: relative;
-            text-decoration: none;
-        }
-
-        .nav-link:hover {
-            color: var(--primary-600);
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            padding: 0.25rem 0.4rem;
-        }
-
-        .dropdown-menu {
-            border: 1px solid var(--gray-200);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 0.5rem 0;
-        }
-
-        .dropdown-item {
-            padding: 0.5rem 1.5rem;
-            color: var(--gray-700);
-        }
-
-        .dropdown-item:hover {
-            background-color: var(--primary-50);
-            color: var(--primary-700);
-        }
-
-        .dropdown-divider {
-            border-top: 1px solid var(--gray-200);
-            margin: 0.5rem 0;
-        }
-
-        /* Contenido principal */
-        .main-content {
-            margin-left: 280px;
-            margin-top: 60px;
-            padding: 2rem;
-            width: 100%;
-        }
-
-        .page-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .page-header h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--gray-800);
-            margin: 0;
-        }
-
-        .page-header i {
-            color: var(--primary-500);
-            margin-right: 1rem;
-            font-size: 1.5rem;
-        }
-
-        /* Cards */
-        .card {
-            background: white;
-            border: 1px solid var(--gray-200);
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1.5rem;
-            transition: all 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-            background-color: white;
-            border-radius: 12px 12px 0 0;
-            font-weight: 600;
-            color: var(--gray-800);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem; /* Ajuste para el espacio entre el ícono y el texto */
-        }
-
-        .card-header i {
-            color: var(--primary-500);
-            font-size: 1.25rem; /* Icono un poco más grande */
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* Formularios */
-        .form-select {
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .form-select:focus {
-            border-color: var(--primary-400);
-            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
-        }
-
-        /* Botones */
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: none;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .btn-lg {
-            padding: 0.875rem 2rem;
-            font-size: 1rem;
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .btn-warning {
-            background-color: var(--warning);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Alertas */
-        .alert {
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem; /* Espacio entre el icono y el texto */
-        }
-
-        .alert-info {
-            background-color: var(--primary-50);
-            color: var(--primary-800);
-        }
-
-        .alert-warning {
-            background-color: #fffbeb;
-            color: #92400e;
-        }
-
-        /* Mapa */
-        #map {
-            height: 350px;
-            width: 100%;
-            border-radius: 0 0 12px 12px;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
+            /* Sidebar estilo LinkedIn */
             #sidebar {
-                left: -280px;
+                width: 280px;
+                background: white;
+                border-right: 1px solid var(--gray-200);
+                position: fixed;
+                height: 100vh;
+                transition: all 0.3s;
+                z-index: 1000;
             }
 
+            .sidebar-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid var(--gray-200);
+                text-align: center;
+            }
+
+            .sidebar-header img {
+                max-height: 50px;
+            }
+
+            .sidebar-nav {
+                padding: 1rem 0;
+            }
+
+            .sidebar-nav .nav-link {
+                padding: 0.75rem 1.5rem;
+                color: var(--gray-600);
+                display: flex;
+                align-items: center;
+                margin: 0.25rem 1rem;
+                border-radius: 8px;
+                transition: all 0.2s;
+                text-decoration: none; /* Asegura que los enlaces no tengan subrayado */
+            }
+
+            .sidebar-nav .nav-link:hover {
+                background-color: var(--primary-50);
+                color: var(--primary-600);
+            }
+
+            .sidebar-nav .nav-link.active {
+                background-color: var(--primary-100);
+                color: var(--primary-700);
+                font-weight: 500;
+            }
+
+            .sidebar-nav .nav-link i {
+                margin-right: 12px;
+                font-size: 1.1rem;
+                width: 24px;
+                text-align: center;
+            }
+
+            /* Navbar superior */
             .top-navbar {
-                left: 0;
+                height: 60px;
+                background: white;
+                border-bottom: 1px solid var(--gray-200);
+                display: flex;
+                align-items: center;
+                padding: 0 1.5rem;
+                position: fixed;
+                top: 0;
+                right: 0;
+                left: 280px;
+                z-index: 900;
             }
 
+            .navbar-content {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                width: 100%;
+            }
+
+            .nav-item {
+                margin-left: 1rem;
+            }
+
+            .nav-link {
+                color: var(--gray-600);
+                display: flex;
+                align-items: center;
+                position: relative;
+                text-decoration: none;
+            }
+
+            .nav-link:hover {
+                color: var(--primary-600);
+            }
+
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.25rem 0.4rem;
+            }
+
+            .dropdown-menu {
+                border: 1px solid var(--gray-200);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                padding: 0.5rem 0;
+            }
+
+            .dropdown-item {
+                padding: 0.5rem 1.5rem;
+                color: var(--gray-700);
+            }
+
+            .dropdown-item:hover {
+                background-color: var(--primary-50);
+                color: var(--primary-700);
+            }
+
+            .dropdown-divider {
+                border-top: 1px solid var(--gray-200);
+                margin: 0.5rem 0;
+            }
+
+            /* Contenido principal */
             .main-content {
-                margin-left: 0;
+                margin-left: 280px;
+                margin-top: 60px;
+                padding: 2rem;
+                width: 100%;
             }
 
-            #sidebar.active {
-                left: 0;
+            .page-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 2rem;
             }
-        }
-    </style>
-</head>
-<body>
-<nav id="sidebar" th:fragment="sidebar">
-    <div class="sidebar-header text-center py-4">
-        <a th:href="@{/coordinador/home}" class="logo-link d-block">
-            <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" class="img-fluid">
-        </a>
-        <span class="d-block mt-3 fw-bold" style="color: var(--primary-700)">Coordinador</span>
-    </div>
 
-    <ul class="nav flex-column sidebar-nav">
-        <li class="nav-item">
-            <a th:href="@{/coordinador/home}" class="nav-link active">
-                <i class="bi bi-house-door-fill"></i>Inicio
-            </a>
-        </li>
+            .page-header h3 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--gray-800);
+                margin: 0;
+            }
 
-        <li class="nav-item">
-            <a th:href="@{/coordinador/reservas-hoy}" class="nav-link">
-                <i class="bi bi-calendar-check-fill"></i>Reservas
-            </a>
-        </li>
+            .page-header i {
+                color: var(--primary-500);
+                margin-right: 1rem;
+                font-size: 1.5rem;
+            }
 
-        <li class="nav-item">
-            <a th:href="@{/coordinador/perfil}" class="nav-link">
-                <i class="bi bi-person-circle"></i>Mi Perfil
-            </a>
-        </li>
-    </ul>
-</nav>
+            /* Cards */
+            .card {
+                background: white;
+                border: 1px solid var(--gray-200);
+                border-radius: 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                margin-bottom: 1.5rem;
+                transition: all 0.2s;
+            }
 
-<nav class="top-navbar" th:fragment="navbar">
-    <button class="btn btn-sm d-lg-none me-3" id="sidebarToggle" type="button">
-        <i class="bi bi-list"></i>
-    </button>
-    <div class="navbar-content">
-        <div class="d-flex align-items-center ms-auto me-3 d-none d-md-block">
-            <i class="bi bi-clock-fill text-muted me-2"></i>
-            <span class="text-muted" id="reloj"></span>
-        </div>
+            .card:hover {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
 
-        <ul class="navbar-nav d-flex flex-row align-items-center">
-            <li class="nav-item me-3">
-                <a class="nav-link position-relative" th:href="@{/coordinador/notificaciones}" title="Ver notificaciones">
-                    <i class="bi bi-bell-fill"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          th:if="${notificacionesNoLeidas > 0}"
-                          th:text="${notificacionesNoLeidas}">
+            .card-header {
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid var(--gray-200);
+                background-color: white;
+                border-radius: 12px 12px 0 0;
+                font-weight: 600;
+                color: var(--gray-800);
+                display: flex;
+                align-items: center;
+                gap: 0.75rem; /* Ajuste para el espacio entre el ícono y el texto */
+            }
+
+            .card-header i {
+                color: var(--primary-500);
+                font-size: 1.25rem; /* Icono un poco más grande */
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            /* Formularios */
+            .form-select {
+                padding: 0.75rem 1rem;
+                border: 1px solid var(--gray-300);
+                border-radius: 8px;
+                font-size: 1rem;
+            }
+
+            .form-select:focus {
+                border-color: var(--primary-400);
+                box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+            }
+
+            /* Botones */
+            .btn {
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 500;
+                transition: all 0.2s;
+                border: none;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .btn-lg {
+                padding: 0.875rem 2rem;
+                font-size: 1rem;
+            }
+
+            .btn-success {
+                background-color: var(--success);
+                color: white;
+            }
+
+            .btn-warning {
+                background-color: var(--warning);
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Alertas */
+            .alert {
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                border: none;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem; /* Espacio entre el icono y el texto */
+            }
+
+            .alert-info {
+                background-color: var(--primary-50);
+                color: var(--primary-800);
+            }
+
+            .alert-warning {
+                background-color: #fffbeb;
+                color: #92400e;
+            }
+
+            /* Mapa */
+            #map {
+                height: 350px;
+                width: 100%;
+                border-radius: 0 0 12px 12px;
+            }
+
+            /* Responsive */
+            @media (max-width: 992px) {
+                #sidebar {
+                    left: -280px;
+                }
+
+                .top-navbar {
+                    left: 0;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                }
+
+                #sidebar.active {
+                    left: 0;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav id="sidebar" th:fragment="sidebar">
+            <div class="sidebar-header text-center py-4">
+                <a th:href="@{/coordinador/home}" class="logo-link d-block">
+                    <img th:src="@{/img/logo_sanmiguel.png}" alt="Logo Municipalidad" class="img-fluid">
+                </a>
+                <span class="d-block mt-3 fw-bold" style="color: var(--primary-700)">Coordinador</span>
+            </div>
+
+            <ul class="nav flex-column sidebar-nav">
+                <li class="nav-item">
+                    <a th:href="@{/coordinador/home}" class="nav-link active">
+                        <i class="bi bi-house-door-fill"></i>Inicio
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a th:href="@{/coordinador/reservas-hoy}" class="nav-link">
+                        <i class="bi bi-calendar-check-fill"></i>Reservas
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a th:href="@{/coordinador/perfil}" class="nav-link">
+                        <i class="bi bi-person-circle"></i>Mi Perfil
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <nav class="top-navbar" th:fragment="navbar">
+            <button class="btn btn-sm d-lg-none me-3" id="sidebarToggle" type="button">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="navbar-content">
+                <div class="d-flex align-items-center ms-auto me-3 d-none d-md-block">
+                    <i class="bi bi-clock-fill text-muted me-2"></i>
+                    <span class="text-muted" id="reloj"></span>
+                </div>
+
+                <ul class="navbar-nav d-flex flex-row align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="nav-link position-relative" th:href="@{/coordinador/notificaciones}" title="Ver notificaciones">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  th:if="${notificacionesNoLeidas > 0}"
+                                  th:text="${notificacionesNoLeidas}">
                         </span>
-                </a>
-            </li>
+                        </a>
+                    </li>
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle me-2"></i>
-                    <span class="d-none d-sm-inline fw-medium">Coordinador</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end shadow-lg">
-                    <h6 class="dropdown-header fw-bold text-uppercase text-muted">Cuenta</h6>
-                    <a class="dropdown-item" th:href="@{/coordinador/perfil}">
-                        <i class="bi bi-person-fill me-2"></i> Mi Perfil
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item text-danger" th:href="@{/logout}">
-                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-                    </a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <span class="d-none d-sm-inline fw-medium">Coordinador</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg">
+                            <h6 class="dropdown-header fw-bold text-uppercase text-muted">Cuenta</h6>
+                            <a class="dropdown-item" th:href="@{/coordinador/perfil}">
+                                <i class="bi bi-person-fill me-2"></i> Mi Perfil
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" th:href="@{/logout}">
+                                <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="page-header">
+                <i class="bi bi-geo-alt-fill"></i>
+                <h3>Local asignado</h3>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6 col-md-12">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="bi bi-building"></i>Selecciona un local
+                        </div>
+                        <div class="card-body">
+                            <label for="sedeSelect" class="form-label visually-hidden">
+                                Selecciona un local
+                            </label>
+                            <select id="sedeSelect" class="form-select form-select-lg mb-4">
+                                <option
+                                        th:each="sede : ${sedesAsignadas}"
+                                        th:value="${sede.idsede}"
+                                        th:text="${sede.nombre}">
+                                </option>
+                            </select>
+                            <div
+                                    id="mensajeAsistencia"
+                                    class="alert alert-info text-start mt-4 d-none"
+                                    role="alert"
+                            >
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                Ya registraste tu entrada hoy a las: <strong id="horaAsistenciaTexto"></strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </li>
-        </ul>
-    </div>
-</nav>
 
-<div class="main-content">
-    <div class="page-header">
-        <i class="bi bi-geo-alt-fill"></i>
-        <h3>Local asignado</h3>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-6 col-md-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="bi bi-building"></i>Selecciona un local
-                </div>
-                <div class="card-body">
-                    <label for="sedeSelect" class="form-label visually-hidden">
-                        Selecciona un local
-                    </label>
-                    <select id="sedeSelect" class="form-select form-select-lg mb-4">
-                        <option
-                                th:each="sede : ${sedesAsignadas}"
-                                th:value="${sede.idsede}"
-                                th:text="${sede.nombre}">
-                        </option>
-                    </select>
-                    <div
-                            id="mensajeAsistencia"
-                            class="alert alert-info text-start mt-4 d-none"
-                            role="alert"
-                    >
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Ya registraste tu entrada hoy a las: <strong id="horaAsistenciaTexto"></strong>
+                <div class="col-lg-6 col-md-12">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="bi bi-map-fill"></i>Ubicación del Local
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="map"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-6 col-md-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="bi bi-map-fill"></i>Ubicación del Local
-                </div>
-                <div class="card-body p-0">
-                    <div id="map"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <div class="row g-4 mt-4">
+                <div class="col-12">
+                    <div class="card text-center" id="bloqueFormulario">
+                        <div class="card-body py-4">
+                            <div id="sinTurnoMensaje" class="alert alert-warning mb-4 justify-content-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <span>Hoy no tienes ningún horario asignado</span>
+                            </div>
 
-    <div class="row g-4 mt-4">
-        <div class="col-12">
-            <div class="card text-center" id="bloqueFormulario">
-                <div class="card-body py-4">
-                    <div id="sinTurnoMensaje" class="alert alert-warning mb-4 justify-content-center">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <span>Hoy no tienes ningún horario asignado</span>
-                    </div>
+                            <div id="conTurnoContenido">
+                                <p class="card-text mb-4 text-muted">
+                                    Usa los botones para registrar tu entrada o salida según tu turno.
+                                </p>
 
-                    <div id="conTurnoContenido">
-                        <p class="card-text mb-4 text-muted">
-                            Usa los botones para registrar tu entrada o salida según tu turno.
-                        </p>
+                                <div
+                                        id="turnos-data"
+                                        th:data-json="${turnosJson}"
+                                        style="display: none;"
+                                ></div>
+                                <div
+                                        id="asistencias-data"
+                                        th:data-json="${asistenciasPorSede}"
+                                        style="display: none;"
+                                ></div>
 
-                        <div
-                                id="turnos-data"
-                                th:data-json="${turnosJson}"
-                                style="display: none;"
-                        ></div>
-                        <div
-                                id="asistencias-data"
-                                th:data-json="${asistenciasPorSede}"
-                                style="display: none;"
-                        ></div>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <form id="formEntrada" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
+                                        <input type="hidden" id="latitudInput" name="latitud" />
+                                        <input type="hidden" id="longitudInput" name="longitud" />
+                                        <input type="hidden" id="idsedeInput" name="idsede" />
+                                        <input type="hidden" id="turnoIdInput" name="id_coordinador_horario">
+                                        <input type="hidden" name="accion" value="entrada" />
+                                        <input type="hidden" id="programadaEntradaInput" name="hora_programada_entrada" />
+                                        <input type="hidden" id="estadoEntradaInput" name="estado" />
+                                        <button
+                                                type="button"
+                                                class="btn btn-success btn-lg px-5 d-none"
+                                                id="btnEntrada"
+                                        >
+                                            <i class="bi bi-check-circle-fill me-2"></i> Registrar entrada
+                                        </button>
+                                    </form>
 
-                        <div class="d-flex justify-content-center gap-3">
-                            <form id="formEntrada" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
-                                <input type="hidden" id="latitudInput" name="latitud" />
-                                <input type="hidden" id="longitudInput" name="longitud" />
-                                <input type="hidden" id="idsedeInput" name="idsede" />
-                                <input type="hidden" id="turnoIdInput" name="id_coordinador_horario">
-                                <input type="hidden" name="accion" value="entrada" />
-                                <input type="hidden" id="programadaEntradaInput" name="hora_programada_entrada" />
-                                <input type="hidden" id="estadoEntradaInput" name="estado" />
-                                <button
-                                        type="button"
-                                        class="btn btn-success btn-lg px-5 d-none"
-                                        id="btnEntrada"
-                                >
-                                    <i class="bi bi-check-circle-fill me-2"></i> Registrar entrada
-                                </button>
-                            </form>
-
-                            <form id="formSalida" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
-                                <input type="hidden" id="latitudSalida" name="latitudSalida">
-                                <input type="hidden" id="longitudSalida" name="longitudSalida">
-                                <input type="hidden" id="idsedeInputSalida" name="idsede">
-                                <input type="hidden" id="turnoIdInputSalida" name="id_coordinador_horario">
-                                <input type="hidden" id="accionSalida" name="accion" value="salida">
-                                <input type="hidden" id="programadaSalidaInput" name="hora_programada_salida" />
-                                <input type="hidden" id="estadoSalidaInput" name="estado" />
-                                <button type="button"
-                                        class="btn btn-warning btn-lg px-5 d-none"
-                                        id="btnSalida">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Registrar salida
-                                </button>
-                            </form>
+                                    <form id="formSalida" th:action="@{/coordinador/asistencia-dia/registrar}" method="post">
+                                        <input type="hidden" id="latitudSalida" name="latitudSalida">
+                                        <input type="hidden" id="longitudSalida" name="longitudSalida">
+                                        <input type="hidden" id="idsedeInputSalida" name="idsede">
+                                        <input type="hidden" id="turnoIdInputSalida" name="id_coordinador_horario">
+                                        <input type="hidden" id="accionSalida" name="accion" value="salida">
+                                        <input type="hidden" id="programadaSalidaInput" name="hora_programada_salida" />
+                                        <input type="hidden" id="estadoSalidaInput" name="estado" />
+                                        <button type="button"
+                                                class="btn btn-warning btn-lg px-5 d-none"
+                                                id="btnSalida">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Registrar salida
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    // Toggle sidebar en móviles
-    document.getElementById('sidebarToggle').addEventListener('click', function() {
-        document.getElementById('sidebar').classList.toggle('active');
-    });
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            // Toggle sidebar en móviles
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
 
-    // Reloj en tiempo real
-    function updateClock() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-        document.getElementById('reloj').innerHTML = `<span class="fw-medium">${timeString}</span>, <span class="text-muted">${dateString}</span>`;
-    }
+            // Reloj en tiempo real
+            function updateClock() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                const dateString = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+                document.getElementById('reloj').innerHTML = `<span class="fw-medium">${timeString}</span>, <span class="text-muted">${dateString}</span>`;
+            }
 
-    setInterval(updateClock, 1000);
-    updateClock();
+            setInterval(updateClock, 1000);
+            updateClock();
+            const map = L.map('map').setView([-12.0621065, -77.0371545], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
 
-    // ... (Resto de tu código JavaScript existente) ...
-</script>
-</body>
+            L.marker([-12.0621065, -77.0371545]).addTo(map);
+            L.circle([-12.0621065, -77.0371545], {
+                radius: 500,
+                color: '#0d6efd',
+                fillColor: '#cce5ff',
+                fillOpacity: 0.2
+            }).addTo(map);
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const sidebarToggle = document.querySelector(".js-sidebar-toggle");
+                const sidebar = document.getElementById('sidebar'); // Asume que la sidebar cargada tiene id="sidebar"
+                const mainContent = document.querySelector('.main');
+
+                if (sidebarToggle && sidebar && mainContent) {
+                    sidebarToggle.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        document.body.classList.toggle("sidebar-collapsed");
+                        // Guarda el estado en localStorage
+                        localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
+                    });
+
+                    // Recupera el estado guardado al cargar la página
+                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                    if (isCollapsed) {
+                        document.body.classList.add('sidebar-collapsed');
+                    }
+                }
+            });
+        </script>
+
+    </body>
 </html>
