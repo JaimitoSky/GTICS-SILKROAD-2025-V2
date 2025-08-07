@@ -3,28 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Configurar Sede - Superadmin</title>
 
     <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/estilos_superadmin.css}">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <!-- Estilos internos -->
-
 </head>
-<script>
-    function ajustarSoloHoras(input) {
-        if (!input.value) return;
-        const partes = input.value.split(':');
-        if (partes.length >= 1) {
-            input.value = partes[0].padStart(2, '0') + ':00';
-        }
-    }
-</script>
-
 
 <body>
 <div class="wrapper">
@@ -35,23 +24,18 @@
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
-
-
-
-
-
         <!-- Contenido principal -->
         <main class="content">
             <div class="container-fluid p-0">
-                <h1 class="h3 mb-4">
-                    <strong>Configurar Sede:</strong>
-                    <span th:text="${sede.nombre}"></span>
-                </h1>
+                <h2 class="page-title">
+                    Configurar Sede: <strong th:text="${sede.nombre}"></strong>
+                </h2>
 
                 <!-- Servicios y Tarifas -->
                 <div class="card mb-4">
-                    <div class="card-header">Servicios y Tarifas</div>
+                    <div class="card-header">
+                        <i class="bi bi-list-check me-2"></i>Servicios y Tarifas
+                    </div>
                     <div class="card-body">
                         <form th:action="@{/superadmin/sedes/configurar/servicios}" method="post">
                             <input type="hidden" th:value="${sede.idsede}" name="idsede" />
@@ -66,7 +50,6 @@
                                     <label class="form-label">Nombre Personalizado</label>
                                     <input type="text" name="nombrePersonalizado" class="form-control" placeholder="Ej. Cancha Fútbol 1" required />
                                 </div>
-
                                 <div class="col-md-6">
                                     <label class="form-label">Tarifa</label>
                                     <select class="form-select" name="idtarifa" required>
@@ -74,44 +57,36 @@
                                                 th:value="${t.idtarifa}"
                                                 th:text="${t.descripcion + ' - S/ ' + t.monto}">
                                         </option>
-
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Asignar Servicio</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Asignar Servicio
+                            </button>
                         </form>
 
                         <hr/>
-                        <h5 class="mt-4">Servicios Asignados</h5>
+                        <h5 class="mt-4"><i class="bi bi-card-checklist me-2"></i>Servicios Asignados</h5>
                         <ul class="list-unstyled">
                             <li th:each="ss : ${sede.sedeServicios}" class="mb-4">
                                 <div class="d-flex align-items-center mb-2">
-                                    <!-- Nombre y edición de tarifa/estado -->
-                                    <!-- Nombre del servicio -->
                                     <strong th:text="${ss.nombrePersonalizado != null ? ss.nombrePersonalizado : ss.servicio.nombre}"></strong>
 
-                                    <!-- Selector de tarifa -->
                                     <form th:action="@{/superadmin/sedes/configurar/servicios/actualizar-tarifa}" method="post" class="ms-3 d-flex align-items-center gap-2">
                                         <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
-
-                                        <!-- Campo editable para nombre personalizado -->
                                         <input type="text" name="nombrePersonalizado" class="form-control form-control-sm"
                                                th:value="${ss.nombrePersonalizado}" placeholder="Nombre personalizado" required />
-
-                                        <!-- Selector de tarifa -->
                                         <select class="form-select form-select-sm" name="idtarifa">
                                             <option th:each="t : ${listaTarifas}" th:value="${t.idtarifa}"
                                                     th:selected="${t.idtarifa == ss.tarifa.idtarifa}"
                                                     th:text="${t.descripcion + ' (S/ ' + t.monto + ')'}">
                                             </option>
                                         </select>
-
-                                        <!-- Botón de guardar -->
-                                        <button type="submit" class="btn btn-warning btn-sm">Guardar</button>
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-save me-1"></i>Guardar
+                                        </button>
                                     </form>
 
-
-                                    <!-- Botón de activar/desactivar -->
                                     <form th:action="@{/superadmin/sedes/configurar/servicios/toggle-estado}" method="post" class="ms-2">
                                         <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
                                         <button type="submit"
@@ -119,63 +94,52 @@
                                                 th:text="${ss.activo} ? 'Desactivar' : 'Activar'">
                                         </button>
                                     </form>
-
                                 </div>
 
                                 <form th:action="@{/superadmin/sedes/configurar/servicios/actualizar-foto}"
                                       method="post"
                                       enctype="multipart/form-data"
                                       class="d-flex align-items-center mb-4">
-
                                     <input type="hidden" name="idsedeServicio" th:value="${ss.idSedeServicio}" />
-
-                                    <!-- wrapper clickeable para disparar el file input -->
                                     <div class="rounded border me-3"
                                          style="width:80px; height:80px; overflow:hidden; cursor:pointer;"
                                          th:onclick="|document.getElementById('fotoServicio-${ss.idSedeServicio}').click()|">
-
-                                        <!-- imagen REAL si ya hay una subida -->
                                         <img th:if="${ss.imagen != null}"
                                              th:src="@{/superadmin/sedes/configurar/servicios/photo(idsedeServicio=${ss.idSedeServicio})}"
                                              class="img-fluid w-100 h-100"
                                              style="object-fit:cover;" />
-
-                                        <!-- placeholder si no hay imagen -->
                                         <img th:if="${ss.imagen == null}"
                                              th:src="@{/img/sede-placeholder.png}"
                                              class="img-fluid w-100 h-100"
                                              style="object-fit:cover;" />
-
                                     </div>
-
-                                    <!-- input file oculto -->
                                     <input type="file"
                                            th:id="'fotoServicio-' + ${ss.idSedeServicio}"
                                            name="foto"
                                            accept="image/*"
                                            hidden
                                            onchange="previewServicio(this, [[${ss.idSedeServicio}]])" />
-
-                                    <button type="submit" class="btn btn-primary btn-sm">Guardar Foto</button>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-upload me-1"></i>Guardar Foto
+                                    </button>
                                 </form>
                             </li>
                         </ul>
-                        <div class="card-header">
 
-                        <a th:href="@{/superadmin/sedes/asignar-coordinadores/{idsede}(idsede=${sede.idsede})}"
-                           class="btn btn-outline-primary btn-sm">
-                            Asignar Coordinadores
-                        </a>
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/superadmin/sedes/asignar-coordinadores/{idsede}(idsede=${sede.idsede})}"
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-person-plus me-1"></i>Asignar Coordinadores
+                            </a>
                         </div>
-
-
-
                     </div>
                 </div>
 
                 <!-- Horarios de Atención -->
                 <div class="card mb-4">
-                    <div class="card-header bg-light fw-bold">Horarios de Atención por Día</div>
+                    <div class="card-header">
+                        <i class="bi bi-clock me-2"></i>Horarios de Atención por Día
+                    </div>
                     <div class="card-body">
                         <form th:action="@{/superadmin/sedes/configurar/atencion/guardar}" method="post">
                             <input type="hidden" name="idsede" th:value="${sede.idsede}" />
@@ -199,7 +163,6 @@
                                                     th:selected="${dia.horaInicio != null and #strings.substring(dia.horaInicio.toString(), 0, 5) == ((h < 10 ? '0' : '') + h + ':00')}">
                                             </option>
                                         </select>
-
                                     </td>
                                     <td>
                                         <select class="form-select" th:name="'horaFin_' + ${dia.diaSemana}" required>
@@ -209,20 +172,20 @@
                                                     th:selected="${dia.horaFin != null and #strings.substring(dia.horaFin.toString(), 0, 5) == ((h < 10 ? '0' : '') + (h % 24) + ':00')}">
                                             </option>
                                         </select>
-
                                     </td>
                                     <td>
-                                        <input type="checkbox" th:name="'activo_' + ${dia.diaSemana}" th:checked="${dia.activo}" />
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   th:name="'activo_' + ${dia.diaSemana}" th:checked="${dia.activo}" />
+                                        </div>
                                     </td>
                                 </tr>
                                 </tbody>
-
-
-
-
                             </table>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Guardar Horarios</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i>Guardar Horarios
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -230,24 +193,22 @@
 
                 <!-- Horarios Disponibles para Reservas -->
                 <div class="card mb-5">
-                    <div class="card-header bg-light fw-bold">Horarios Disponibles para Reservas</div>
+                    <div class="card-header">
+                        <i class="bi bi-calendar2-range me-2"></i>Horarios Disponibles para Reservas
+                    </div>
                     <div class="card-body">
                         <div class="mb-3 row align-items-end">
-                            <!-- Selector de servicio -->
                             <div class="col-md-6">
                                 <label class="form-label">Servicio</label>
                                 <select name="idsedeServicio" class="form-select" id="servicio-select" required>
                                     <option value="">Seleccione un servicio</option>
                                     <option th:each="ss : ${sede.sedeServicios}"
                                             th:value="${ss.idSedeServicio}"
-
-
                                             th:text="${ss.nombrePersonalizado != null ? ss.nombrePersonalizado : ss.servicio.nombre}">
                                     </option>
                                 </select>
                             </div>
 
-                            <!-- Formulario de aforo: ahora con id en el input -->
                             <div class="col-md-6">
                                 <form onsubmit="return actualizarAforoMasivo(event)" class="d-flex gap-2">
                                     <input id="aforo-input"
@@ -258,13 +219,12 @@
                                            class="form-control"
                                            placeholder="Aforo"
                                     />
-                                    <button class="btn btn-outline-dark">Actualizar Aforo</button>
+                                    <button class="btn btn-outline-dark">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Actualizar Aforo
+                                    </button>
                                 </form>
                             </div>
                         </div>
-
-
-
 
                         <ul id="dias-pills" class="nav nav-pills mb-3">
                             <li th:each="dia, iterStat : ${listaHorariosAtencion}"
@@ -279,253 +239,30 @@
                             </li>
                         </ul>
 
-                        <!-- Mostrar/ocultar horarios -->
                         <div class="mb-3">
                             <button type="button" id="btn-toggle-lista" class="btn btn-outline-secondary">
-                                Mostrar horarios
+                                <i class="bi bi-list me-1"></i>Mostrar horarios
                             </button>
                         </div>
-                        <!-- Lista de horarios para el día seleccionado -->
+
                         <div id="lista-horarios-dia">
                             <p class="text-center text-muted">Seleccione servicio y día para ver horarios</p>
                         </div>
-
-
                     </div>
                 </div>
 
                 <!-- Volver -->
                 <div class="text-end">
-                    <a th:href="@{/superadmin/sedes}" class="btn btn-secondary">Volver</a>
+                    <a th:href="@{/superadmin/sedes}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Volver
+                    </a>
                 </div>
             </div>
         </main>
 
-        <!-- Script -->
-        <script>
-            function getCsrfHeaders() {
-                const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-                const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
-
-
-                if (!token || !header) {
-                    console.error("CSRF token o header no encontrados en el HTML");
-                    return {};
-                }
-
-                return { [header]: token };
-            }
-
-            // 2) Función para activar/desactivar
-            function toggleHorario(idHorario, idSedeServicio, esActivo) {
-                const accion = esActivo ? 'desactivar' : 'activar';
-                if (!confirm(`¿Seguro que deseas ${accion} este horario?`)) return;
-                fetch(`/api/horarios-disponibles/${idHorario}/toggle`, {
-                    method: 'POST',
-                    headers: getCsrfHeaders()
-                })
-                    .then(res => {
-                        if (res.ok) {
-                            // refrescamos el día activo volviendo a "clickear" la pestaña activa
-                            const activo = document.querySelector('#dias-pills .nav-link.active');
-                            if (activo) activo.click();
-                        } else {
-                            res.text().then(msg => alert(`Error al ${accion}: ${msg}`));
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Error en la petición al servidor');
-                    });
-            }
-
-
-            document.addEventListener("DOMContentLoaded", () => {
-                const servicioSelect     = document.getElementById("servicio-select");
-                const diasPills          = document.querySelectorAll("#dias-pills .nav-link");
-                const contenedorHorarios = document.getElementById("lista-horarios-dia");
-
-                const aforoInput = document.getElementById("aforo-input");
-
-                servicioSelect.addEventListener("change", () => {
-                    // …tu código existente para habilitar días…
-                    // ahora actualizamos el input de aforo:
-                    const opt = servicioSelect.selectedOptions[0];
-                    if (opt && opt.dataset.aforo) {
-                        aforoInput.value = opt.dataset.aforo;
-                    } else {
-                        aforoInput.value = "";
-                    }
-                    // opcional: si quieres que el placeholder cambie
-                    // aforoInput.placeholder = opt && opt.dataset.aforo ? "" : "Aforo";
-                });
-
-
-                // botón para expandir/ocultar la lista
-                const btnToggle   = document.getElementById("btn-toggle-lista");
-                const listaDia    = document.getElementById("lista-horarios-dia");
-
-                btnToggle.addEventListener("click", () => {
-                    const isHidden = listaDia.style.display === "none";
-                    listaDia.style.display = isHidden ? "block" : "none";
-                    btnToggle.textContent  = isHidden ? "Ocultar horarios" : "Mostrar horarios";
-                });
-
-
-
-                // Al cambiar servicio: habilita/deshabilita días y auto-clic en el primero
-                servicioSelect.addEventListener("change", () => {
-                    const tieneServicio = !!servicioSelect.value;
-                    diasPills.forEach(btn => {
-                        btn.classList.toggle("disabled", !tieneServicio);
-                    });
-                    contenedorHorarios.innerHTML = `<p class="text-center text-muted">
-        ${tieneServicio
-                        ? "Seleccione un día para ver horarios"
-                        : "Seleccione servicio y día para ver horarios"}
-      </p>`;
-
-                    if (tieneServicio) {
-                        // auto-clic primer día activo
-                        const primero = Array.from(diasPills).find(b => !b.classList.contains("disabled"));
-                        if (primero) primero.click();
-                    }
-                });
-
-                // Al hacer clic en un día:
-                diasPills.forEach(btn => {
-                    btn.addEventListener("click", () => {
-                        if (btn.classList.contains("disabled")) return;
-                        // pinta la pestaña activa
-                        diasPills.forEach(b => b.classList.remove("active"));
-                        btn.classList.add("active");
-                        // carga horarios de ese día
-                        loadHorariosDia(btn.getAttribute("data-dia"));
-                    });
-                });
-
-                // Función que llama al endpoint y muestra la lista
-                async function loadHorariosDia(diaSemana) {
-                    const idSS = servicioSelect.value;
-                    contenedorHorarios.innerHTML = `<p class="text-center">Cargando…</p>`;
-
-                    try {
-                        const res  = await fetch(`/api/horarios-disponibles?sedeServicioId=${idSS}`, {
-                            headers: getCsrfHeaders()
-                        });
-                        const data = await res.json();
-
-                        // Filtra solo el día y editables
-                        const lista = data.filter(h =>
-                            h.diaSemana === diaSemana &&
-                            (h.editable === true || h.editable === 'true')
-                        );
-
-                        if (lista.length === 0) {
-                            contenedorHorarios.innerHTML = `<p class="text-center text-muted">
-            No hay horarios en ${diaSemana}
-          </p>`;
-                            return;
-                        }
-
-                        // *** AQUÍ *** asignamos el aforo del primer horario
-                        aforoInput.value = lista[0].aforoMaximo;
-
-                        // Construye un <ul> con cada horario y su botón
-                        const ul = document.createElement("ul");
-                        ul.className = "list-group";
-                        lista.forEach(h => {
-                            const esActivo = h.activo === true || h.activo === 'true';
-                            const li = document.createElement("li");
-                            li.className = "list-group-item d-flex justify-content-between align-items-center";
-                            li.innerHTML = `
-            <span>${h.horaInicio} - ${h.horaFin} |
-                  Estado: <strong>${esActivo ? 'Activo' : 'Inactivo'}</strong>
-            </span>
-            <button class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}">
-              ${esActivo ? 'Desactivar' : 'Activar'}
-            </button>
-          `;
-                            li.querySelector("button").onclick = () =>
-                                toggleHorario(h.idhorario, idSS, esActivo);
-                            ul.append(li);
-                        });
-
-                        contenedorHorarios.innerHTML = "";
-                        contenedorHorarios.append(ul);
-
-                    } catch (err) {
-                        console.error(err);
-                        contenedorHorarios.innerHTML = `<p class="text-danger text-center">
-          Error al cargar horarios
-        </p>`;
-                    }
-                }
-            });
-
-
-
-
-            function actualizarAforoMasivo(event) {
-                event.preventDefault();
-                const form = event.target;
-                const aforo = form.querySelector("input[name=aforoMaximo]").value;
-                const sedeServicioId = document.getElementById("servicio-select").value;
-
-                if (!sedeServicioId) {
-                    alert("Seleccione un servicio primero.");
-                    return false;
-                }
-
-                if (parseInt(aforo) < 1) {
-                    alert("Aforo inválido.");
-                    return false;
-                }
-
-                const formData = new URLSearchParams();
-                formData.append("sedeServicioId", sedeServicioId);
-                formData.append("aforoMaximo", aforo);
-
-                fetch("/api/horarios-disponibles/aforo-masivo", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        ...getCsrfHeaders()
-                    },
-                    body: formData
-                }).then(res => {
-                    if (res.ok) {
-                        alert("Aforo actualizado correctamente.");
-                        document.getElementById("servicio-select").dispatchEvent(new Event("change"));
-                    } else {
-                        res.text().then(msg => alert("Error: " + msg));
-                    }
-                }).catch(err => {
-                    console.error("Error:", err);
-                    alert("Error inesperado al actualizar aforo.");
-                });
-
-                return false;
-            }
-
-        </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
         <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer">
+            <div class="container text-center">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
@@ -534,41 +271,188 @@
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
-
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                    document.body.classList.add("sidebar-collapsed");
-                }
-            }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 991.98) {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-        });
-    });
-</script>
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
     feather.replace();
+
+    function getCsrfHeaders() {
+        const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+        if (!token || !header) {
+            console.error("CSRF token o header no encontrados en el HTML");
+            return {};
+        }
+
+        return { [header]: token };
+    }
+
+    function toggleHorario(idHorario, idSedeServicio, esActivo) {
+        const accion = esActivo ? 'desactivar' : 'activar';
+        if (!confirm(`¿Seguro que deseas ${accion} este horario?`)) return;
+        fetch(`/api/horarios-disponibles/${idHorario}/toggle`, {
+            method: 'POST',
+            headers: getCsrfHeaders()
+        })
+            .then(res => {
+                if (res.ok) {
+                    const activo = document.querySelector('#dias-pills .nav-link.active');
+                    if (activo) activo.click();
+                } else {
+                    res.text().then(msg => alert(`Error al ${accion}: ${msg}`));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error en la petición al servidor');
+            });
+    }
+
+    function actualizarAforoMasivo(event) {
+        event.preventDefault();
+        const form = event.target;
+        const aforo = form.querySelector("input[name=aforoMaximo]").value;
+        const sedeServicioId = document.getElementById("servicio-select").value;
+
+        if (!sedeServicioId) {
+            alert("Seleccione un servicio primero.");
+            return false;
+        }
+
+        if (parseInt(aforo) < 1) {
+            alert("Aforo inválido.");
+            return false;
+        }
+
+        const formData = new URLSearchParams();
+        formData.append("sedeServicioId", sedeServicioId);
+        formData.append("aforoMaximo", aforo);
+
+        fetch("/api/horarios-disponibles/aforo-masivo", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                ...getCsrfHeaders()
+            },
+            body: formData
+        }).then(res => {
+            if (res.ok) {
+                alert("Aforo actualizado correctamente.");
+                document.getElementById("servicio-select").dispatchEvent(new Event("change"));
+            } else {
+                res.text().then(msg => alert("Error: " + msg));
+            }
+        }).catch(err => {
+            console.error("Error:", err);
+            alert("Error inesperado al actualizar aforo.");
+        });
+
+        return false;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const servicioSelect = document.getElementById("servicio-select");
+        const diasPills = document.querySelectorAll("#dias-pills .nav-link");
+        const contenedorHorarios = document.getElementById("lista-horarios-dia");
+        const aforoInput = document.getElementById("aforo-input");
+        const btnToggle = document.getElementById("btn-toggle-lista");
+        const listaDia = document.getElementById("lista-horarios-dia");
+
+        servicioSelect.addEventListener("change", () => {
+            const opt = servicioSelect.selectedOptions[0];
+            if (opt && opt.dataset.aforo) {
+                aforoInput.value = opt.dataset.aforo;
+            } else {
+                aforoInput.value = "";
+            }
+
+            const tieneServicio = !!servicioSelect.value;
+            diasPills.forEach(btn => {
+                btn.classList.toggle("disabled", !tieneServicio);
+            });
+
+            contenedorHorarios.innerHTML = `<p class="text-center text-muted">
+                ${tieneServicio ? "Seleccione un día para ver horarios" : "Seleccione servicio y día para ver horarios"}
+            </p>`;
+
+            if (tieneServicio) {
+                const primero = Array.from(diasPills).find(b => !b.classList.contains("disabled"));
+                if (primero) primero.click();
+            }
+        });
+
+        btnToggle.addEventListener("click", () => {
+            const isHidden = listaDia.style.display === "none";
+            listaDia.style.display = isHidden ? "block" : "none";
+            btnToggle.textContent = isHidden ? "Ocultar horarios" : "Mostrar horarios";
+            btnToggle.innerHTML = isHidden
+                ? '<i class="bi bi-list me-1"></i>Ocultar horarios'
+                : '<i class="bi bi-list me-1"></i>Mostrar horarios';
+        });
+
+        diasPills.forEach(btn => {
+            btn.addEventListener("click", () => {
+                if (btn.classList.contains("disabled")) return;
+                diasPills.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                loadHorariosDia(btn.getAttribute("data-dia"));
+            });
+        });
+
+        async function loadHorariosDia(diaSemana) {
+            const idSS = servicioSelect.value;
+            contenedorHorarios.innerHTML = `<p class="text-center">Cargando…</p>`;
+
+            try {
+                const res = await fetch(`/api/horarios-disponibles?sedeServicioId=${idSS}`, {
+                    headers: getCsrfHeaders()
+                });
+                const data = await res.json();
+
+                const lista = data.filter(h =>
+                    h.diaSemana === diaSemana &&
+                    (h.editable === true || h.editable === 'true')
+                );
+
+                if (lista.length === 0) {
+                    contenedorHorarios.innerHTML = `<p class="text-center text-muted">
+                        No hay horarios en ${diaSemana}
+                    </p>`;
+                    return;
+                }
+
+                aforoInput.value = lista[0].aforoMaximo;
+
+                const ul = document.createElement("ul");
+                ul.className = "list-group";
+                lista.forEach(h => {
+                    const esActivo = h.activo === true || h.activo === 'true';
+                    const li = document.createElement("li");
+                    li.className = "list-group-item d-flex justify-content-between align-items-center";
+                    li.innerHTML = `
+                        <span>${h.horaInicio} - ${h.horaFin} |
+                            Estado: <strong>${esActivo ? 'Activo' : 'Inactivo'}</strong>
+                        </span>
+                        <button class="btn btn-sm ${esActivo ? 'btn-danger' : 'btn-success'}">
+                            ${esActivo ? 'Desactivar' : 'Activar'}
+                        </button>
+                    `;
+                    li.querySelector("button").onclick = () =>
+                        toggleHorario(h.idhorario, idSS, esActivo);
+                    ul.append(li);
+                });
+
+                contenedorHorarios.innerHTML = "";
+                contenedorHorarios.append(ul);
+
+            } catch (err) {
+                console.error(err);
+                contenedorHorarios.innerHTML = `<p class="text-danger text-center">
+                    Error al cargar horarios
+                </p>`;
+            }
+        }
+    });
 </script>
 
 <script th:inline="javascript">

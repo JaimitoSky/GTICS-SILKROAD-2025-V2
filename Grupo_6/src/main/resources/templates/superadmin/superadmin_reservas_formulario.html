@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio - Superadmin</title>
+    <title>Registrar Reserva - Superadmin</title>
 
     <!-- Estilos externos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/superadmin_sidebar.css}">
-
-    <!-- Estilos internos -->
-
+    <link rel="stylesheet" th:href="@{/css/estilos_superadmin.css}">
 </head>
+
 <body>
 <div class="wrapper">
     <!-- Sidebar -->
@@ -23,303 +22,321 @@
     <div class="main">
         <div th:replace="fragments/navbar-superadmin :: navbar"></div>
 
-
-
-
-
-
-
         <!-- Contenido principal -->
         <main class="content">
-            <div class="container-fluid p-0">
-                <h1 class="h3 mb-3"><strong>Registrar Nueva Reserva</strong></h1>
+            <div class="container-fluid">
+                <h2 class="page-title mb-4">Registrar <strong>Nueva Reserva</strong></h2>
 
                 <!-- Alertas dinámicas -->
                 <div id="alertas" class="mb-3"></div>
 
                 <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-calendar-plus me-2"></i>Datos de la Reserva
+                    </div>
                     <div class="card-body">
+                        <!-- Alertas del servidor -->
                         <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
                             <span th:text="${mensajeError}"></span>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                         </div>
                         <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i>
                             <span th:text="${mensajeExito}"></span>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                         </div>
 
                         <form id="formReserva" th:action="@{/superadmin/reservas/guardar}" th:object="${reserva}" method="post" onsubmit="return validarFormulario()">
+                            <div class="row">
+                                <!-- DNI del Vecino -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person-badge me-1"></i>DNI del Vecino
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-123"></i></span>
+                                        <input type="text" class="form-control" name="dni" placeholder="Ej: 12345678" required
+                                               pattern="[0-9]{8}" title="Ingrese un DNI válido de 8 dígitos">
+                                    </div>
+                                    <small class="text-muted">Ingrese el DNI del vecino sin puntos ni guiones</small>
+                                </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">DNI del Vecino</label>
-                                <input type="text" class="form-control" name="dni" placeholder="Ej: 12345678" required>
+                                <!-- Selector de Sede -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-building me-1"></i>Sede
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                        <select id="sede-select" class="form-select" required>
+                                            <option value="">Seleccione una sede</option>
+                                            <option th:each="sede : ${listaSedes}" th:value="${sede.idsede}" th:text="${sede.nombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Selector de Servicio -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-list-check me-1"></i>Servicio
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                        <select id="servicio-select" name="idsedeServicio" class="form-select" required>
+                                            <option value="">Seleccione una sede primero</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Fecha de Reserva -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar-date me-1"></i>Fecha de Reserva
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                        <input type="date" class="form-control" id="fechaReserva" name="fechaReserva"
+                                               th:field="*{fechaReserva}" required min="">
+                                    </div>
+                                </div>
+
+                                <!-- Horario Disponible -->
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label">
+                                        <i class="bi bi-clock me-1"></i>Horario Disponible
+                                    </label>
+                                    <select class="form-select" name="idhorario" id="horarioDisponible" required>
+                                        <option value="">Seleccione servicio y fecha</option>
+                                    </select>
+                                    <div id="info-horario" class="mt-2 small text-muted"></div>
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="col-12 d-flex justify-content-end gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-save me-1"></i>Registrar Reserva
+                                    </button>
+                                    <a th:href="@{/superadmin/reservas}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                                    </a>
+                                </div>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Sede</label>
-                                <select id="sede-select" class="form-select" required>
-                                    <option value="">Seleccione una sede</option>
-                                    <option th:each="sede : ${listaSedes}" th:value="${sede.idsede}" th:text="${sede.nombre}"></option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Servicio</label>
-                                <select id="servicio-select" name="idsedeServicio" class="form-select" required>
-                                    <option value="">Seleccione una sede primero</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Fecha de Reserva</label>
-                                <input type="date" class="form-control" id="fechaReserva" name="fechaReserva"
-                                       th:field="*{fechaReserva}" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Horario Disponible</label>
-                                <select class="form-select" name="idhorario" id="horarioDisponible" required>
-                                    <option value="">Seleccione servicio y fecha</option>
-                                </select>
-                            </div>
-
-                            <button type="submit" class="btn btn-success">Registrar Reserva</button>
-                            <a th:href="@{/superadmin/reservas}" class="btn btn-secondary">Cancelar</a>
                         </form>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Scripts -->
-        <script>
-            const servicioSelect = document.getElementById("servicio-select");
-            const sedeSelect = document.getElementById("sede-select");
-            const fechaInput = document.getElementById("fechaReserva");
-            const horarioSelect = document.getElementById("horarioDisponible");
-            const alertasDiv = document.getElementById("alertas");
-
-            let diasPermitidos = [];
-            let mapaAforo = {};
-
-            function mostrarAlerta(mensaje, tipo = 'danger') {
-                alertasDiv.innerHTML = `
-            <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
-                ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>`;
-            }
-
-            // Cuando cambias de sede, recargas la lista de servicios y los días permitidos
-            sedeSelect.addEventListener("change", function () {
-                const sedeId = this.value;
-                servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
-                horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
-                alertasDiv.innerHTML = '';
-
-                // Usa un timestamp único para evitar caché
-                fetch(`/api/servicios-por-sede/${sedeId}?timestamp=${new Date().getTime()}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log("Servicios recibidos:", data);
-                        servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
-                        data.forEach(s => {
-                            const opt = document.createElement("option");
-                            opt.value = s.idSedeServicio;
-                            // Usa el nombre personalizado si existe, sino el nombre normal
-                            const displayName = s.nombrePersonalizado
-                                ? `${s.nombrePersonalizado} - ${s.nombre}`
-                                : s.nombre;
-                            opt.textContent = displayName;
-                            servicioSelect.appendChild(opt);
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Error al cargar servicios:", error);
-                        servicioSelect.innerHTML = '<option value="">Error al cargar servicios</option>';
-                    });
-
-
-                // Traer días permitidos para esa sede
-                fetch(`/api/dias-activos?idsede=${sedeId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        diasPermitidos = data.map(d =>
-                            d.toUpperCase()
-                                .normalize("NFD")
-                                .replace(/[\u0300-\u036f]/g, '')
-                        );
-                    });
-            });
-
-            // Carga los horarios según servicio y fecha, deshabilitando los que ya pasaron o se llenaron
-            function cargarHorariosDisponibles() {
-                const sedeServicioId = servicioSelect.value;
-                const fechaStr = fechaInput.value;
-                horarioSelect.innerHTML = '';
-                mapaAforo = {};
-                alertasDiv.innerHTML = '';
-
-                if (!sedeServicioId || !fechaStr) {
-                    horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
-                    return;
-                }
-
-                const [year, month, day] = fechaStr.split("-");
-                const fechaReserva = new Date(year, month - 1, day);
-
-                const hoy = new Date();
-                hoy.setHours(0, 0, 0, 0);
-
-                if (fechaReserva < hoy) {
-                    mostrarAlerta("La fecha no puede ser pasada.");
-                    horarioSelect.innerHTML = '<option value="">Fecha inválida</option>';
-                    return;
-                }
-
-                let diaSemana = fechaReserva
-                    .toLocaleDateString('es-PE', { weekday: 'long' })
-                    .toUpperCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, '');
-
-                if (!diasPermitidos.includes(diaSemana)) {
-                    mostrarAlerta(`No se permiten reservas el día ${diaSemana.toLowerCase()}.`);
-                    horarioSelect.innerHTML = '<option value="">Día no disponible</option>';
-                    return;
-                }
-
-                fetch(`/api/horarios-disponibles-por-fecha?sedeServicioId=${sedeServicioId}&fecha=${fechaStr}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!Array.isArray(data) || data.length === 0) {
-                            horarioSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
-                            return;
-                        }
-
-                        // Opción placeholder
-                        const placeholder = document.createElement("option");
-                        placeholder.value = "";
-                        placeholder.textContent = "Seleccione un horario";
-                        placeholder.disabled = true;
-                        placeholder.selected = true;
-                        horarioSelect.appendChild(placeholder);
-
-                        const ahora = new Date();
-
-                        data.forEach(h => {
-                            const aforoMaximo = parseInt(h.aforoMaximo, 10);
-                            const aforoDisponible = parseInt(h.aforoDisponible, 10);
-                            mapaAforo[h.idhorario] = aforoDisponible;
-
-                            // Construir Date de inicio
-                            const [hInicioHoras, hInicioMinutos] = h.horaInicio.split(":").map(Number);
-                            const horaInicioDate = new Date(fechaReserva);
-                            horaInicioDate.setHours(hInicioHoras, hInicioMinutos, 0, 0);
-
-                            const opt = document.createElement("option");
-                            opt.value = h.idhorario;
-                            opt.textContent = `${h.horaInicio} - ${h.horaFin} (max: ${aforoMaximo}, libres: ${aforoDisponible})`;
-
-                            // Si es el mismo día y ya pasó la hora de inicio
-                            if (fechaReserva.getTime() === hoy.getTime() && horaInicioDate <= ahora) {
-                                opt.disabled = true;
-                                opt.textContent += " - HORA PASADA";
-                            }
-                            // Si no hay cupos
-                            else if (aforoDisponible <= 0) {
-                                opt.disabled = true;
-                                opt.textContent += " - SIN CUPOS";
-                            }
-
-                            horarioSelect.appendChild(opt);
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Error al cargar horarios:", error);
-                        horarioSelect.innerHTML = '<option>Error al cargar horarios</option>';
-                    });
-            }
-
-            // Validación final antes de enviar el formulario
-            function validarFormulario() {
-                const horarioId = horarioSelect.value;
-                if (!horarioId) {
-                    mostrarAlerta("Debe seleccionar un horario válido.");
-                    return false;
-                }
-                if (mapaAforo[horarioId] <= 0) {
-                    mostrarAlerta("El horario seleccionado ya no tiene cupos disponibles.");
-                    return false;
-                }
-                return true;
-            }
-
-            servicioSelect.addEventListener("change", cargarHorariosDisponibles);
-            fechaInput.addEventListener("change", cargarHorariosDisponibles);
-        </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <!-- Footer -->
-        <footer class="footer mt-auto py-3 bg-light border-top">
-            <div class="container text-center text-muted">
+        <footer class="footer">
+            <div class="container text-center">
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const toggle = document.querySelector(".js-sidebar-toggle");
-        const sidebar = document.getElementById('sidebar');
 
-        if (toggle) {
-            toggle.addEventListener("click", function (e) {
-                e.preventDefault();
-                document.body.classList.toggle("sidebar-collapsed");
-            });
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 991.98) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnToggle = event.target.closest('.js-sidebar-toggle');
-
-                if (!isClickInsideSidebar && !isClickOnToggle && !document.body.classList.contains("sidebar-collapsed")) {
-                    document.body.classList.add("sidebar-collapsed");
-                }
-            }
-        });
-
-        // Ajustar al redimensionar
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 991.98) {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-        });
-    });
-
-
-</script>
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://unpkg.com/feather-icons"></script>
 <script>
     feather.replace();
+
+    // Configuración inicial
+    document.addEventListener("DOMContentLoaded", function() {
+        // Establecer fecha mínima como hoy
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("fechaReserva").min = today;
+    });
+
+    // Variables globales
+    const servicioSelect = document.getElementById("servicio-select");
+    const sedeSelect = document.getElementById("sede-select");
+    const fechaInput = document.getElementById("fechaReserva");
+    const horarioSelect = document.getElementById("horarioDisponible");
+    const alertasDiv = document.getElementById("alertas");
+    const infoHorarioDiv = document.getElementById("info-horario");
+
+    let diasPermitidos = [];
+    let mapaAforo = {};
+
+    // Mostrar alertas
+    function mostrarAlerta(mensaje, tipo = 'danger') {
+        alertasDiv.innerHTML = `
+            <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+                <i class="bi ${tipo === 'danger' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+    }
+
+    // Cargar servicios por sede
+    sedeSelect.addEventListener("change", function() {
+        const sedeId = this.value;
+        servicioSelect.innerHTML = '<option value="">Cargando servicios...</option>';
+        horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
+        infoHorarioDiv.innerHTML = '';
+        alertasDiv.innerHTML = '';
+
+        if (!sedeId) {
+            servicioSelect.innerHTML = '<option value="">Seleccione una sede primero</option>';
+            return;
+        }
+
+        fetch(`/api/servicios-por-sede/${sedeId}?timestamp=${new Date().getTime()}`)
+            .then(res => res.json())
+            .then(data => {
+                servicioSelect.innerHTML = '<option value="">Seleccione un servicio</option>';
+                data.forEach(s => {
+                    const opt = document.createElement("option");
+                    opt.value = s.idSedeServicio;
+                    opt.textContent = s.nombrePersonalizado || s.nombre;
+                    servicioSelect.appendChild(opt);
+                });
+            })
+            .catch(error => {
+                console.error("Error al cargar servicios:", error);
+                servicioSelect.innerHTML = '<option value="">Error al cargar servicios</option>';
+                mostrarAlerta("Error al cargar los servicios de la sede seleccionada");
+            });
+
+        // Obtener días permitidos para la sede
+        fetch(`/api/dias-activos?idsede=${sedeId}`)
+            .then(res => res.json())
+            .then(data => {
+                diasPermitidos = data.map(d =>
+                    d.toUpperCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, '')
+                );
+            });
+    });
+
+    // Cargar horarios disponibles
+    function cargarHorariosDisponibles() {
+        const sedeServicioId = servicioSelect.value;
+        const fechaStr = fechaInput.value;
+        horarioSelect.innerHTML = '<option value="">Cargando horarios...</option>';
+        infoHorarioDiv.innerHTML = '';
+        mapaAforo = {};
+        alertasDiv.innerHTML = '';
+
+        if (!sedeServicioId || !fechaStr) {
+            horarioSelect.innerHTML = '<option value="">Seleccione servicio y fecha</option>';
+            return;
+        }
+
+        const [year, month, day] = fechaStr.split("-");
+        const fechaReserva = new Date(year, month - 1, day);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        // Validar fecha no pasada
+        if (fechaReserva < hoy) {
+            mostrarAlerta("No puede seleccionar una fecha pasada");
+            horarioSelect.innerHTML = '<option value="">Fecha inválida</option>';
+            return;
+        }
+
+        // Validar día permitido
+        let diaSemana = fechaReserva
+            .toLocaleDateString('es-PE', { weekday: 'long' })
+            .toUpperCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, '');
+
+        if (!diasPermitidos.includes(diaSemana)) {
+            mostrarAlerta(`La sede no atiende los ${diaSemana.toLowerCase()}s`);
+            horarioSelect.innerHTML = '<option value="">Día no disponible</option>';
+            return;
+        }
+
+        // Obtener horarios disponibles
+        fetch(`/api/horarios-disponibles-por-fecha?sedeServicioId=${sedeServicioId}&fecha=${fechaStr}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!Array.isArray(data) || data.length === 0) {
+                    horarioSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
+                    mostrarAlerta("No hay horarios disponibles para la fecha seleccionada", "info");
+                    return;
+                }
+
+                horarioSelect.innerHTML = '';
+                const placeholder = document.createElement("option");
+                placeholder.value = "";
+                placeholder.textContent = "Seleccione un horario";
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                horarioSelect.appendChild(placeholder);
+
+                const ahora = new Date();
+
+                data.forEach(h => {
+                    const aforoMaximo = parseInt(h.aforoMaximo, 10);
+                    const aforoDisponible = parseInt(h.aforoDisponible, 10);
+                    mapaAforo[h.idhorario] = aforoDisponible;
+
+                    // Construir hora de inicio
+                    const [hInicioHoras, hInicioMinutos] = h.horaInicio.split(":").map(Number);
+                    const horaInicioDate = new Date(fechaReserva);
+                    horaInicioDate.setHours(hInicioHoras, hInicioMinutos, 0, 0);
+
+                    const opt = document.createElement("option");
+                    opt.value = h.idhorario;
+                    opt.textContent = `${h.horaInicio} - ${h.horaFin} (${aforoDisponible} cupos disponibles)`;
+
+                    // Deshabilitar opciones no disponibles
+                    if (fechaReserva.getTime() === hoy.getTime() && horaInicioDate <= ahora) {
+                        opt.disabled = true;
+                        opt.textContent += " - HORA PASADA";
+                    } else if (aforoDisponible <= 0) {
+                        opt.disabled = true;
+                        opt.textContent += " - SIN CUPOS";
+                    }
+
+                    horarioSelect.appendChild(opt);
+                });
+            })
+            .catch(error => {
+                console.error("Error al cargar horarios:", error);
+                horarioSelect.innerHTML = '<option value="">Error al cargar horarios</option>';
+                mostrarAlerta("Error al cargar los horarios disponibles");
+            });
+    }
+
+    // Mostrar información del horario seleccionado
+    horarioSelect.addEventListener("change", function() {
+        if (!this.value) {
+            infoHorarioDiv.innerHTML = '';
+            return;
+        }
+
+        const selectedOption = this.options[this.selectedIndex];
+        infoHorarioDiv.innerHTML = `
+            <div class="alert alert-info py-2 mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                ${selectedOption.textContent.replace(/\(.*\)/, '').trim()}
+            </div>`;
+    });
+
+    // Validar formulario antes de enviar
+    function validarFormulario() {
+        const horarioId = horarioSelect.value;
+        if (!horarioId) {
+            mostrarAlerta("Debe seleccionar un horario válido");
+            return false;
+        }
+        if (mapaAforo[horarioId] <= 0) {
+            mostrarAlerta("El horario seleccionado no tiene cupos disponibles");
+            return false;
+        }
+        return true;
+    }
+
+    // Event listeners
+    servicioSelect.addEventListener("change", cargarHorariosDisponibles);
+    fechaInput.addEventListener("change", cargarHorariosDisponibles);
 </script>
 
 </body>
