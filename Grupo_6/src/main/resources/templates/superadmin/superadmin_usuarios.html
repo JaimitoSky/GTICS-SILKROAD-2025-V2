@@ -336,6 +336,11 @@
 		.modal-header.bg-warning .btn-close {
 			opacity: 0.7;
 		}
+		.search-filter-form select.form-select {
+			padding-left: 2.5rem; /* aumenta el espacio para el texto */
+			background-position-x: 0.75rem; /* mueve la flecha un poco a la izquierda */
+		}
+
 
 	</style>
 </head>
@@ -413,7 +418,7 @@
 									<select name="rol" class="form-select form-select-sm"
 											onchange="this.form.submit()"
 											th:disabled="${usuario.email == session.usuario.email}">
-										<option value="1" th:selected="${usuario.idrol == 1}" disabled>Superadmin</option>
+										<option value="1" th:selected="${usuario.idrol == 1}" disabled hidden>Superadmin</option>
 										<option value="2" th:selected="${usuario.idrol == 2}" disabled>Administrador</option>
 										<option value="3" th:selected="${usuario.idrol == 3}">Coordinador</option>
 										<option value="4" th:selected="${usuario.idrol == 4}">Vecino</option>

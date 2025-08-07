@@ -383,6 +383,13 @@
         .container-fluid {
             padding: 0; /* Content wrapper handles padding */
         }
+
+        /* Corrige sobreposición de texto y flecha en selects */
+        select.form-select {
+            padding-left: 2rem !important;         /* Da espacio al texto */
+            background-position-x: 0.6rem !important; /* Mueve la flecha más a la izquierda */
+        }
+
     </style>
 </head>
 <body>

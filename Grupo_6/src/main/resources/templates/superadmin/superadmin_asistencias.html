@@ -273,6 +273,13 @@
             color: var(--light-text-color);
             margin-top: var(--spacing-xl); /* Reduced margin-top for better spacing */
         }
+        /* Corregir flecha y texto sobrepuestos en todos los select tipo Bootstrap */
+        select.form-select {
+            padding-left: 2.2rem !important;        /* más espacio para el texto */
+            background-position-x: 0.75rem !important; /* corre la flecha hacia la izquierda */
+            background-size: 1rem;                  /* tamaño estándar de la flecha */
+        }
+
     </style>
 
 </head>
