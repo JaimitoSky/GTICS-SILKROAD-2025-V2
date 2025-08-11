@@ -17,88 +17,82 @@
             href="https://unpkg.com/cropperjs/dist/cropper.min.css"
             rel="stylesheet"/>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+        /* === Estilo general formulario perfil === */
+        .profile-card {
+            max-width: 480px;
+            margin: auto;
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 6px 18px rgba(13, 110, 253, 0.12);
         }
 
-        * {
-            transition: all 0.2s ease-in-out;
+        .profile-image-wrapper {
+            border: 2px solid #0d6efd;
+            transition: border-color 0.2s ease;
         }
 
-        h4 {
-            font-weight: 700;
-            color: #333;
-            animation: fadeIn 0.4s ease-in-out;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        .profile-image-wrapper:hover {
+            border-color: #0b5ed7;
+            cursor: pointer;
         }
 
-        .form-label {
+        .profile-image-preview {
+            border-radius: 50%;
+            object-fit: cover;
+            user-select: none;
+        }
+
+        label.form-label {
             font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
+            color: #212529;
         }
 
         .form-control {
+            border: 1.5px solid #ced4da;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #dee2e6;
-            padding: 0.85rem 1.25rem;
-            transition: all 0.3s ease-in-out;
-            background-color: #ffffff;
+            padding: 0.55rem 1rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
 
         .form-control:focus {
-            border-color: #17b5c0;
-            box-shadow: 0 0 0 0.25rem rgba(23, 181, 192, 0.25);
-            outline: none;
-        }
-
-        .form-control[disabled],
-        .form-control[readonly] {
-            background-color: #e9ecef;
-            opacity: 0.9;
+            border-color: #0d6efd;
             box-shadow: none;
         }
 
-        .profile-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            padding: 2.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn-action-group .btn {
+        .btn {
             border-radius: 12px;
             font-weight: 600;
-            padding: 0.85rem 2.5rem;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-action-group .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem 1.6rem;
+            font-size: 1rem;
+            box-shadow: none !important;
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary {
-            background-color: #17b5c0;
-            border-color: #17b5c0;
+            background-color: #0d6efd;
+            border: none;
+            color: white;
         }
 
         .btn-primary:hover {
-            background-color: #1399a3;
-            border-color: #128c94;
+            background-color: #0b5ed7;
+        }
+
+        .btn-outline-primary {
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            color: white;
         }
 
         .btn-outline-secondary {
-            border: 2px solid #6c757d;
+            border-color: #6c757d;
             color: #6c757d;
-            background-color: transparent;
         }
 
         .btn-outline-secondary:hover {
@@ -106,26 +100,34 @@
             color: white;
         }
 
-        main.content {
-            padding: 2.5rem;
+        /* Botones acción: alineados y responsivos */
+        .btn-action-group {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            flex-wrap: wrap;
         }
 
-        footer.footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+        .btn-action-group a,
+        .btn-action-group button {
+            flex: 1 1 45%;
+            min-width: 140px;
+            text-align: center;
         }
 
-        footer.footer img {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        /* En pantallas muy chicas apilar */
+        @media (max-width: 480px) {
+            .btn-action-group a,
+            .btn-action-group button {
+                flex: 1 1 100%;
+            }
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        ::-webkit-scrollbar {
+            display: none;
         }
     </style>
+
 </head>
 <body>
 <div class="wrapper">
@@ -247,15 +249,16 @@
                                    th:value="${perfil.direccion}" />
                         </div>
 
-                        <div class="d-flex justify-content-between btn-action-group">
+                        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between btn-action-group">
                             <a th:href="@{/vecino/cambiar-contrasena}"
-                               class="btn btn-outline-secondary">
+                               class="btn btn-outline-secondary w-100 w-sm-auto text-center">
                                 <i class="bi bi-lock-fill me-2"></i> Cambiar contraseña
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary w-100 w-sm-auto">
                                 <i class="bi bi-save me-2"></i> Guardar cambios
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -368,9 +371,6 @@
         });
     });
 </script>
-
-
-Preguntar a ChatGPT
 
 <div th:replace="~{fragments/chatbot.html}"></div>
 

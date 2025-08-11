@@ -13,10 +13,125 @@
     <link rel="stylesheet" th:href="@{/css/vecino_sidebar.css}">
     <link rel="stylesheet" th:href="@{/datatables/datatables.min.css}" />
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+        }
+
+        h2, h5 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+
+        /* Tarjeta principal */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            background: #fff;
+            transition: box-shadow 0.2s ease;
+            transform: none !important; /* Evita cualquier movimiento */
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            transform: none !important; /* No se mueve */
+        }
+
+        /* Botones */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            background-image: none !important; /* Elimina cualquier degradado */
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+
+        .btn-success {
+            background-color: #198754;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #157347;
+        }
+
+        /* Inputs */
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            box-shadow: none;
+        }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.25);
+        }
+
+        /* Imagen comprobante */
+        .img-thumbnail {
+            border-radius: 0.75rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Modal */
+        .modal-content {
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+
+        /* Tabs de métodos de pago */
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            color: #495057;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        /* Responsive mejoras */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 1.5rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .img-thumbnail {
+                max-width: 100%;
+            }
+            .d-flex.gap-4 {
+                flex-direction: column;
+                gap: 1rem !important;
+            }
+        }
+
+        /* Ocultar scroll */
         ::-webkit-scrollbar {
             display: none;
         }
     </style>
+
+
 </head>
 <body>
 <div class="wrapper">
@@ -127,22 +242,6 @@
 
                     <!-- Opción alternativa: Pago con tarjeta (solo si no hay comprobante, aún está a tiempo y la reserva está pendiente) -->
                     <!-- Opción alternativa: Pago con tarjeta (solo si NO es ONLINE y NO es BANCO) -->
-                    <div class="form-group mt-4 text-center"
-                         th:if="${reserva.pago?.comprobante == null
-                         and reserva.fechaLimitePago != null
-                         and ahora.isBefore(reserva.fechaLimitePago)
-                         and reserva.estado.nombre == 'pendiente'
-                         and reserva.pago?.metodo.name() != 'ONLINE'
-                         and reserva.pago?.metodo.name() != 'BANCO'}">
-
-                        <p class="fw-bold mb-2">¿Prefieres pagar con tarjeta?</p>
-                        <a th:href="@{/vecino/reservas/pago-tarjeta(idreserva=${reserva.idreserva})}" class="btn btn-success">
-                            Pagar con tarjeta
-                        </a>
-                    </div>
-
-
-
 
                     <!-- Mostrar mensaje de tiempo expirado -->
                     <div th:if="${reserva.pago?.comprobante == null and reserva.fechaLimitePago != null and ahora.isAfter(reserva.fechaLimitePago)}">
@@ -160,29 +259,20 @@
                         and reserva.pago?.metodo.name() != 'ONLINE'}">
 
                     <p>No se ha subido ningún comprobante.</p>
-
-                        <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
-
-
-                            <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
-
-                            <div class="form-group">
-                                <label for="adjuntar">Adjuntar Comprobante de Pago (.jpg, .png):</label>
-                                <input type="file" class="form-control" id="adjuntar" name="comprobante" accept=".jpg,.jpeg,.png" required />
-                            </div>
-
-                            <div class="form-group mt-4 text-center">
-                                <label class="mb-2 fw-bold">Escanea este código QR para realizar el pago:</label><br>
-                                <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
-                            </div>
-
-                            <!-- Dentro del formulario -->
-                            <div class="form-group mt-3 d-flex justify-content-center">
-                                <button type="button" class="btn btn-primary" id="btnComprobante">Enviar Comprobante</button>
-                            </div>
-
-
-                        </form>
+                        <div class="form-group mt-4 text-center"
+                             th:if="${reserva.pago?.comprobante == null
+     and reserva.fechaLimitePago != null
+     and ahora.isBefore(reserva.fechaLimitePago)
+     and reserva.estado.nombre == 'pendiente'}">
+                            <button type="button"
+                                    class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 mx-auto"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalOpcionesPago"
+                                    style="border-radius: 8px; font-size: 1rem;">
+                                <i class="bi bi-wallet2"></i>
+                                <span>Realizar Pago</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -194,6 +284,103 @@
                 Municipalidad de San Miguel © 2025
             </div>
         </footer>
+        <div class="modal fade" id="modalOpcionesPago" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-primary">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">Selecciona un método de pago</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Pestañas -->
+                        <ul class="nav nav-tabs" id="metodoPagoTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tab-tarjeta" data-bs-toggle="tab" data-bs-target="#pagoTarjeta" type="button" role="tab">Tarjeta</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-qr" data-bs-toggle="tab" data-bs-target="#pagoQR" type="button" role="tab">Yape/Plin</button>
+                            </li>
+                        </ul>
+
+                        <!-- Contenido -->
+                        <div class="tab-content mt-3">
+
+                            <!-- TARJETA -->
+                            <div class="tab-pane fade show active" id="pagoTarjeta" role="tabpanel">
+                                <form th:action="@{/vecino/reservas/procesar-pago-tarjeta}" method="post" id="formPagoTarjeta">
+                                    <input type="hidden" name="idreserva" th:value="${reserva.idreserva}" />
+
+                                    <!-- Número de Tarjeta -->
+                                    <div class="mb-3">
+                                        <label for="numero" class="form-label">Número de Tarjeta</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                            <input type="text" name="numero" id="numero" class="form-control"
+                                                   placeholder="•••• •••• •••• ••••" maxlength="16" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mes y Año -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="mes" class="form-label">Mes</label>
+                                            <select name="mes" id="mes" class="form-control" required>
+                                                <option value="">--</option>
+                                                <option th:each="m : ${#numbers.sequence(1,12)}"
+                                                        th:value="${m < 10 ? '0' + m : m}"
+                                                        th:text="${m < 10 ? '0' + m : m}"></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="anio" class="form-label">Año</label>
+                                            <select name="anio" id="anio" class="form-control" required></select>
+                                        </div>
+                                        <input type="hidden" name="vencimiento" id="vencimiento">
+                                    </div>
+
+                                    <!-- CVV -->
+                                    <div class="mb-3">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <input type="password" name="cvv" id="cvv" maxlength="3" class="form-control"
+                                               placeholder="123" required>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success w-100">Confirmar Pago</button>
+                                </form>
+                            </div>
+
+                            <!-- QR -->
+                            <div class="tab-pane fade" id="pagoQR" role="tabpanel">
+                                <form id="formComprobante" th:action="@{/vecino/reservas/comprobante}" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="idpago" th:value="${reserva.pago.idpago}" />
+                                    <div class="d-flex justify-content-center gap-4 flex-wrap mb-3">
+                                        <div>
+                                            <img th:src="@{/img/photos/yape.jpg}" alt="QR Yape" class="img-fluid rounded" style="max-height: 250px;">
+                                            <p class="mt-2 fw-semibold text-center">Yape</p>
+                                        </div>
+                                        <div>
+                                            <img th:src="@{/img/photos/plin.jpg}" alt="QR Plin" class="img-fluid rounded" style="max-height: 250px;">
+                                            <p class="mt-2 fw-semibold text-center">Plin</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="adjuntar">Adjuntar Comprobante (.jpg, .png):</label>
+                                        <input type="file" class="form-control" id="adjuntar" name="comprobante" accept=".jpg,.jpeg,.png" required />
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <button type="submit" class="btn btn-primary">Enviar Comprobante</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal de confirmación -->
         <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -212,7 +399,6 @@
                 </div>
             </div>
         </div>
-        <!-- Modal de error -->
         <!-- Modal de error -->
         <div class="modal fade" id="modalErrorArchivo" tabindex="-1" aria-labelledby="modalErrorArchivoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -340,6 +526,46 @@
 
     }
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const anioSelect = document.getElementById("anio");
+        const currentYear = new Date().getFullYear();
+        const maxYear = currentYear + 15;
+
+        for (let y = currentYear; y <= maxYear; y++) {
+            const option = document.createElement("option");
+            option.value = y;
+            option.textContent = y;
+            anioSelect.appendChild(option);
+        }
+
+        document.getElementById("formPagoTarjeta").addEventListener("submit", function (e) {
+            const numero = document.getElementById("numero").value.trim();
+            const mes = document.getElementById("mes").value;
+            const anio = document.getElementById("anio").value;
+            const cvv = document.getElementById("cvv").value.trim();
+
+            if (!/^\d{16}$/.test(numero)) {
+                alert("El número de tarjeta debe tener 16 dígitos.");
+                e.preventDefault();
+                return;
+            }
+            if (!mes || !anio) {
+                alert("Seleccione mes y año.");
+                e.preventDefault();
+                return;
+            }
+            if (!/^\d{3}$/.test(cvv)) {
+                alert("El CVV debe tener 3 dígitos.");
+                e.preventDefault();
+                return;
+            }
+
+            document.getElementById("vencimiento").value = `${anio}-${mes}`;
+        });
+    });
+</script>
+
 
 
 <!-- Modal de advertencia sin comprobante -->
