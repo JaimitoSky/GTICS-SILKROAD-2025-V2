@@ -1,31 +1,95 @@
 <!-- Guardar el ID del usuario en localStorage -->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const idUsuario = /*[[${session.usuario.idusuario}]]*/ '0';
-    localStorage.setItem("idUsuario", idUsuario);
-    console.log("🧪 ID usuario guardado en localStorage:", idUsuario);
+    (function () {
+        // Si hay usuario en sesión usa su id; si no, "0"
+        const idUsuario = /*[[${session.usuario != null ? session.usuario.idusuario : 0}]]*/ 0;
+        localStorage.setItem("idUsuario", String(idUsuario || "0"));
+        console.log("🧪 ID usuario guardado en localStorage:", String(idUsuario || "0"));
+    })();
     /*]]>*/
 </script>
 
-<!-- Dialogflow Messenger -->
+<!-- Dialogflow Messenger SDK -->
 <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+
+<!-- Estilos (tema + responsive + dark mode) -->
+<style>
+    /* Tema y posición del widget */
+    df-messenger {
+        /* Colores de marca */
+        --df-messenger-button-titlebar-color: #001bb7;  /* botón flotante y barra superior */
+        --df-messenger-chat-background-color: #f6f8fb;  /* fondo del chat */
+        --df-messenger-font-color: #12263a;             /* texto general */
+        --df-messenger-bot-message: #ffffff;            /* burbuja bot */
+        --df-messenger-user-message: #e9f0ff;           /* burbuja usuario */
+        --df-messenger-send-icon: #001bb7;              /* ícono enviar */
+        --df-messenger-input-box-color: #ffffff;        /* caja de entrada */
+        --df-messenger-border-radius: 16px;             /* esquinas redondeadas */
+
+        /* Posición fija (no lo tapa nada) */
+        position: fixed;
+        z-index: 2147483647;
+        right: max(20px, env(safe-area-inset-right));
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    /* Sombra suave del botón flotante (cuando está cerrado) */
+    df-messenger::part(button) {
+        box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
+
+    /* Ajustes responsive */
+    @media (max-width: 768px) {
+        df-messenger {
+            right: max(12px, env(safe-area-inset-right));
+            bottom: calc(12px + env(safe-area-inset-bottom));
+        }
+    }
+
+    /* Modo oscuro del sistema (opcional) */
+    @media (prefers-color-scheme: dark) {
+        df-messenger {
+            --df-messenger-chat-background-color: #0f1520;
+            --df-messenger-font-color: #e7eaf0;
+            --df-messenger-bot-message: #141b29;
+            --df-messenger-user-message: #1f2b44;
+            --df-messenger-button-titlebar-color: #2f6bff;
+            --df-messenger-send-icon: #2f6bff;
+            --df-messenger-input-box-color: #0f1520;
+        }
+    }
+</style>
+
+<!-- Widget -->
 <df-messenger
         id="chatbot"
         intent="WELCOME"
         chat-title="Miguelito"
         agent-id="86beb279-f2f8-4833-a2a5-62510565b625"
         language-code="es"
-        chat-icon="/img/chatbot.png">
+        chat-icon="/img/chatbot.png"
+        expand="false">
 </df-messenger>
 
 <!-- Setear el user-id después de cargar el componente -->
 <script>
     window.addEventListener('dfMessengerLoaded', function () {
-        const idUsuario = localStorage.getItem("idUsuario") || "0";
+        const idUsuario = (localStorage.getItem("idUsuario") && localStorage.getItem("idUsuario") !== 'null')
+            ? String(localStorage.getItem("idUsuario"))
+            : "0";
         const dfMessengerEl = document.querySelector('df-messenger');
         if (dfMessengerEl) {
             dfMessengerEl.setAttribute('user-id', idUsuario);
-            console.log("✅ user-id seteado desde localStorage:", idUsuario);
+            console.log("✅ user-id seteado en df-messenger:", idUsuario);
+        }
+    });
+
+    /* Si el idUsuario cambia (login/logout en otra pestaña), re-aplica automáticamente */
+    window.addEventListener('storage', function (ev) {
+        if (ev.key === 'idUsuario') {
+            const el = document.querySelector('df-messenger');
+            if (el) el.setAttribute('user-id', String(localStorage.getItem('idUsuario') || '0'));
         }
     });
 </script>
